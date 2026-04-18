@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品列表</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f5f7fb; margin:0; padding:24px; }
+        .wrap { max-width: 1100px; margin: 0 auto; background:#fff; border-radius:12px; padding:24px; box-shadow:0 6px 20px rgba(0,0,0,.08); }
+        h2 { margin-top:0; }
+        .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+        .btn { border:none; background:#2563eb; color:#fff; padding:10px 16px; border-radius:8px; cursor:pointer; }
+        table { width:100%; border-collapse:collapse; }
+        th, td { border-bottom:1px solid #e5e7eb; text-align:left; padding:12px 10px; vertical-align:top; }
+        th { background:#f8fafc; }
+        .pager { margin-top:16px; display:flex; justify-content:flex-end; align-items:center; gap:12px; }
+        .muted { color:#666; font-size:14px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="toolbar">
+        <h2>商品列表</h2>
+        <button class="btn" onclick="location.href='/product/publish'">继续发布商品</button>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>商品名称</th>
+            <th>描述</th>
+            <th>价格</th>
+            <th>库存</th>
+            <th>状态</th>
+            <th>分类</th>
+        </tr>
+        </thead>
+        <tbody id="productTableBody">
+        <tr><td colspan="7">加载中...</td></tr>
+        </tbody>
+    </table>
+
+    <div class="pager">
+        <button class="btn" id="prevBtn">上一页</button>
+        <span class="muted" id="pageInfo">第 1 页</span>
+        <button class="btn" id="nextBtn">下一页</button>
+    </div>
+</div>
+
+<script>
+    let pageNum = 1;
+    const pageSize = 10;
+    let totalPage = 1;
+
+    function loadProducts() {
+        fetch(`/product/list/api?pageNum=${pageNum}&pageSize=${pageSize}`)
+            .then(res => res.json())
+            .then(result => {
+                if (!(result.isSuccess === true || result.success === true)) {
+                    throw new Error(result.message || '查询失败');
+                }
+                const paging = result.data || {};
+                const list = paging.data || [];
+                totalPage = paging.totalPage || 1;
+                document.getElementById('pageInfo').textContent = `第 ${paging.pageNum || pageNum} 页 / 共 ${totalPage} 页 / 共 ${paging.totalCount || 0} 条`;
+
+                const tbody = document.getElementById('productTableBody');
+                if (!list.length) {
+                    tbody.innerHTML = '<tr><td colspan="7">暂无商品数据</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = list.map(item => `
+                    <tr>
+                        <td>${item.id ?? ''}</td>
+                        <td>${item.name ?? ''}</td>
+                        <td>${item.description ?? ''}</td>
+                        <td>${item.price ?? ''}</td>
+                        <td>${item.stock ?? ''}</td>
+                        <td>${item.status ?? ''}</td>
+                        <td>${item.categoryIds ?? ''}</td>
+                    </tr>
+                `).join('');
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('productTableBody').innerHTML = `<tr><td colspan="7">加载失败：${err.message}</td></tr>`;
+            });
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', function () {
+        if (pageNum > 1) {
+            pageNum -= 1;
+            loadProducts();
+        }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', function () {
+        if (pageNum < totalPage) {
+            pageNum += 1;
+            loadProducts();
+        }
+    });
+
+    loadProducts();
+</script>
+</body>
+</html>

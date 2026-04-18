@@ -1,0 +1,76 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  /* 二次元渐变背景 */
+    background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+}
+
+.register-box {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  width: 400px;
+}
+
+.register-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.input-item {
+  margin-bottom: 15px;
+}
+
+.input-item label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.input-item input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.reg-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #409eff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.reg-btn:hover {
+  background-color: #337ecc;
+}
+
+.link {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.link a {
+  color: #409eff;
+  text-decoration: none;
+}
