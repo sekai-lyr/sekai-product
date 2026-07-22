@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sekai Anime - 我的中转站</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <style>
+        /* Home-specific enhanced effects */
+        .starfield-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .canvas-sekai-sparkles, .canvas-sekai-neon-shapes, .canvas-sekai-ripple-effect {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        }
+        body { background: var(--ink); }
+
+        .app-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10,10,26,0.85) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(155,123,255,0.12) !important;
+        }
+
+        .app-main { position: relative; z-index: 1; }
+
+        /* Stats bar enhancement */
+        .stats-bar { position: relative; z-index: 1; }
+        .stat-item {
+            background: rgba(18,18,42,0.7) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(155,123,255,0.1) !important;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+            border-radius: 16px !important;
+        }
+        .stat-item:hover {
+            transform: translateY(-4px);
+            border-color: rgba(155,123,255,0.3) !important;
+            box-shadow: 0 12px 36px rgba(105,92,158,0.2);
+        }
+
+        /* Toolbar enhancement */
+        .toolbar {
+            background: rgba(18,18,42,0.6);
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(155,123,255,0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin-bottom: 20px;
+        }
+
+        .search-input, .filter-select {
+            background: rgba(10,10,26,0.6) !important;
+            border: 1px solid rgba(155,123,255,0.15) !important;
+            border-radius: 10px !important;
+            transition: all 0.3s ease;
+        }
+        .search-input:focus, .filter-select:focus {
+            border-color: var(--pink) !important;
+            box-shadow: 0 0 0 3px rgba(255,114,184,0.1), 0 0 16px rgba(255,114,184,0.1) !important;
+        }
+
+        .search-btn, .add-btn {
+            border-radius: 10px !important;
+            transition: all 0.35s ease !important;
+        }
+        .search-btn:hover, .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,114,184,0.3); }
+        .add-btn.secondary { background: rgba(85,216,255,0.08); border: 1px solid rgba(85,216,255,0.15); color: var(--cyan); }
+        .add-btn.secondary:hover { background: rgba(85,216,255,0.15); }
+
+        /* Site card enhancement */
+        .site-card {
+            background: rgba(18,18,42,0.7) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(155,123,255,0.1) !important;
+            border-radius: 16px !important;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1) !important;
+        }
+        .site-card:hover {
+            transform: translateY(-6px) !important;
+            border-color: rgba(155,123,255,0.35) !important;
+            box-shadow: 0 16px 48px rgba(105,92,158,0.25) !important;
+        }
+
+        /* Hot card enhancement */
+        .hot-card {
+            background: rgba(18,18,42,0.7) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,114,184,0.1) !important;
+            border-radius: 12px !important;
+            transition: all 0.3s ease;
+        }
+        .hot-card:hover { transform: translateX(6px) !important; border-color: rgba(255,114,184,0.3) !important; }
+
+        /* Modal enhancement */
+        .modal-content {
+            background: rgba(18,18,42,0.95) !important;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(155,123,255,0.15) !important;
+            border-radius: 18px !important;
+        }
+        .modal-content input, .modal-content select {
+            background: rgba(10,10,26,0.7) !important;
+            border: 1px solid rgba(155,123,255,0.15) !important;
+            border-radius: 10px !important;
+        }
+        .modal-content input:focus, .modal-content select:focus {
+            border-color: var(--pink) !important;
+            box-shadow: 0 0 0 3px rgba(255,114,184,0.1) !important;
+        }
+
+        /* Flash message */
+        .flash {
+            border-radius: 12px !important;
+            animation: msgSlide 0.4s ease-out;
+        }
+        @keyframes msgSlide {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page button */
+        .page-btn {
+            border-radius: 10px !important;
+            transition: all 0.3s ease;
+        }
+        .page-btn:hover { border-color: var(--pink) !important; background: rgba(255,114,184,0.1) !important; }
+    </style>
+</head>
+<body>
+<!-- Particle Starfield -->
+<canvas class="starfield-canvas sekai-starfield" data-count="100"></canvas>
+<!-- Mouse Glow Trail -->
+<canvas class="canvas-glow sekai-glow"></canvas>
+<!-- Floating Orbs -->
+<canvas class="canvas-orbs sekai-orbs"></canvas>
+<!-- Sparkle Trail -->
+<canvas class="canvas-sekai-sparkles sekai-sparkles"></canvas>
+<!-- Neon Shapes -->
+<canvas class="canvas-sekai-neon-shapes sekai-neon-shapes"></canvas>
+<!-- Click Ripple -->
+<canvas class="canvas-sekai-ripple-effect sekai-ripple-effect"></canvas>
+
+<nav class="app-nav">
+    <div class="nav-brand">🌸 Sekai Anime</div>
+    <div class="nav-links">
+        <a href="/home" class="active">首页</a>
+        <a href="/anime">🎬 看番</a>
+        <a href="/anime-hub">🌐 聚合</a>
+        <a href="/dashboard">数据看板</a>
+        <span class="nav-user" th:text="${loginUser.nickName}">Sekai</span>
+        <a href="/logout" class="nav-logout">退出</a>
+    </div>
+</nav>
+
+<main class="app-main">
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-item reveal">
+            <span class="stat-value" th:text="${stats.siteCount}">0</span>
+            <span class="stat-label">收录站点</span>
+        </div>
+        <div class="stat-item reveal" style="transition-delay:0.05s">
+            <span class="stat-value" th:text="${stats.categoryCount}">0</span>
+            <span class="stat-label">分类数</span>
+        </div>
+        <div class="stat-item reveal" style="transition-delay:0.1s">
+            <span class="stat-value" th:text="${stats.favoriteCount}">0</span>
+            <span class="stat-label">收藏数</span>
+        </div>
+        <div class="stat-item reveal" style="transition-delay:0.15s">
+            <span class="stat-value" th:text="${stats.totalClicks}">0</span>
+            <span class="stat-label">总点击</span>
+        </div>
+    </div>
+
+    <!-- Flash messages -->
+    <div class="flash success" th:if="${message}" th:text="${message}"></div>
+    <div class="flash error" th:if="${error}" th:text="${error}"></div>
+
+    <!-- Search & Filter -->
+    <div class="toolbar reveal">
+        <form class="search-form" action="/home" method="get">
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索站点名称、标签..." class="search-input">
+            <select name="categoryId" class="filter-select">
+                <option value="">全部分类</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}"
+                        th:text="${cat.name}" th:selected="${categoryId != null && categoryId == cat.id}"></option>
+            </select>
+            <button type="submit" class="search-btn">搜索</button>
+        </form>
+        <button class="add-btn sekai-btn" onclick="document.getElementById('addSiteModal').style.display='flex'">+ 添加站点</button>
+        <button class="add-btn secondary sekai-btn" onclick="document.getElementById('addCategoryModal').style.display='flex'">+ 添加分类</button>
+    </div>
+
+    <!-- Hot Sites -->
+    <div class="hot-section reveal" th:if="${not #lists.isEmpty(hotSites)}">
+        <h3>🔥 热门站点</h3>
+        <div class="hot-grid">
+            <a th:each="site : ${hotSites}" th:href="@{/redirect(id=${site.id})}" target="_blank" class="hot-card">
+                <span class="hot-rank" th:text="${siteStat.index + 1}">1</span>
+                <span class="hot-name" th:text="${site.siteName}">囧次元</span>
+                <span class="hot-clicks" th:text="${site.clickCount + ' 次点击'}">0 次点击</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Site Grid -->
+    <h3 class="reveal">📋 全部站点 <span class="count-badge" th:text="${totalCount}">0</span></h3>
+    <div class="site-grid" th:if="${not #lists.isEmpty(sites)}">
+        <div class="site-card tilt-card reveal" th:each="site,stat : ${sites}" th:style="'transition-delay:' + (${stat.index} * 0.04) + 's'">
+            <div class="card-header">
+                <span class="card-category" th:text="${site.categoryId}">分类</span>
+                <span class="card-clicks">👆 <span th:text="${site.clickCount}">0</span></span>
+            </div>
+            <h4 class="card-title" th:text="${site.siteName}">站点名</h4>
+            <p class="card-desc" th:text="${site.description}">描述</p>
+            <div class="card-tags" th:if="${site.tags != null and site.tags != ''}">
+                <span class="tag" th:each="tag : ${#strings.arraySplit(site.tags, ',')}" th:text="${tag}">标签</span>
+            </div>
+            <div class="card-actions">
+                <a th:href="@{/redirect(id=${site.id})}" target="_blank" class="card-btn primary sekai-btn">前往站点</a>
+                <form action="/favorite/toggle" method="post" style="display:inline">
+                    <input type="hidden" name="siteId" th:value="${site.id}">
+                    <button type="submit" class="card-btn fav sekai-btn">⭐ 收藏</button>
+                </form>
+                <form action="/site/delete" method="post" style="display:inline" onsubmit="return confirm('确定删除？')">
+                    <input type="hidden" name="id" th:value="${site.id}">
+                    <button type="submit" class="card-btn danger sekai-btn">删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="empty-state" th:if="${#lists.isEmpty(sites)}">
+        <p>📭 还没有收录任何站点，点击"+ 添加站点"开始吧！</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination reveal" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 1}" th:href="@{/home(keyword=${keyword}, categoryId=${categoryId}, page=${currentPage - 1})}" class="page-btn">上一页</a>
+        <span class="page-info" th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
+        <a th:if="${currentPage < totalPages}" th:href="@{/home(keyword=${keyword}, categoryId=${categoryId}, page=${currentPage + 1})}" class="page-btn">下一页</a>
+    </div>
+</main>
+
+<!-- Add Site Modal -->
+<div id="addSiteModal" class="modal">
+    <div class="modal-content">
+        <h3>📌 添加新站点</h3>
+        <form action="/site/add" method="post">
+            <label>站点名称 *</label>
+            <input type="text" name="siteName" placeholder="如：囧次元" required>
+            <label>站点URL *</label>
+            <input type="url" name="siteUrl" placeholder="https://..." required>
+            <label>描述</label>
+            <input type="text" name="description" placeholder="简短描述这个站点">
+            <label>标签（逗号分隔）</label>
+            <input type="text" name="tags" placeholder="在线观看,番剧,动漫">
+            <label>分类</label>
+            <select name="categoryId">
+                <option value="">不分类</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+            </select>
+            <div class="modal-actions">
+                <button type="submit" class="card-btn primary sekai-btn">✨ 添加</button>
+                <button type="button" class="card-btn sekai-btn" onclick="document.getElementById('addSiteModal').style.display='none'">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div id="addCategoryModal" class="modal">
+    <div class="modal-content">
+        <h3>📂 添加新分类</h3>
+        <form action="/category/add" method="post">
+            <label>分类名称 *</label>
+            <input type="text" name="name" placeholder="如：🎬 在线看番" required>
+            <label>描述</label>
+            <input type="text" name="description" placeholder="这个分类的说明">
+            <div class="modal-actions">
+                <button type="submit" class="card-btn primary sekai-btn">✨ 创建</button>
+                <button type="button" class="card-btn sekai-btn" onclick="document.getElementById('addCategoryModal').style.display='none'">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
+});
+</script>
+<script th:src="@{/js/effects.js}" src="/js/effects.js"></script>
+</body>
+</html>

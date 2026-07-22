@@ -1,0 +1,5 @@
+# Created at 2026-05-26T19:14:15.839
+Boot Manifest-JAR contains absolute paths in classpath 'B:\Sekai\Sekai\sekai\memory-6\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

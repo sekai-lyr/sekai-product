@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽签历史 - Sekai Draw Lots</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="logo" th:href="@{/home}" href="/home"><span>DL</span><strong>Sekai Draw Lots</strong></a>
+        <nav>
+            <a th:href="@{/home}" href="/home">今日抽签</a>
+            <a th:href="@{/characters}" href="/characters">角色库</a>
+            <a class="active" th:href="@{/history}" href="/history">抽签历史</a>
+        </nav>
+    </aside>
+    <main class="content">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Archive</p>
+                <h1>你的抽签记录</h1>
+            </div>
+        </header>
+        <section class="timeline">
+            <article class="timeline-item" th:each="record : ${records}">
+                <time th:text="${#temporals.format(record.drawTime, 'yyyy-MM-dd HH:mm')}">2026-05-08</time>
+                <div>
+                    <h2 th:text="${record.character.englishName}">Character</h2>
+                    <p th:text="${record.fortune.levelName} + ' · ' + ${record.fortuneScore} + ' 分 · ' + ${record.wishTopic}">大吉</p>
+                    <blockquote th:text="${record.message}">message</blockquote>
+                </div>
+            </article>
+            <p class="muted" th:if="${#lists.isEmpty(records)}">还没有历史记录。</p>
+        </section>
+    </main>
+</div>
+</body>
+</html>

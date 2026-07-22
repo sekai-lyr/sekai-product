@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sekai.draw.lots.mapper.SekaiDrawLotsFocusSessionMapper">
+    <resultMap id="BaseResultMap" type="com.sekai.draw.lots.dataobject.SekaiDrawLotsFocusSessionDO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="taskId" column="task_id"/>
+        <result property="taskTitle" column="task_title"/>
+        <result property="plannedMinutes" column="planned_minutes"/>
+        <result property="actualMinutes" column="actual_minutes"/>
+        <result property="energyLabel" column="energy_label"/>
+        <result property="note" column="note"/>
+        <result property="completedTime" column="completed_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, user_id, task_id, task_title, planned_minutes, actual_minutes, energy_label, note, completed_time, create_time
+    </sql>
+
+    <insert id="insert" parameterType="com.sekai.draw.lots.dataobject.SekaiDrawLotsFocusSessionDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sekai_Draw_lots_focus_session
+        (user_id, task_id, task_title, planned_minutes, actual_minutes, energy_label, note, completed_time)
+        VALUES
+        (#{userId}, #{taskId}, #{taskTitle}, #{plannedMinutes}, #{actualMinutes}, #{energyLabel}, #{note}, #{completedTime})
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sekai_Draw_lots_focus_session
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <select id="selectRecentByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sekai_Draw_lots_focus_session
+        WHERE user_id = #{userId}
+        ORDER BY completed_time DESC, id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="sumMinutesSince" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(actual_minutes), 0)
+        FROM sekai_Draw_lots_focus_session
+        WHERE user_id = #{userId}
+          AND completed_time &gt;= #{since}
+    </select>
+
+    <select id="sumMinutesBetween" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(actual_minutes), 0)
+        FROM sekai_Draw_lots_focus_session
+        WHERE user_id = #{userId}
+          AND completed_time &gt;= #{start}
+          AND completed_time &lt; #{end}
+    </select>
+
+    <select id="countSince" resultType="int">
+        SELECT COUNT(*)
+        FROM sekai_Draw_lots_focus_session
+        WHERE user_id = #{userId}
+          AND completed_time &gt;= #{since}
+    </select>
+
+    <select id="countAllByUserId" resultType="int">
+        SELECT COUNT(*)
+        FROM sekai_Draw_lots_focus_session
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="countActiveDaysSince" resultType="int">
+        SELECT COUNT(*) FROM (
+            SELECT DATE(completed_time) AS active_day
+            FROM sekai_Draw_lots_focus_session
+            WHERE user_id = #{userId}
+              AND completed_time &gt;= #{since}
+            GROUP BY DATE(completed_time)
+        ) active_days
+    </select>
+
+    <select id="selectDailyMinutes" resultType="com.sekai.draw.lots.model.InsightMetric">
+        SELECT DATE_FORMAT(completed_time, '%m-%d') AS label,
+               COUNT(*) AS count,
+               CAST(SUM(actual_minutes) AS SIGNED) AS score
+        FROM sekai_Draw_lots_focus_session
+        WHERE user_id = #{userId}
+          AND completed_time &gt;= #{since}
+        GROUP BY DATE(completed_time), DATE_FORMAT(completed_time, '%m-%d')
+        ORDER BY DATE(completed_time)
+    </select>
+</mapper>

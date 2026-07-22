@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" fill="#2a2a4a"/>
+  <text x="64" y="45" font-family="Arial" font-size="24" fill="#ffffff" text-anchor="middle">异世界</text>
+  <text x="64" y="75" font-family="Arial" font-size="20" fill="#ffcc00" text-anchor="middle">冒险</text>
+  <circle cx="64" cy="100" r="15" fill="#ff6b6b"/>
+  <text x="64" y="105" font-family="Arial" font-size="12" fill="#ffffff" text-anchor="middle">RPG</text>
+</svg>

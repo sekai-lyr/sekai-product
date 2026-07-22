@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伙伴库 - 灵感伙伴签</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v=202605082245)}" href="/css/app.css?v=202605082245">
+</head>
+<body>
+<header class="topbar">
+    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
+    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a class="active" th:href="@{/characters}">伙伴库</a><a th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a><a th:href="@{/insights}">分析</a><a th:href="@{/coach}">行动</a><a th:href="@{/tasks}">任务</a><a th:href="@{/focus}">专注</a><a th:href="@{/membership}">会员</a></nav>
+</header>
+<main class="dashboard">
+    <section class="list-head">
+        <div><p class="eyebrow">原创伙伴图鉴</p><h1>伙伴库</h1></div>
+        <form class="search-form" th:action="@{/characters}" method="get">
+            <input name="keyword" th:value="${keyword}" placeholder="搜索名字、系列、属性">
+            <button type="submit">搜索</button>
+        </form>
+    </section>
+    <section class="character-grid">
+        <a class="character-card" th:each="character : ${characters}" th:href="@{/characters/{id}(id=${character.id})}">
+            <img th:src="@{/character/image/{id}(id=${character.id},v=202605091650)}" alt="">
+            <div>
+                <h2 th:text="${character.displayName}">名字</h2>
+                <p th:text="${character.displayAnimeTitle}">作品</p>
+                <span th:text="${character.displayArchetype + ' / ' + character.displayElement}">类型</span>
+            </div>
+        </a>
+    </section>
+</main>
+</body>
+</html>

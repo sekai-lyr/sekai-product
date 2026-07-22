@@ -1,0 +1,67 @@
+/**
+ * decks.js - 预设主题卡组、AI卡组和Nightcord新玩家卡组
+ */
+
+import { createDeck } from "./deck.js";
+
+// 二次元魔法卡入门卡组 (40张)
+export const NIGHTCORD_STARTER_DECK = {
+    id: "nightcord_starter",
+    name: "二次元魔法入门卡组",
+    coverCardId: "nc_sp_ur_001",
+    description: "二次元角色魔法卡入门卡组。包含UR和SSR魔法卡。",
+    difficulty: "easy",
+    strategy: "balanced",
+    main: [
+        // 水属性怪兽（新卡）
+        "water_007", "water_007", "water_007",
+        "water_008", "water_008", "water_008",
+        "water_009", "water_009", "water_009",
+        // 其他水属性怪兽
+        "water_001", "water_001",
+        "water_002", "water_002",
+        "water_005", "water_005",
+        // UR魔法卡各3张 = 27张
+        "nc_sp_ur_001", "nc_sp_ur_001", "nc_sp_ur_001",
+        "nc_sp_ur_002", "nc_sp_ur_002", "nc_sp_ur_002",
+        "nc_sp_ur_003", "nc_sp_ur_003", "nc_sp_ur_003",
+        "nc_sp_ur_004", "nc_sp_ur_004", "nc_sp_ur_004",
+        "nc_sp_ur_005", "nc_sp_ur_005", "nc_sp_ur_005",
+        "nc_sp_ur_006", "nc_sp_ur_006", "nc_sp_ur_006",
+        "nc_sp_ur_007", "nc_sp_ur_007", "nc_sp_ur_007",
+        "nc_sp_ur_008", "nc_sp_ur_008", "nc_sp_ur_008",
+        "nc_sp_ur_009", "nc_sp_ur_009", "nc_sp_ur_009",
+        // SSR魔法卡各2张 = 12张
+        "nc_sp_ss_001", "nc_sp_ss_001",
+        "nc_sp_ss_002", "nc_sp_ss_002",
+        "nc_sp_ss_003", "nc_sp_ss_003",
+        "nc_sp_ss_004", "nc_sp_ss_004",
+        "nc_sp_ss_005", "nc_sp_ss_005",
+        "nc_sp_ss_006", "nc_sp_ss_006", "nc_sp_ss_006",
+    ],
+
+    extra: [],
+};
+
+export const PRESET_DECKS = [
+    NIGHTCORD_STARTER_DECK,
+];
+
+export function getDefaultDecks() {
+    return PRESET_DECKS.map(d => ({
+        id: d.id, name: d.name, coverCardId: d.coverCardId,
+        main: [...d.main], extra: [...(d.extra || [])], side: [],
+        createdAt: Date.now(), updatedAt: Date.now(),
+    }));
+}
+
+export function getAIDeck(difficulty = "normal") {
+    const filtered = PRESET_DECKS.filter(d => d.difficulty === difficulty);
+    if (filtered.length === 0) return PRESET_DECKS[0];
+    return filtered[Math.floor(Math.random() * filtered.length)];
+}
+
+// 获取Nightcord新玩家卡组
+export function getNightcordStarterDeck() {
+    return { ...NIGHTCORD_STARTER_DECK, main: [...NIGHTCORD_STARTER_DECK.main] };
+}

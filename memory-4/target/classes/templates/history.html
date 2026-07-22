@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽签历史 - 灵感伙伴签</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v=202605082245)}" href="/css/app.css?v=202605082245">
+</head>
+<body>
+<header class="topbar">
+    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
+    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a class="active" th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a><a th:href="@{/insights}">分析</a><a th:href="@{/coach}">行动</a><a th:href="@{/tasks}">任务</a><a th:href="@{/focus}">专注</a><a th:href="@{/membership}">会员</a></nav>
+</header>
+<main class="dashboard">
+    <section class="list-head"><div><p class="eyebrow">历史记录</p><h1>抽签历史</h1></div></section>
+    <form class="history-filter" th:action="@{/history}" method="get">
+        <input name="keyword" th:value="${keyword}" placeholder="搜伙伴、系列、愿望">
+        <select name="mood">
+            <option value="">全部心情</option>
+            <option value="平静" th:selected="${mood == '平静'}">平静</option>
+            <option value="燃" th:selected="${mood == '燃'}">燃</option>
+            <option value="想摆烂" th:selected="${mood == '想摆烂'}">想摆烂</option>
+            <option value="需要灵感" th:selected="${mood == '需要灵感'}">需要灵感</option>
+        </select>
+        <select name="minScore">
+            <option value="">全部分数</option>
+            <option value="60" th:selected="${minScore == 60}">60 分以上</option>
+            <option value="80" th:selected="${minScore == 80}">80 分以上</option>
+            <option value="90" th:selected="${minScore == 90}">90 分以上</option>
+        </select>
+        <button type="submit">筛选</button>
+        <a th:href="@{/history}">重置</a>
+    </form>
+    <section class="history-list">
+        <article class="history-row" th:each="record : ${records}">
+            <img th:src="@{/character/image/{id}(id=${record.character.id},v=202605082230)}" alt="">
+            <div>
+                <h2 th:text="${record.character.displayName}">伙伴</h2>
+                <p th:text="${record.fortune.advice}">Advice</p>
+                <p class="record-message" th:text="${record.message}">message</p>
+                <span th:text="${record.drawTime}">time</span>
+            </div>
+            <strong th:text="${record.luckScore}">88</strong>
+        </article>
+        <p class="muted" th:if="${#lists.isEmpty(records)}">暂无抽签历史。</p>
+    </section>
+</main>
+</body>
+</html>

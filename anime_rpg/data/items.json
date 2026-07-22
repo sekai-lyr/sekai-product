@@ -1,0 +1,105 @@
+{
+  "items": [
+    {
+      "id": "potion",
+      "name": "生命药水",
+      "description": "恢复50点HP",
+      "type": "consumable",
+      "effect": {
+        "type": "heal_hp",
+        "value": 50
+      },
+      "price": 30,
+      "buyable": true
+    },
+    {
+      "id": "ether",
+      "name": "魔力药水",
+      "description": "恢复30点MP",
+      "type": "consumable",
+      "effect": {
+        "type": "heal_mp",
+        "value": 30
+      },
+      "price": 50,
+      "buyable": true
+    },
+    {
+      "id": "antidote",
+      "name": "解毒草",
+      "description": "解除中毒状态",
+      "type": "consumable",
+      "effect": {
+        "type": "cure_poison"
+      },
+      "price": 20,
+      "buyable": true
+    },
+    {
+      "id": "elixir",
+      "name": "万能药",
+      "description": "完全恢复HP和MP",
+      "type": "consumable",
+      "effect": {
+        "type": "full_heal"
+      },
+      "price": 200,
+      "buyable": false
+    },
+    {
+      "id": "bomb",
+      "name": "炸弹",
+      "description": "对所有敌人造成30点伤害",
+      "type": "consumable",
+      "effect": {
+        "type": "damage_all",
+        "value": 30
+      },
+      "price": 80,
+      "buyable": true
+    },
+    {
+      "id": "key",
+      "name": "钥匙",
+      "description": "打开特定宝箱或门的钥匙",
+      "type": "key_item",
+      "price": 0,
+      "buyable": false
+    },
+    {
+      "id": "map",
+      "name": "地图",
+      "description": "显示区域地图",
+      "type": "key_item",
+      "price": 100,
+      "buyable": true
+    },
+    {
+      "id": "herb",
+      "name": "草药",
+      "description": "恢复10点HP",
+      "type": "consumable",
+      "effect": {
+        "type": "heal_hp",
+        "value": 10
+      },
+      "price": 10,
+      "buyable": true
+    }
+  ],
+  "chest_contents": {
+    "village_chest_1": [
+      {"id": "potion", "quantity": 3}
+    ],
+    "village_chest_2": [
+      {"id": "ether", "quantity": 2}
+    ],
+    "dungeon_chest_1": [
+      {"id": "bomb", "quantity": 2},
+      {"id": "elixir", "quantity": 1}
+    ],
+    "dungeon_chest_2": [
+      {"id": "key", "quantity": 1}
+    ]
+  }
+}

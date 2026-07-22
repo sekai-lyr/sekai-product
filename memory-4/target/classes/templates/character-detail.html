@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${character.displayName + ' - 灵感伙伴签'}">伙伴详情</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v=202605091650)}" href="/css/app.css?v=202605091650">
+</head>
+<body>
+<header class="topbar">
+    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
+    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a class="active" th:href="@{/characters}">伙伴库</a><a th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a><a th:href="@{/insights}">分析</a><a th:href="@{/coach}">行动</a><a th:href="@{/tasks}">任务</a><a th:href="@{/focus}">专注</a><a th:href="@{/membership}">会员</a></nav>
+</header>
+<main class="dashboard">
+    <section class="character-detail">
+        <div class="detail-image"><img th:src="@{/character/image/{id}(id=${character.id},v=202605091650)}" alt=""></div>
+        <div class="detail-copy">
+            <p class="eyebrow">伙伴详情</p>
+            <h1 th:text="${character.displayName}">伙伴</h1>
+            <p th:text="${character.displayAnimeTitle}">作品</p>
+            <div class="detail-tags">
+                <span th:text="${character.displayArchetype}">类型</span>
+                <span th:text="${character.displayElement}">能量</span>
+                <span th:text="'热度 ' + ${character.popularity}">popularity</span>
+            </div>
+            <p class="detail-quote" th:text="${character.displayQuote}">标签</p>
+            <button class="draw-btn favorite-toggle"
+                    th:data-id="${character.id}"
+                    th:text="${favorite} ? '取消收藏' : '收藏伙伴'">收藏伙伴</button>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="section-title"><h2>羁绊推荐</h2><a th:href="@{/characters}">探索伙伴库</a></div>
+        <div class="recommend-grid">
+            <a class="recommend-card"
+               th:each="item : ${recommendations}"
+               th:href="@{/characters/{id}(id=${item.character.id})}">
+                <img th:src="@{/character/image/{id}(id=${item.character.id},v=202605121710)}" alt="">
+                <div>
+                    <span class="recommend-signal" th:text="${item.signal + ' · ' + item.affinityScore}">高相性 · 78</span>
+                    <h3 th:text="${item.character.displayName}">伙伴</h3>
+                    <p th:text="${item.reason}">同系列、伙伴类型接近</p>
+                    <small th:text="${item.character.displayAnimeTitle}">作品</small>
+                </div>
+            </a>
+            <p class="muted" th:if="${#lists.isEmpty(recommendations)}">暂时还没有可推荐的羁绊伙伴。</p>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="section-title"><h2>和 TA 相关的抽签</h2><a th:href="@{/history(keyword=${character.displayName})}">查看筛选历史</a></div>
+        <div class="record-list">
+            <article class="record" th:each="record : ${records}">
+                <img th:src="@{/character/image/{id}(id=${record.character.id},v=202605091650)}" alt="">
+                <div>
+                    <strong th:text="${record.fortune.title + ' / ' + record.luckScore}">fortune</strong>
+                    <span th:text="${record.message}">message</span>
+                </div>
+            </article>
+            <p class="muted" th:if="${#lists.isEmpty(records)}">还没有抽到过这个伙伴。</p>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/app.js(v=202605091650)}" src="/js/app.js?v=202605091650"></script>
+</body>
+</html>

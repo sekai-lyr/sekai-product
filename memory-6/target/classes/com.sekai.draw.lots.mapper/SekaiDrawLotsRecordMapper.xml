@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sekai.draw.lots.mapper.SekaiDrawLotsRecordMapper">
+
+    <resultMap id="RecordResultMap" type="com.sekai.draw.lots.dataobject.SekaiDrawLotsRecordDO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="characterId" column="character_id"/>
+        <result property="fortuneId" column="fortune_id"/>
+        <result property="mood" column="mood"/>
+        <result property="wishTopic" column="wish_topic"/>
+        <result property="fortuneScore" column="fortune_score"/>
+        <result property="message" column="message"/>
+        <result property="drawTime" column="draw_time"/>
+        <association property="character" javaType="com.sekai.draw.lots.dataobject.SekaiDrawLotsCharacterDO">
+            <id property="id" column="c_id"/>
+            <result property="englishName" column="english_name"/>
+            <result property="animeTitle" column="anime_title"/>
+            <result property="roleType" column="role_type"/>
+            <result property="tags" column="tags"/>
+            <result property="energy" column="energy"/>
+            <result property="imageUrl" column="image_url"/>
+            <result property="popularityScore" column="popularity_score"/>
+        </association>
+        <association property="fortune" javaType="com.sekai.draw.lots.dataobject.SekaiDrawLotsFortuneDO">
+            <id property="id" column="f_id"/>
+            <result property="levelName" column="level_name"/>
+            <result property="scoreMin" column="score_min"/>
+            <result property="scoreMax" column="score_max"/>
+            <result property="luckyColor" column="lucky_color"/>
+            <result property="luckyItem" column="lucky_item"/>
+            <result property="summary" column="summary"/>
+            <result property="advice" column="advice"/>
+        </association>
+    </resultMap>
+
+    <sql id="JoinedColumnList">
+        r.id, r.user_id, r.character_id, r.fortune_id, r.mood, r.wish_topic, r.fortune_score, r.message, r.draw_time,
+        c.id c_id, c.english_name, c.anime_title, c.role_type, c.tags, c.energy, c.image_url, c.popularity_score,
+        f.id f_id, f.level_name, f.score_min, f.score_max, f.lucky_color, f.lucky_item, f.summary, f.advice
+    </sql>
+
+    <insert id="insert"
+            parameterType="com.sekai.draw.lots.dataobject.SekaiDrawLotsRecordDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO sekai_draw_lots_record (
+            user_id, character_id, fortune_id, mood, wish_topic, fortune_score, message
+        ) VALUES (
+            #{userId}, #{characterId}, #{fortuneId}, #{mood}, #{wishTopic}, #{fortuneScore}, #{message}
+        )
+    </insert>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="RecordResultMap">
+        SELECT <include refid="JoinedColumnList"/>
+        FROM sekai_draw_lots_record r
+        JOIN sekai_draw_lots_character c ON c.id = r.character_id
+        JOIN sekai_draw_lots_fortune f ON f.id = r.fortune_id
+        WHERE r.id = #{id}
+    </select>
+
+    <select id="selectLatestByUserId" resultMap="RecordResultMap">
+        SELECT <include refid="JoinedColumnList"/>
+        FROM sekai_draw_lots_record r
+        JOIN sekai_draw_lots_character c ON c.id = r.character_id
+        JOIN sekai_draw_lots_fortune f ON f.id = r.fortune_id
+        WHERE r.user_id = #{userId}
+        ORDER BY r.draw_time DESC, r.id DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectRecentByUserId" resultMap="RecordResultMap">
+        SELECT <include refid="JoinedColumnList"/>
+        FROM sekai_draw_lots_record r
+        JOIN sekai_draw_lots_character c ON c.id = r.character_id
+        JOIN sekai_draw_lots_fortune f ON f.id = r.fortune_id
+        WHERE r.user_id = #{userId}
+        ORDER BY r.draw_time DESC, r.id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM sekai_draw_lots_record
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="countTodayByUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM sekai_draw_lots_record
+        WHERE user_id = #{userId}
+          AND DATE(draw_time) = CURDATE()
+    </select>
+</mapper>

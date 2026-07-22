@@ -1,0 +1,96 @@
+{
+  "id": "prologue",
+  "title": "序章：异世界的呼唤",
+  "dialogues": [
+    {
+      "id": "prologue_001",
+      "speaker": "aidang_2",
+      "text": "这是...哪里？我记得我明明在...",
+      "expression": "idle"
+    },
+    {
+      "id": "prologue_002",
+      "speaker": "narrator",
+      "text": "你醒来发现自己躺在一片草地上，周围是陌生的景色。",
+      "expression": "normal"
+    },
+    {
+      "id": "prologue_003",
+      "speaker": "haru",
+      "text": "你终于醒了！别担心，你现在安全了。",
+      "expression": "normal_01"
+    },
+    {
+      "id": "prologue_004",
+      "speaker": "aidang_2",
+      "text": "你是...？这是什么地方？",
+      "expression": "idle"
+    },
+    {
+      "id": "prologue_005",
+      "speaker": "haru",
+      "text": "我叫haru，这里是艾尔利亚王国。你从天而降，差点砸到我呢！",
+      "expression": "normal_02"
+    },
+    {
+      "id": "prologue_006",
+      "speaker": "aidang_2",
+      "text": "从天而降？这不可能...我应该在...",
+      "expression": "idle"
+    },
+    {
+      "id": "prologue_007",
+      "speaker": "haru",
+      "text": "看你的服装，你不是这个世界的人吧？难道说...你就是预言中的勇者？",
+      "expression": "normal_03"
+    },
+    {
+      "id": "prologue_008",
+      "speaker": "aidang_2",
+      "text": "预言？勇者？这到底是什么情况...",
+      "expression": "idle"
+    },
+    {
+      "id": "prologue_009",
+      "speaker": "haru",
+      "text": "很久以前就有预言说，当世界面临危机时，会从异世界召唤一位勇者来拯救我们。",
+      "expression": "normal_04"
+    },
+    {
+      "id": "prologue_010",
+      "speaker": "haru",
+      "text": "最近，黑暗势力开始蠢蠢欲动，魔王的军队正在集结。我们正需要你的力量！",
+      "expression": "normal_05"
+    },
+    {
+      "id": "prologue_011",
+      "speaker": "aidang_2",
+      "text": "等等...我只是个普通人，怎么可能...",
+      "expression": "idle"
+    },
+    {
+      "id": "prologue_012",
+      "speaker": "haru",
+      "text": "不用担心！我会帮助你的。首先，我们先回村庄准备一下吧。",
+      "expression": "normal_06"
+    },
+    {
+      "id": "prologue_013",
+      "speaker": "haru",
+      "text": "村庄就在前面不远，那里有商店和旅馆，可以买到补给品。",
+      "expression": "normal_07"
+    },
+    {
+      "id": "prologue_014",
+      "speaker": "narrator",
+      "text": "就这样，你的异世界冒险开始了。",
+      "expression": "normal"
+    },
+    {
+      "id": "prologue_015",
+      "speaker": "system",
+      "text": "使用 WASD 或方向键移动，空格键交互",
+      "expression": "normal"
+    }
+  ]
+}

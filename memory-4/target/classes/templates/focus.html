@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专注冲刺 - 灵感伙伴签</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v=202605291030)}" href="/css/app.css?v=202605291030">
+</head>
+<body>
+<header class="topbar">
+    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
+    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a><a th:href="@{/insights}">分析</a><a th:href="@{/coach}">行动</a><a th:href="@{/tasks}">任务</a><a class="active" th:href="@{/focus}">专注</a><a th:href="@{/membership}">会员</a></nav>
+</header>
+<main class="dashboard">
+    <section class="focus-hero">
+        <div>
+            <p class="eyebrow">VIP Focus Lab</p>
+            <h1 th:text="${loginUser.nickName} + ' 的专注冲刺'">专注冲刺</h1>
+            <p>把任务看板推进到真实执行：选一个任务，开一段冲刺，完成后留下时间、状态和结果。</p>
+        </div>
+        <div class="focus-hero-status">
+            <span th:text="${membership.planName}">会员</span>
+            <strong th:text="${stats.weekHoursText}">0 分钟</strong>
+            <small>近 7 日专注</small>
+        </div>
+    </section>
+
+    <section class="stats-grid">
+        <div><strong th:text="${stats.todayHoursText}">0 分钟</strong><span>今日专注</span></div>
+        <div><strong th:text="${stats.weekHoursText}">0 分钟</strong><span>7 日累计</span></div>
+        <div><strong th:text="${stats.todaySessions}">0</strong><span>今日冲刺</span></div>
+        <div><strong th:text="${stats.activeDays}">0</strong><span>30 日活跃</span></div>
+    </section>
+
+    <section class="focus-grid">
+        <div class="focus-timer-panel">
+            <div class="section-title">
+                <h2>开始一轮冲刺</h2>
+                <a th:href="@{/tasks}">任务看板</a>
+            </div>
+            <form class="focus-form" id="focusForm" th:action="@{/focus/sessions}">
+                <label>
+                    <span>关联任务</span>
+                    <select id="focusTask" name="taskId">
+                        <option value="">自由专注</option>
+                        <option th:each="task : ${openTasks}" th:value="${task.id}" th:text="${task.title}">任务</option>
+                    </select>
+                </label>
+                <div class="focus-form-row">
+                    <label>
+                        <span>时长</span>
+                        <select id="focusMinutes" name="plannedMinutes">
+                            <option value="15">15 分钟</option>
+                            <option value="25" selected>25 分钟</option>
+                            <option value="45">45 分钟</option>
+                            <option value="60">60 分钟</option>
+                            <option value="90">90 分钟</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>状态</span>
+                        <select id="focusEnergy" name="energyLabel">
+                            <option>专注</option>
+                            <option>深度</option>
+                            <option>学习</option>
+                            <option>创作</option>
+                            <option>代码</option>
+                            <option>复盘</option>
+                            <option>轻量</option>
+                        </select>
+                    </label>
+                </div>
+                <label>
+                    <span>结果记录</span>
+                    <textarea id="focusNote" name="note" maxlength="260" placeholder="例如：完成登录页错误提示修复"></textarea>
+                </label>
+                <label class="focus-check">
+                    <input id="focusCompleteTask" type="checkbox" name="completeTask" value="true">
+                    <span>记录后把关联任务标记为已完成</span>
+                </label>
+                <div class="focus-timer-display" id="focusTimerDisplay" aria-live="polite">25:00</div>
+                <div class="focus-controls">
+                    <button type="button" id="focusStart">开始</button>
+                    <button type="button" id="focusPause">暂停</button>
+                    <button type="button" id="focusReset">重置</button>
+                    <button class="focus-record-button" type="button" id="focusRecord">记录</button>
+                </div>
+                <p class="focus-message" id="focusMessage"></p>
+            </form>
+        </div>
+
+        <aside class="focus-side">
+            <section class="focus-panel">
+                <div class="section-title"><h2>7 日趋势</h2><a th:href="@{/focus/export.md}">导出</a></div>
+                <div class="focus-trend-list">
+                    <article th:each="metric : ${dailyMinutes}" th:style="'--value:' + ${metric.score}">
+                        <span th:text="${metric.label}">05-29</span>
+                        <div><i></i></div>
+                        <strong th:text="${metric.score + ' 分钟'}">0 分钟</strong>
+                    </article>
+                </div>
+            </section>
+
+            <section class="focus-panel focus-task-panel">
+                <div class="section-title"><h2>待推进任务</h2><a th:href="@{/tasks}">管理</a></div>
+                <div class="focus-task-list">
+                    <article th:each="task : ${openTasks}">
+                        <strong th:text="${task.title}">任务标题</strong>
+                        <span th:text="${task.priorityText + ' / ' + task.dueDateText}">普通 / 未设</span>
+                    </article>
+                    <p class="muted" th:if="${#lists.isEmpty(openTasks)}">任务看板里还没有进行中的任务。</p>
+                </div>
+            </section>
+        </aside>
+    </section>
+
+    <section class="focus-panel">
+        <div class="section-title"><h2>最近冲刺</h2><a th:href="@{/focus/export.md}">导出 Markdown</a></div>
+        <div class="focus-session-list">
+            <article th:each="focusSession : ${recentSessions}">
+                <div>
+                    <strong th:text="${focusSession.taskTitleText}">自由专注</strong>
+                    <p th:if="${focusSession.note != null && focusSession.note != ''}" th:text="${focusSession.note}">记录</p>
+                </div>
+                <div class="focus-session-meta">
+                    <span th:text="${focusSession.durationText}">25 分钟</span>
+                    <span th:text="${focusSession.energyText}">专注</span>
+                    <span th:text="${focusSession.completedText}">05-29 10:30</span>
+                </div>
+            </article>
+            <p class="muted" th:if="${#lists.isEmpty(recentSessions)}">还没有专注记录。</p>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/focus.js(v=202605291030)}" src="/js/focus.js?v=202605291030"></script>
+</body>
+</html>

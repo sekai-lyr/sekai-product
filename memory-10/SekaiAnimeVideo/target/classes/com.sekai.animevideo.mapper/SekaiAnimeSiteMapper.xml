@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sekai.animevideo.mapper.SekaiAnimeSiteMapper">
+    <resultMap id="BaseResultMap" type="com.sekai.animevideo.dataobject.SekaiAnimeSiteDO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="siteName" column="site_name"/>
+        <result property="siteUrl" column="site_url"/>
+        <result property="description" column="description"/>
+        <result property="tags" column="tags"/>
+        <result property="clickCount" column="click_count"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <sql id="Base_Column_List">id, user_id, category_id, site_name, site_url, description, tags, click_count, status, create_time, update_time</sql>
+    <insert id="insert" parameterType="com.sekai.animevideo.dataobject.SekaiAnimeSiteDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sekai_anime_mode_site (user_id, category_id, site_name, site_url, description, tags, click_count, status)
+        VALUES (#{userId}, #{categoryId}, #{siteName}, #{siteUrl}, #{description}, #{tags}, #{clickCount}, #{status})
+    </insert>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM sekai_anime_mode_site WHERE id = #{id}
+    </select>
+    <select id="listByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM sekai_anime_mode_site
+        WHERE user_id = #{userId} AND status = 'ACTIVE'
+        <if test="categoryId != null">AND category_id = #{categoryId}</if>
+        <if test="keyword != null and keyword != ''">AND (site_name LIKE CONCAT('%', #{keyword}, '%') OR tags LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))</if>
+        ORDER BY create_time DESC LIMIT #{offset}, #{limit}
+    </select>
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(1) FROM sekai_anime_mode_site
+        WHERE user_id = #{userId} AND status = 'ACTIVE'
+        <if test="categoryId != null">AND category_id = #{categoryId}</if>
+        <if test="keyword != null and keyword != ''">AND (site_name LIKE CONCAT('%', #{keyword}, '%') OR tags LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))</if>
+    </select>
+    <update id="incrementClickCount">
+        UPDATE sekai_anime_mode_site SET click_count = click_count + 1 WHERE id = #{id}
+    </update>
+    <select id="listHotByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM sekai_anime_mode_site
+        WHERE user_id = #{userId} AND status = 'ACTIVE'
+        ORDER BY click_count DESC LIMIT #{limit}
+    </select>
+    <select id="countTotalClicksByUserId" resultType="int">
+        SELECT COALESCE(SUM(click_count), 0) FROM sekai_anime_mode_site WHERE user_id = #{userId}
+    </select>
+    <delete id="deleteByPrimaryKey">
+        DELETE FROM sekai_anime_mode_site WHERE id = #{id}
+    </delete>
+    <update id="updateByPrimaryKeySelective" parameterType="com.sekai.animevideo.dataobject.SekaiAnimeSiteDO">
+        UPDATE sekai_anime_mode_site
+        <set>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="siteName != null">site_name = #{siteName},</if>
+            <if test="siteUrl != null">site_url = #{siteUrl},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>

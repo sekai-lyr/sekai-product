@@ -1,0 +1,671 @@
+package com.sekai.animevideo.control;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.CookieManager;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Controller
+public class ProxyController {
+
+    private static final String PROXY_PATH = "/proxy/";
+
+    // Skip proxying for CDN/static/asset domains - load directly from origin for speed
+    // Video/audio file extensions for detecting media URLs even without proper Content-Type
+    private static final Pattern MEDIA_EXTENSIONS = Pattern.compile(
+        "\\.(mp4|webm|mkv|avi|mov|flv|wmv|m4v|3gp|ts|mp3|aac|flac|ogg|wav|m4a|opus)(\\?.*)?$",
+        Pattern.CASE_INSENSITIVE
+    );
+
+    // HLS playlist extension pattern (separate from media extensions since m3u8 needs rewriting)
+    private static final Pattern HLS_EXTENSIONS = Pattern.compile(
+        "\\.m3u8[^a-z]*$",
+        Pattern.CASE_INSENSITIVE
+    );
+
+    private static final Pattern DIRECT_DOMAINS = Pattern.compile(
+        "^(https?:)?//(i\\d+\\.hdslb\\.com|fonts\\.googleapis\\.com|fonts\\.gstatic\\.com|cdnjs\\.cloudflare\\.com|api\\.dicebear\\.com|cdn\\.bootcdn\\.net|cdn\\.jsdelivr\\.net|unpkg\\.com|code\\.jquery\\.com|cdn\\.bdstatic\\.com|ss1\\.bdstatic\\.com|img\\.aliyun\\.com|s1\\.hdslb\\.com|hm\\.baidu\\.com|dn-kylin\\.qbox\\.io|lazyload\\.qbox\\.io|yunqivedio\\.com|cdn\\.yanghuaji\\.com|static\\.fankuhub\\.com|img\\.fankuhub\\.com|cdn\\.kanfantv\\.net|kanfantv\\.b-cdn\\.net|ikun\\.fankuhub\\.com|static\\.kanfantv\\.com|cdn\\.fankuhub\\.com|res\\.fankuhub\\.com|pic\\.kanfantv\\.com|image\\.kanfantv\\.com|img\\.kanfantv\\.com|txmov2\\.a\\d+\\.com|m3u8cdn\\.com|m3u8\\.fankuhub\\.com|m3u8\\.kanfantv\\.com|v\\.kanfantv\\.com|play\\.kanfantv\\.com|vod\\.kanfantv\\.com|video\\.kanfantv\\.com|stream\\.kanfantv\\.com)",
+        Pattern.CASE_INSENSITIVE
+    );
+
+    // Simple in-memory cache for proxied responses
+    private static final long CACHE_TTL = 5 * 60 * 1000L; // 5 minutes
+    private static final int CACHE_MAX_SIZE = 500;
+    private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
+
+    private static final long CACHE_TTL_STATIC = 30 * 60 * 1000L; // 30 minutes for static assets
+
+    private static class CacheEntry {
+        final byte[] data;
+        final String contentType;
+        final long timestamp;
+        final long ttl;
+        CacheEntry(byte[] data, String contentType, long ttl) {
+            this.data = data; this.contentType = contentType; this.timestamp = System.currentTimeMillis(); this.ttl = ttl;
+        }
+        CacheEntry(byte[] data, String contentType) {
+            this(data, contentType, CACHE_TTL);
+        }
+        boolean isExpired() { return System.currentTimeMillis() - timestamp > ttl; }
+    }
+    private static final Pattern ATTR_PATTERN = Pattern.compile(
+            "(href|src|action|poster|data-src|data-href|data-original|srcset)=(\"[^\"]*\"|'[^']*')",
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final Pattern SCRIPT_STYLE_CONTENT_PATTERN = Pattern.compile(
+            "(?i)(<script[^>]*>)(.*?)(</script\\s*>)|(<style[^>]*>)(.*?)(</style\\s*>)",
+            Pattern.DOTALL
+    );
+
+    private static final String INJECT_CSS = """
+        <style>
+        * { box-sizing: border-box; }
+        html, body, div, section, main, header, footer, article, aside, nav {
+            background-color: #0a0a1a !important;
+            color: #e0e0e0 !important;
+        }
+        body { background: #0a0a1a !important; color: #e0e0e0 !important; }
+        a, a:link, a:visited { color: #b89bff !important; text-decoration: none !important; }
+        a:hover, a:focus { color: #ff72b8 !important; text-decoration: underline !important; }
+        a:active { color: #55d8ff !important; }
+        h1, h2, h3, h4, h5, h6 { color: #f0f0f0 !important; }
+        p, span, li, td, th, label { color: #d0d0e0 !important; }
+        input, textarea, select, button {
+            background: #0d0d22 !important;
+            color: #fff !important;
+            border: 1px solid rgba(155,123,255,0.25) !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+        }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25) !important; }
+        input:focus, textarea:focus { border-color: #9b7bff !important; box-shadow: 0 0 8px rgba(155,123,255,0.3) !important; outline: none !important; }
+        button, input[type="submit"], input[type="button"] {
+            background: linear-gradient(135deg, #9b7bff, #ff72b8) !important;
+            color: #fff !important;
+            border: none !important;
+            cursor: pointer !important;
+        }
+        table { background: #0d0d22 !important; border-color: rgba(155,123,255,0.15) !important; }
+        td, th { border-color: rgba(155,123,255,0.15) !important; }
+        img, video, iframe { max-width: 100% !important; }
+        ::-webkit-scrollbar { width: 8px !important; }
+        ::-webkit-scrollbar-track { background: #0a0a1a !important; }
+        ::-webkit-scrollbar-thumb { background: rgba(155,123,255,0.3) !important; border-radius: 4px !important; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(155,123,255,0.5) !important; }
+        </style>
+        """;
+
+    private static final String INJECT_HEAD_JS = """
+        <script>
+        (function(){
+            var bg = '#0a0a1a', fg = '#e0e0e0';
+            function apply() {
+                var d = document.documentElement;
+                d.style.backgroundColor = bg;
+                d.style.color = fg;
+                if (document.body) { document.body.style.backgroundColor = bg; document.body.style.color = fg; }
+            }
+            apply();
+            document.addEventListener('DOMContentLoaded', apply);
+            window.addEventListener('load', apply);
+            new MutationObserver(apply).observe(document.documentElement, {attributes:true, attributeFilter:['style','class']});
+        })();
+        </script>
+        """;
+
+    private static final String INJECT_BODY_JS = """
+        <script>
+        (function(){
+            var PROXY_PREFIX = '/proxy/';
+            var SITE_HOST = '__SITE_HOST__';
+            function proxyUrl(url) {
+                if (!url || typeof url !== 'string') return url;
+                if (url.indexOf(PROXY_PREFIX) === 0) return url;
+                if (url.indexOf('blob:') === 0 || url.indexOf('data:') === 0 || url.indexOf('javascript:') === 0) return url;
+                if (url.indexOf('://') > 0) return PROXY_PREFIX + url;
+                if (url.indexOf('//') === 0) return PROXY_PREFIX + 'https:' + url;
+                if (url.indexOf('/') === 0) return PROXY_PREFIX + 'https://' + SITE_HOST + url;
+                return PROXY_PREFIX + 'https://' + SITE_HOST + '/' + url;
+            }
+            (function forceTheme() {
+                var bg = '#0a0a1a', fg = '#e0e0e0';
+                function apply() {
+                    var d = document.documentElement;
+                    d.style.backgroundColor = bg;
+                    d.style.color = fg;
+                    if (document.body) { document.body.style.backgroundColor = bg; document.body.style.color = fg; }
+                }
+                apply();
+                document.addEventListener('DOMContentLoaded', apply);
+                window.addEventListener('load', apply);
+                new MutationObserver(apply).observe(document.documentElement, {attributes:true, attributeFilter:['style','class']});
+            })();
+            (function proxyMediaAndImages() {
+                function proxyElSrc(el) {
+                    if (el.src && el.src.indexOf(PROXY_PREFIX) !== 0 && el.src.indexOf('blob:') !== 0 && el.src.indexOf('data:') !== 0) {
+                        el.src = PROXY_PREFIX + el.src;
+                    }
+                }
+                var allMedia = document.querySelectorAll('video, audio, source, img');
+                for (var i = 0; i < allMedia.length; i++) { proxyElSrc(allMedia[i]); }
+                new MutationObserver(function(muts) {
+                    for (var i = 0; i < muts.length; i++) {
+                        var nodes = muts[i].addedNodes;
+                        for (var j = 0; j < nodes.length; j++) {
+                            if (nodes[j].querySelectorAll) {
+                                var found = nodes[j].querySelectorAll('video[src], audio[src], source[src], img[src]');
+                                for (var k = 0; k < found.length; k++) { proxyElSrc(found[k]); }
+                            } else if (nodes[j].src && nodes[j].tagName) {
+                                proxyElSrc(nodes[j]);
+                            }
+                        }
+                    }
+                }).observe(document.documentElement, {childList:true, subtree:true});
+            })();
+            (function preventEscape() {
+                var as = document.querySelectorAll('a[target="_blank"], a[target="blank"]');
+                for (var i = 0; i < as.length; i++) { as[i].removeAttribute('target'); }
+                window.open = function(url, target, features) {
+                    if (url && typeof url === 'string' && url.indexOf('javascript:') !== 0) {
+                        window.location.href = proxyUrl(url);
+                    }
+                    return window;
+                };
+                try {
+                    var origAssign = Location.prototype.assign;
+                    if (origAssign) {
+                        Location.prototype.assign = function(url) {
+                            if (typeof url === 'string' && url.indexOf('blob:') !== 0 && url.indexOf('data:') !== 0) {
+                                url = proxyUrl(url);
+                            }
+                            return origAssign.call(this, url);
+                        };
+                    }
+                } catch(e) {}
+                try {
+                    var origReplace = Location.prototype.replace;
+                    if (origReplace) {
+                        Location.prototype.replace = function(url) {
+                            if (typeof url === 'string' && url.indexOf('blob:') !== 0 && url.indexOf('data:') !== 0) {
+                                url = proxyUrl(url);
+                            }
+                            return origReplace.call(this, url);
+                        };
+                    }
+                } catch(e) {}
+                new MutationObserver(function(muts) {
+                    for (var i = 0; i < muts.length; i++) {
+                        var nodes = muts[i].addedNodes;
+                        for (var j = 0; j < nodes.length; j++) {
+                            if (nodes[j].querySelectorAll) {
+                                var links = nodes[j].querySelectorAll('a[target="_blank"], a[target="blank"]');
+                                for (var k = 0; k < links.length; k++) { links[k].removeAttribute('target'); }
+                            }
+                        }
+                    }
+                }).observe(document.documentElement, {childList:true, subtree:true});
+            })();        })();
+        </script>
+        """;
+
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_2)
+            .followRedirects(HttpClient.Redirect.ALWAYS)
+            .connectTimeout(Duration.ofSeconds(10))
+            .cookieHandler(new CookieManager())
+            .executor(java.util.concurrent.Executors.newFixedThreadPool(16))
+            .build();
+
+    // Separate client for streaming (binary/video) - longer timeout, no auto-redirect
+    private final HttpClient streamingClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_2)
+            .connectTimeout(Duration.ofSeconds(30))
+            .cookieHandler(new CookieManager())
+            .executor(java.util.concurrent.Executors.newFixedThreadPool(8))
+            .build();
+
+    @RequestMapping({"/proxy/**", "/_nuxt/**", "/_next/**"})
+    public void proxy(HttpServletRequest request, HttpServletResponse response) {
+        String fullPath = request.getRequestURI();
+        String target;
+
+        // If request came directly (/_nuxt/... or /_next/...) without /proxy/ prefix,
+        // reconstruct the target URL from the Referer header
+        if (!fullPath.startsWith(PROXY_PATH)) {
+            String referer = request.getHeader("Referer");
+            String host = "www.fankuhub.com";
+            if (referer != null) {
+                int pi = referer.indexOf("/proxy/");
+                if (pi >= 0) {
+                    try { host = java.net.URI.create(referer.substring(pi + 7)).getHost(); }
+                    catch (Exception ignored) {}
+                }
+            }
+            target = "https://" + host + fullPath;
+        } else {
+            target = fullPath.substring(PROXY_PATH.length());
+        }
+
+        if (target.isEmpty()) {
+            response.setStatus(400);
+            return;
+        }
+
+        String query = request.getQueryString();
+        if (query != null && !query.isEmpty()) {
+            target += "?" + query;
+        }
+
+        try {
+            URI targetUri = URI.create(target);
+
+            // Forward client cookies to upstream for session continuity
+            String clientCookie = request.getHeader("Cookie");
+            // Build the request with headers that mimic a real browser
+            HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
+                    .uri(targetUri)
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+                    .header("Sec-Ch-Ua", "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"")
+                    .header("Sec-Ch-Ua-Mobile", "?0")
+                    .header("Sec-Ch-Ua-Platform", "\"Windows\"")
+                    .header("Accept", "*/*")
+                    .header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+                    .header("Accept-Encoding", "identity")
+                    .header("Referer", targetUri.getScheme() + "://" + targetUri.getHost() + "/")
+                    .header("Origin", targetUri.getScheme() + "://" + targetUri.getHost());
+            if (clientCookie != null && !clientCookie.isEmpty()) {
+                reqBuilder.header("Cookie", clientCookie);
+            }
+
+            String method = request.getMethod().toUpperCase();
+
+            // Forward Range and conditional request headers for streaming support
+            String range = request.getHeader("Range");
+            boolean hasRange = range != null && !range.isEmpty();
+            if (hasRange) {
+                reqBuilder.header("Range", range);
+            }
+            String ifRange = request.getHeader("If-Range");
+            if (ifRange != null && !ifRange.isEmpty()) {
+                reqBuilder.header("If-Range", ifRange);
+            }
+
+            // Serve from cache for GET requests (skip when Range is present)
+            if ("GET".equals(method) && !hasRange) {
+                CacheEntry cached = cache.get(target);
+                if (cached != null && !cached.isExpired()) {
+                    response.setContentType(cached.contentType);
+                    response.setContentLength(cached.data.length);
+                    response.setHeader("Cache-Control", "public, max-age=300");
+                    response.getOutputStream().write(cached.data);
+                    return;
+                }
+            }
+
+            if (method.equals("POST") || method.equals("PUT") || method.equals("PATCH")) {
+                String body = new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                reqBuilder.header("Content-Type", request.getContentType());
+                reqBuilder.method(method, body.isEmpty()
+                        ? HttpRequest.BodyPublishers.noBody()
+                        : HttpRequest.BodyPublishers.ofString(body));
+            } else {
+                reqBuilder.GET();
+            }
+
+            HttpResponse<InputStream> proxyRes = httpClient.send(reqBuilder.build(), HttpResponse.BodyHandlers.ofInputStream());
+            String contentType = proxyRes.headers().firstValue("Content-Type").orElse("");
+
+            // Use final URI after redirects for URL resolution
+            URI finalUri = proxyRes.uri();
+            String effectiveTarget = finalUri != null ? finalUri.toString() : target;
+
+            // Forward response status (including 206 Partial Content for video streams)
+            response.setStatus(proxyRes.statusCode());
+
+            // Forward Set-Cookie headers from upstream so the client browser can maintain session
+            proxyRes.headers().allValues("Set-Cookie").forEach(c -> response.addHeader("Set-Cookie", c));
+
+            // Strip security headers that would block embedding in iframe
+            // X-Frame-Options is discarded (don't forward it to allow embedding)
+            // Clean frame-ancestors from CSP to allow iframe display
+            String csp = proxyRes.headers().firstValue("Content-Security-Policy").orElse(null);
+            if (csp != null) {
+                String cleanCsp = csp.replaceAll("(?i)frame-ancestors\\s+[^;]+;?", "").trim();
+                if (!cleanCsp.isEmpty()) {
+                    response.setHeader("Content-Security-Policy", cleanCsp);
+                }
+            }
+            // Strip Referrer-Policy and Permissions-Policy that could interfere
+            proxyRes.headers().firstValue("Referrer-Policy").ifPresent(v -> response.setHeader("Referrer-Policy", "no-referrer-when-downgrade"));
+            proxyRes.headers().firstValue("Permissions-Policy").ifPresent(v -> {}); // intentionally discard
+
+            // Forward streaming/video response headers
+            proxyRes.headers().firstValue("Content-Range").ifPresent(v -> response.setHeader("Content-Range", v));
+            proxyRes.headers().firstValue("Accept-Ranges").ifPresent(v -> response.setHeader("Accept-Ranges", v));
+            proxyRes.headers().firstValue("Content-Length").ifPresent(v -> response.setHeader("Content-Length", v));
+
+            // Handle HLS playlists BEFORE the binary media streaming check
+            // (m3u8 files must be rewritten as text, not streamed as binary)
+            boolean isHlsByType = contentType.contains("mpegurl") || contentType.contains("vnd.apple.mpegurl");
+            boolean isHlsByUrl = HLS_EXTENSIONS.matcher(effectiveTarget).find();
+            if (isHlsByType || isHlsByUrl) {
+                // HLS playlists - rewrite segment URLs to go through proxy
+                String m3u8 = new String(proxyRes.body().readAllBytes(), StandardCharsets.UTF_8);
+                String baseHost = extractBase(effectiveTarget);
+                StringBuilder sb = new StringBuilder();
+                for (String line : m3u8.split("\n")) {
+                    String trimmed = line.trim();
+                    if (!trimmed.isEmpty() && !trimmed.startsWith("#") && !trimmed.startsWith("http://") && !trimmed.startsWith("https://") && !trimmed.startsWith("//")) {
+                        // Relative URL - resolve against current target
+                        String resolved;
+                        if (trimmed.startsWith("/")) {
+                            resolved = PROXY_PATH + "https://" + baseHost + trimmed;
+                        } else {
+                            String baseDir = effectiveTarget;
+                            int lastSlash = effectiveTarget.lastIndexOf('/');
+                            if (lastSlash > effectiveTarget.indexOf("://") + 2) {
+                                baseDir = effectiveTarget.substring(0, lastSlash + 1);
+                            } else {
+                                baseDir = effectiveTarget + "/";
+                            }
+                            resolved = PROXY_PATH + baseDir + trimmed;
+                        }
+                        sb.append(resolved).append("\n");
+                    } else if (!trimmed.isEmpty() && (trimmed.startsWith("http://") || trimmed.startsWith("https://"))) {
+                        sb.append(PROXY_PATH).append(trimmed).append("\n");
+                    } else if (!trimmed.isEmpty() && trimmed.startsWith("//")) {
+                        sb.append(PROXY_PATH).append("https:").append(trimmed).append("\n");
+                    } else {
+                        sb.append(line).append("\n");
+                    }
+                }
+                response.setContentType(contentType.isEmpty() ? "application/vnd.apple.mpegurl" : contentType);
+                response.getWriter().write(sb.toString());
+                return;
+            }
+
+            // Stream video/audio binary content directly without buffering
+            if (contentType.startsWith("video/") || contentType.startsWith("audio/") ||
+                (contentType.contains("octet-stream") && MEDIA_EXTENSIONS.matcher(effectiveTarget).find())) {
+                response.setContentType(contentType);
+                proxyRes.headers().firstValue("Accept-Ranges").ifPresentOrElse(
+                    v -> response.setHeader("Accept-Ranges", v),
+                    () -> response.setHeader("Accept-Ranges", "bytes")
+                );
+                try (InputStream is = proxyRes.body()) {
+                    is.transferTo(response.getOutputStream());
+                }
+                return;
+            }
+
+            // For non-2xx responses (errors, CloudFlare challenges, 404s), pass through raw
+            boolean isError = proxyRes.statusCode() >= 400;
+
+            // Handle text content types with URL rewriting / CSS/JS injection
+            if (contentType.contains("text/html")) {
+                if (isError) {
+                    response.setContentType(contentType);
+                    byte[] errData = proxyRes.body().readAllBytes();
+                    response.setContentLength(errData.length);
+                    response.getOutputStream().write(errData);
+                    return;
+                }
+                byte[] rawHtml = proxyRes.body().readAllBytes();
+                String charsetName = extractCharset(contentType);
+                // Try to detect from HTML <meta> tags for better CJK support
+                boolean metaOverride = !contentType.toLowerCase().contains("charset=") || charsetName.equalsIgnoreCase("utf-8");
+                if (metaOverride) {
+                    String metaCharset = detectCharsetFromMeta(rawHtml);
+                    if (metaCharset != null) charsetName = metaCharset;
+                }
+                Charset charset;
+                try { charset = Charset.forName(charsetName); } catch (Exception e) { charset = StandardCharsets.UTF_8; }
+                String html = new String(rawHtml, charset);
+                // If decoded text contains replacement characters (锟?, the charset might be wrong.
+                // Try other common Chinese charsets in order of likelihood.
+                if (html.indexOf('\uFFFD') > 0) {
+                    String[] fallbacks = charset.name().equalsIgnoreCase("UTF-8")
+                        ? new String[]{"GBK", "GB2312", "GB18030", "Big5", "EUC-JP", "Shift_JIS", "ISO-8859-1", "windows-1252"}
+                        : new String[]{"UTF-8", "GBK", "GB2312", "GB18030", "Big5", "EUC-JP", "Shift_JIS", "ISO-8859-1", "windows-1252"};
+                    for (String fb : fallbacks) {
+                        if (fb.equalsIgnoreCase(charset.name())) continue;
+                        try {
+                            Charset fbCharset = Charset.forName(fb);
+                            String test = new String(rawHtml, fbCharset);
+                            if (test.indexOf('\uFFFD') < 0) {
+                                charset = fbCharset;
+                                html = test;
+                                break;
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                }
+
+                String siteHost = extractBase(effectiveTarget);
+                if (siteHost == null) siteHost = "www.fankuhub.com";
+                String headJs = INJECT_HEAD_JS
+                    .replace("__SITE_HOST__", siteHost);
+                String bodyJs = INJECT_BODY_JS
+                    .replace("__SITE_HOST__", siteHost);
+                // Inject frame-busting JS right after <head> so it runs BEFORE site scripts
+                int headStartTag = html.indexOf("<head");
+                int headTagClose = html.indexOf(">", headStartTag);
+                if (headStartTag >= 0 && headTagClose > headStartTag) {
+                    String siteHostForJs = siteHost != null ? siteHost : "www.fankuhub.com";
+                    String criticalJs = "<script>(function(){try{Object.defineProperty(window,'top',{get:function(){return window;},configurable:false});}catch(e){}try{Object.defineProperty(window,'parent',{get:function(){return window;},configurable:false});}catch(e){}var _si=window.setInterval;window.setInterval=function(fn,d){var s=String(fn);if(s.indexOf('top')>-1&&(s.indexOf('location')>-1||s.indexOf('self')>-1))return 0;return _si.call(window,fn,d);};var _st=window.setTimeout;window.setTimeout=function(fn,d){var s=String(fn);if(s.indexOf('top')>-1&&(s.indexOf('location')>-1||s.indexOf('self')>-1))return 0;return _st.call(window,fn,d);};})();</script>"
+                        + "<script>(function(){var P='/proxy/',H='__SITE_HOST__';function p(u){if(!u||typeof u!=='string')return u;if(u.indexOf(P)===0)return u;if(u.indexOf('blob:')===0||u.indexOf('data:')===0||u.indexOf('javascript:')===0)return u;if(u.indexOf('://')>0)return P+u;if(u.indexOf('//')===0)return P+'https:'+u;if(u.indexOf('/')===0)return P+'https://'+H+u;return P+'https://'+H+'/'+u;}var oF=window.fetch;window.fetch=function(i,n){if(typeof i==='string'){if(i.indexOf('blob:')===0||i.indexOf('data:')===0)return oF.call(window,i,n);i=p(i);}else if(i&&i.url&&typeof i.url==='string'){if(i.url.indexOf('blob:')===0||i.url.indexOf('data:')===0)return oF.call(window,i,n);var nu=p(i.url);if(nu!==i.url){try{i=new Request(nu,i);}catch(e){}}}return oF.call(window,i,n);};var X=window.XMLHttpRequest,oO=X.prototype.open;X.prototype.open=function(m,u,a,us,pa){if(typeof u==='string'&&(u.indexOf('blob:')===0||u.indexOf('data:')===0))return oO.call(this,m,u,a,us,pa);u=typeof u==='string'?p(u):u;return oO.call(this,m,u,a,us,pa);};var md=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');if(md&&md.set){var oS=md.set;Object.defineProperty(HTMLMediaElement.prototype,'src',{set:function(v){if(typeof v==='string'&&v.indexOf(P)!==0&&v.indexOf('blob:')!==0&&v.indexOf('data:')!==0)v=p(v);oS.call(this,v);},get:md.get,configurable:true});}var id=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');if(id&&id.set){var oI=id.set;Object.defineProperty(HTMLImageElement.prototype,'src',{set:function(v){if(typeof v==='string'&&v.indexOf(P)!==0&&v.indexOf('blob:')!==0&&v.indexOf('data:')!==0)v=p(v);oI.call(this,v);},get:id.get,configurable:true});}var sd=Object.getOwnPropertyDescriptor(HTMLSourceElement.prototype,'src');if(sd&&sd.set){var oSS=sd.set;Object.defineProperty(HTMLSourceElement.prototype,'src',{set:function(v){if(typeof v==='string'&&v.indexOf(P)!==0&&v.indexOf('blob:')!==0&&v.indexOf('data:')!==0)v=p(v);oSS.call(this,v);},get:sd.get,configurable:true});}var oCE=document.createElement;document.createElement=function(t){var e=oCE.call(document,t);var tl=t.toLowerCase();if(tl==='video'||tl==='audio'||tl==='source'){var md2=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');if(md2&&md2.set&&(tl==='video'||tl==='audio')){var oS2=md2.set;Object.defineProperty(e,'src',{set:function(v){if(typeof v==='string'&&v.indexOf(P)!==0&&v.indexOf('blob:')!==0&&v.indexOf('data:')!==0)v=p(v);oS2.call(this,v);},get:md2.get,configurable:true});}}return e;};var oSA=Element.prototype.setAttribute;Element.prototype.setAttribute=function(n,v){if((n==='src'||n==='href')&&typeof v==='string'&&v.indexOf(P)!==0&&v.indexOf('blob:')!==0&&v.indexOf('data:')!==0&&v.indexOf('javascript:')!==0){var t=this.tagName.toLowerCase();if(t==='video'||t==='audio'||t==='source'||t==='img'||t==='iframe'||t==='a')v=p(v);}return oSA.call(this,n,v);};}})();</script>".replace("__SITE_HOST__", siteHostForJs);
+                    html = html.substring(0, headTagClose + 1) + criticalJs + html.substring(headTagClose + 1);
+                }
+                int headEnd = html.indexOf("</head>");
+                if (headEnd > 0) {
+                    html = html.substring(0, headEnd) + INJECT_CSS + headJs + html.substring(headEnd);
+                }
+                int bodyEnd = html.lastIndexOf("</body>");
+                if (bodyEnd > 0) {
+                    html = html.substring(0, bodyEnd) + bodyJs + html.substring(bodyEnd);
+                }
+                // Remove Content-Security-Policy meta tags and integrity attributes that break proxy
+                html = html.replaceAll("(?i)<meta\\s+http-equiv\\s*=\\s*[\"']?Content-Security-Policy[\"']?[^>]*>", "");
+                html = html.replaceAll("\\s+integrity\\s*=\\s*\"[^\"]*\"", "");
+                html = rewriteUrls(html, effectiveTarget, charset);
+
+                response.setContentType("text/html;charset=UTF-8");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write(html);
+            } else if (contentType.contains("text/css")) {
+                String css = new String(proxyRes.body().readAllBytes(), StandardCharsets.UTF_8);
+                css = rewriteCssUrls(css, effectiveTarget, extractBase(effectiveTarget));
+                response.setContentType(contentType);
+                response.getWriter().write(css);
+            } else if (contentType.contains("text/") || contentType.contains("javascript") || contentType.contains("json")) {
+                response.setContentType(contentType);
+                byte[] data = proxyRes.body().readAllBytes();
+                if ("GET".equals(method) && cache.size() < CACHE_MAX_SIZE) {
+                    cache.put(target, new CacheEntry(data, contentType));
+                }
+                response.setContentLength(data.length);
+                response.getOutputStream().write(data);
+            } else {
+                // Binary content (images, fonts, etc.) - cache for speed
+                response.setContentType(contentType);
+                byte[] data = proxyRes.body().readAllBytes();
+                if ("GET".equals(method) && data.length < 2_000_000 && cache.size() < CACHE_MAX_SIZE) {
+                    cache.put(target, new CacheEntry(data, contentType, CACHE_TTL_STATIC));
+                }
+                response.setContentLength(data.length);
+                response.getOutputStream().write(data);
+            }
+        } catch (Exception e) {
+            System.err.println("[Proxy ERROR] " + target + " - " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            e.printStackTrace(System.err);
+            if (!response.isCommitted()) {
+                try {
+                    response.setStatus(502);
+                    response.setContentType("text/plain;charset=UTF-8");
+                    response.getWriter().write("Proxy error: " + e.getMessage());
+                } catch (Exception ignored2) {}
+            }
+        }
+    }
+
+    private String extractCharset(String contentType) {
+        Pattern p = Pattern.compile("charset\\s*=\\s*([^;\\s]+)", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(contentType);
+        return m.find() ? m.group(1).trim() : "UTF-8";
+    }
+
+    private String detectCharsetFromMeta(byte[] htmlBytes) {
+        // Scan raw bytes as Latin-1 (byte-preserving) for charset declarations
+        String head = new String(htmlBytes, 0, Math.min(htmlBytes.length, 8192), StandardCharsets.ISO_8859_1);
+        Pattern metaCharset = Pattern.compile(
+            "<meta[^>]+charset\\s*=\\s*['\"]?([a-zA-Z0-9\\-_]+)['\"]?",
+            Pattern.CASE_INSENSITIVE
+        );
+        Matcher m = metaCharset.matcher(head);
+        if (m.find()) {
+            String cs = m.group(1).trim();
+            return cs;
+        }
+        Pattern metaHttpEquiv = Pattern.compile(
+            "<meta[^>]+http-equiv\\s*=\\s*['\"]?content-type['\"]?[^>]+content\\s*=\\s*['\"][^'\"]*charset=([a-zA-Z0-9\\-_]+)",
+            Pattern.CASE_INSENSITIVE
+        );
+        m = metaHttpEquiv.matcher(head);
+        if (m.find()) {
+            String cs = m.group(1).trim();
+            return cs;
+        }
+        return null;
+    }
+
+    private String rewriteUrls(String html, String baseUrl, Charset charset) {
+        String baseHost = extractBase(baseUrl);
+        if (baseHost == null) return html;
+
+        // Replace inner content of script/style tags with placeholders
+        // (keep opening tags so attr rewriting still applies)
+        List<String> innerBlocks = new ArrayList<>();
+        StringBuffer sb = new StringBuffer();
+        Matcher sm = SCRIPT_STYLE_CONTENT_PATTERN.matcher(html);
+        while (sm.find()) {
+            String tagOpen = sm.group(1) != null ? sm.group(1) : sm.group(4);
+            String inner = sm.group(2) != null ? sm.group(2) : sm.group(5);
+            String tagClose = sm.group(3) != null ? sm.group(3) : sm.group(6);
+            innerBlocks.add(inner);
+            sm.appendReplacement(sb, Matcher.quoteReplacement(tagOpen + "<<<BLOCK" + (innerBlocks.size() - 1) + ">>>" + tagClose));
+        }
+        sm.appendTail(sb);
+        String body = sb.toString();
+
+        // Rewrite URLs in the non-script/style body (attributes are preserved in the tags)
+        body = rewriteAttrUrls(body, baseUrl, baseHost);
+        body = rewriteCssUrls(body, baseUrl, baseHost);
+
+        // Restore inner content
+        for (int i = 0; i < innerBlocks.size(); i++) {
+            body = body.replace("<<<BLOCK" + i + ">>>", innerBlocks.get(i));
+        }
+        return body;
+    }
+
+    private String rewriteAttrUrls(String html, String baseUrl, String baseHost) {
+        StringBuffer sb = new StringBuffer();
+        Matcher m = ATTR_PATTERN.matcher(html);
+        while (m.find()) {
+            String attr = m.group(1);
+            String val = m.group(2);
+            String url = val.substring(1, val.length() - 1);
+            String rewritten = rewriteSingleUrl(url, baseUrl, baseHost);
+            if (rewritten != null) {
+                m.appendReplacement(sb, Matcher.quoteReplacement(attr + "=\"" + rewritten + "\""));
+            }
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private String rewriteCssUrls(String html, String baseUrl, String baseHost) {
+        StringBuffer sb = new StringBuffer();
+        Pattern p = Pattern.compile("url\\(['\"]?([^)'\"]+)['\"]?\\)", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(html);
+        while (m.find()) {
+            String url = m.group(1);
+            if (url.startsWith("data:") || url.startsWith("#")) continue;
+            String rewritten = rewriteSingleUrl(url, baseUrl, baseHost);
+            if (rewritten != null) {
+                m.appendReplacement(sb, Matcher.quoteReplacement("url(" + rewritten + ")"));
+            }
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private String rewriteSingleUrl(String url, String baseUrl, String baseHost) {
+        if (url.isEmpty() || url.startsWith("#") || url.startsWith("javascript:") || url.startsWith("data:") || url.startsWith("mailto:")) {
+            return null;
+        }
+        String trimmed = url.trim();
+        // Skip rewriting for CDN/static domains - load directly from origin for speed
+        if (DIRECT_DOMAINS.matcher(trimmed).find()) {
+            return null;
+        }
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            return PROXY_PATH + trimmed;
+        }
+        if (trimmed.startsWith("//")) {
+            return PROXY_PATH + "https:" + trimmed;
+        }
+        // Use URI-based resolution for correct relative URL handling
+        try {
+            String resolved;
+            if (trimmed.startsWith("/")) {
+                URI base = URI.create(baseUrl);
+                resolved = base.getScheme() + "://" + base.getAuthority() + trimmed;
+            } else {
+                // Resolve relative URL against base URL's directory
+                String baseDir = baseUrl;
+                int lastSlash = baseUrl.lastIndexOf('/');
+                if (lastSlash > baseUrl.indexOf("://") + 2) {
+                    baseDir = baseUrl.substring(0, lastSlash + 1);
+                } else {
+                    baseDir = baseUrl + "/";
+                }
+                URI base = URI.create(baseDir);
+                resolved = base.resolve(trimmed).toString();
+            }
+            return PROXY_PATH + resolved;
+        } catch (Exception e) {
+            // Fallback for resolution errors
+            return PROXY_PATH + "https://" + baseHost + "/" + trimmed;
+        }
+    }
+
+    
+    private String extractBase(String url) {
+        try {
+            URI uri = URI.create(url);
+            String host = uri.getHost();
+            int port = uri.getPort();
+            if (host == null) return null;
+            return port > 0 && port != 80 && port != 443 ? host + ":" + port : host;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SekaiForm - Login</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <style>
+        body { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .particle { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--d) ease-in-out infinite; animation-delay: var(--delay); opacity: 0; }
+        @keyframes twinkle { 0%,100% { opacity: 0.1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.5); } }
+        .login-wrapper { width: 100%; max-width: 430px; padding: 20px; animation: slideUp 0.8s ease-out; z-index: 1; }
+        .login-card { padding: 45px 35px; text-align: center; position: relative; overflow: hidden; }
+        .login-card::before { content: ''; position: absolute; top: -40%; left: -40%; width: 180%; height: 180%; background: radial-gradient(circle at 30% 20%, rgba(255,107,157,0.06) 0%, transparent 45%), radial-gradient(circle at 70% 80%, rgba(196,77,255,0.06) 0%, transparent 45%); pointer-events: none; }
+        .logo-icon { font-size: 4em; margin-bottom: 2px; display: block; animation: floatIcon 3s ease-in-out infinite; }
+        @keyframes floatIcon { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .login-card h1 { font-size: 2.4em; font-weight: 900; background: linear-gradient(135deg, #ff6b9d, #c44dff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0; }
+        .login-card .sub { color: var(--text-dim); font-size: 0.88em; margin-bottom: 28px; letter-spacing: 1px; }
+        .login-card .error-msg { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #ff6b6b; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-size: 0.85em; font-weight: 600; }
+        .form-group { margin-bottom: 18px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--text-dim); font-size: 0.8em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .form-group input { background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px 15px; font-size: 1em; transition: all 0.3s; width: 100%; color: var(--text); }
+        .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(255,107,157,0.12); background: rgba(255,255,255,0.06); outline: none; }
+        .login-btn { width: 100%; padding: 14px; border: none; border-radius: 14px; background: linear-gradient(135deg, #ff6b9d, #c44dff); color: #fff; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-top: 4px; }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,107,157,0.45); }
+        .hint { text-align: center; margin-top: 20px; color: var(--text-dim); font-size: 0.76em; }
+        .hint code { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 5px; color: var(--accent); margin: 0 3px; }
+    </style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+<div class="login-wrapper">
+    <div class="login-card glass-card">
+        <div class="logo-icon">&#x1F338;</div>
+        <h1>SekaiForm</h1>
+        <p class="sub">&#x2726; Character Raising System &#x2726;</p>
+        <div class="error-msg" th:if="${error}" th:text="${error}">Error message</div>
+        <form id="loginForm" method="post" action="/login">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="userName" id="userName" placeholder="Enter username" th:value="${userName}" value="sekai" autofocus>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" id="password" placeholder="Enter password" value="123456520baba">
+            </div>
+            <button type="submit" class="login-btn" id="loginBtn">&#x2728; Sign In &#x2728;</button>
+        </form>
+        <p class="hint">Default: <code>sekai</code> / <code>123456520baba</code></p>
+    </div>
+</div>
+<script>
+(function(){
+    var c=document.getElementById('particles');
+    for(var i=0;i<60;i++){
+        var s=document.createElement('span');s.className='particle';
+        s.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;width:'+(1+Math.random()*2)+'px;height:'+(1+Math.random()*2)+'px;--d:'+(1+Math.random()*3)+'s;--delay:'+Math.random()*4+'s';
+        c.appendChild(s);
+    }
+})();
+document.getElementById('loginForm').addEventListener('submit',function(e){
+    var u=document.getElementById('userName').value.trim();
+    var p=document.getElementById('password').value.trim();
+    if(!u||!p){ e.preventDefault(); alert('Please enter username and password'); }
+});
+</script>
+</body>
+</html>

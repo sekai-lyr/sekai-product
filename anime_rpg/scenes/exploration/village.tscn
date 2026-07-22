@@ -1,0 +1,209 @@
+[gd_scene load_steps=6 format=3 uid="uid://village_scene"]
+
+[ext_resource type="Script" path="res://scripts/exploration/player_controller.gd" id="1_player_script"]
+[ext_resource type="Script" path="res://scripts/exploration/npc.gd" id="2_npc_script"]
+[ext_resource type="Script" path="res://scripts/exploration/chest.gd" id="3_chest_script"]
+[ext_resource type="Script" path="res://scripts/exploration/door.gd" id="4_door_script"]
+[ext_resource type="Script" path="res://scripts/exploration/shop.gd" id="5_shop_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_interaction"]
+size = Vector2(50, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_npc"]
+size = Vector2(40, 40)
+
+[node name="Village" type="Node2D"]
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.3, 0.5, 0.3, 1)
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(960, 540)
+script = ExtResource("1_player_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="InteractionArea" type="Area2D" parent="Player"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player/InteractionArea"]
+shape = SubResource("RectangleShape2D_interaction")
+
+[node name="NPCs" type="Node2D" parent="."]
+
+[node name="Elder" type="Area2D" parent="NPCs"]
+position = Vector2(400, 300)
+script = ExtResource("2_npc_script")
+npc_id = "elder"
+npc_name = "村长"
+dialogue_id = "chapter1_001"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NPCs/Elder"]
+shape = SubResource("RectangleShape2D_npc")
+
+[node name="Sprite2D" type="Sprite2D" parent="NPCs/Elder"]
+position = Vector2(0, -16)
+
+[node name="InteractionPrompt" type="Label" parent="NPCs/Elder"]
+position = Vector2(-50, -50)
+text = "按空格对话"
+horizontal_alignment = 1
+visible = false
+
+[node name="Haru" type="Area2D" parent="NPCs"]
+position = Vector2(1500, 300)
+script = ExtResource("2_npc_script")
+npc_id = "haru"
+npc_name = "haru"
+dialogue_id = "prologue_001"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NPCs/Haru"]
+shape = SubResource("RectangleShape2D_npc")
+
+[node name="Sprite2D" type="Sprite2D" parent="NPCs/Haru"]
+position = Vector2(0, -16)
+
+[node name="InteractionPrompt" type="Label" parent="NPCs/Haru"]
+position = Vector2(-50, -50)
+text = "按空格对话"
+horizontal_alignment = 1
+visible = false
+
+[node name="Shopkeeper" type="Area2D" parent="NPCs"]
+position = Vector2(800, 400)
+script = ExtResource("5_shop_script")
+shop_id = "village_shop"
+shop_name = "村长家商店"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NPCs/Shopkeeper"]
+shape = SubResource("RectangleShape2D_npc")
+
+[node name="Sprite2D" type="Sprite2D" parent="NPCs/Shopkeeper"]
+position = Vector2(0, -16)
+
+[node name="InteractionPrompt" type="Label" parent="NPCs/Shopkeeper"]
+position = Vector2(-50, -50)
+text = "按空格购物"
+horizontal_alignment = 1
+visible = false
+
+[node name="Interactables" type="Node2D" parent="."]
+
+[node name="Chest1" type="Area2D" parent="Interactables"]
+position = Vector2(1200, 700)
+script = ExtResource("3_chest_script")
+chest_id = "village_chest_1"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/Chest1"]
+shape = SubResource("RectangleShape2D_npc")
+
+[node name="Sprite2D" type="Sprite2D" parent="Interactables/Chest1"]
+position = Vector2(0, -12)
+
+[node name="InteractionPrompt" type="Label" parent="Interactables/Chest1"]
+position = Vector2(-50, -40)
+text = "按空格开启"
+horizontal_alignment = 1
+visible = false
+
+[node name="Chest2" type="Area2D" parent="Interactables"]
+position = Vector2(1600, 700)
+script = ExtResource("3_chest_script")
+chest_id = "village_chest_2"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/Chest2"]
+shape = SubResource("RectangleShape2D_npc")
+
+[node name="Sprite2D" type="Sprite2D" parent="Interactables/Chest2"]
+position = Vector2(0, -12)
+
+[node name="InteractionPrompt" type="Label" parent="Interactables/Chest2"]
+position = Vector2(-50, -40)
+text = "按空格开启"
+horizontal_alignment = 1
+visible = false
+
+[node name="FieldDoor" type="Area2D" parent="Interactables"]
+position = Vector2(1800, 540)
+script = ExtResource("4_door_script")
+target_scene = "res://scenes/exploration/field.tscn"
+target_area = "field"
+door_name = "野外"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/FieldDoor"]
+shape = SubResource("RectangleShape2D_npc")
+
+[node name="Label" type="Label" parent="Interactables/FieldDoor"]
+position = Vector2(-30, -30)
+text = "→ 野外"
+
+[node name="DungeonDoor" type="Area2D" parent="Interactables"]
+position = Vector2(100, 540)
+script = ExtResource("4_door_script")
+target_scene = "res://scenes/exploration/dungeon.tscn"
+target_area = "dungeon"
+door_name = "地下城"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/DungeonDoor"]
+shape = SubResource("RectangleShape2D_npc")
+
+[node name="Label" type="Label" parent="Interactables/DungeonDoor"]
+position = Vector2(-30, -30)
+text = "← 地下城"
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HPBar" type="ProgressBar" parent="UI/HUD"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 45.0
+value = 100.0
+
+[node name="MPBar" type="ProgressBar" parent="UI/HUD"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 55.0
+offset_right = 220.0
+offset_bottom = 80.0
+value = 100.0
+
+[node name="AreaLabel" type="Label" parent="UI/HUD"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -150.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 45.0
+grow_horizontal = 0
+text = "村庄"
+horizontal_alignment = 2
+
+[node name="GoldLabel" type="Label" parent="UI/HUD"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 90.0
+offset_right = 200.0
+offset_bottom = 115.0
+text = "金币: 100"

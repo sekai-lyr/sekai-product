@@ -1,0 +1,92 @@
+{
+  "skills": [
+    {
+      "id": "basic_attack",
+      "name": "普通攻击",
+      "description": "基础物理攻击",
+      "mp_cost": 0,
+      "power": 10,
+      "type": "physical",
+      "target": "single_enemy",
+      "required_level": 1
+    },
+    {
+      "id": "fireball",
+      "name": "火球术",
+      "description": "发射火球攻击敌人",
+      "mp_cost": 15,
+      "power": 30,
+      "type": "magical",
+      "target": "single_enemy",
+      "required_level": 3
+    },
+    {
+      "id": "ice_shard",
+      "name": "冰棱术",
+      "description": "召唤冰棱攻击敌人",
+      "mp_cost": 20,
+      "power": 35,
+      "type": "magical",
+      "target": "single_enemy",
+      "required_level": 5
+    },
+    {
+      "id": "heal",
+      "name": "治愈术",
+      "description": "恢复自身HP",
+      "mp_cost": 20,
+      "power": 50,
+      "type": "heal",
+      "target": "self",
+      "required_level": 2
+    },
+    {
+      "id": "power_up",
+      "name": "力量强化",
+      "description": "暂时提升攻击力",
+      "mp_cost": 15,
+      "power": 5,
+      "type": "buff",
+      "target": "self",
+      "duration": 3,
+      "required_level": 4
+    },
+    {
+      "id": "goblin_slash",
+      "name": "哥布林斩击",
+      "description": "哥布林的强力斩击",
+      "mp_cost": 0,
+      "power": 18,
+      "type": "physical",
+      "target": "single_enemy"
+    },
+    {
+      "id": "bone_throw",
+      "name": "骨投",
+      "description": "骷髅兵投掷骨头攻击",
+      "mp_cost": 0,
+      "power": 20,
+      "type": "physical",
+      "target": "single_enemy"
+    },
+    {
+      "id": "heavy_strike",
+      "name": "重击",
+      "description": "BOSS的强力物理攻击",
+      "mp_cost": 0,
+      "power": 40,
+      "type": "physical",
+      "target": "single_enemy"
+    },
+    {
+      "id": "iron_wall",
+      "name": "铁壁",
+      "description": "BOSS大幅提升防御力",
+      "mp_cost": 0,
+      "power": 10,
+      "type": "buff",
+      "target": "self",
+      "duration": 2
+    }
+  ]
+}

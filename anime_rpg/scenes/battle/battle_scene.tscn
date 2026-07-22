@@ -1,0 +1,282 @@
+[gd_scene load_steps=3 format=3 uid="uid://battle_scene"]
+
+[ext_resource type="Script" path="res://scripts/battle/battle_manager.gd" id="1_battle_manager"]
+[ext_resource type="Script" path="res://scripts/battle/battle_ui.gd" id="2_battle_ui"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bg"]
+size = Vector2(1920, 1080)
+
+[node name="BattleScene" type="Node2D"]
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.15, 0.15, 0.25, 1)
+
+[node name="BattleField" type="Node2D" parent="."]
+
+[node name="PlayerSprite" type="Sprite2D" parent="BattleField"]
+position = Vector2(300, 500)
+
+[node name="EnemyContainer" type="Node2D" parent="BattleField"]
+position = Vector2(1200, 400)
+
+[node name="BattleManager" type="Node" parent="."]
+script = ExtResource("1_battle_manager")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="BattleUI" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_battle_ui")
+
+[node name="PlayerInfo" type="PanelContainer" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 350.0
+offset_bottom = 180.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/BattleUI/PlayerInfo"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="UI/BattleUI/PlayerInfo/VBoxContainer"]
+layout_mode = 2
+text = "勇者"
+
+[node name="HPBar" type="ProgressBar" parent="UI/BattleUI/PlayerInfo"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 20)
+max_value = 100.0
+value = 100.0
+
+[node name="HPLabel" type="Label" parent="UI/BattleUI/PlayerInfo"]
+layout_mode = 2
+text = "HP: 100 / 100"
+
+[node name="MPBar" type="ProgressBar" parent="UI/BattleUI/PlayerInfo"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 20)
+max_value = 100.0
+value = 100.0
+
+[node name="MPLabel" type="Label" parent="UI/BattleUI/PlayerInfo"]
+layout_mode = 2
+text = "MP: 50 / 50"
+
+[node name="ATBLabel" type="Label" parent="UI/BattleUI/PlayerInfo"]
+layout_mode = 2
+text = "行动条"
+
+[node name="ATBBar" type="ProgressBar" parent="UI/BattleUI/PlayerInfo"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 20)
+max_value = 100.0
+value = 0.0
+
+[node name="EnemyInfoContainer" type="VBoxContainer" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -350.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 200.0
+grow_horizontal = 0
+
+[node name="ActionMenu" type="PanelContainer" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.7
+anchor_right = 0.5
+anchor_bottom = 0.7
+offset_left = -150.0
+offset_top = -100.0
+offset_right = 150.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/BattleUI/ActionMenu"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AttackButton" type="Button" parent="UI/BattleUI/ActionMenu/VBoxContainer"]
+layout_mode = 2
+text = "攻击"
+custom_minimum_size = Vector2(150, 35)
+
+[node name="SkillButton" type="Button" parent="UI/BattleUI/ActionMenu/VBoxContainer"]
+layout_mode = 2
+text = "技能"
+custom_minimum_size = Vector2(150, 35)
+
+[node name="DefendButton" type="Button" parent="UI/BattleUI/ActionMenu/VBoxContainer"]
+layout_mode = 2
+text = "防御"
+custom_minimum_size = Vector2(150, 35)
+
+[node name="ItemButton" type="Button" parent="UI/BattleUI/ActionMenu/VBoxContainer"]
+layout_mode = 2
+text = "道具"
+custom_minimum_size = Vector2(150, 35)
+
+[node name="EscapeButton" type="Button" parent="UI/BattleUI/ActionMenu/VBoxContainer"]
+layout_mode = 2
+text = "逃跑"
+custom_minimum_size = Vector2(150, 35)
+
+[node name="TargetSelectionPanel" type="PanelContainer" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_top = -150.0
+offset_right = 175.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/BattleUI/TargetSelectionPanel"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="UI/BattleUI/TargetSelectionPanel/VBoxContainer"]
+layout_mode = 2
+text = "选择目标："
+horizontal_alignment = 1
+
+[node name="SkillSelectionPanel" type="PanelContainer" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_top = -200.0
+offset_right = 175.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/BattleUI/SkillSelectionPanel"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="UI/BattleUI/SkillSelectionPanel/VBoxContainer"]
+layout_mode = 2
+text = "选择技能："
+horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="UI/BattleUI/SkillSelectionPanel/VBoxContainer"]
+layout_mode = 2
+text = "关闭"
+custom_minimum_size = Vector2(300, 40)
+
+[node name="ItemSelectionPanel" type="PanelContainer" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_top = -200.0
+offset_right = 175.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/BattleUI/ItemSelectionPanel"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="UI/BattleUI/ItemSelectionPanel/VBoxContainer"]
+layout_mode = 2
+text = "选择道具："
+horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="UI/BattleUI/ItemSelectionPanel/VBoxContainer"]
+layout_mode = 2
+text = "关闭"
+custom_minimum_size = Vector2(300, 40)
+
+[node name="VictoryPanel" type="PanelContainer" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/BattleUI/VictoryPanel"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="UI/BattleUI/VictoryPanel/VBoxContainer"]
+layout_mode = 2
+text = "战斗胜利！"
+horizontal_alignment = 1
+
+[node name="ExpLabel" type="Label" parent="UI/BattleUI/VictoryPanel/VBoxContainer"]
+layout_mode = 2
+text = "获得经验值: 0"
+horizontal_alignment = 1
+
+[node name="GoldLabel" type="Label" parent="UI/BattleUI/VictoryPanel/VBoxContainer"]
+layout_mode = 2
+text = "获得金币: 0"
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="UI/BattleUI/VictoryPanel/VBoxContainer"]
+layout_mode = 2
+text = "继续"
+custom_minimum_size = Vector2(200, 40)
+
+[node name="MessageLabel" type="Label" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.3
+anchor_right = 0.5
+anchor_bottom = 0.3
+offset_left = -200.0
+offset_top = -30.0
+offset_right = 200.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "战斗开始！"
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
+
+[node name="TurnLabel" type="Label" parent="UI/BattleUI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -40.0
+offset_right = 200.0
+offset_bottom = -10.0
+grow_vertical = 0
+text = "回合: 1"

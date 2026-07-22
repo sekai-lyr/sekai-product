@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开通会员 - 灵感伙伴签</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v=202605271840)}" href="/css/app.css?v=202605271840">
+</head>
+<body>
+<header class="topbar">
+    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
+    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a><a th:href="@{/insights}">分析</a><a th:href="@{/coach}">行动</a><a th:href="@{/tasks}">任务</a><a th:href="@{/focus}">专注</a><a class="active" th:href="@{/membership}">会员</a></nav>
+</header>
+<main class="dashboard">
+    <section class="membership-hero">
+        <div>
+            <p class="eyebrow">会员变现入口</p>
+            <h1>把免费抽签升级成付费体验</h1>
+            <p>用户扫码付款并填写订单备注，你在后台批准后自动开通会员。现在就能先卖，后面再接微信支付自动回调。</p>
+        </div>
+        <div class="membership-status">
+            <span th:text="${membership.active} ? '会员有效' : '当前免费版'">当前免费版</span>
+            <strong th:if="${membership.active}" th:text="${membership.planName + ' · 剩余 ' + membership.daysLeft + ' 天'}">月度会员</strong>
+            <strong th:unless="${membership.active}">三连签和深度分析待解锁</strong>
+            <small th:if="${membership.active}" th:text="'到期时间：' + ${membership.expireDateText}">到期时间：2026-06-30 23:59</small>
+            <small th:text="${membership.renewalHint}">续费会自动顺延</small>
+        </div>
+    </section>
+
+    <div class="server-message success" th:if="${message}" th:text="${message}"></div>
+    <div class="server-message error" th:if="${error}" th:text="${error}"></div>
+    <section class="paywall-notice" th:if="${locked == 'insights'}">
+        <strong>深度分析是会员功能</strong>
+        <p>开通后可查看趋势报告、行动建议、高分签回放，并解锁三连签仪式。</p>
+    </section>
+    <section class="paywall-notice" th:if="${locked == 'share'}">
+        <strong>分享卡是会员功能</strong>
+        <p>开通后每次抽签都可以生成可保存、可转发的会员分享卡，适合发朋友圈或社群。</p>
+    </section>
+    <section class="paywall-notice" th:if="${locked == 'coach'}">
+        <strong>7 天行动计划是会员功能</strong>
+        <p>开通后会根据最近抽签记录生成一周执行路径、节奏判断和风险提醒。</p>
+    </section>
+    <section class="paywall-notice" th:if="${locked == 'wheel-vip'}">
+        <strong>智能补全转盘是会员功能</strong>
+        <p>开通后可把抽签历史和行动计划自动转成任务分区，一键导入到命运转盘里。</p>
+    </section>
+    <section class="paywall-notice" th:if="${locked == 'tasks'}">
+        <strong>行动任务看板是会员功能</strong>
+        <p>开通后可把 7 天行动计划拆成任务，管理优先级、截止日期、完成状态，并导出 Markdown。</p>
+    </section>
+    <section class="paywall-notice" th:if="${locked == 'focus'}">
+        <strong>专注冲刺系统是会员功能</strong>
+        <p>开通后可把任务推进成番茄钟冲刺，记录时长、完成关联任务、查看 7 日趋势，并导出复盘。</p>
+    </section>
+
+    <section class="trial-panel" th:if="${trialEligible}">
+        <div>
+            <p class="eyebrow">Free Trial</p>
+            <strong>先免费试用 3 天会员</strong>
+            <p>无需付款，立即解锁三连签仪式、深度趋势分析和会员分享卡。试用结束前续费会自动顺延会员时间。</p>
+        </div>
+        <form th:action="@{/membership/trial}" method="post">
+            <button type="submit">领取试用会员</button>
+        </form>
+    </section>
+
+    <section class="membership-perks">
+        <article>
+            <strong>三连签仪式</strong>
+            <p>一次生成阻力、助力、行动三张签，适合围绕一个主题做决策。</p>
+        </article>
+        <article>
+            <strong>趋势分析</strong>
+            <p>按最近抽签记录生成均分、波动、风险和下一步建议。</p>
+        </article>
+        <article>
+            <strong>高分回放</strong>
+            <p>自动筛出高分签，方便复盘近期最值得抓住的好运。</p>
+        </article>
+        <article>
+            <strong>分享卡</strong>
+            <p>为抽签结果生成可保存、可转发的会员专属卡片。</p>
+        </article>
+        <article>
+            <strong>7 天行动计划</strong>
+            <p>把抽签记录转成每天能执行的小步骤，并可导出到笔记或日历继续跟进。</p>
+        </article>
+        <article>
+            <strong>智能补全转盘</strong>
+            <p>把抽签主线、风险提醒和行动计划合成可执行分区，让转盘更像今天的任务调度器。</p>
+        </article>
+        <article>
+            <strong>行动任务看板</strong>
+            <p>把会员行动计划变成可完成任务，支持导入、完成、搁置、逾期提醒和 Markdown 导出。</p>
+        </article>
+        <article>
+            <strong>专注冲刺系统</strong>
+            <p>把任务接入专注计时、状态记录、完成打卡和 7 日统计，更像真正能每天打开的效率 App。</p>
+        </article>
+    </section>
+
+    <section class="pricing-grid">
+        <article class="price-card" th:each="plan : ${plans}" th:classappend="${plan.highlighted} ? ' featured' : ''">
+            <div>
+                <div class="price-card-head">
+                    <span th:text="${plan.badge}">推荐</span>
+                    <em th:text="${plan.days + ' 天'}">31 天</em>
+                </div>
+                <h2 th:text="${plan.name}">月度会员</h2>
+                <p th:text="${plan.tagline}">先验证愿意付费的人</p>
+            </div>
+            <div>
+                <strong th:text="'¥' + ${plan.priceText}">¥19.90</strong>
+                <small th:text="'折合 ¥' + ${plan.dailyPriceText} + '/天'">折合 ¥0.64/天</small>
+            </div>
+            <ul>
+                <li th:each="feature : ${plan.features}" th:text="${feature}">解锁三连签仪式</li>
+            </ul>
+            <form th:action="@{/membership/orders}" method="post">
+                <input type="hidden" name="planCode" th:value="${plan.code}">
+                <input name="contact" maxlength="120" placeholder="微信号/手机号，方便对账">
+                <button type="submit" th:text="${membership.active} ? '续费此方案' : '生成付款订单'">生成付款订单</button>
+            </form>
+        </article>
+    </section>
+
+    <section class="payment-panel" th:if="${order}">
+        <div class="payment-copy">
+            <p class="eyebrow" th:text="${recoveredOrder} ? '继续支付' : '待付款订单'">待付款订单</p>
+            <h2 th:text="${order.planName + ' · ¥' + order.amountText}">月度会员 · ¥19.90</h2>
+            <p class="pending-hint" th:if="${recoveredOrder}">已自动找回你最近一笔待付款订单，可以继续扫码支付或取消后重新选择套餐。</p>
+            <p>扫码付款时请务必填写下面的付款备注。你收到钱后，用后台审批接口批准订单，会员会自动生效。</p>
+            <div class="order-meta">
+                <span>订单号</span><strong th:text="${order.orderNo}">SK202605260001</strong>
+                <span>付款备注</span><strong th:text="${order.payNote}">SK-SK202605260001</strong>
+                <span>付款方式</span><strong th:text="${order.payMethodText}">微信扫码</strong>
+                <span>创建时间</span><strong th:text="${order.createTimeText}">2026-05-27 09:30</strong>
+                <span>状态</span><strong th:text="${order.statusText}">待付款</strong>
+            </div>
+            <form class="payment-actions" th:if="${order.cancelable}" th:action="@{/membership/orders/{orderNo}/cancel(orderNo=${order.orderNo})}" method="post">
+                <button class="ghost-button" type="submit">取消这笔订单</button>
+            </form>
+        </div>
+        <div class="payment-qr">
+            <img th:src="${paymentQrUrl}" alt="微信收款码">
+            <span>微信扫码付款</span>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="section-title"><h2>最近订单</h2><a th:href="@{/membership}">刷新</a></div>
+        <div class="order-list">
+            <article th:each="item : ${recentOrders}">
+                <div>
+                    <strong th:text="${item.planName + ' · ¥' + item.amountText}">月度会员 · ¥19.90</strong>
+                    <span th:text="${item.orderNo + ' / 备注：' + item.payNote + ' / ' + item.createTimeText}">订单号</span>
+                </div>
+                <em th:classappend="${item.paid} ? ' paid' : (${item.rejected} ? ' rejected' : (${item.canceled} ? ' canceled' : ''))" th:text="${item.statusText}">待付款</em>
+            </article>
+            <p class="muted" th:if="${#lists.isEmpty(recentOrders)}">还没有付款订单。</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

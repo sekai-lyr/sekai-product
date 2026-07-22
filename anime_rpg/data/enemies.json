@@ -1,0 +1,68 @@
+{
+  "enemies": [
+    {
+      "id": "slime",
+      "name": "史莱姆",
+      "description": "最弱小的魔物，圆滚滚的身体",
+      "level": 1,
+      "hp": 30,
+      "attack": 5,
+      "defense": 2,
+      "speed": 8,
+      "exp_reward": 10,
+      "gold_reward": 5,
+      "skills": [],
+      "sprite": "res://assets/enemies/slime.png"
+    },
+    {
+      "id": "goblin",
+      "name": "哥布林",
+      "description": "狡猾的小型人形魔物",
+      "level": 3,
+      "hp": 60,
+      "attack": 12,
+      "defense": 5,
+      "speed": 10,
+      "exp_reward": 25,
+      "gold_reward": 15,
+      "skills": ["goblin_slash"],
+      "sprite": "res://assets/enemies/goblin.png"
+    },
+    {
+      "id": "skeleton",
+      "name": "骷髅兵",
+      "description": "被复活的战士遗骸",
+      "level": 5,
+      "hp": 80,
+      "attack": 15,
+      "defense": 8,
+      "speed": 9,
+      "exp_reward": 40,
+      "gold_reward": 25,
+      "skills": ["bone_throw"],
+      "sprite": "res://assets/enemies/skeleton.png"
+    },
+    {
+      "id": "boss_guardian",
+      "name": "地下城守护者",
+      "description": "古代地下城的强大守卫",
+      "level": 8,
+      "hp": 200,
+      "attack": 25,
+      "defense": 15,
+      "speed": 12,
+      "exp_reward": 100,
+      "gold_reward": 80,
+      "skills": ["heavy_strike", "iron_wall"],
+      "sprite": "res://assets/enemies/boss_guardian.png",
+      "is_boss": true
+    }
+  ],
+  "enemy_groups": {
+    "field_easy": ["slime", "slime"],
+    "field_normal": ["slime", "goblin"],
+    "field_hard": ["goblin", "skeleton"],
+    "dungeon_easy": ["skeleton", "skeleton"],
+    "dungeon_boss": ["boss_guardian"]
+  }
+}

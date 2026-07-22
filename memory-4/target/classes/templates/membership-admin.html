@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员后台 - 灵感伙伴签</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v=202605271130)}" href="/css/app.css?v=202605271130">
+</head>
+<body>
+<header class="topbar">
+    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
+    <nav><a th:href="@{/membership}">会员页</a><a class="active" th:href="@{/admin/membership}">会员后台</a></nav>
+</header>
+<main class="dashboard admin-dashboard">
+    <section class="admin-head">
+        <div>
+            <p class="eyebrow">Membership Ops</p>
+            <h1>会员订单后台</h1>
+            <p>处理手动收款订单，拒绝异常订单，或按用户 ID 赠送/补发会员天数。</p>
+        </div>
+        <form class="admin-token-form" th:action="@{/admin/membership}" method="get">
+            <label>
+                <span>后台 Token</span>
+                <input name="token" th:value="${adminToken}" placeholder="输入 ADMIN_TOKEN">
+            </label>
+            <label>
+                <span>显示数量</span>
+                <input name="limit" type="number" min="1" max="100" th:value="${limit}">
+            </label>
+            <button type="submit">载入订单</button>
+        </form>
+    </section>
+
+    <div class="server-message success" th:if="${message}" th:text="${message}"></div>
+    <div class="server-message error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="paywall-notice" th:unless="${adminReady}">
+        <strong th:text="${tokenProvided} ? '后台密钥不正确' : '请输入后台 Token'">请输入后台 Token</strong>
+        <p>这个页面不会展示订单，直到提供的 token 与环境变量 ADMIN_TOKEN 一致。</p>
+    </section>
+
+    <section class="admin-grid" th:if="${adminReady}">
+        <div class="admin-panel admin-orders">
+            <div class="section-title">
+                <h2>待处理订单</h2>
+                <a th:href="@{/admin/membership(token=${adminToken},limit=${limit})}">刷新</a>
+            </div>
+            <div class="admin-table-wrap" th:if="${!#lists.isEmpty(pendingOrders)}">
+                <table class="admin-order-table">
+                    <thead>
+                    <tr>
+                        <th>订单</th>
+                        <th>金额</th>
+                        <th>付款备注</th>
+                        <th>联系方式</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${pendingOrders}">
+                        <td>
+                            <strong th:text="${order.planName}">月度会员</strong>
+                            <span th:text="${order.orderNo + ' / 用户 #' + order.userId}">订单号</span>
+                        </td>
+                        <td th:text="'¥' + ${order.amountText}">¥19.90</td>
+                        <td><code th:text="${order.payNote}">SK-SK202605270001</code></td>
+                        <td th:text="${order.contact}">微信号</td>
+                        <td th:text="${order.createTimeText}">2026-05-27 11:30</td>
+                        <td>
+                            <div class="admin-actions">
+                                <form th:action="@{/admin/membership/orders/{id}/approve-page(id=${order.id})}" method="post">
+                                    <input type="hidden" name="token" th:value="${adminToken}">
+                                    <button class="approve-button" type="submit">批准</button>
+                                </form>
+                                <form th:action="@{/admin/membership/orders/{id}/reject-page(id=${order.id})}" method="post">
+                                    <input type="hidden" name="token" th:value="${adminToken}">
+                                    <button class="reject-button" type="submit">拒绝</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="muted" th:if="${#lists.isEmpty(pendingOrders)}">当前没有待处理订单。</p>
+        </div>
+
+        <aside class="admin-panel admin-grant">
+            <div class="section-title"><h2>赠送会员</h2></div>
+            <form th:action="@{/admin/membership/grants-page}" method="post">
+                <input type="hidden" name="token" th:value="${adminToken}">
+                <label>
+                    <span>用户 ID</span>
+                    <input name="userId" type="number" min="1" placeholder="例如：1" required>
+                </label>
+                <label>
+                    <span>会员方案</span>
+                    <select name="planCode" required>
+                        <option th:each="plan : ${plans}" th:value="${plan.code}" th:text="${plan.name}">月度会员</option>
+                    </select>
+                </label>
+                <label>
+                    <span>天数</span>
+                    <input name="days" type="number" min="1" max="3660" placeholder="默认使用套餐天数">
+                </label>
+                <button type="submit">开通或顺延会员</button>
+            </form>
+        </aside>
+    </section>
+</main>
+</body>
+</html>

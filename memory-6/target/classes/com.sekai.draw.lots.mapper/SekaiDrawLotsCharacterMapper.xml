@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sekai.draw.lots.mapper.SekaiDrawLotsCharacterMapper">
+
+    <resultMap id="BaseResultMap" type="com.sekai.draw.lots.dataobject.SekaiDrawLotsCharacterDO">
+        <id property="id" column="id"/>
+        <result property="englishName" column="english_name"/>
+        <result property="animeTitle" column="anime_title"/>
+        <result property="roleType" column="role_type"/>
+        <result property="tags" column="tags"/>
+        <result property="energy" column="energy"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="popularityScore" column="popularity_score"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="BaseColumnList">
+        id, english_name, anime_title, role_type, tags, energy, image_url, popularity_score, create_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumnList"/>
+        FROM sekai_draw_lots_character
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectHot" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumnList"/>
+        FROM sekai_draw_lots_character
+        ORDER BY popularity_score DESC, id
+        LIMIT #{limit}
+    </select>
+
+    <select id="search" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumnList"/>
+        FROM sekai_draw_lots_character
+        <where>
+            <if test="keyword != null">
+                english_name LIKE CONCAT('%', #{keyword}, '%')
+                OR anime_title LIKE CONCAT('%', #{keyword}, '%')
+                OR tags LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY popularity_score DESC, english_name
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectRandom" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumnList"/>
+        FROM sekai_draw_lots_character
+        ORDER BY MOD(id * 1103515245 + #{seed}, 2147483647)
+        LIMIT 1
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(1)
+        FROM sekai_draw_lots_character
+    </select>
+</mapper>

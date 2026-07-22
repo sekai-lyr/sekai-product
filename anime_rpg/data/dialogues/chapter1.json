@@ -1,0 +1,72 @@
+{
+  "id": "chapter1",
+  "title": "第一章：冒险者之路",
+  "dialogues": [
+    {
+      "id": "chapter1_001",
+      "speaker": "haru",
+      "text": "欢迎来到冒险者公会！这里是所有冒险者的据点。",
+      "expression": "normal_01"
+    },
+    {
+      "id": "chapter1_002",
+      "speaker": "haru",
+      "text": "首先，你需要注册成为冒险者。这样就能接受任务了。",
+      "expression": "normal_02"
+    },
+    {
+      "id": "chapter1_003",
+      "speaker": "aidang_2",
+      "text": "冒险者公会？听起来很有趣。",
+      "expression": "idle"
+    },
+    {
+      "id": "chapter1_004",
+      "speaker": "haru",
+      "text": "公会会发布各种任务，完成后可以获得报酬和经验值。",
+      "expression": "normal_03"
+    },
+    {
+      "id": "chapter1_005",
+      "speaker": "haru",
+      "text": "作为新手，我建议你先去野外练习一下战斗技巧。",
+      "expression": "normal_04"
+    },
+    {
+      "id": "chapter1_006",
+      "speaker": "haru",
+      "text": "野外会有一些弱小的魔物，适合练手。",
+      "expression": "normal_05"
+    },
+    {
+      "id": "chapter1_007",
+      "speaker": "aidang_2",
+      "text": "明白了，我去试试看。",
+      "expression": "idle"
+    },
+    {
+      "id": "chapter1_008",
+      "speaker": "haru",
+      "text": "小心点！如果遇到危险就逃跑，不要逞强。",
+      "expression": "normal_06"
+    },
+    {
+      "id": "chapter1_009",
+      "speaker": "narrator",
+      "text": "你的冒险者生涯正式开始了。先去野外锻炼一下吧。",
+      "expression": "normal"
+    },
+    {
+      "id": "field_traveler",
+      "speaker": "traveler",
+      "text": "你好啊，冒险者！这片野外有很多史莱姆，很适合新手练级。",
+      "expression": "normal"
+    },
+    {
+      "id": "field_traveler_2",
+      "speaker": "traveler",
+      "text": "往北走就是地下城，不过那里比较危险，建议等级高一些再去。",
+      "expression": "normal"
+    }
+  ]
+}

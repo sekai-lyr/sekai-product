@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sekai Anime - 聚合</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <style>
+        html, body { height: 100%; margin: 0; background: #0a0a1a; overflow: hidden; }
+        body { display: flex; flex-direction: column; }
+        .app-nav { flex-shrink: 0; }
+        .hub-frame {
+            flex: 1; width: 100%; border: 0; display: none; min-height: 0;
+        }
+        .hub-fallback {
+            flex: 1; display: none; flex-direction: column; align-items: center;
+            justify-content: center; gap: 20px; color: #ccc; text-align: center; padding: 40px;
+        }
+        .hub-fallback.show { display: flex; }
+        .hub-fallback h2 { font-size: 24px; color: #fff; margin: 0; }
+        .hub-fallback p { color: var(--muted); margin: 0; font-size: 14px; max-width: 400px; }
+        .hub-fallback a {
+            display: inline-block; padding: 14px 32px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: #fff; text-decoration: none; font-weight: 900; font-size: 15px;
+            transition: all 0.3s;
+        }
+        .hub-fallback a:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,114,184,0.4); }
+        .hub-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 16px; background: rgba(18,18,42,0.9);
+            border-bottom: 1px solid rgba(155,123,255,0.15); flex-shrink: 0;
+            display: none; z-index: 11; position: relative;
+        }
+        .hub-bar.show { display: flex; }
+        .hub-bar-title { font-size: 13px; font-weight: 800; color: #ccc; }
+        .hub-bar-close {
+            width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04); color: #aaa; font-size: 14px; cursor: pointer;
+            display: grid; place-items: center; transition: all 0.2s;
+        }
+        .hub-bar-close:hover { background: rgba(255,107,107,0.2); color: #ff6b6b; }
+        .hub-site-nav {
+            display: flex; gap: 6px; padding: 10px 16px; background: rgba(12,12,30,0.95);
+            border-bottom: 1px solid rgba(155,123,255,0.12); flex-shrink: 0; overflow-x: auto; z-index: 10;
+        }
+        .hub-site-nav a {
+            flex-shrink: 0; padding: 7px 18px; border-radius: 20px; font-size: 13px; font-weight: 700;
+            background: rgba(255,255,255,0.05); color: #aaa; text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.06); transition: all 0.25s; white-space: nowrap;
+        }
+        .hub-site-nav a:hover { background: rgba(155,123,255,0.15); color: #fff; border-color: rgba(155,123,255,0.3); }
+        .hub-site-nav a.active {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: #fff; border-color: transparent; box-shadow: 0 4px 16px rgba(255,114,184,0.3);
+        }
+    </style>
+</head>
+<body>
+<nav class="app-nav">
+    <div class="nav-brand">🌸 Sekai Anime</div>
+    <div class="nav-links">
+        <a href="/home">首页</a>
+        <a href="/anime">🎬 看番</a>
+        <a href="/anime-hub" class="active">🌐 聚合</a>
+        <a href="/dashboard">数据看板</a>
+        <span class="nav-user" th:text="${loginUser.nickName}">Sekai</span>
+        <a href="/logout" class="nav-logout">退出</a>
+    </div>
+</nav>
+<div class="hub-site-nav">
+    <a href="#" onclick="openHub('https://www.kanfantv.com','KanFanTV');return false;" data-site="kanfantv">🎬 KanFanTV</a>
+    <a href="#" onclick="openHub('https://yhdm6.top','樱花动漫');return false;" data-site="yhdm6">🎬 樱花动漫</a>
+    <a href="#" onclick="openHub('https://otage.cc','AGE动漫');return false;" data-site="otage">🎬 AGE动漫</a>
+    <a href="#" onclick="openHub('https://fengchedmp.com','FengChe动漫');return false;" data-site="fengchedmp">🎬 FengChe动漫</a>
+</div>
+<div class="hub-bar" id="hubBar">
+    <span class="hub-bar-title" id="hubBarTitle">KanFanTV</span>
+    <button class="hub-bar-close" onclick="closeHub()">✕</button>
+</div>
+<iframe class="hub-frame" id="hubFrame" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+<div class="hub-fallback" id="hubFallback">
+    <h2>🌐 KanFanTV 聚合看番</h2>
+    <p>该站点无法在此处嵌入显示（可能被 X-Frame-Options 限制）</p>
+</div>
+<script>
+function openHub(url, title) {
+    var frame = document.getElementById('hubFrame');
+    var bar = document.getElementById('hubBar');
+    var barTitle = document.getElementById('hubBarTitle');
+    var fallback = document.getElementById('hubFallback');
+    barTitle.textContent = title || 'Sekai Anime';
+    frame.src = url;
+    frame.style.display = 'block';
+    bar.classList.add('show');
+    fallback.classList.remove('show');
+    var navLinks = document.querySelectorAll('.hub-site-nav a');
+    navLinks.forEach(function(a) {
+        a.classList.remove('active');
+        if (a.getAttribute('onclick').indexOf(url) !== -1) a.classList.add('active');
+    });
+}
+function closeHub() {
+    var frame = document.getElementById('hubFrame');
+    var bar = document.getElementById('hubBar');
+    frame.style.display = 'none';
+    frame.src = '';
+    bar.classList.remove('show');
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeHub();
+});
+var initSite = new URLSearchParams(window.location.search).get('site') || 'kanfantv';
+var initMap = {
+    'kanfantv': ['https://www.kanfantv.com','KanFanTV'],
+    'yhdm6': ['https://yhdm6.top','樱花动漫'],
+    'otage': ['https://otage.cc','AGE动漫'],
+    'fengchedmp': ['https://fengchedmp.com','FengChe动漫']
+};
+var init = initMap[initSite] || initMap['kanfantv'];
+openHub(init[0], init[1]);
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{
+  "id": "chapter2",
+  "title": "第二章：地下城探索",
+  "dialogues": [
+    {
+      "id": "chapter2_001",
+      "speaker": "haru",
+      "text": "你已经变强了很多呢！现在可以挑战地下城了。",
+      "expression": "normal_01"
+    },
+    {
+      "id": "chapter2_002",
+      "speaker": "haru",
+      "text": "古代地下城据说封印着强大的守护者。",
+      "expression": "normal_02"
+    },
+    {
+      "id": "chapter2_003",
+      "speaker": "aidang_2",
+      "text": "守护者？那是什么？",
+      "expression": "idle"
+    },
+    {
+      "id": "chapter2_004",
+      "speaker": "haru",
+      "text": "是古代文明留下的守卫，保护着地下城深处的宝物。",
+      "expression": "normal_03"
+    },
+    {
+      "id": "chapter2_005",
+      "speaker": "haru",
+      "text": "击败守护者可以获得珍贵的奖励。",
+      "expression": "normal_04"
+    },
+    {
+      "id": "chapter2_006",
+      "speaker": "aidang_2",
+      "text": "听起来很有挑战性，我准备好了！",
+      "expression": "idle"
+    },
+    {
+      "id": "chapter2_007",
+      "speaker": "haru",
+      "text": "地下城里有很多宝箱，记得搜刮一下。",
+      "expression": "normal_05"
+    },
+    {
+      "id": "chapter2_008",
+      "speaker": "haru",
+      "text": "还有，BOSS房间在最深处，准备好再进去。",
+      "expression": "normal_06"
+    },
+    {
+      "id": "chapter2_009",
+      "speaker": "aidang_2",
+      "text": "好的，我会小心的。",
+      "expression": "idle"
+    },
+    {
+      "id": "chapter2_010",
+      "speaker": "narrator",
+      "text": "你进入了古代地下城。准备好面对强大的守护者了吗？",
+      "expression": "normal"
+    }
+  ]
+}

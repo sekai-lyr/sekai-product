@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sekai.draw.lots.mapper.SekaiDrawLotsCharacterMapper">
+    <resultMap id="BaseResultMap" type="com.sekai.draw.lots.dataobject.SekaiDrawLotsCharacterDO">
+        <id property="id" column="id"/>
+        <result property="englishName" column="english_name"/>
+        <result property="japaneseName" column="japanese_name"/>
+        <result property="animeTitle" column="anime_title"/>
+        <result property="archetype" column="archetype"/>
+        <result property="element" column="element"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="quote" column="quote"/>
+        <result property="popularity" column="popularity"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        id, english_name, NULL AS japanese_name, anime_title, role_type AS archetype, energy AS element,
+        image_url, tags AS quote, popularity_score AS popularity, create_time
+    </sql>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM sekai_Draw_lots_character
+        WHERE role_type &lt;&gt; 'archived'
+    </select>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectRandom" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
+        WHERE role_type &lt;&gt; 'archived'
+        ORDER BY RAND()
+        LIMIT 1
+    </select>
+
+    <select id="selectRandomByFocus" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
+        WHERE role_type &lt;&gt; 'archived'
+          AND (
+              energy LIKE CONCAT('%', #{focus}, '%')
+              OR tags LIKE CONCAT('%', #{focus}, '%')
+              OR role_type LIKE CONCAT('%', #{focus}, '%')
+              OR anime_title LIKE CONCAT('%', #{focus}, '%')
+          )
+        ORDER BY popularity_score DESC, RAND()
+        LIMIT 1
+    </select>
+
+    <select id="selectTop" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
+        WHERE role_type &lt;&gt; 'archived'
+        ORDER BY popularity_score DESC, id
+        LIMIT #{limit}
+    </select>
+
+    <select id="search" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
+        <where>
+            role_type &lt;&gt; 'archived'
+            <if test="keyword != null">
+                AND (
+                    english_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR anime_title LIKE CONCAT('%', #{keyword}, '%')
+                    OR role_type LIKE CONCAT('%', #{keyword}, '%')
+                    OR tags LIKE CONCAT('%', #{keyword}, '%')
+                    OR energy LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY popularity_score DESC, id
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectRelated" resultMap="BaseResultMap">
+        SELECT
+            c.id,
+            c.english_name,
+            NULL AS japanese_name,
+            c.anime_title,
+            c.role_type AS archetype,
+            c.energy AS element,
+            c.image_url,
+            c.tags AS quote,
+            c.popularity_score AS popularity,
+            c.create_time
+        FROM sekai_Draw_lots_character c
+        JOIN sekai_Draw_lots_character base ON base.id = #{baseId}
+        WHERE c.id != base.id
+          AND c.role_type &lt;&gt; 'archived'
+        ORDER BY
+            CASE WHEN c.anime_title = base.anime_title THEN 50 ELSE 0 END
+            + CASE WHEN c.role_type = base.role_type THEN 24 ELSE 0 END
+            + CASE WHEN c.energy = base.energy THEN 18 ELSE 0 END
+            + CASE WHEN c.tags LIKE CONCAT('%', base.role_type, '%') OR base.tags LIKE CONCAT('%', c.role_type, '%') THEN 10 ELSE 0 END
+            + CASE WHEN EXISTS (
+                SELECT 1
+                FROM sekai_Draw_lots_record r
+                WHERE r.user_id = #{userId}
+                  AND r.character_id = c.id
+                  AND r.fortune_score &gt;= 82
+            ) THEN 16 ELSE 0 END DESC,
+            c.popularity_score DESC,
+            c.id
+        LIMIT #{limit}
+    </select>
+</mapper>
