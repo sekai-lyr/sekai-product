@@ -19,3 +19,8 @@ Thumbs.db
 # Temp
 *.tmp
 *.bak
+
+# Large model files
+*.cmo3
+*.vrm
+*.zip
