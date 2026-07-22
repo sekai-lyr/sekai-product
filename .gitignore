@@ -20,7 +20,14 @@ Thumbs.db
 *.tmp
 *.bak
 
-# Large model files
+# Large files
 *.cmo3
 *.vrm
 *.zip
+*.png
+*.sql
+*.sql.gz
+*.fbx
+*.obj
+*.blend
+*.psd
