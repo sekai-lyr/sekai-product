@@ -2,3 +2,50 @@
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.iml
+workspace.xml
+
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.original
+
+# Node / 前端
+node_modules/
+frontend/dist/
+dist/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv-clip/
+
+# 日志
+*.log
+*.out
+*.err
+logs/
+
+# 数据库（本地数据不提交）
+*.mv.db
+*.trace.db
+*.sqlite
+
+# 临时/敏感
+cookies.txt
+*.cookies.txt
+.tmp-*/
+.tools/
+.edge-*/
+tmp/
+
+# 本地上传目录
+uploads/wallpapers/
