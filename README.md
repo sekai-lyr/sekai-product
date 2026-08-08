@@ -34,7 +34,7 @@
 | [memory-11](memory-11/) | Sekai Duel 夜曲决斗 | 卡牌游戏 | WebSocket PvP + Godot 4 客户端 + 游戏王规则 |
 | [memory-12](memory-12/) | SekaiLearning | 学习平台 | 游戏化学习、积分、社群 |
 | [memory-13](memory-13/) | 谎言十年 | 视觉小说 AVG | Ren'Py 引擎、多语言、APK 发布 |
-| [memory-14](memory-14/) | anime-ai 聊天平台 | AI 应用 | Spring AI + RAG + ONNX 视觉识别 |
+| [memory-14](memory-14/) | anime-ai 动漫智能助手 | AI 应用 | 截图识番 + 角色识别 + Spring AI + RAG + TTS/ASR |
 
 ---
 
