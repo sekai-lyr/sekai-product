@@ -11,6 +11,13 @@ public final class UploadPathUtil {
     }
 
     public static Path uploadRoot() {
+        String configured = System.getProperty("sekai.uploadRoot");
+        if (configured == null || configured.isBlank()) {
+            configured = System.getenv("SEKAI_UPLOAD_ROOT");
+        }
+        if (configured != null && !configured.isBlank()) {
+            return Path.of(configured).toAbsolutePath().normalize();
+        }
         return projectRoot().resolve("uploads").toAbsolutePath().normalize();
     }
 

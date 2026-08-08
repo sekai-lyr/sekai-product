@@ -6,8 +6,19 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="sekai-form" />
+        <module name="sekai-game" />
         <module name="SekaiAnimeVideo" />
+        <module name="sekai-learning" />
+        <module name="sekai-form" />
+      </profile>
+      <profile name="Annotation profile for Anime AI Assistant" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="anime-ai" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -17,8 +28,11 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="SekaiAnimeVideo" options="-parameters" />
+      <module name="anime-ai" options="-parameters" />
       <module name="chat-social" options="-parameters" />
       <module name="sekai-form" options="-parameters" />
+      <module name="sekai-game" options="-parameters" />
+      <module name="sekai-learning" options="-parameters" />
     </option>
   </component>
 </project>

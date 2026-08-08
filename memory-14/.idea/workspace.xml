@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="299be605-da34-4d5e-bcfd-44d6a4e7a9a6" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/login_state.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/query" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/Application.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/Application.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/AgentResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/AgentResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/AgentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/AgentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/SensitiveWordFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/SensitiveWordFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/ToolCall.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/ToolCall.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/BaseTool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/BaseTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/FileAnalysisTool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/FileAnalysisTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ImageAnalysisTool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ImageAnalysisTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ImageEditTool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ImageEditTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ImageGenerationTool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ImageGenerationTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ToolDefinition.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ToolDefinition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ToolResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/ToolResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/TtsTool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/agent/tools/TtsTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/asr/AudioConverterService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/asr/AudioConverterService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/asr/DashScopeAsrService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/asr/DashScopeAsrService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/ChatMemoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/ChatMemoryService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/ChatMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/ChatMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/EmbeddingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/EmbeddingService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/LlmService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/LlmService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/UserSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/UserSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/UserSessionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/UserSessionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/VectorStoreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/VectorStoreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/config/ChatMemoryConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/config/ChatMemoryConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/config/ChatMemoryMigration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/config/ChatMemoryMigration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/config/RedisConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/config/RedisConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/entity/Conversation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/entity/Conversation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/entity/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/entity/Message.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/CachedChatMemoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/CachedChatMemoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/ChatMemoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/ChatMemoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/ConversationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/ConversationRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/DatabaseChatMemoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/DatabaseChatMemoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/InMemoryChatMemoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/InMemoryChatMemoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/MessageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/MessageRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/RedisChatMemoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/chat/repository/RedisChatMemoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/config/DashScopeConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/config/DashScopeConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/config/XunfeiTtsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/config/XunfeiTtsConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/core/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/core/FileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/core/FileParserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/core/FileParserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/core/FileStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/core/FileStorageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/core/ILinkMessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/core/ILinkMessageListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/core/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/core/WebConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/imagegen/ImageGenerationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/imagegen/ImageGenerationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/router/AiRouteResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/router/AiRouteResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/router/MessageRouter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/router/MessageRouter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/tts/XfTtsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/tts/XfTtsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/utils/JsonUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/utils/JsonUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/vision/ImageAnalysisResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/vision/ImageAnalysisResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/vision/VisionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/vision/VisionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/config/OkHttpConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/config/OkHttpConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/config/WeatherApiProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/config/WeatherApiProperties.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/dto/WeatherApiResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/dto/WeatherApiResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/exception/WeatherApiException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/exception/WeatherApiException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/model/WeatherResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/model/WeatherResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/service/WeatherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/service/WeatherService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/tool/WeatherTool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/demo/weather/tool/WeatherTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/META-INF/MANIFEST.MF" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/META-INF/maven/io.github.lith0924/wechat-ilink-sdk/pom.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/META-INF/maven/io.github.lith0924/wechat-ilink-sdk/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/ILinkClient$MediaInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/ILinkClient.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/LoginCredentials.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/converter/EntityConverter.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/login/LoginInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/login/LoginStatus$Status.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/login/LoginStatus.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/login/QrCodeInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/CDNMedia.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/FileContent.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/ImageContent.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/Message.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/MessageContent$Type.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/MessageContent.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/MessageItemDto$Type.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/MessageItemDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/MessagesResult.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/ReceiveMessagesResult.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/RefMessage.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/TextContent.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/VideoContent.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/VoiceContent.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/WeixinMessageDto$State.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/WeixinMessageDto$Type.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/dto/message/WeixinMessageDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/config/BaseInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/config/GetConfigRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/config/GetConfigResp.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/config/SendTypingRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/config/SendTypingResp.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/login/LoginStatusResp.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/login/QrCodeResp.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/media/GetUploadUrlReq.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/media/GetUploadUrlResp.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/CDNMediaEntity.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/FileItem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/GetUpdatesResponse.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/ImageItem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/MessageItem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/RefMessageEntity.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/TextItem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/VideoItem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/VoiceItem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/message/WeixinMessage.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/send/SendMessageRequest$Msg.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/send/SendMessageRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/entity/send/SendMessageResp.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/exception/ILinkException.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/exception/ILinkSessionExpiredException.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/exception/NotLoggedInException.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/com/lth/wechat/ilink/utils/MediaUtils.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/ilinkclient.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/ilinkclient_full.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784710397629_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784710897623_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784712019836_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784713732586_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784714106954_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784769714289_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784770119913_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784770615406_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784770952175_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784771194192_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784771490851_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784771657364_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784771901080_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784771922077_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784772107233_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784772284239_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784772895529_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784773303908_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784773596545_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784774008552_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784777769064_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784792638784_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784796070382_南工浦江2026级新生手册.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784796510941_南工浦江2026级新生手册.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784855467776_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/1784856836010_Python程序设计 复习题库(新).pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/2f28d094-f515-4c8b-82cd-2245cae33cb2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/3f2533a0-e45e-4967-9d8c-07e1cb082412.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/3f7237f6-aca2-442c-bf8c-39480fbc10c9.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/88b73200-72b2-4eb3-8fbb-cf564e5f3589.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/9c68b3a7-beb7-4add-8068-006569cc107c.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/b97a550a-8b76-49a6-b58a-af82f5ce4748.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/ddf128ff-f978-48bf-accb-18a08ed311bd.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_033feb8c-d2fe-4319-9fdb-26ca60b70483.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_054ee5d4-a1ee-40ee-bee1-8f8d90597814.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_0682ae8e-2842-4ac5-8210-9a1cd0229e89.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_08c6ec7a-c7e0-40c2-92ba-3d96f3ef2521.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_1102bd65-b15a-4a3b-ae27-228a215ec0dc.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_14572018-179c-4b4d-bc16-b4db672dcc82.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_1ec6b20b-b3de-4e16-ae64-e8b86e26899b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_274948fc-abd4-489e-a38c-0fb9eb6b9f9a.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_27d5cc94-46e9-46f0-8c9d-5b052722599c.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_3335f3e6-c258-48e0-b3a4-f02670de815b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_33d37c2a-fe22-4913-b8da-d7c2cc82cabb.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_3451e0b0-494c-45a3-b4be-feb02a6b11fc.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_37c6f5ab-291f-4df3-b000-c5d457a8c40f.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_39c3d1bd-399e-4087-b3ff-23a7382a63e5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_412bbd61-d361-401f-9fc4-81238d54dc5b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_4ca31b1d-7ebe-48e0-b73f-78dbddd14f8a.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_5086e81e-32d5-4ed1-947e-71ccb6f19043.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_50bffd9b-6588-4f14-8020-7944a7244eac.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_54fa3dac-785e-42b4-a35d-7b158b514919.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_565e05d0-e32b-4470-883a-51545dc5f775.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_599e6c49-7455-4344-830d-194181ea732e.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_6374df73-9ee6-47c6-bdb8-d0c7bd05486b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_64df09a8-ac6a-420e-8dc7-4223deeb1129.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_65c62d8d-4ccc-4329-9223-4749d3df88cf.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_69869e7e-7d99-4114-ad80-e9c9de42bdf0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_6b81a8ac-1def-49aa-a1d0-237724dc00dc.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_6f2aa272-cdd2-4ff2-9806-c26311ed42d1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_83aadcb9-ad63-41ce-9774-e38c92f7778a.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_83ab8532-d904-4dc2-95d9-a6a9c7ad0f4a.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_85f91d90-9e56-468f-ac60-7c7b92228926.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_8b1d93b4-5016-4dfc-a682-90cfe20ceb57.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_8b40345f-df6f-4bc9-805b-77cf7d4a6685.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_8ebbf85f-36a8-4bfe-acee-ce4947b73a69.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_9c3ed94e-0c6a-460e-87e6-24b5bbd9d521.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_9ea30cc7-e3e1-4139-acd5-acdc052f9732.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_9f7df87c-d4f1-4855-b1f8-6c4c7f80fc21.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_a3f32b50-7b5a-44c0-b5f5-73f7f0226304.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_a63b9166-705f-4106-9b1e-2e3a375b6150.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_a95b53c5-3e78-4780-8469-469205ad54d6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_b0cb2904-2181-4cec-9a79-a2909f1586dd.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_b5bcacf9-4c1d-4b73-8ffd-16c2d3e53ed7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_b68ffa11-7c1e-423b-b975-1806854e5a0a.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_b6b4bd8c-6d0f-4f60-8fec-f5c551895be2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_bf1200e2-7c1e-409e-aa3f-fd65c1eec8b3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_c1a63247-ce6c-434d-82d7-d3dc379730db.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_cb3e801e-c9ab-430b-b9b8-9391a50db498.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_d49cb1bc-1e12-4a5d-8724-60f6105cb6b0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_d9509767-d3af-41b5-a6b4-57d4a4ec4bab.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_db5a7076-cae6-4a18-804c-ec839619af1d.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_dcad24d5-c6de-4304-9e31-4330f64554d7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_dd1b241e-9245-45ff-b674-697b9f57ff2d.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_dfe93e9e-74af-4d2b-825b-0e3487f22adb.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_e3344e71-610b-4bee-ade3-c81f341ec57f.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_e73e016f-9abe-4976-964f-272b7996671c.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_e8120854-b165-4bd1-ad6a-b112a6cf6926.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_e8f49482-ccb2-48e3-adb0-674d611a63ac.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_f86a9465-5657-4180-96bd-6e0f419334c8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_f9dd0246-2e47-48f0-9d22-3ec7d65802bc.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/gen_fb760a19-3210-4067-a3bc-143942ee9f4a.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/pending_de025b29-3322-4533-a3a4-8645ce124573.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/pending_f9f73144-0037-451c-b4b0-6ac715b33fa7.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_0ab5c0bc-f6c0-4c3f-b4ce-903c93900013.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_0c858ac7-2dd3-47a4-85cb-5375de0be2dd.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_15066389-e172-4aa7-8937-3edcaacc6a8b.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_230cc25b-622f-4f5a-bf9f-8e520d77c418.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_2e8391b9-3db3-40de-99b6-edd602e58477.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_2f8913e4-4617-4bf1-96d4-62489e2755b2.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_40bd3479-c75f-43b2-b403-444b05483ebe.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_54d0d8d3-b09a-4e51-8ea9-561f5985a312.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_588db6cf-55c9-43d8-a23c-842637587766.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_66ee2c35-e1a2-422f-bb73-3fab85f5e199.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_68110db6-8616-44b2-b1fe-83fc8b7d69e0.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_72d18526-88bc-4ca5-b2eb-57d368bb5dd1.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_7ce6d986-c81f-47a3-85f5-309d0be7d1b8.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_7e05c383-a303-4e19-9946-ff9ce1351551.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_7e3d25fd-2a2b-43ef-b571-4402aa955be9.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_84a69b12-fbf1-4f1c-b47e-4cde0d7c9d0d.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_98cc50da-da80-4330-a16f-9904d8cc6ac2.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_9a20b1ed-c800-4b45-a67a-147086148af0.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_ad513f28-4c4f-4662-bc17-cb54a807ebfb.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_bb31eca1-fd20-49aa-9472-ade7a0bf294f.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_bc6d2924-5e89-4cf1-a63f-469bb0a50c85.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_cf3c1b27-bcb3-4285-a8d1-66690bc4cdb4.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uploads/tts_dffa3c12-82de-402b-8d19-447678aefbde.mp3" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="SYNC" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="3GZcVmdWK9EhgAr1n7O3ilsTgQp" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Application.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;B:/YKD/A_YKD_LAST_TENT/8.3.pm&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
+    &quot;应用程序.ILinkJavaDemo.executor&quot;: &quot;Run&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Spring Boot.Application">
+    <configuration name="ILinkJavaDemo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.example.demo.ILinkJavaDemo" />
+      <module name="demo" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.demo.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="demo" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.demo.Application" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.demo.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DemoApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="demo" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.demo.DemoApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.Application" />
+        <item itemvalue="应用程序.ILinkJavaDemo" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.26222.65" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.26222.65" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="299be605-da34-4d5e-bcfd-44d6a4e7a9a6" name="更改" comment="" />
+      <created>1784182557392</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1784182557392</updated>
+      <workItem from="1784182558510" duration="752000" />
+      <workItem from="1784189763529" duration="3534000" />
+      <workItem from="1784193552833" duration="345000" />
+      <workItem from="1784250049894" duration="3102000" />
+      <workItem from="1784270896008" duration="107000" />
+      <workItem from="1784271276299" duration="5430000" />
+      <workItem from="1784277302281" duration="5147000" />
+      <workItem from="1784287050451" duration="3461000" />
+      <workItem from="1784290600583" duration="2777000" />
+      <workItem from="1784295935623" duration="849000" />
+      <workItem from="1784297489909" duration="1009000" />
+      <workItem from="1784334605647" duration="5866000" />
+      <workItem from="1784342067105" duration="1708000" />
+      <workItem from="1784344487929" duration="7619000" />
+      <workItem from="1784352695478" duration="9287000" />
+      <workItem from="1784508752484" duration="10551000" />
+      <workItem from="1784520893763" duration="2625000" />
+      <workItem from="1784523545700" duration="1643000" />
+      <workItem from="1784525204603" duration="4589000" />
+      <workItem from="1784536192930" duration="3361000" />
+      <workItem from="1784596621547" duration="11987000" />
+      <workItem from="1784617023697" duration="523000" />
+      <workItem from="1784618200586" duration="6996000" />
+      <workItem from="1784681210637" duration="10481000" />
+      <workItem from="1784710147701" duration="4151000" />
+      <workItem from="1784768383400" duration="21230000" />
+      <workItem from="1784853791159" duration="3130000" />
+      <workItem from="1784859769322" duration="2657000" />
+      <workItem from="1784900598296" duration="27000" />
+      <workItem from="1784940558342" duration="1292000" />
+      <workItem from="1785074825090" duration="20000" />
+      <workItem from="1785074948156" duration="274000" />
+      <workItem from="1785115770338" duration="11790000" />
+      <workItem from="1785147324821" duration="177000" />
+      <workItem from="1785204392520" duration="9918000" />
+      <workItem from="1785234017208" duration="894000" />
+      <workItem from="1785286242319" duration="18451000" />
+      <workItem from="1785393914681" duration="1217000" />
+      <workItem from="1785402450763" duration="1185000" />
+      <workItem from="1785460557205" duration="968000" />
+      <workItem from="1786078103393" duration="2080000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

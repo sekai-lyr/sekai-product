@@ -15,27 +15,27 @@ public class SekaiFormUserServiceImpl implements SekaiFormUserService {
     @Override
     public Result<SekaiFormUserDO> register(String userName, String password, String email) {
         SekaiFormUserDO existing = userMapper.findByUserName(userName);
-        if (existing != null) return Result.fail("??????");
+        if (existing != null) return Result.fail("用户名已存在");
         SekaiFormUserDO user = new SekaiFormUserDO();
         user.setUserName(userName);
         user.setPassword(PasswordHashUtil.hash(password));
         user.setEmail(email);
         userMapper.insert(user);
-        return Result.ok("????", user);
+        return Result.ok("注册成功", user);
     }
 
     @Override
     public Result<SekaiFormUserDO> login(String userName, String password) {
         SekaiFormUserDO user = userMapper.findByUserName(userName);
-        if (user == null) return Result.fail("?????");
-        if (!PasswordHashUtil.verify(password, user.getPassword())) return Result.fail("????");
-        return Result.ok("????", user);
+        if (user == null) return Result.fail("用户不存在");
+        if (!PasswordHashUtil.verify(password, user.getPassword())) return Result.fail("密码错误");
+        return Result.ok("登录成功", user);
     }
 
     @Override
     public Result<SekaiFormUserDO> getUserById(Long id) {
         SekaiFormUserDO user = userMapper.findById(id);
-        if (user == null) return Result.fail("?????");
+        if (user == null) return Result.fail("用户不存在");
         return Result.ok(user);
     }
 }

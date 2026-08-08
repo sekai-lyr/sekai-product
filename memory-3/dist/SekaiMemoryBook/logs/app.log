@@ -1,0 +1,24 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-08-08T15:24:36.492+08:00  INFO 17124 --- [           main] c.s.m.book.SekaiMemoryBookApplication    : Starting SekaiMemoryBookApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 17124 (B:\Sekai\Sekai\sekai\memory-3\dist\SekaiMemoryBook\app\sekai-memory-book.jar started by levono in B:\Sekai\Sekai\sekai\memory-3\dist\SekaiMemoryBook)
+2026-08-08T15:24:36.496+08:00  INFO 17124 --- [           main] c.s.m.book.SekaiMemoryBookApplication    : The following 1 profile is active: "desktop"
+2026-08-08T15:24:37.458+08:00  INFO 17124 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 18083 (http)
+2026-08-08T15:24:37.475+08:00  INFO 17124 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-08T15:24:37.475+08:00  INFO 17124 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-08-08T15:24:37.498+08:00  INFO 17124 --- [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 936 ms
+2026-08-08T15:24:37.806+08:00  INFO 17124 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-08T15:24:38.038+08:00  INFO 17124 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:file:B:\Sekai\Sekai\sekai\memory-3\dist\SekaiMemoryBook\data/sekai-memory user=SA
+2026-08-08T15:24:38.040+08:00  INFO 17124 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-08T15:24:38.621+08:00  INFO 17124 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 18083 (http) with context path '/'
+2026-08-08T15:24:38.637+08:00  INFO 17124 --- [           main] c.s.m.book.SekaiMemoryBookApplication    : Started SekaiMemoryBookApplication in 2.417 seconds (process running for 2.85)
+2026-08-08T15:24:40.605+08:00  INFO 17124 --- [io-18083-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-08T15:24:40.606+08:00  INFO 17124 --- [io-18083-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-08T15:24:40.607+08:00  INFO 17124 --- [io-18083-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

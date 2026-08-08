@@ -1,14 +1,20 @@
 * { box-sizing: border-box; }
 
 :root {
-    --ink: #0a0a1a;
-    --muted: #8892b0;
+    --ink: #0d0818;
+    --ink2: #1a1028;
+    --muted: #a894b8;
     --pink: #ff72b8;
-    --cyan: #55d8ff;
-    --mint: #79e6c5;
-    --violet: #9b7bff;
-    --glow-pink: 0 0 20px rgba(255,114,184,0.4);
-    --glow-cyan: 0 0 20px rgba(85,216,255,0.4);
+    --sakura-light: #ffb7c5;
+    --sakura: #ff8da1;
+    --sakura-deep: #e8607a;
+    --cyan: #7ad8ff;
+    --mint: #7ee6c5;
+    --violet: #c49bff;
+    --purple: #c49bff;
+    --glow-pink: 0 0 20px rgba(255,114,184,0.5);
+    --glow-sakura: 0 0 18px rgba(255,141,161,0.45);
+    --glow-cyan: 0 0 20px rgba(122,216,255,0.4);
 }
 
 body {
@@ -32,7 +38,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px 20px 50vh;
-    background: var(--ink);
+    background: transparent;
 }
 
 @keyframes border-rotate {
@@ -41,7 +47,7 @@ body {
 }
 @keyframes glow-pulse {
     0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.6; }
+    50% { opacity: 0.65; }
 }
 
 .login-card {
@@ -49,10 +55,10 @@ body {
     max-width: 400px;
     padding: 36px 32px;
     border-radius: 16px;
-    background: #16162e;
-    color: #e0e0e0;
-    border: 1px solid rgba(155,123,255,0.2);
-    box-shadow: 0 8px 60px rgba(0,0,0,0.4), 0 0 80px rgba(155,123,255,0.05);
+    background: rgba(26, 16, 38, 0.92);
+    color: #e0d8e8;
+    border: 1px solid rgba(255,141,161,0.2);
+    box-shadow: 0 8px 60px rgba(0,0,0,0.4), 0 0 80px rgba(255,141,161,0.06);
     position: relative;
     overflow: hidden;
     transition: box-shadow 0.3s;
@@ -65,7 +71,7 @@ body {
     z-index: -1;
     border-radius: 18px;
     background: conic-gradient(
-        var(--violet), var(--pink), var(--cyan), var(--mint), var(--violet)
+        var(--sakura-light), var(--sakura), var(--pink), var(--sakura-deep), var(--purple), var(--sakura-light)
     );
     animation: border-rotate 4s linear infinite;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -77,17 +83,33 @@ body {
 }
 .login-card:hover::before { opacity: 1; }
 .login-card:hover {
-    box-shadow: 0 8px 60px rgba(0,0,0,0.4), 0 0 80px rgba(155,123,255,0.15);
+    box-shadow: 0 8px 60px rgba(0,0,0,0.5), 0 0 100px rgba(255,141,161,0.18);
+}
+
+/* Sakura petal decoration on card */
+.login-card::after {
+    content: '🌸';
+    position: absolute;
+    top: -15px;
+    right: -10px;
+    font-size: 40px;
+    opacity: 0.08;
+    pointer-events: none;
+    animation: petalSpin 10s linear infinite;
+}
+@keyframes petalSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .login-card h2 {
     margin: 0 0 4px;
     font-size: 28px;
-    background: linear-gradient(135deg, var(--pink), var(--violet), var(--cyan));
+    background: linear-gradient(135deg, var(--sakura-light), var(--sakura), var(--pink), var(--sakura-deep));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-size: 200% 200%;
+    background-size: 300% 300%;
     animation: bg-shift 4s ease-in-out infinite;
 }
 
@@ -111,31 +133,31 @@ label {
     margin: 14px 0 6px;
     font-size: 13px;
     font-weight: 700;
-    color: #ccc;
+    color: #d0c8e0;
 }
 
 input {
     width: 100%;
     height: 46px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,141,161,0.15);
     border-radius: 10px;
     padding: 0 14px;
     font-size: 15px;
     outline: none;
-    background: #0d0d22;
+    background: rgba(13, 8, 24, 0.7);
     color: #fff;
     font-family: inherit;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 input::placeholder {
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.18);
 }
 input:hover {
-    border-color: rgba(155,123,255,0.4);
+    border-color: rgba(255,141,161,0.4);
 }
 input:focus {
-    border-color: var(--pink);
-    box-shadow: 0 0 10px rgba(255,114,184,0.2), 0 0 0 3px rgba(255,114,184,0.08);
+    border-color: var(--sakura);
+    box-shadow: 0 0 12px rgba(255,141,161,0.25), 0 0 0 3px rgba(255,141,161,0.08);
     animation: glow-pulse 2s ease-in-out infinite;
 }
 
@@ -150,7 +172,7 @@ input:focus {
     width: 68px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(135deg, var(--cyan), var(--violet));
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
     background-size: 200% 200%;
     color: #fff;
     cursor: pointer;
@@ -169,7 +191,7 @@ input:focus {
     margin-top: 20px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(135deg, var(--pink), var(--violet), var(--cyan), var(--pink));
+    background: linear-gradient(135deg, var(--sakura), var(--pink), var(--sakura-deep), var(--sakura-light));
     background-size: 300% 300%;
     color: #fff;
     font-size: 16px;
@@ -179,7 +201,7 @@ input:focus {
 }
 .primary-btn:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 24px rgba(255,114,184,0.35);
+    box-shadow: 0 8px 28px rgba(255,141,161,0.4);
     animation: bg-shift 2s ease-in-out infinite;
 }
 
@@ -190,19 +212,19 @@ input:focus {
     height: 48px;
     margin-top: 12px;
     border-radius: 10px;
-    border: 1px solid rgba(155,123,255,0.3);
-    background: rgba(155,123,255,0.08);
-    color: #d0c8ff;
+    border: 1px solid rgba(255,141,161,0.3);
+    background: rgba(255,141,161,0.08);
+    color: #e0c8d8;
     text-decoration: none;
     font-size: 14px;
     font-weight: 700;
     transition: border-color 0.2s, background 0.2s;
 }
 .secondary-btn:hover {
-    border-color: var(--violet);
-    background: rgba(155,123,255,0.18);
+    border-color: var(--sakura);
+    background: rgba(255,141,161,0.18);
     color: #fff;
-    box-shadow: 0 0 20px rgba(155,123,255,0.15);
+    box-shadow: 0 0 20px rgba(255,141,161,0.18);
 }
 
 .back-link {
@@ -215,7 +237,7 @@ input:focus {
     transition: color 0.2s;
 }
 .back-link:hover {
-    color: var(--cyan);
+    color: var(--sakura-light);
 }
 
 .server-message {
@@ -227,13 +249,13 @@ input:focus {
 }
 .server-message.success {
     color: var(--mint);
-    background: rgba(121,230,197,0.1);
-    border: 1px solid rgba(121,230,197,0.2);
+    background: rgba(126,230,197,0.1);
+    border: 1px solid rgba(126,230,197,0.2);
 }
 .server-message.error {
-    color: var(--pink);
-    background: rgba(255,114,184,0.1);
-    border: 1px solid rgba(255,114,184,0.2);
+    color: var(--sakura);
+    background: rgba(255,141,161,0.1);
+    border: 1px solid rgba(255,141,161,0.2);
 }
 
 @media (max-width: 500px) {

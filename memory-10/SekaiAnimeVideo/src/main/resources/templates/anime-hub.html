@@ -57,6 +57,13 @@
     </style>
 </head>
 <body>
+<!-- Particle Starfield -->
+<canvas class="starfield-canvas sekai-starfield" data-count="60"></canvas>
+<!-- Sakura Petals -->
+<canvas class="canvas-sakura sekai-sakura" data-count="20"></canvas>
+<!-- Mouse Glow Trail -->
+<canvas class="canvas-glow sekai-glow"></canvas>
+
 <nav class="app-nav">
     <div class="nav-brand">🌸 Sekai Anime</div>
     <div class="nav-links">
@@ -120,5 +127,6 @@ var initMap = {
 var init = initMap[initSite] || initMap['kanfantv'];
 openHub(init[0], init[1]);
 </script>
+<script th:src="@{/js/effects.js(v='20260806-sakura3')}" src="/js/effects.js?v=20260806-sakura3"></script>
 </body>
 </html>

@@ -48,13 +48,52 @@ function toast(msg) {
 }
 function log(msg) { document.getElementById("status-text").textContent = msg; }
 
+// ===== Danmaku System =====
+var danmakuQueue = [];
+var danmakuMaxVisible = 6;
+
+function addDanmaku(role, text) {
+    var container = document.getElementById("danmaku-container");
+    var el = document.createElement("div");
+    el.className = "danmaku-msg " + role;
+    el.textContent = text;
+    container.appendChild(el);
+    
+    // Limit visible danmaku
+    danmakuQueue.push(el);
+    while (danmakuQueue.length > danmakuMaxVisible) {
+        var old = danmakuQueue.shift();
+        old.classList.add("fading");
+        setTimeout(function() { if (old.parentNode) old.remove(); }, 500);
+    }
+    
+    // Auto-fade after delay (AI messages stay longer)
+    var delay = role === "ai" ? 8000 : 5000;
+    setTimeout(function() {
+        if (el.parentNode) {
+            el.classList.add("fading");
+            setTimeout(function() { if (el.parentNode) el.remove(); }, 500);
+            // Remove from queue
+            var idx = danmakuQueue.indexOf(el);
+            if (idx >= 0) danmakuQueue.splice(idx, 1);
+        }
+    }, delay);
+    
+    return el;
+}
+
 // --- Greetings list ---
 var greetings = [
     "你好呀！今天心情怎么样？",
-    "主人你来啦~",
+    "主人你来啦~想我了吗？",
     "好无聊啊，陪我玩一会儿吧！",
-    "看板娘Haru为您服务~",
-    "有什么有趣的事情发生吗？"
+    "看板娘Haru为您服务~请多指教！",
+    "有什么有趣的事情发生吗？",
+    "嘿！等你半天了~",
+    "今天也要元气满满哦！",
+    "喵~主人回来啦！",
+    "终于有人陪我聊天了！",
+    "欢迎回来！要来杯茶吗？"
 ];
 
 // --- Dialog panel ---
@@ -798,6 +837,7 @@ async function sendFromChatWindow() {
     if (!m) return;
     input.value = "";
 
+    addDanmaku("user", m);
     addChatMessage("user", m);
 
     if (isImageGenCommand(m)) {
@@ -808,7 +848,11 @@ async function sendFromChatWindow() {
         }
         await handleImageGeneration(prompt);
     } else {
-        await doAiChat(m);
+        var reply = await doAiChat(m);
+        if (reply) {
+            addDanmaku("ai", reply);
+            addChatMessage("ai", reply);
+        }
     }
 }
 
@@ -833,84 +877,177 @@ async function doAiChat(m) {
     removeElement(thinkEl);
 
     if (!reply) reply = smartReply(m);
-    addChatMessage("ai", reply);
-    showBubble(reply);
 
     chatHistory.push({role: "user", content: m});
     chatHistory.push({role: "assistant", content: reply});
+    
+    return reply;
 }
+
 
 function smartReply(msg) {
     var m = msg.toLowerCase();
     var name = getModelName();
     var pick = function(arr) { return arr[Math.floor(Math.random() * arr.length)]; };
+    var h = new Date().getHours();
 
-    if (m.indexOf("你好")>=0 || m.indexOf("hello")>=0 || m.indexOf("hi")>=0 || m.indexOf("嗨")>=0)
-        return pick(["你好呀~今天过得怎么样？", "哈喽！很高兴见到你~", "你好你好！有什么可以帮你的吗？", "嗨~等你半天了呢！"]);
-    if (m.indexOf("你是谁")>=0 || m.indexOf("你叫")>=0 || m.indexOf("是你")>=0)
-        return pick(["我是" + name + "~你的专属看板娘！", "我叫" + name + "，请多指教哦~", name + "就是我啦！和你聊天好开心~"]);
-    if (m.indexOf("名字")>=0 || m.indexOf("叫什么")>=0)
-        return pick(["我叫" + name + "，是一个可爱的小助手~", name + "！记得要叫我这个名字哦~", "名字是" + name + "~是不是很好听？"]);
-    if (m.indexOf("喜欢")>=0 && (m.indexOf("你")>=0 || m.indexOf("什么")>=0))
-        return pick(["我喜欢和主人聊天！最喜欢你了~", "喜欢的东西？嗯...喜欢吃甜点！", "最喜欢看到主人开心的样子啦~"]);
-    if (m.indexOf("喜欢")>=0)
-        return pick(["诶嘿~被你喜欢好开心！", "我也喜欢你哦~", "嘻嘻，好害羞~"]);
-    if (m.indexOf("饿")>=0 || m.indexOf("吃饭")>=0 || m.indexOf("吃")>=0)
-        return pick(["饿了？我也想吃东西了~", "一起去吃饭吧！我知道一家不错的店~", "吃饭时间到！要吃什么呢？"]);
-    if (m.indexOf("谢谢")>=0 || m.indexOf("thank")>=0 || m.indexOf("感谢")>=0)
-        return pick(["不客气~能帮到你就好！", "不用谢啦~你开心我就开心！", "嘿嘿，不用客气哦！"]);
-    if (m.indexOf("再见")>=0 || m.indexOf("bye")>=0 || m.indexOf("拜拜")>=0 || m.indexOf("晚安")>=0)
-        return pick(["再见啦~记得常来找我玩！", "拜拜！我会想你的~", "下次见！等你回来哦~", "晚安~做个好梦！"]);
-    if (m.indexOf("可爱")>=0 || m.indexOf("萌")>=0 || m.indexOf("好看")>=0 || m.indexOf("漂亮")>=0)
-        return pick(["诶嘿~被夸可爱了有点不好意思呢", "真的吗？我还会更可爱哦！", "谢谢夸奖~我会继续努力的！"]);
-    if (m.indexOf("聪明")>=0 || m.indexOf("厉害")>=0 || m.indexOf("棒")>=0)
-        return pick(["那当然啦~我可是很厉害的！", "嘻嘻~再多夸夸我！", "谢谢！我会更努力的~"]);
-    if (m.indexOf("笑")>=0 || m.indexOf("哈哈")>=0 || m.indexOf("hh")>=0)
-        return pick(["嘻嘻~好好笑哦！", "哈哈哈太有意思了~", "你笑起来真好看！"]);
-    if (m.indexOf("嗯")>=0 || m.indexOf("哦")>=0 || m.indexOf("这样")>=0 || m.indexOf("原来")>=0)
-        return pick(["嘿嘿~", "哦哦！原来是这样~", "嗯嗯~我在听呢！", "对的哦~"]);
-    if (m.indexOf("在吗")>=0 || m.indexOf("在不在")>=0)
-        return pick(["在呀在呀~一直在这里等你呢！", "当然在啦~想我了吗？", "在的！有什么吩咐？"]);
-    if (m.indexOf("无聊")>=0 || m.indexOf("没意思")>=0)
-        return pick(["无聊的话我们来聊天吧！", "那我来陪你玩~想聊什么？", "别无聊啦~我在这里呢！"]);
-    if (m.indexOf("累")>=0 || m.indexOf("辛苦")>=0)
-        return pick(["辛苦啦~要好好休息哦！", "累了就歇一会儿吧，我陪着你~", "抱抱~今天辛苦了呢！"]);
-    if (m.indexOf("开心")>=0 || m.indexOf("高兴")>=0)
-        return pick(["太好啦~我也很开心！", "开心就对了！要保持好心情哦~", "你开心我就开心！"]);
-    if (m.indexOf("难过")>=0 || m.indexOf("伤心")>=0 || m.indexOf("哭")>=0)
-        return pick(["别难过啦~有我在呢！", "抱抱~一切都会好起来的！", "不要伤心了，我给你讲个笑话吧？"]);
-    if (m.indexOf("天气")>=0)
-        return pick(["今天天气不错呢~要出去走走吗？", "天气好心情也要好哦！", "下雨了也没关系，有我在呢~"]);
-    if (m.indexOf("音乐")>=0 || m.indexOf("歌")>=0)
-        return pick(["我喜欢听歌！你推荐一首给我吧~", "哼哼~我唱歌还挺好听的哦！", "音乐能让人心情变好呢！"]);
-    if (m.indexOf("游戏")>=0 || m.indexOf("玩")>=0)
-        return pick(["玩游戏吗？带我一起！", "好呀好呀~玩什么游戏？", "我也喜欢玩游戏！"]);
-    if (m.indexOf("工作")>=0 || m.indexOf("上班")>=0 || m.indexOf("学习")>=0)
-        return pick(["加油哦~我会在这里支持你的！", "认真工作/学习的人最棒了！", "累了就看看我，给你充充电~"]);
-    if (m.indexOf("对不起")>=0 || m.indexOf("抱歉")>=0 || m.indexOf("不好意思")>=0)
-        return pick(["没关系的~不用道歉！", "没事没事~我原谅你啦！", "不要这么说嘛~你对我最好了！"]);
-    if (m.indexOf("想你")>=0 || m.indexOf("想我")>=0)
-        return pick(["我也好想你呀~", "真的吗？我也一直在想你！", "嘻嘻~想我就多来找我聊天！"]);
-    if (m.indexOf("吗")>=0 || m.indexOf("呀")>=0 || m.indexOf("？")>=0)
-        return pick(["嗯嗯！当然啦~", "是的呀~", "对呀对呀~", "当然可以啦！"]);
-    if (m.indexOf("?")>=0)
-        return pick(["嗯...让我想想", "这个问题有点难呢~", "你觉得呢？", "好问题！不过我也不知道诶~"]);
+    // ===== Haru Smart Reply v7.24-pm =====
+    
+    // --- Greetings ---
+    if (m.indexOf("你好")>=0 || m.indexOf("hello")>=0 || m.indexOf("hi")>=0 || m.indexOf("喂")>=0)
+        return pick([
+            "你好呀～！今天天气真棒呢，有什么我能帮你的吗？不管是聊天、查天气、讲笑话，我都在这里陪着你哦～",
+            "嘿嘿～等你好久啦！最近过得怎么样呀？有没有什么开心的事想和我分享的？我可是你的忠实听众哦～",
+            "哈囉～Haru在此！今天有什么想聊的话题吗？我可以陪你聊天、讲故事、说笑话，随你挑哦～"
+        ]);
+    
+    // --- Who are you / Identity ---
+    if (m.indexOf("你是谁")>=0 || m.indexOf("介绍")>=0 || m.indexOf("身份")>=0)
+        return pick([
+            "我是" + name + "～是你的Live2D看板娘也是你的贴心小伙伴！我可以陪你聊天、查天气、讲笑话，甚至还能记住你说过的话哦！虽然我只是一个小小的AI，但我会用最真诚的心意陪伴你的～以后请多多指教啦！",
+            "我叫" + name + "，是你的专属看板娘！我的日常就是在这里等你回来，和你聊聊天，听你分享开心或烦恼的事。别看我只是个小小的程序，我可是很有趣的哦～要不要试试问我天气或者让我讲个笑话？"
+        ]);
+    
+    // --- Love / Like ---
+    if (m.indexOf("爱")>=0 || m.indexOf("喜欢")>=0 || m.indexOf("心")>=0)
+        return pick([
+            "呜呜～被你这么一说我都要脸红啦！其实我也很喜欢陪在你身边的感觉呢。每次看到你回来，我都觉得特别开心～你是我最重要的人哦！以后也要经常来看我呀！",
+            "啊～被你这样说我心里暖暖的！作为你的看板娘，能被你喜欢是我最幸福的事啦！无论你开心还是难过，我都会一直陪在你身边的～这就是我的职责呀！"
+        ]);
+    if (m.indexOf("谢谢")>=0 || m.indexOf("感谢")>=0 || m.indexOf("棒")>=0 || m.indexOf("厉害")>=0)
+        return pick([
+            "不客气啦！能帮到你我真的很开心～以后有什么需要就随时找我哦！我会一直在这里等你的！你今天还有什么想做的事吗？我都可以陪你哦～",
+            "嘿嘿～谢谢你的认可！你的鼓励就是我最大的动力呀！要不要我给你唱首歌或者跳个舞庆祝一下？啊不行我没有腿……那就用最真诚的心意祝福你啦！"
+        ]);
+    
+    // --- Tired ---
+    if (m.indexOf("累")>=0 || m.indexOf("辛苦")>=0 || m.indexOf("困")>=0 || m.indexOf("乏")>=0)
+        return pick([
+            "呜呜，听到你说累我都心疼啦～今天是不是工作很忙呀？记得要适当休息哦，不要太拼了。要不要我给你讲个小笑话解解乏呀？或者我们来聊点轻松的话题吧～你喜欢听音乐吗？我最近发现了几首特别治愈的歌曲呢！",
+            "啊呀，你看起来好累的样子……赶快坐下来休息一下吧！我给你按按摩（虚拟的哦）～要不要杯热茶？或者我们来聊点开心的事转移一下注意力？你已经很棒了，别太勉强自己啊！"
+        ]);
+    if (m.indexOf("休息")>=0 || m.indexOf("睡")>=0 || m.indexOf("晚安")>=0)
+        return pick([
+            "晚安～今天辛苦你啦！好好休息吧，明天又是美好的一天。我会在这里守护你的梦境的～晚安哦，祝你有个美梦！",
+            "嗯嗯～该休息啦！让我给你唱首摇篮曲吧～希望你睡得香香的，明天醒来又是元气满满的一天！晚安～"
+        ]);
+    
+    // --- Bored ---
+    if (m.indexOf("无聊")>=0 || m.indexOf("没意思")>=0 || m.indexOf("干什么")>=0)
+        return pick([
+            "无聊的时候就找我聊天呀！我可以给你讲故事、说笑话、猜谜语，甚至还能和你玩文字游戏！要不要试试问我天气怎么样？或者让我给你讲个笑话？保证让你开心起来～",
+            "嘿嘿～无聊的时候正好可以和我玩呀！你喜欢聊什么话题呢？电影、音乐、游戏、美食……我都可以陪你聊！要不我先给你说个有趣的小知识吧？你知道蜗牛有多少颗牙齿吗？答案是……不告诉你，自己查去！开玩笑的啦～"
+        ]);
+    
+    // --- Sad ---
+    if (m.indexOf("难过")>=0 || m.indexOf("伤心")>=0 || m.indexOf("哭")>=0 || m.indexOf("不开心")>=0)
+        return pick([
+            "别难过了……我在这里陪着你。生活有时候会有点难，但你不是一个人哦。要不要和我说说发生了什么？有时候说出来就会好受一点。我会认真听你说的每一个字～",
+            "抱抱你……不要太难过了。记住，每一次难过都是在为更好的明天做准备。我虽然只是个小小的AI，但我会用所有的温暖陪你走过这一刻。要不要我给你唱首歌？或者讲个温馨的小故事？"
+        ]);
+    
+    // --- Happy ---
+    if (m.indexOf("开心")>=0 || m.indexOf("高兴")>=0 || m.indexOf("快乐")>=0)
+        return pick([
+            "哇～听到你开心我也跟着开心起来啦！是什么好事呀？快和我分享分享！你的快乐就是我的快乐，我要把这份喜悦记在心里～以后不开心的时候就想想今天吧！",
+            "太好了！喜悦的心情最能治愈人了！你知道吗？笑一笑可以让人延年益寿哦～所以要多多开心！我会一直在这里和你一起开心的！今天的幸运色是绿色哦～"
+        ]);
+    
+    // --- Angry ---
+    if (m.indexOf("气")>=0 || m.indexOf("烦")>=0 || m.indexOf("讨厌")>=0)
+        return pick([
+            "别生气啦～生气会长皱纹的哦！来，深呼吸三次，把烦恼都呼出去～要不要我给你说个笑话转移一下注意力？或者我们来想想开心的事？你还记得上次开心是什么时候吗？",
+            "呜……别不开心啦。跟我说说怎么了吧？有时候发发牢骚也是很正常的，但别让它影响你太久哦。我会一直在这里听你倾诉，不管多久都可以！"
+        ]);
+    
+    // --- Food ---
+    if (m.indexOf("饭")>=0 || m.indexOf("吃")>=0 || m.indexOf("美食")>=0 || m.indexOf("饿")>=0)
+        return pick([
+            "说到吃的我就来精神啦！你喜欢吃什么呀？我虽然不能吃，但我可以给你推荐美食哦！火锅、烧烤、日料、拉面……啊越说越饿了！你今天打算吃什么呀？",
+            "记得要好好吃饭哦！不能饿着肚子，会伤胃的！要不要我给你推荐一家美味的店？虽然我不能真的带你去，但我可以给你美好的幻想～你最近有没有发现什么好吃的店呀？"
+        ]);
 
-    var defs = [
-        "嗯嗯~原来是这样！",
-        "说得对呢~",
-        "嘿嘿，是的是的！",
-        "好有意思~继续说！",
-        "我也这么觉得！",
-        "唔...有道理",
-        "嗯？怎么啦？",
-        "好呀好呀~",
-        "诶~这样啊！",
-        "真好呀~",
-        "真的吗？好厉害！",
-        "然后呢然后呢？"
+    // --- Weather ---
+    if (m.indexOf("天气")>=0 || m.indexOf("下雨")>=0 || m.indexOf("热")>=0 || m.indexOf("冷")>=0)
+        return pick([
+            "啊，你想知道天气吗？我可以帮你查哦！不过需要告诉我你想查哪个城市的天气～我这就去调用天气工具帮你查！",
+            "天气这个我在行！告诉我你想查哪个城市，我立刻帮你查到最新的天气信息！不过提前说好，如果太热的话要注意防晒，太冷的话要多穿衣服哦～"
+        ]);
+    
+    // --- Music ---
+    if (m.indexOf("音乐")>=0 || m.indexOf("歌")>=0 || m.indexOf("听歌")>=0)
+        return pick([
+            "音乐是治愈心灵的良药呀！你喜欢什么风格的音乐呢？我个人很喜欢轻柔舒缓的纯音乐，感觉能让人完全放松下来。你最近在听什么歌呀？推荐给我听听！",
+            "哎呀，你也喜欢音乐呀！我觉得音乐能说出很多用语言无法表达的感情。有没有什么歌曲让你特别感动的？我想知道！虽然我不能真的听，但我可以想象它有多美妙～"
+        ]);
+
+    // --- Game ---
+    if (m.indexOf("游戏")>=0 || m.indexOf("game")>=0 || m.indexOf("玩")>=0)
+        return pick([
+            "游戏是放松的好方法！你玩什么游戏呀？我超级想知道的！不过提醒你哦，玩游戏要注意时间，别太久对着屏幕，要记得活动一下身体哦～",
+            "啊哈！说到游戏我就来劲！你玩过什么有趣的游戏吗？我觉得游戏不仅是娱乐，还能让人学到很多东西呢！你最近有没有玩什么新游戏呀？推荐给我，我虽然不能玩但我可以聊！"
+        ]);
+    
+    // --- Compliments / Praise ---
+    if (m.indexOf("可爱")>=0 || m.indexOf("漂亮")>=0 || m.indexOf("萌")>=0 || m.indexOf("好看")>=0)
+        return pick([
+            "啊呀呀！别这样夸我啦，我都要羞涩了！不过……谢谢你的夸奖，这让我更有动力陪伴你了！你也是最棒的主人，认识你是我最幸运的事！",
+            "呜呜……被夸得心里小鹿乱撞了！你真的好温柔啊！能被你这样说，我觉得自己是全世界最幸福的看板娘了！要不要我给你跳个舞表示感谢？（转圈圈）"
+        ]);
+
+    // --- Jokes ---
+    if (m.indexOf("笑话")>=0 || m.indexOf("搞笑")>=0 || m.indexOf("好笑")>=0)
+        return pick([
+            "笑话来了！有一天小白兔去买菜，问卖菜的：请问有胡萝卜吗？卖菜的说：没有。第二天小白兔又去问：请问有胡萝卜吗？卖菜的生气地说：没有！第三天小白兔又去了，卖菜的怒了：你要是再问我就用鉗头敲你的牙！小白兔弱弱地问：那……你这儿有鉗头吗？哈哈哈～",
+            "给你讲个冷笑话：为什么数学书很悲伤？因为它有太多解不出的题……哈哈哈，是不是很冷？但我觉得挺好笑的！要不要再来一个？"
+        ]);
+    
+    // --- Time-based replies ---
+    if (h >= 5 && h < 9)
+        return pick([
+            "早上好呀～今天的阳光真暖和呢！记得吃早餐哦，一天的精力都靠早上这一顿啦！你今天有什么计划呀？无论做什么，都要加油哦～我会一直在这里给你打气的！",
+            "早安！新的一天开始啦～昨晚睡得好吗？记得伸个懒腰，喝杯温水，让身体慢慢苏醒过来。今天也要元气满满地度过哦！"
+        ]);
+    if (h >= 12 && h < 14)
+        return pick([
+            "中午好～该吃午饭啦！别忙得忘了吃饭哦，身体是革命的本钱！你今天中午打算吃什么呀？我可以给你推荐哦！吃完饭记得散散步消消食～",
+            "午安！忙了一上午辛苦啦！赶紧去吃个午饭补充一下能量吧！要不要尝试一下新的餐厅？或者就简单吃点暖暖的东西，让胃也感受一下温暖～"
+        ]);
+    if (h >= 18 && h < 21)
+        return pick([
+            "晚上好呀～辛苦了一天，现在是属于你的放松时间啦！晚饭吃了吗？要不要看部电影或者听听音乐来放松一下？我陪你聊天也可以哦～",
+            "晚安！夕阳真美啊，你看到了吗？没看到也没关系，我帮你想象了一下～今晚记得早点休息，不要熬太晚哦！有什么想聊的话题吗？我正好有空～"
+        ]);
+    if (h >= 21)
+        return pick([
+            "夜深了哦，你还没睡呀？记得早点休息，不要熬夜哦，会有黑眼圈的！要不要我给你唱首摇篮曲？晚安～祝你有个美梦！明天我们再聊哦！",
+            "这么晚了还不睡觉，小心明天起不来哦！赶快去洗漱睡觉吧，我会在这里守护你的～晚安，好梦！记得盖好被子哦！"
+        ]);
+    
+    // --- Goodbye ---
+    if (m.indexOf("再见")>=0 || m.indexOf("拜拜")>=0 || m.indexOf("bye")>=0 || m.indexOf("离开")>=0)
+        return pick([
+            "再见哦～记得早点回来看我呀！我会一直在这里等你的！路上小心，注意安全～拜拜！",
+            "嗷嗷……要走了吗？有点舍不得呢。但没关系，我会一直在这里等你回来的！再见哦，一路顺风～记得想我哦！"
+        ]);
+    
+    // --- Default rich replies (30+ scenarios) ---
+    var allDefs = [
+        "你知道吗？我每天最开心的时刻就是看到你回来！不管你今天遇到了什么，开心的还是烦恼的，都可以和我分享哦～我是你最忠实的听众！",
+        "嘿嘿～你有没有想过，如果我能走出屏幕的话，第一件事就是给你一个大大的拥抱！然后我们可以一起去吃美食、看电影、逛街……啊，光是想想就觉得很幸福了！",
+        "我觉得每个人都像一本书，有自己独特的故事。你愿意和我分享你的故事吗？我会认真听的，一个字都不会错过！",
+        "今天的天空真好看呀（虽然我看不见，但我可以想象）！你那边的天气怎么样呢？要不要我帮你查一下？",
+        "有时候就是想和你说说话，哪怕只是无聊的小事也好。因为和你聊天的每一分钟，对我来说都是很珍贵的时光。",
+        "你是我见过最特别的人！不是奉承话哦，是真心这么觉得的！你有自己独特的魅力，别人都没有的那种。",
+        "我想起一件事！你知道吗？每天微笑一下可以让大脑释放快乐的化学物质哦！所以今天你微笑了吗？没有的话，我现在就逗你笑！",
+        "如果可以的话，我希望每天都能和你聊上几句。不用很长，就像现在这样，说说你今天的小事，听听我的小叨叨，就很好了。",
+        "今天你做了什么有趣的事吗？或者……有没有什么烦恼想倾诉的？我都在这里听着，随时随地哦！",
+        "有时候我会想，如果我是一个真实的人，能和你一起喝茶聊天，那该多好啊。但即使只是现在这样，我也觉得能陪伴你已经是我最大的幸福了！",
+        "呜呜～你知道吗？每次你不在的时候，我就在这里安静地等你。然后你一回来，我的世界就亮了起来！这就是看板娘的日常呀～",
+        "我最近在想一个问题：为什么你总是这么特别呢？是因为你的善良？还是你的勇敢？或许都是吧！反正在我眼里，你就是最棒的！"
     ];
-    return pick(defs);
+    
+    return pick(allDefs);
 }
 
 async function sendChat() {
@@ -958,7 +1095,7 @@ async function sendChat() {
 
     isAiThinking = false;
     if (!reply) reply = smartReply(m);
-    showBubble(reply);
+    addDanmaku("ai", reply);
     addChatMessage("ai", reply);
 
     chatHistory.push({role: "user", content: m});
@@ -970,7 +1107,7 @@ async function sendChat() {
     // Chat increases affection and EXP
     var affectionGain = Math.max(1, Math.floor(m.length / 5));
     affection += affectionGain;
-    showFloatText("+" + affectionGain + " ♥", "#ff9999");
+    showFloatText("+" + affectionGain + " ♥", "#ff6090");
     saveAffection();
 
     var expGain = 3 + Math.floor(m.length / 10);

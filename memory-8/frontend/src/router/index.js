@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
+import AuthPage from '../views/AuthPage.vue'
 import Dashboard from '../views/Dashboard.vue'
 import FeatureGuide from '../views/FeatureGuide.vue'
 import DailyPlan from '../views/DailyPlan.vue'
@@ -21,8 +20,8 @@ import AdminMonetization from '../views/AdminMonetization.vue'
 
 const routes = [
   { path: '/', redirect: '/dashboard' },
-  { path: '/login', component: Login },
-  { path: '/register', component: Register },
+  { path: '/login', component: AuthPage },
+  { path: '/register', component: AuthPage },
   { path: '/dashboard', component: Dashboard },
   { path: '/guide', component: FeatureGuide },
   { path: '/daily-plan', component: DailyPlan },

@@ -1,0 +1,2296 @@
+[
+  {
+    "source": "魔法卡/SR/073DAB6875508248BB7E028684AC61B4.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "073DAB6875508248BB7E028684AC61B4",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/12092A1066A34F2076077AA292C88D04.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "12092A1066A34F2076077AA292C88D04",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/1EDA2D3C95889D1DFF6157AAB9C6E87D.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "1EDA2D3C95889D1DFF6157AAB9C6E87D",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/2826C28DBD76C3C2B6043C0047BC104B.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "2826C28DBD76C3C2B6043C0047BC104B",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/4349A689630836C02E20254E31D27EB0.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "4349A689630836C02E20254E31D27EB0",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/7AC0D76178F188536820303AA8E6F405.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "7AC0D76178F188536820303AA8E6F405",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/8A56DBB7E904AFE11CC0E78C0C8B52A7.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "8A56DBB7E904AFE11CC0E78C0C8B52A7",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/A4C046444E6870B56831E8EDB3140074.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "A4C046444E6870B56831E8EDB3140074",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/CF7A8D461992C0CB870E986E62C8B4CA.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "CF7A8D461992C0CB870E986E62C8B4CA",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/F2F3A31DB29280E7F53553331730B519.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "F2F3A31DB29280E7F53553331730B519",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/Night Dance.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "Night Dance",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/008.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/于终末黄昏寻求新生的誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "于终末黄昏寻求新生的誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/047.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/于黄昏废墟缔结的弑恶之誓.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "于黄昏废墟缔结的弑恶之誓",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/046.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/以乐曲镌刻的青春邀约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "以乐曲镌刻的青春邀约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/040.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/以彭格列之焰起誓的家族盟约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "以彭格列之焰起誓的家族盟约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/041.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/以青春执笔的相逢誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "以青春执笔的相逢誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/042.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/众伴同旅.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "众伴同旅",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/049.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/借晚风缔结的青涩誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "借晚风缔结的青涩誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/012.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/利刃与性命立下的逃亡誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "利刃与性命立下的逃亡誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/017.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/双剑盟约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "双剑盟约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/027.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/墟野集结.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "墟野集结",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/034.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/女友不止这么可爱.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "女友不止这么可爱",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/023.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/嬉闹之中的倾心誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "嬉闹之中的倾心誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/030.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/家隅旧契.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "家隅旧契",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/011.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/御主与从者的盟约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "御主与从者的盟约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/048.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/怪异诡缘.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "怪异诡缘",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/010.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/恋爱头脑战开幕.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "恋爱头脑战开幕",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/018.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/戏语藏情.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "戏语藏情",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/031.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/托付一生的婚姻誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "托付一生的婚姻誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/029.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/扭曲青春中寻得真心的相守誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "扭曲青春中寻得真心的相守誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/021.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/数码邀约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "数码邀约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/026.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/旧街巷连通现实与加速世界的路途.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "旧街巷连通现实与加速世界的路途",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/013.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/暖阳坡道上的再度相识.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "暖阳坡道上的再度相识",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/022.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/暮街火契.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "暮街火契",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/020.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/有限时光里缔结的永恒回忆.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "有限时光里缔结的永恒回忆",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/045.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/樱下相邀.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "樱下相邀",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/043.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/檐下和鸣.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "檐下和鸣",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/038.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/檐下糯缘.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "檐下糯缘",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/039.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/游缘升契.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "游缘升契",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/044.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/熏香花朵凌然绽放.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "熏香花朵凌然绽放",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/037.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/狭路心契.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "狭路心契",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/032.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/碎光偕行.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "碎光偕行",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/028.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/落晖下的信约归途.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "落晖下的信约归途",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/019.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/蓝海起航的海贼盟约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "蓝海起航的海贼盟约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/016.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/血绊之契.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "血绊之契",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/036.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/裁布牵情.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "裁布牵情",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/009.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/跨越世界线的羁绊.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "跨越世界线的羁绊",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/014.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/跨越虚幻病症的相守誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "跨越虚幻病症的相守誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/015.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/追寻归属的羁绊誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "追寻归属的羁绊誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/050.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/邪眼心诺.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "邪眼心诺",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/033.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/雪径执手.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "雪径执手",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/035.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/青春期综合征的相守誓约.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "青春期综合征的相守誓约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/024.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SR/青涩情愫.jpg",
+    "type": "spell",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "青涩情愫",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/025.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/SSR/夏风石阶的挚友茶会.jpg",
+    "type": "spell",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "夏风石阶的挚友茶会",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/053.jpg",
+      "assets/cards/spells/ssr/夏风石阶的挚友茶会.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/SSR/夜刻萦音的永续热忱.jpg",
+    "type": "spell",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "夜刻萦音的永续热忱",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/054.jpg",
+      "assets/cards/spells/ssr/夜刻萦音的永续热忱.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/SSR/奏响点亮天空.jpg",
+    "type": "spell",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "奏响点亮天空",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/056.jpg",
+      "assets/cards/spells/ssr/奏响点亮天空.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/SSR/幽蝶旧画的沉郁祈愿.jpg",
+    "type": "spell",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "幽蝶旧画的沉郁祈愿",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/055.jpg",
+      "assets/cards/spells/ssr/幽蝶旧画的沉郁祈愿.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/SSR/沉睡的蓝调.jpg",
+    "type": "spell",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "沉睡的蓝调",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/051.jpg",
+      "assets/cards/spells/ssr/沉睡的蓝调.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/SSR/畸变 DNA.jpg",
+    "type": "spell",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "畸变 DNA",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/052.jpg",
+      "assets/cards/spells/ssr/畸变DNA.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/8千年的思念.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "8千年的思念",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/057.jpg",
+      "assets/cards/spells/ur/8千年的思念.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/temp_swap.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "temp_swap",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/060.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/不登校的未来.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "不登校的未来",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/059.jpg",
+      "assets/cards/spells/ur/不登校的未来.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/冰原双天鹅的星咏.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "冰原双天鹅的星咏",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_spell_021.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/寄往遥远彼岸的信.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "寄往遥远彼岸的信",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/062.jpg",
+      "assets/cards/spells/ur/寄往遥远彼岸的信.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/异世残绪.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "异世残绪",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/071.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/心印同框·八千年的契约.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "心印同框·八千年的契约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/068.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/放学后的茶会.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "放学后的茶会",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/061.jpg",
+      "assets/cards/spells/ur/放学后的茶会.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/星界瞬刻.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "星界瞬刻",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/070.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/最好的伙伴.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "最好的伙伴",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/076.jpg",
+      "assets/cards/spells/ur/最好的伙伴.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/月下传讯.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "月下传讯",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/075.jpg",
+      "assets/cards/spells/ur/月下传讯.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/有刺无刺.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "有刺无刺",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/074.jpg",
+      "assets/cards/spells/ur/有刺无刺.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/杖与剑的契约.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "杖与剑的契约",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_spell_022.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/樱时之契·和服共舞.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "樱时之契·和服共舞",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/072.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/浅海浮汐.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "浅海浮汐",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/065.jpg",
+      "assets/cards/spells/ur/浅海浮汐.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/涟声合奏.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "涟声合奏",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/064.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/游戏王座.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "游戏王座",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/073.jpg",
+      "assets/cards/spells/ur/游戏王座.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/碎穹.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "碎穹",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/067.jpg",
+      "assets/cards/spells/ur/碎穹.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/社恐的焦虑.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "社恐的焦虑",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/066.jpg",
+      "assets/cards/spells/ur/社恐的焦虑.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/草野闲奏.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "草野闲奏",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/069.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "魔法卡/UR/薄采序奏.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "薄采序奏",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/058.jpg",
+      "assets/cards/spells/ur/薄采序奏.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "魔法卡/UR/街角的温柔日常.jpg",
+    "type": "spell",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "街角的温柔日常",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/063.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/夕映雪嶺の紅葉結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "夕映雪嶺の紅葉結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_030.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/夜桜涼亭の花吹雪結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "夜桜涼亭の花吹雪結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_033.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/夜桜神籠の灯火結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "夜桜神籠の灯火結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_034.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/富士桜花の結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "富士桜花の結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_024.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/月光水鏡の幽玄結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "月光水鏡の幽玄結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_036.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/桜花結界の春霞神殿.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "桜花結界の春霞神殿",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_035.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/水鏡湖畔の桜花結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "水鏡湖畔の桜花結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_028.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/神社参道の花灯結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "神社参道の花灯結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_027.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/索道黄昏の都市結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "索道黄昏の都市結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_029.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/翡翠峰嶺の雲霧結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "翡翠峰嶺の雲霧結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_023.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/花園涼亭の星夜結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "花園涼亭の星夜結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_026.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/花燈橋の夜桜結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "花燈橋の夜桜結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_025.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/雪嶺白嶽の凍結結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "雪嶺白嶽の凍結結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_032.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SR/雪林曙光の結界.jpg",
+    "type": "trap",
+    "rarity": "SR",
+    "level": 0,
+    "stem": "雪林曙光の結界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_031.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/古寺五重的黄昏钟声.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "古寺五重的黄昏钟声",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_044.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/古都塔影的黄昏小路.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "古都塔影的黄昏小路",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_043.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/古都暗影的五重封印.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "古都暗影的五重封印",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_042.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/夜樱灯笼的幽冥引路.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "夜樱灯笼的幽冥引路",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_049.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/富士灵峰的湖畔守望.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "富士灵峰的湖畔守望",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_041.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/岩间清瀑的结界之水.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "岩间清瀑的结界之水",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_048.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/本町通尽头的灵峰.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "本町通尽头的灵峰",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_038.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/樱花光隙的幻惑结界.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "樱花光隙的幻惑结界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_050.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/水田镜天的云映结界.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "水田镜天的云映结界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_046.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/海中鸟居的神域结界.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "海中鸟居的神域结界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_045.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/百体地蔵的净罪之光.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "百体地蔵的净罪之光",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_037.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/稻荷神域的千本鸟居.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "稻荷神域的千本鸟居",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_040.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/翠林水车的清流结界.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "翠林水车的清流结界",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_039.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/SSR/雪灵峰下的驿站.jpg",
+    "type": "trap",
+    "rarity": "SSR",
+    "level": 0,
+    "stem": "雪灵峰下的驿站",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_trap_047.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "陷阱卡/UR/夏空校舍的流云.jpg",
+    "type": "trap",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "夏空校舍的流云",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/080.jpg",
+      "assets/cards/traps/ur/夏空校舍的流云.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "陷阱卡/UR/寒岭汤泉的憩息.jpg",
+    "type": "trap",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "寒岭汤泉的憩息",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/078.jpg",
+      "assets/cards/traps/ur/寒岭汤泉的憩息.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "陷阱卡/UR/星降神篱的祈愿.jpg",
+    "type": "trap",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "星降神篱的祈愿",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/081.jpg",
+      "assets/cards/traps/ur/星降神篱的祈愿.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "陷阱卡/UR/暮雨长街的独行.jpg",
+    "type": "trap",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "暮雨长街的独行",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/079.jpg",
+      "assets/cards/traps/ur/暮雨长街的独行.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "陷阱卡/UR/澄湖栈桥的余晖.jpg",
+    "type": "trap",
+    "rarity": "UR",
+    "level": 0,
+    "stem": "澄湖栈桥的余晖",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/077.jpg",
+      "assets/cards/traps/ur/澄湖栈桥的余晖.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "怪兽卡/UR/10星/BE95BE37198D56064087E1C81D4DA33A.jpg",
+    "type": "monster",
+    "rarity": "UR",
+    "level": 10,
+    "stem": "BE95BE37198D56064087E1C81D4DA33A",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_018.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/UR/10星/CAE305E96597AF4D96A131CA3BD37667.jpg",
+    "type": "monster",
+    "rarity": "UR",
+    "level": 10,
+    "stem": "CAE305E96597AF4D96A131CA3BD37667",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_019.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/UR/10星/ED1A2666F3F2900BDB316584BA7DCCAD.jpg",
+    "type": "monster",
+    "rarity": "UR",
+    "level": 10,
+    "stem": "ED1A2666F3F2900BDB316584BA7DCCAD",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_020.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/UR/4星/朝比奈真冬.jpg",
+    "type": "monster",
+    "rarity": "UR",
+    "level": 4,
+    "stem": "朝比奈真冬",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_001.jpg",
+      "assets/cards/imported/001.jpg",
+      "assets/cards/imported/007.jpg",
+      "assets/cards/monsters/UR/4星/朝比奈真冬.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "怪兽卡/SSR/4星/山田凉.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 4,
+    "stem": "山田凉",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/006.jpg",
+      "assets/cards/monsters/SSR/4星/山田凉.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "怪兽卡/SSR/4星/青蓝妆者.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 4,
+    "stem": "青蓝妆者",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/005.jpg",
+      "assets/cards/monsters/SSR/4星/青蓝妆者.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "怪兽卡/SSR/5星/01591C36E4275DF5664FD1C6E9B040B8.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 5,
+    "stem": "01591C36E4275DF5664FD1C6E9B040B8",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/5星/2FBAB8BA00B513659F6A751E4C9973D1.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 5,
+    "stem": "2FBAB8BA00B513659F6A751E4C9973D1",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_004.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/5星/30B07C9EC5AF838E9C56F7B7DD9CE32F.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 5,
+    "stem": "30B07C9EC5AF838E9C56F7B7DD9CE32F",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_005.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/5星/48BEB41AAEC576E59DCEFA78739A226D.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 5,
+    "stem": "48BEB41AAEC576E59DCEFA78739A226D",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/5星/55B36C8B2F51158925660FA041276B90.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 5,
+    "stem": "55B36C8B2F51158925660FA041276B90",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_006.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/5星/8D8E093C96A9F30FE9CCC7E01A4B5272.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 5,
+    "stem": "8D8E093C96A9F30FE9CCC7E01A4B5272",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/5星/C8F128480A6C09CCBC07489E9538C180.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 5,
+    "stem": "C8F128480A6C09CCBC07489E9538C180",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/5星/F932DED255F60A233A5727BB55A77714.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 5,
+    "stem": "F932DED255F60A233A5727BB55A77714",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_007.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/6星/4FA8E2A5E8F3BBD68EF7187AA4F0F927.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 6,
+    "stem": "4FA8E2A5E8F3BBD68EF7187AA4F0F927",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_008.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/6星/B25E3F6A81B98412D0E005D7FDF5F06D.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 6,
+    "stem": "B25E3F6A81B98412D0E005D7FDF5F06D",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_009.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/6星/DBBEB50C7B2AF71DD38F76D7E80EFDD5.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 6,
+    "stem": "DBBEB50C7B2AF71DD38F76D7E80EFDD5",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_010.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/196BCD56CD1047F3D16087352C385661.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "196BCD56CD1047F3D16087352C385661",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_011.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/1F35A04C96C0AC559DC74E86CAA72A3C.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "1F35A04C96C0AC559DC74E86CAA72A3C",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/36F833ADC8045DA8726533DC06054C26.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "36F833ADC8045DA8726533DC06054C26",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/38EC61DEF1338450BE6EEE6E8C1C1A7D.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "38EC61DEF1338450BE6EEE6E8C1C1A7D",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_012.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/4B58C805A0A7834F845D60C4D0CF2D52.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "4B58C805A0A7834F845D60C4D0CF2D52",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_013.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/799E7344ADE4F6DE05DC6D53DF78D91E.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "799E7344ADE4F6DE05DC6D53DF78D91E",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/80CF40F691B5D3CC02F8839A1F9C4323.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "80CF40F691B5D3CC02F8839A1F9C4323",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_014.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/83AEAFD50D1D2EAE388DB2AAB4E2BE07.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "83AEAFD50D1D2EAE388DB2AAB4E2BE07",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_015.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/9A319742AE13A4AF519DF5CE05E5BC6C.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "9A319742AE13A4AF519DF5CE05E5BC6C",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/A57D6D2AE4AD06B8EEF629CEC8461AD5.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "A57D6D2AE4AD06B8EEF629CEC8461AD5",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_016.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SSR/8星/C4FC3980048C599F5A3F3DF6C5BDA58E.jpg",
+    "type": "monster",
+    "rarity": "SSR",
+    "level": 8,
+    "stem": "C4FC3980048C599F5A3F3DF6C5BDA58E",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_017.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/060469085B92CA840DDD6A0E8B2FE02C.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "060469085B92CA840DDD6A0E8B2FE02C",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/1E6F0DA201D001F99228D87E14A644D6.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "1E6F0DA201D001F99228D87E14A644D6",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/21F1303BC399B3437395719140A8449A.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "21F1303BC399B3437395719140A8449A",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/2FB431CA5122FD63B1F013CF09C63D03.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "2FB431CA5122FD63B1F013CF09C63D03",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/4CA389839DA4C6F39F9B30476EE50F10.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "4CA389839DA4C6F39F9B30476EE50F10",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/4E4FE9E87B401FBCB46405FA8E0721AA.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "4E4FE9E87B401FBCB46405FA8E0721AA",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/5A2ECEC7C1BB779DA07FD627EA953412.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "5A2ECEC7C1BB779DA07FD627EA953412",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/697CE3F93F017C684D9C50471E440266.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "697CE3F93F017C684D9C50471E440266",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/6F4C688F368A4890748A38EFF03BC253.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "6F4C688F368A4890748A38EFF03BC253",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/768DE19336F2712F32FCB9E903871703.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "768DE19336F2712F32FCB9E903871703",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/7F75BB4ACA66238FDFB56BD6665A1191.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "7F75BB4ACA66238FDFB56BD6665A1191",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/8971F415472A892F4AF34A17431B9C2D.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "8971F415472A892F4AF34A17431B9C2D",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/8B4BCB32EE04BF154B522A6857C52014.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "8B4BCB32EE04BF154B522A6857C52014",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/4星/FFE9E4B278C0A1DF006D0FE1A5A9D8F7.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 4,
+    "stem": "FFE9E4B278C0A1DF006D0FE1A5A9D8F7",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/3036FB1198A86FCC3A8928DB1AF96345.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "3036FB1198A86FCC3A8928DB1AF96345",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/659F6432A63DEFB4E9C8C6BD1ABF44C6.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "659F6432A63DEFB4E9C8C6BD1ABF44C6",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/784AAA2C3299189FB0FEF022D39DFAF5.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "784AAA2C3299189FB0FEF022D39DFAF5",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/7A40D09EFE243FBDAA3C0C4E8C728182.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "7A40D09EFE243FBDAA3C0C4E8C728182",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/81293A6B005C468957A1797C4866D9BA.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "81293A6B005C468957A1797C4866D9BA",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/AB8849E0F09C5FF3793BCD79E1E39E01.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "AB8849E0F09C5FF3793BCD79E1E39E01",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/BB602D6D0098F9CF807C03F7E0D470C3.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "BB602D6D0098F9CF807C03F7E0D470C3",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/CEB6976A5CF956507CE10BB12751F32C.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "CEB6976A5CF956507CE10BB12751F32C",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/5星/ED8C4C79A06657B82BAFE6E4213225ED.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 5,
+    "stem": "ED8C4C79A06657B82BAFE6E4213225ED",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/005DFA56BA6B78085547E4A1AA4D2E90.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "005DFA56BA6B78085547E4A1AA4D2E90",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/1113B2F950BFBCBB64D512C206245547.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "1113B2F950BFBCBB64D512C206245547",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/55E3CF07135F5A0579F21EAA3451FC31.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "55E3CF07135F5A0579F21EAA3451FC31",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/5C7C4E5A3540B68B1EDC35D961A46E53.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "5C7C4E5A3540B68B1EDC35D961A46E53",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/5D094EE92FB7598C34A8AD17594B9CAC.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "5D094EE92FB7598C34A8AD17594B9CAC",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/664AC45984FF53E7AED4DE8EBE7E84F2.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "664AC45984FF53E7AED4DE8EBE7E84F2",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/6C452C5AE5E6FCDD5F7064295B2B091E.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "6C452C5AE5E6FCDD5F7064295B2B091E",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/7F963FA8E8EA7E91800CF740638B53BD.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "7F963FA8E8EA7E91800CF740638B53BD",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/9BDB83094DFA7BABAA0C28A096C840AE.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "9BDB83094DFA7BABAA0C28A096C840AE",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/B4A8939AB8C4215AE8E2197892226951.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "B4A8939AB8C4215AE8E2197892226951",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/BC9375364AD8D988C1635190CA17F0BA.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "BC9375364AD8D988C1635190CA17F0BA",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/DCBA4FBC99DD7AE48293FC5E31879504.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "DCBA4FBC99DD7AE48293FC5E31879504",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/6星/F8CE165BAF54ECBC1D4D29CF50C66832.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 6,
+    "stem": "F8CE165BAF54ECBC1D4D29CF50C66832",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/04617E7008F5D393C2E3E5E328CBDD7C.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "04617E7008F5D393C2E3E5E328CBDD7C",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/0A7EC72174738AA8B9241189701F1FFF.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "0A7EC72174738AA8B9241189701F1FFF",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/0E566341C06339AFDFC7A197000DF1A0.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "0E566341C06339AFDFC7A197000DF1A0",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/355412338A5E91E1346F0D3A8317238D.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "355412338A5E91E1346F0D3A8317238D",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/3AA450141C4FC25EE3713706BA674318.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "3AA450141C4FC25EE3713706BA674318",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/45E5B1B7E2BCB8BD559B39BA0E4433C5.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "45E5B1B7E2BCB8BD559B39BA0E4433C5",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/5C25995A495B7CEA9D5370DDC72C425D.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "5C25995A495B7CEA9D5370DDC72C425D",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/BD194FD9BEEB883D073FB6BEACCB5BED.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "BD194FD9BEEB883D073FB6BEACCB5BED",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/BE554B1E968C26894E32711D2832ED05.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "BE554B1E968C26894E32711D2832ED05",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/C2747336FE763AB3F675FD66E7842A55.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "C2747336FE763AB3F675FD66E7842A55",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/C27D95F02266B1202AAE44ADD419CDE5.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "C27D95F02266B1202AAE44ADD419CDE5",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/D285E5396FBE3889D2A7891E333B0ED4.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "D285E5396FBE3889D2A7891E333B0ED4",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/DA335CDE765564DC4F2BF5CD27E618DE.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "DA335CDE765564DC4F2BF5CD27E618DE",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/DC1F9F53CAA3190DD78E3E46D4ECB11D.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "DC1F9F53CAA3190DD78E3E46D4ECB11D",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/E4B3AF247560FBB8919C18095F775CE5.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "E4B3AF247560FBB8919C18095F775CE5",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/SR/7星/E5915433D7D2BB95B76A67FF543D4422.jpg",
+    "type": "monster",
+    "rarity": "SR",
+    "level": 7,
+    "stem": "E5915433D7D2BB95B76A67FF543D4422",
+    "named": false,
+    "exactAssetMatches": [],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/R/3星/真冬.jpg",
+    "type": "monster",
+    "rarity": "R",
+    "level": 3,
+    "stem": "真冬",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_001.jpg",
+      "assets/cards/imported/001.jpg",
+      "assets/cards/imported/007.jpg",
+      "assets/cards/monsters/UR/4星/朝比奈真冬.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/R/4星/2EC2D8F78A52459FBF5E2F886DA80EE8.jpg",
+    "type": "monster",
+    "rarity": "R",
+    "level": 4,
+    "stem": "2EC2D8F78A52459FBF5E2F886DA80EE8",
+    "named": false,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_002.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/R/4星/宫崎奏.jpg",
+    "type": "monster",
+    "rarity": "R",
+    "level": 4,
+    "stem": "宫崎奏",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/002.jpg",
+      "assets/cards/monsters/R/4星/宫崎奏.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "怪兽卡/R/4星/祥子.jpg",
+    "type": "monster",
+    "rarity": "R",
+    "level": 4,
+    "stem": "祥子",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/complete/source_monster_003.jpg"
+    ],
+    "filenameReferenced": false
+  },
+  {
+    "source": "怪兽卡/R/4星/蓝絮猫女仆 凯伊.jpg",
+    "type": "monster",
+    "rarity": "R",
+    "level": 4,
+    "stem": "蓝絮猫女仆 凯伊",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/003.jpg",
+      "assets/cards/monsters/R/4星/蓝絮猫女仆 凯伊.jpg"
+    ],
+    "filenameReferenced": true
+  },
+  {
+    "source": "怪兽卡/R/4星/里间雨.jpg",
+    "type": "monster",
+    "rarity": "R",
+    "level": 4,
+    "stem": "里间雨",
+    "named": true,
+    "exactAssetMatches": [
+      "assets/cards/imported/004.jpg",
+      "assets/cards/monsters/R/4星/里间雨.jpg"
+    ],
+    "filenameReferenced": true
+  }
+]

@@ -33,7 +33,7 @@ public class Live2DController {
         String message = (String) body.get("message");
         if (message == null || message.isBlank()) return Result.fail("消息不能为空");
         @SuppressWarnings("unchecked")
-        List<ChatResponse.Message> history = (List<ChatResponse.Message>) body.get("history");
+        List<Map<String, Object>> history = (List<Map<String, Object>>) body.get("history");
         return live2DService.chat(modelId, message, history);
     }
 

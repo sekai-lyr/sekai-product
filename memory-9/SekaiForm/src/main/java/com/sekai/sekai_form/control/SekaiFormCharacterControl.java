@@ -28,7 +28,7 @@ public class SekaiFormCharacterControl {
 
     @GetMapping public Result<List<SekaiFormCharacterDO>> list(HttpSession session) {
         Long userId = getUserId(session);
-        if (userId == null) return Result.fail("????");
+        if (userId == null) return Result.fail("请先登录");
         return characterService.listByUserId(userId);
     }
 
@@ -36,7 +36,7 @@ public class SekaiFormCharacterControl {
 
     @PostMapping public Result<SekaiFormCharacterDO> create(@RequestBody CharacterForm form, HttpSession session) {
         Long userId = getUserId(session);
-        if (userId == null) return Result.fail("????");
+        if (userId == null) return Result.fail("请先登录");
         return characterService.create(userId, form);
     }
 

@@ -9,10 +9,19 @@
 <body style="background:var(--ink);">
 <!-- Particle Starfield -->
 <canvas class="starfield-canvas sekai-starfield" data-count="80"></canvas>
+<!-- Sakura Petals -->
+<canvas class="canvas-sakura sekai-sakura" data-count="25"></canvas>
 <!-- Mouse Glow Trail -->
 <canvas class="canvas-glow sekai-glow"></canvas>
 <!-- Floating Orbs -->
 <canvas class="canvas-orbs sekai-orbs"></canvas>
+<!-- Sparkle Trail -->
+<canvas class="canvas-sekai-sparkles sekai-sparkles"></canvas>
+<!-- Neon Shapes -->
+<canvas class="canvas-sekai-neon-shapes sekai-neon-shapes"></canvas>
+<!-- Sakura Corner Decorations -->
+<div class="sakura-decor-top" style="--r:15deg">🌸</div>
+<div class="sakura-decor-bottom" style="--r:-10deg">🌸</div>
 
 <nav class="app-nav">
     <div class="nav-brand">🌸 Sekai Anime</div>
@@ -64,6 +73,6 @@
     </div>
 </main>
 
-<script th:src="@{/js/effects.js}" src="/js/effects.js"></script>
+<script th:src="@{/js/effects.js(v='20260806-sakura3')}" src="/js/effects.js?v=20260806-sakura3"></script>
 </body>
 </html>

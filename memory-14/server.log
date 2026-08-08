@@ -1,0 +1,985 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.example:anime-ai >------------------------
+[INFO] Building Anime AI Assistant 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.14:run (default-cli) > test-compile @ anime-ai >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ anime-ai ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ anime-ai ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ anime-ai ---
+[INFO] skip non existing resourceDirectory B:\YKD\A_YKD_LAST_TENT\8.1.pm\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ anime-ai ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target\test-classes
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by lombok.permit.Permit
+WARNING: Please consider reporting this to the maintainers of class lombok.permit.Permit
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[INFO] 
+[INFO] <<< spring-boot:3.5.14:run (default-cli) < test-compile @ anime-ai <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.14:run (default-cli) @ anime-ai ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T22:57:57.842+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T22:57:57.843+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T22:57:57.882+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-01T22:57:57.882+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-01T22:57:58.506+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T22:57:58.509+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T22:57:58.631+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 114 ms. Found 11 JPA repository interfaces.
+2026-08-01T22:57:59.073+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T22:57:59.083+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T22:57:59.083+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T22:57:59.120+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T22:57:59.121+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1238 ms
+2026-08-01T22:57:59.242+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T22:57:59.288+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-08-01T22:57:59.317+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T22:57:59.500+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T22:57:59.520+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-01T22:57:59.628+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@20d08bcf
+2026-08-01T22:57:59.630+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-01T22:57:59.661+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T22:57:59.671+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T22:58:00.291+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T22:58:00.508+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T22:58:00.526+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.config.DashScopeConfig    : DashScopeConfig: baseUrl=, model=, visionBaseUrl=https://dashscope.aliyuncs.com/compatible-mode/v1, visionModel=qwen-vl-plus, visionApiKey=***set***
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::allocateMemory has been called by io.netty.util.internal.PlatformDependent0$2 (file:/C:/Users/administration/.m2/repository/io/netty/netty-common/4.1.132.Final/netty-common-4.1.132.Final.jar)
+WARNING: Please consider reporting this to the maintainers of class io.netty.util.internal.PlatformDependent0$2
+WARNING: sun.misc.Unsafe::allocateMemory will be removed in a future release
+2026-08-01T22:58:00.646+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.chat.config.RedisConfig   : Creating Redis connection factory: localhost:6379
+2026-08-01T22:58:00.707+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.chat.config.RedisConfig   : Redis connection factory created successfully
+2026-08-01T22:58:00.770+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Initializing RedisChatMemoryRepository ==========
+2026-08-01T22:58:00.993+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-01T22:58:01.239+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Initializing DatabaseChatMemoryRepository ==========
+2026-08-01T22:58:01.261+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Using CachedChatMemoryRepository (Redis + Database) ==========
+2026-08-01T22:58:01.261+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.CachedChatMemoryRepository     : Starting data migration from Redis to Database...
+2026-08-01T22:58:01.516+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: analyzeFile
+2026-08-01T22:58:01.516+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: analyzeImage
+2026-08-01T22:58:01.516+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: editImage
+2026-08-01T22:58:01.516+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: generateImage
+2026-08-01T22:58:01.516+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: synthesizeSpeech
+2026-08-01T22:58:01.516+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: webSearch
+2026-08-01T22:58:01.516+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: getWeather
+2026-08-01T22:58:01.521+08:00  WARN 42900 --- [anime-ai] [      Thread-10] c.e.d.c.r.RedisChatMemoryRepository      : Redis connection not available: Unable to connect to Redis
+2026-08-01T22:58:01.521+08:00  WARN 42900 --- [anime-ai] [      Thread-10] c.e.d.c.r.RedisChatMemoryRepository      : Redis not available, using memory cache for getMessages: sample
+2026-08-01T22:58:01.521+08:00  INFO 42900 --- [anime-ai] [      Thread-10] c.e.d.c.r.CachedChatMemoryRepository     : Data migration check completed
+2026-08-01T22:58:01.813+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.SpringAiTools        : SpringAiTools initialized with anime tools + Jikan API
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: generateImage
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: analyzeImage
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: synthesizeSpeech
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: analyzeFile
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: editImage
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getWeather
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: webSearch
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: searchAnime
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getSeasonAnime
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getTopAnime
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getUpcomingAnime
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getCurrentSeasonAnime
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getCurrentTime
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: analyzeAnimeTaste
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: searchNearbyCinema
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: navigateToPlace
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: findAnimeEvent
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: searchAnimeCharacter
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: addToWatchList
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: searchNearbyAnimeStore
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: recommendAnime
+2026-08-01T22:58:01.815+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getAnimeDetail
+2026-08-01T22:58:01.816+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getWatchList
+2026-08-01T22:58:01.816+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : ToolCallingService initialized, registered 23 tools: [generateImage, analyzeImage, synthesizeSpeech, analyzeFile, editImage, getWeather, webSearch, searchAnime, getSeasonAnime, getTopAnime, getUpcomingAnime, getCurrentSeasonAnime, getCurrentTime, analyzeAnimeTaste, searchNearbyCinema, navigateToPlace, findAnimeEvent, searchAnimeCharacter, addToWatchList, searchNearbyAnimeStore, recommendAnime, getAnimeDetail, getWatchList]
+2026-08-01T22:58:01.816+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.ai.SpringAiChatService    : SpringAiChatService initialized with ToolCallingService
+2026-08-01T22:58:01.845+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.asr.DashScopeAsrService   : DashScope ASR service initialized
+2026-08-01T22:58:01.874+08:00  INFO 42900 --- [anime-ai] [essage-Listener] c.e.demo.core.ILinkMessageListener       : Starting ILink login...
+2026-08-01T22:58:01.927+08:00  WARN 42900 --- [anime-ai] [  restartedMain] c.e.d.features.FeatureSchemaInitializer  : Feature schema initialization skipped (non-critical): StatementCallback; bad SQL grammar [CREATE INDEX IF NOT EXISTS idx_timeline_user_target ON growth_timeline(user_id, target_type, target_id, captured_at)]
+2026-08-01T22:58:01.953+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T22:58:02.170+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+ÇëÉ¨ÂëµÇÂ¼: https://liteapp.weixin.qq.com/q/7GiQu1?qrcode=52cd4948bb0fde186a2785e9bc9b03b2&bot_type=3
+2026-08-01T22:58:02.172+08:00  INFO 42900 --- [anime-ai] [essage-Listener] c.e.demo.core.ILinkMessageListener       : QR code generated, waiting for scan...
+2026-08-01T22:58:02.197+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T22:58:02.213+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T22:58:02.219+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 4.686 seconds (process running for 5.056)
+2026-08-01T22:58:02.221+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : ========== Starting Chat Memory Migration ==========
+2026-08-01T22:58:02.224+08:00  WARN 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.RedisChatMemoryRepository      : Redis connection not available: Unable to connect to Redis
+2026-08-01T22:58:02.224+08:00  WARN 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.RedisChatMemoryRepository      : Redis not available, using memory cache for getMessages: o9cq80zxm0L5kcJtoj6ZbeijGgGg@im.wechat
+2026-08-01T22:58:02.224+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : No existing messages found in Redis
+2026-08-01T22:58:02.224+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : ========== Chat Memory Migration Completed ==========
+2026-08-01T22:58:42.921+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-01T22:58:42.921+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-01T22:58:42.922+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-08-01T22:58:52.305+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-4] com.example.demo.auth.AuthController     : Register request: demo
+2026-08-01T22:58:52.473+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-4] com.example.demo.auth.AuthService        : User registered: demo
+2026-08-01T22:58:52.533+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-5] com.example.demo.auth.AuthController     : Login request: demo
+2026-08-01T22:58:52.620+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-5] com.example.demo.auth.AuthService        : User logged in: demo
+2026-08-01T23:00:26.618+08:00 ERROR 42900 --- [anime-ai] [       ilink-io] c.e.demo.core.ILinkMessageListener       : ILink login failed
+
+java.util.concurrent.CompletionException: com.github.wechat.ilink.sdk.core.exception.ConnectFailedException: qrcode expired
+	at java.base/java.util.concurrent.CompletableFuture.wrapInCompletionException(CompletableFuture.java:323) ~[na:na]
+	at java.base/java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:359) ~[na:na]
+	at java.base/java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:364) ~[na:na]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1791) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+Caused by: com.github.wechat.ilink.sdk.core.exception.ConnectFailedException: qrcode expired
+	at com.github.wechat.ilink.sdk.service.LoginService$1.get(LoginService.java:82) ~[wechat-ilink-sdk-2.1.0.jar:na]
+	at com.github.wechat.ilink.sdk.service.LoginService$1.get(LoginService.java:54) ~[wechat-ilink-sdk-2.1.0.jar:na]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789) ~[na:na]
+	... 3 common frames omitted
+
+2026-08-01T23:04:17.483+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.auth.AuthController     : Login request: sekai
+2026-08-01T23:04:21.038+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:04:21.123+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] com.example.demo.auth.AuthService        : User registered: sekai
+2026-08-01T23:04:23.070+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-3] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:04:23.768+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-2] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:04:23.950+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-4] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:04:38.710+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-9] com.example.demo.auth.AuthController     : Login request: sekai
+2026-08-01T23:04:38.812+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-9] com.example.demo.auth.AuthService        : User logged in: sekai
+2026-08-01T23:04:43.151+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:43.001+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-2] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:44.066+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-4] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:44.272+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-5] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:44.456+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-6] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:44.617+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-9] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:44.768+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-8] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:44.919+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:45.064+08:00  INFO 42900 --- [anime-ai] [io-8080-exec-10] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:09:45.176+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] com.example.demo.auth.AuthController     : Register request: sekai
+2026-08-01T23:13:40.587+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 159 class path changes (12 additions, 146 deletions, 1 modification)
+2026-08-01T23:13:40.593+08:00  INFO 42900 --- [anime-ai] [      Thread-44] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:13:40.601+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:13:40.636+08:00  INFO 42900 --- [anime-ai] [      Thread-44] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:13:40.641+08:00  INFO 42900 --- [anime-ai] [      Thread-44] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-08-01T23:13:40.647+08:00  INFO 42900 --- [anime-ai] [      Thread-44] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:13:40.761+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:13:40.761+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:13:41.071+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:13:41.072+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:13:41.073+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-08-01T23:13:41.166+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:13:41.167+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:13:41.167+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:13:41.201+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:13:41.201+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 437 ms
+2026-08-01T23:13:41.252+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:13:41.256+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:13:41.264+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:13:41.267+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-08-01T23:13:41.272+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@569f0f46
+2026-08-01T23:13:41.273+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-08-01T23:13:41.274+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:13:41.274+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:13:41.292+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:13:41.292+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:13:41.339+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:13:41.352+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-01T23:13:41.430+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:13:41.625+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:13:41.647+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:13:41.662+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:13:41.666+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 0.941 seconds (process running for 944.503)
+2026-08-01T23:13:41.671+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   TaskExecutorConfigurations.AsyncConfigurerConfiguration matched:
+      - @ConditionalOnMissingBean (types: org.springframework.scheduling.annotation.AsyncConfigurer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskExecutorConfigurations.AsyncConfigurerConfiguration#applicationTaskExecutorAsyncConfigurer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.scheduling.annotation.AsyncConfigurer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration matched:
+      - AnyNestedCondition 1 matched 1 did not; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ModelCondition @ConditionalOnProperty (spring.task.execution.mode=force) did not find property 'spring.task.execution.mode'; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ExecutorBeanCondition @ConditionalOnMissingBean (types: java.util.concurrent.Executor; SearchStrategy: all) did not find any beans (TaskExecutorConfigurations.OnExecutorCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration#applicationTaskExecutor matched:
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+
+Negative matches:
+-----------------
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration#applicationTaskExecutorVirtualThreads:
+      Did not match:
+         - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-08-01T23:14:15.503+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-08-01T23:14:15.504+08:00  INFO 42900 --- [anime-ai] [      Thread-46] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:14:15.511+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:14:15.515+08:00  INFO 42900 --- [anime-ai] [      Thread-46] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:14:15.515+08:00  INFO 42900 --- [anime-ai] [      Thread-46] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-08-01T23:14:15.517+08:00  INFO 42900 --- [anime-ai] [      Thread-46] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:14:15.586+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:14:15.587+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:14:15.783+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:14:15.783+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:14:15.785+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-08-01T23:14:15.862+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:14:15.862+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:14:15.862+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:14:15.895+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:14:15.895+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 307 ms
+2026-08-01T23:14:15.926+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:14:15.931+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:14:15.937+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:14:15.939+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-08-01T23:14:15.944+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection com.mysql.cj.jdbc.ConnectionImpl@e7be646
+2026-08-01T23:14:15.944+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-08-01T23:14:15.945+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:14:15.946+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-3)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:14:15.960+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:14:15.960+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:14:15.989+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:14:15.997+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-01T23:14:16.036+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:14:16.171+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:14:16.183+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:14:16.192+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:14:16.195+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 0.63 seconds (process running for 979.033)
+2026-08-01T23:14:16.196+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-08-01T23:15:18.435+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-08-01T23:15:18.436+08:00  INFO 42900 --- [anime-ai] [      Thread-88] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:15:18.450+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:15:18.455+08:00  INFO 42900 --- [anime-ai] [      Thread-88] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:15:18.456+08:00  INFO 42900 --- [anime-ai] [      Thread-88] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown initiated...
+2026-08-01T23:15:18.458+08:00  INFO 42900 --- [anime-ai] [      Thread-88] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:15:18.527+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:15:18.527+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:15:18.735+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:15:18.735+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:15:18.737+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-08-01T23:15:18.840+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:15:18.841+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:15:18.841+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:15:18.881+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:15:18.881+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 352 ms
+2026-08-01T23:15:18.929+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:15:18.933+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:15:18.940+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:15:18.943+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-08-01T23:15:18.949+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2c5c3223
+2026-08-01T23:15:18.950+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-08-01T23:15:18.951+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:15:18.952+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-4)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:15:18.969+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:15:18.969+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:15:19.009+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:15:19.020+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-01T23:15:19.076+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:15:19.282+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:15:19.307+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:15:19.322+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:15:19.326+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 0.823 seconds (process running for 1042.164)
+2026-08-01T23:15:19.327+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-08-01T23:15:43.060+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-08-01T23:15:43.062+08:00  INFO 42900 --- [anime-ai] [     Thread-130] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:15:43.069+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:15:43.073+08:00  INFO 42900 --- [anime-ai] [     Thread-130] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:15:43.074+08:00  INFO 42900 --- [anime-ai] [     Thread-130] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown initiated...
+2026-08-01T23:15:43.076+08:00  INFO 42900 --- [anime-ai] [     Thread-130] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:15:43.143+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:15:43.143+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:15:43.345+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:15:43.345+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:15:43.346+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-08-01T23:15:43.421+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:15:43.422+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:15:43.422+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:15:43.458+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:15:43.458+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 313 ms
+2026-08-01T23:15:43.490+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:15:43.493+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:15:43.499+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:15:43.501+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-08-01T23:15:43.506+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection com.mysql.cj.jdbc.ConnectionImpl@527a46c5
+2026-08-01T23:15:43.506+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-08-01T23:15:43.507+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:15:43.507+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-5)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:15:43.523+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:15:43.523+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:15:43.558+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:15:43.567+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-01T23:15:43.606+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:15:43.752+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:15:43.767+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:15:43.778+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:15:43.783+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 0.662 seconds (process running for 1066.62)
+2026-08-01T23:15:43.784+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-08-01T23:16:21.757+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-08-01T23:16:21.758+08:00  INFO 42900 --- [anime-ai] [     Thread-172] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:16:21.766+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:16:21.771+08:00  INFO 42900 --- [anime-ai] [     Thread-172] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:16:21.772+08:00  INFO 42900 --- [anime-ai] [     Thread-172] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown initiated...
+2026-08-01T23:16:21.774+08:00  INFO 42900 --- [anime-ai] [     Thread-172] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:16:21.866+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:16:21.866+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:16:22.089+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:16:22.089+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:16:22.091+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-08-01T23:16:22.168+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:16:22.169+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:16:22.169+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:16:22.205+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:16:22.205+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 337 ms
+2026-08-01T23:16:22.240+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:16:22.243+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:16:22.252+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:16:22.254+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-08-01T23:16:22.258+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1429ad19
+2026-08-01T23:16:22.258+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-08-01T23:16:22.259+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:16:22.261+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-6)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:16:22.275+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:16:22.275+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:16:22.305+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:16:22.313+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-01T23:16:22.357+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:16:22.477+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:16:22.491+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:16:22.500+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:16:22.504+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 0.666 seconds (process running for 1105.341)
+2026-08-01T23:16:22.505+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-08-01T23:16:26.613+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 161 class path changes (161 additions, 0 deletions, 0 modifications)
+2026-08-01T23:16:26.614+08:00  INFO 42900 --- [anime-ai] [     Thread-214] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:16:26.624+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:16:26.628+08:00  INFO 42900 --- [anime-ai] [     Thread-214] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:16:26.628+08:00  INFO 42900 --- [anime-ai] [     Thread-214] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown initiated...
+2026-08-01T23:16:26.631+08:00  INFO 42900 --- [anime-ai] [     Thread-214] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:16:26.697+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:16:26.697+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:16:28.021+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:16:28.022+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:16:28.073+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 50 ms. Found 15 JPA repository interfaces.
+2026-08-01T23:16:28.217+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:16:28.218+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:16:28.218+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:16:28.250+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:16:28.251+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1552 ms
+2026-08-01T23:16:28.295+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:16:28.298+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:16:28.305+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:16:28.307+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Starting...
+2026-08-01T23:16:28.312+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-7 - Added connection com.mysql.cj.jdbc.ConnectionImpl@35643724
+2026-08-01T23:16:28.312+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Start completed.
+2026-08-01T23:16:28.313+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:16:28.313+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-7)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:16:28.586+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:16:28.737+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:16:28.747+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.config.DashScopeConfig    : DashScopeConfig: baseUrl=, model=, visionBaseUrl=https://dashscope.aliyuncs.com/compatible-mode/v1, visionModel=qwen-vl-plus, visionApiKey=***set***
+2026-08-01T23:16:28.754+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.chat.config.RedisConfig   : Creating Redis connection factory: localhost:6379
+2026-08-01T23:16:28.755+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.chat.config.RedisConfig   : Redis connection factory created successfully
+2026-08-01T23:16:28.762+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Initializing RedisChatMemoryRepository ==========
+2026-08-01T23:16:28.843+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Initializing DatabaseChatMemoryRepository ==========
+2026-08-01T23:16:28.851+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Using CachedChatMemoryRepository (Redis + Database) ==========
+2026-08-01T23:16:28.852+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.CachedChatMemoryRepository     : Starting data migration from Redis to Database...
+2026-08-01T23:16:28.904+08:00  WARN 42900 --- [anime-ai] [     Thread-265] c.e.d.c.r.RedisChatMemoryRepository      : Redis connection not available: Unable to connect to Redis
+2026-08-01T23:16:28.904+08:00  WARN 42900 --- [anime-ai] [     Thread-265] c.e.d.c.r.RedisChatMemoryRepository      : Redis not available, using memory cache for getMessages: sample
+2026-08-01T23:16:28.904+08:00  INFO 42900 --- [anime-ai] [     Thread-265] c.e.d.c.r.CachedChatMemoryRepository     : Data migration check completed
+2026-08-01T23:16:28.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: analyzeFile
+2026-08-01T23:16:28.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: analyzeImage
+2026-08-01T23:16:28.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: editImage
+2026-08-01T23:16:28.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: generateImage
+2026-08-01T23:16:28.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: synthesizeSpeech
+2026-08-01T23:16:28.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: webSearch
+2026-08-01T23:16:28.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: searchNearbyService
+2026-08-01T23:16:28.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: getWeather
+2026-08-01T23:16:29.116+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.SpringAiTools        : SpringAiTools initialized with care services
+2026-08-01T23:16:29.117+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: triageSymptoms
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: completeCareReminder
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: listCareReminders
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: createCareReminder
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: searchNearbyService
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: professionalSearch
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: weatherAlert
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: checkMedication
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: queryPetCare
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: queryPlantSafety
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: queryFoodSafety
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: generateImage
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: analyzeImage
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: synthesizeSpeech
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: analyzeFile
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: editImage
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getWeather
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: webSearch
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getCurrentTime
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: generateCarePlan
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: compareImages
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: saveMedication
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : ToolCallingService initialized, registered 22 tools: [triageSymptoms, completeCareReminder, listCareReminders, createCareReminder, searchNearbyService, professionalSearch, weatherAlert, checkMedication, queryPetCare, queryPlantSafety, queryFoodSafety, generateImage, analyzeImage, synthesizeSpeech, analyzeFile, editImage, getWeather, webSearch, getCurrentTime, generateCarePlan, compareImages, saveMedication]
+2026-08-01T23:16:29.118+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.ai.SpringAiChatService    : SpringAiChatService initialized with ToolCallingService
+2026-08-01T23:16:29.126+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.asr.DashScopeAsrService   : DashScope ASR service initialized
+2026-08-01T23:16:29.168+08:00  INFO 42900 --- [anime-ai] [essage-Listener] c.e.demo.core.ILinkMessageListener       : Starting ILink login...
+ÇëÉ¨ÂëµÇÂ¼: https://liteapp.weixin.qq.com/q/7GiQu1?qrcode=1f3ce8f195a97a64d9971251b205a398&bot_type=3
+2026-08-01T23:16:29.316+08:00  INFO 42900 --- [anime-ai] [essage-Listener] c.e.demo.core.ILinkMessageListener       : QR code generated, waiting for scan...
+2026-08-01T23:16:29.369+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:16:29.377+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-01T23:16:29.434+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:16:29.528+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:16:29.541+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:16:29.556+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:16:29.560+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 2.883 seconds (process running for 1112.398)
+2026-08-01T23:16:29.562+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration:
+      Did not match:
+         - AnyNestedCondition 0 matched 2 did not; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ModelCondition @ConditionalOnProperty (spring.task.execution.mode=force) did not find property 'spring.task.execution.mode'; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ExecutorBeanCondition @ConditionalOnMissingBean (types: java.util.concurrent.Executor; SearchStrategy: all) found beans of type 'java.util.concurrent.Executor' vectorTaskExecutor, summaryTaskExecutor (TaskExecutorConfigurations.OnExecutorCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-08-01T23:16:29.562+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : ========== Starting Chat Memory Migration ==========
+2026-08-01T23:16:29.566+08:00  WARN 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.RedisChatMemoryRepository      : Redis connection not available: Unable to connect to Redis
+2026-08-01T23:16:29.567+08:00  WARN 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.RedisChatMemoryRepository      : Redis not available, using memory cache for getMessages: o9cq80zxm0L5kcJtoj6ZbeijGgGg@im.wechat
+2026-08-01T23:16:29.567+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : No existing messages found in Redis
+2026-08-01T23:16:29.567+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : ========== Chat Memory Migration Completed ==========
+2026-08-01T23:17:27.524+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-01T23:17:27.524+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-01T23:17:27.525+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-08-01T23:18:54.670+08:00 ERROR 42900 --- [anime-ai] [       ilink-io] c.e.demo.core.ILinkMessageListener       : ILink login failed
+
+java.util.concurrent.CompletionException: com.github.wechat.ilink.sdk.core.exception.ConnectFailedException: qrcode expired
+	at java.base/java.util.concurrent.CompletableFuture.wrapInCompletionException(CompletableFuture.java:323) ~[na:na]
+	at java.base/java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:359) ~[na:na]
+	at java.base/java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:364) ~[na:na]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1791) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+Caused by: com.github.wechat.ilink.sdk.core.exception.ConnectFailedException: qrcode expired
+	at com.github.wechat.ilink.sdk.service.LoginService$1.get(LoginService.java:82) ~[wechat-ilink-sdk-2.1.0.jar:na]
+	at com.github.wechat.ilink.sdk.service.LoginService$1.get(LoginService.java:54) ~[wechat-ilink-sdk-2.1.0.jar:na]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789) ~[na:na]
+	... 3 common frames omitted
+
+2026-08-01T23:31:56.368+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 167 class path changes (0 additions, 161 deletions, 6 modifications)
+2026-08-01T23:31:56.370+08:00  INFO 42900 --- [anime-ai] [     Thread-256] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:31:56.379+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:31:56.398+08:00  INFO 42900 --- [anime-ai] [     Thread-256] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:31:56.398+08:00  INFO 42900 --- [anime-ai] [     Thread-256] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown initiated...
+2026-08-01T23:31:56.401+08:00  INFO 42900 --- [anime-ai] [     Thread-256] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:31:56.497+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:31:56.497+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:31:56.778+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:31:56.778+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:31:56.787+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 7 ms. Found 0 JPA repository interfaces.
+2026-08-01T23:31:56.901+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:31:56.903+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:31:56.903+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:31:56.944+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:31:56.944+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 444 ms
+2026-08-01T23:31:56.998+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:31:57.003+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:31:57.011+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:31:57.014+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Starting...
+2026-08-01T23:31:57.019+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-8 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1870c8bf
+2026-08-01T23:31:57.019+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Start completed.
+2026-08-01T23:31:57.021+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:31:57.021+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-8)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:31:57.039+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:31:57.039+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:31:57.108+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:31:57.119+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-01T23:31:57.164+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:31:57.339+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:31:57.360+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:31:57.372+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:31:57.377+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 0.911 seconds (process running for 2040.215)
+2026-08-01T23:31:57.379+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   TaskExecutorConfigurations.AsyncConfigurerConfiguration matched:
+      - @ConditionalOnMissingBean (types: org.springframework.scheduling.annotation.AsyncConfigurer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskExecutorConfigurations.AsyncConfigurerConfiguration#applicationTaskExecutorAsyncConfigurer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.scheduling.annotation.AsyncConfigurer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration matched:
+      - AnyNestedCondition 1 matched 1 did not; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ModelCondition @ConditionalOnProperty (spring.task.execution.mode=force) did not find property 'spring.task.execution.mode'; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ExecutorBeanCondition @ConditionalOnMissingBean (types: java.util.concurrent.Executor; SearchStrategy: all) did not find any beans (TaskExecutorConfigurations.OnExecutorCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration#applicationTaskExecutor matched:
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+
+Negative matches:
+-----------------
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration#applicationTaskExecutorVirtualThreads:
+      Did not match:
+         - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-08-01T23:33:32.337+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 51 class path changes (51 additions, 0 deletions, 0 modifications)
+2026-08-01T23:33:32.338+08:00  INFO 42900 --- [anime-ai] [     Thread-299] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:33:32.345+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:33:32.349+08:00  INFO 42900 --- [anime-ai] [     Thread-299] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:33:32.349+08:00  INFO 42900 --- [anime-ai] [     Thread-299] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown initiated...
+2026-08-01T23:33:32.351+08:00  INFO 42900 --- [anime-ai] [     Thread-299] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:33:32.424+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:33:32.424+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:33:32.902+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:33:32.902+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:33:32.911+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 0 JPA repository interfaces.
+2026-08-01T23:33:32.988+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:33:32.988+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:33:32.988+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:33:33.020+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:33:33.020+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 594 ms
+2026-08-01T23:33:33.076+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:33:33.079+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:33:33.087+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:33:33.090+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Starting...
+2026-08-01T23:33:33.095+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-9 - Added connection com.mysql.cj.jdbc.ConnectionImpl@595f5a65
+2026-08-01T23:33:33.095+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Start completed.
+2026-08-01T23:33:33.096+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:33:33.097+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-9)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:33:33.110+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:33:33.111+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:33:33.121+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.config.DashScopeConfig    : DashScopeConfig: baseUrl=, model=, visionBaseUrl=https://dashscope.aliyuncs.com/compatible-mode/v1, visionModel=qwen-vl-plus, visionApiKey=***set***
+2026-08-01T23:33:33.122+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'agentService' defined in file [B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes\com\example\demo\agent\AgentService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'llmService' defined in file [B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes\com\example\demo\chat\LlmService.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'chatMemoryService' defined in file [B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes\com\example\demo\chat\ChatMemoryService.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'com.example.demo.chat.repository.ChatMemoryRepository' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2026-08-01T23:33:33.122+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:33:33.123+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown initiated...
+2026-08-01T23:33:33.124+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown completed.
+2026-08-01T23:33:33.124+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-08-01T23:33:33.131+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-08-01T23:33:33.153+08:00 ERROR 42900 --- [anime-ai] [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.example.demo.chat.ChatMemoryService required a bean of type 'com.example.demo.chat.repository.ChatMemoryRepository' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.example.demo.chat.repository.ChatMemoryRepository' in your configuration.
+
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:34:31.921+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:34:31.921+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:34:32.201+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:34:32.201+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:34:32.210+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 7 ms. Found 0 JPA repository interfaces.
+2026-08-01T23:34:32.302+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:34:32.303+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:34:32.303+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:34:32.346+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:34:32.346+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 423 ms
+2026-08-01T23:34:32.398+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:34:32.403+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:34:32.413+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:34:32.416+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Starting...
+2026-08-01T23:34:32.421+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-10 - Added connection com.mysql.cj.jdbc.ConnectionImpl@48f69034
+2026-08-01T23:34:32.421+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Start completed.
+2026-08-01T23:34:32.423+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:34:32.423+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-10)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:34:32.442+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:34:32.442+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:34:32.497+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:34:32.510+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-01T23:34:32.568+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:34:32.768+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:34:32.793+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:34:32.811+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:34:32.817+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 0.919 seconds (process running for 2195.654)
+2026-08-01T23:34:32.819+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-08-01T23:34:36.523+08:00  INFO 42900 --- [anime-ai] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 162 class path changes (162 additions, 0 deletions, 0 modifications)
+2026-08-01T23:34:36.524+08:00  INFO 42900 --- [anime-ai] [     Thread-341] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-01T23:34:36.532+08:00  INFO 42900 --- [anime-ai] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-08-01T23:34:36.538+08:00  INFO 42900 --- [anime-ai] [     Thread-341] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:34:36.539+08:00  INFO 42900 --- [anime-ai] [     Thread-341] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown initiated...
+2026-08-01T23:34:36.541+08:00  INFO 42900 --- [anime-ai] [     Thread-341] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-08-01T23:34:36.618+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Starting Application using Java 25.0.2 with PID 42900 (B:\YKD\A_YKD_LAST_TENT\8.1.pm\target\classes started by levono in B:\YKD\A_YKD_LAST_TENT\8.1.pm)
+2026-08-01T23:34:36.618+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : No active profile set, falling back to 1 default profile: "default"
+2026-08-01T23:34:37.656+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-01T23:34:37.656+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01T23:34:37.701+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42 ms. Found 15 JPA repository interfaces.
+2026-08-01T23:34:37.822+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-01T23:34:37.823+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-01T23:34:37.823+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-08-01T23:34:37.859+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2026-08-01T23:34:37.860+08:00  INFO 42900 --- [anime-ai] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1240 ms
+2026-08-01T23:34:37.905+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01T23:34:37.909+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-01T23:34:37.918+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01T23:34:37.921+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Starting...
+2026-08-01T23:34:37.926+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-11 - Added connection com.mysql.cj.jdbc.ConnectionImpl@65571b2f
+2026-08-01T23:34:37.927+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Start completed.
+2026-08-01T23:34:37.928+08:00  WARN 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01T23:34:37.928+08:00  INFO 42900 --- [anime-ai] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-11)']
+	Database driver: undefined/unknown
+	Database version: 9.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-01T23:34:38.214+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01T23:34:38.250+08:00  INFO 42900 --- [anime-ai] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01T23:34:38.266+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.config.DashScopeConfig    : DashScopeConfig: baseUrl=, model=, visionBaseUrl=https://dashscope.aliyuncs.com/compatible-mode/v1, visionModel=qwen-vl-plus, visionApiKey=***set***
+2026-08-01T23:34:38.272+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.chat.config.RedisConfig   : Creating Redis connection factory: localhost:6379
+2026-08-01T23:34:38.273+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.chat.config.RedisConfig   : Redis connection factory created successfully
+2026-08-01T23:34:38.280+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Initializing RedisChatMemoryRepository ==========
+2026-08-01T23:34:38.355+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Initializing DatabaseChatMemoryRepository ==========
+2026-08-01T23:34:38.360+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.demo.chat.config.ChatMemoryConfig    : ========== Using CachedChatMemoryRepository (Redis + Database) ==========
+2026-08-01T23:34:38.361+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.CachedChatMemoryRepository     : Starting data migration from Redis to Database...
+2026-08-01T23:34:38.408+08:00  WARN 42900 --- [anime-ai] [     Thread-401] c.e.d.c.r.RedisChatMemoryRepository      : Redis connection not available: Unable to connect to Redis
+2026-08-01T23:34:38.408+08:00  WARN 42900 --- [anime-ai] [     Thread-401] c.e.d.c.r.RedisChatMemoryRepository      : Redis not available, using memory cache for getMessages: sample
+2026-08-01T23:34:38.408+08:00  INFO 42900 --- [anime-ai] [     Thread-401] c.e.d.c.r.CachedChatMemoryRepository     : Data migration check completed
+2026-08-01T23:34:38.415+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: analyzeFile
+2026-08-01T23:34:38.415+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: analyzeImage
+2026-08-01T23:34:38.415+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: editImage
+2026-08-01T23:34:38.415+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: generateImage
+2026-08-01T23:34:38.415+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: synthesizeSpeech
+2026-08-01T23:34:38.415+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: webSearch
+2026-08-01T23:34:38.415+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: searchNearbyService
+2026-08-01T23:34:38.415+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.agent.AgentService      : Registered tool: getWeather
+2026-08-01T23:34:38.553+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.SpringAiTools        : AnimeAI SpringAiTools initialized
+2026-08-01T23:34:38.554+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getWeather
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: webSearch
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: searchAnime
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getTopAnime
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getCurrentTime
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getAnimeDetail
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getSeasonalAnime
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getAnimeNews
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: searchNearbyTheater
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: searchCharacter
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : Registered tool: getLocationInfo
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.ai.ToolCallingService   : ToolCallingService initialized, registered 11 tools: [getWeather, webSearch, searchAnime, getTopAnime, getCurrentTime, getAnimeDetail, getSeasonalAnime, getAnimeNews, searchNearbyTheater, searchCharacter, getLocationInfo]
+2026-08-01T23:34:38.555+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.ai.SpringAiChatService    : AnimeAI SpringAiChatService initialized
+2026-08-01T23:34:38.556+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.example.demo.asr.DashScopeAsrService   : DashScope ASR service initialized
+2026-08-01T23:34:38.697+08:00  INFO 42900 --- [anime-ai] [essage-Listener] c.e.demo.core.ILinkMessageListener       : Starting ILink login...
+2026-08-01T23:34:38.771+08:00  WARN 42900 --- [anime-ai] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01T23:34:38.779+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+ÇëÉ¨ÂëµÇÂ¼: https://liteapp.weixin.qq.com/q/7GiQu1?qrcode=a5e85983b48eecb970dca7c47fa2f6a5&bot_type=3
+2026-08-01T23:34:38.816+08:00  INFO 42900 --- [anime-ai] [essage-Listener] c.e.demo.core.ILinkMessageListener       : QR code generated, waiting for scan...
+2026-08-01T23:34:38.824+08:00  WARN 42900 --- [anime-ai] [  restartedMain] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-01T23:34:38.927+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:mysql://127.0.0.1:3306/ykd_anime_ai?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true'
+2026-08-01T23:34:38.938+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-01T23:34:38.951+08:00  INFO 42900 --- [anime-ai] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-01T23:34:38.956+08:00  INFO 42900 --- [anime-ai] [  restartedMain] com.example.demo.Application             : Started Application in 2.358 seconds (process running for 2201.794)
+2026-08-01T23:34:38.957+08:00  INFO 42900 --- [anime-ai] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration:
+      Did not match:
+         - AnyNestedCondition 0 matched 2 did not; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ModelCondition @ConditionalOnProperty (spring.task.execution.mode=force) did not find property 'spring.task.execution.mode'; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ExecutorBeanCondition @ConditionalOnMissingBean (types: java.util.concurrent.Executor; SearchStrategy: all) found beans of type 'java.util.concurrent.Executor' vectorTaskExecutor, summaryTaskExecutor (TaskExecutorConfigurations.OnExecutorCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-08-01T23:34:38.958+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : ========== Starting Chat Memory Migration ==========
+2026-08-01T23:34:38.962+08:00  WARN 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.RedisChatMemoryRepository      : Redis connection not available: Unable to connect to Redis
+2026-08-01T23:34:38.962+08:00  WARN 42900 --- [anime-ai] [  restartedMain] c.e.d.c.r.RedisChatMemoryRepository      : Redis not available, using memory cache for getMessages: o9cq80zxm0L5kcJtoj6ZbeijGgGg@im.wechat
+2026-08-01T23:34:38.962+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : No existing messages found in Redis
+2026-08-01T23:34:38.962+08:00  INFO 42900 --- [anime-ai] [  restartedMain] c.e.d.chat.config.ChatMemoryMigration    : ========== Chat Memory Migration Completed ==========
+2026-08-01T23:35:10.032+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-01T23:35:10.032+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-01T23:35:10.032+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-08-01T23:35:14.853+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-3] com.example.demo.auth.AuthController     : Register request: testuser
+2026-08-01T23:35:14.946+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-3] com.example.demo.auth.AuthService        : User registered: testuser
+2026-08-01T23:35:19.716+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-9] com.example.demo.auth.AuthController     : Login request: testuser
+2026-08-01T23:35:19.801+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-9] com.example.demo.auth.AuthService        : User logged in: testuser
+2026-08-01T23:35:25.377+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.AiController         : AnimeAI tool chat: tools=null
+2026-08-01T23:35:25.378+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] c.example.demo.ai.SpringAiChatService    : AnimeAI tool chat, msg len: 28, tools: [webSearch, getSeasonalAnime, searchCharacter, getWeather, searchNearbyTheater, getTopAnime, getCurrentTime, getAnimeDetail, getLocationInfo, searchAnime, getAnimeNews]
+2026-08-01T23:35:25.378+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Tool chat started, message length: 28
+2026-08-01T23:35:25.384+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : Built tools schema with 11 tools
+2026-08-01T23:35:25.384+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Iteration 1/5, messages: 1
+2026-08-01T23:35:25.576+08:00 ERROR 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Tool calling iteration 0 failed: Target host is not specified
+2026-08-01T23:35:26.088+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Iteration 2/5, messages: 1
+2026-08-01T23:35:26.089+08:00 ERROR 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Tool calling iteration 1 failed: Target host is not specified
+2026-08-01T23:35:26.603+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Iteration 3/5, messages: 1
+2026-08-01T23:35:26.603+08:00 ERROR 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Tool calling iteration 2 failed: Target host is not specified
+2026-08-01T23:35:27.113+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Iteration 4/5, messages: 1
+2026-08-01T23:35:27.114+08:00 ERROR 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Tool calling iteration 3 failed: Target host is not specified
+2026-08-01T23:35:27.628+08:00  INFO 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Iteration 5/5, messages: 1
+2026-08-01T23:35:27.629+08:00 ERROR 42900 --- [anime-ai] [nio-8080-exec-7] com.example.demo.ai.ToolCallingService   : [Trace:5e4b5e06] Tool calling iteration 4 failed: Target host is not specified

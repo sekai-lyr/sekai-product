@@ -1,7 +1,7 @@
 <template>
   <main class="auth-page">
     <section class="auth-panel">
-      <div class="auth-logo">背词助手</div>
+      <div class="auth-logo">未来电音背词</div>
       <h1>登录</h1>
       <p class="muted">登录后进入首页，错题、收藏、我的词库和学习记录都会保存。</p>
       <form @submit.prevent="submit" class="form">

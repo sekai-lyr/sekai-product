@@ -1,0 +1,19 @@
+{
+    "speakerName": "つくよみちゃん",
+    "speakerUuid": "3c37646f-3881-5374-2a83-149267990abc",
+    "styles": [
+        {
+            "styleName": "れいせい",
+            "styleId": 0
+        },
+        {
+            "styleName": "おしとやか",
+            "styleId": 5
+        },
+        {
+            "styleName": "げんき",
+            "styleId": 6
+        }
+    ],
+    "version": "2.0.0"
+}

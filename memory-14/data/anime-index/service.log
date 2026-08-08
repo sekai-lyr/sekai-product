@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "D:\Sekai_two\memory-14\tools\anime_index.py", line 144, in <module>
+    build(args.pages, args.anime_id) if args.command == "build" else serve(args.port)
+                                                                     ^^^^^^^^^^^^^^^^
+  File "D:\Sekai_two\memory-14\tools\anime_index.py", line 132, in serve
+    ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\administration\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socketserver.py", line 457, in __init__
+    self.server_bind()
+  File "C:\Users\administration\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\http\server.py", line 140, in server_bind
+    socketserver.TCPServer.server_bind(self)
+  File "C:\Users\administration\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+PermissionError: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。

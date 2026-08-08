@@ -1,0 +1,18 @@
+2026-08-06 02:32:17.164: [INFO] CurrentProfilePath: D:\Sekai_two\memory-14\.edge-check-1785983536531-b\Default
+2026-08-06 02:32:17.164: [INFO] Profiles total count: 1
+2026-08-06 02:32:17.165: [INFO] Profile: name=用户配置 1 path=D:\Sekai_two\memory-14\.edge-check-1785983536531-b\Default lastActive=2026-08-06T02:32:17.153Z
+2026-08-06 02:32:17.165: [INFO] LastUsedProfileDir: D:\Sekai_two\memory-14\.edge-check-1785983536531-b\Default
+2026-08-06 02:32:17.165: [INFO] MostRecentlyActiveProfile: name=用户配置 1 path=D:\Sekai_two\memory-14\.edge-check-1785983536531-b\Default lastActive=2026-08-06T02:32:17.153Z
+2026-08-06 02:32:17.165: [INFO] OnDoneLoading sync enabled: 0
+2026-08-06 02:32:17.165: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-08-06 02:32:17.165: [INFO] BookmarksLoadDropped droppedNodes=0
+2026-08-06 02:32:17.165: [INFO] BookmarksSnapshot Startup total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
+2026-08-06 02:32:17.203: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-08-06 02:32:17.323: [INFO] VisibilityChanged: 0
+2026-08-06 02:32:18.532: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-08-06 02:32:18.534: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 3
+2026-08-06 02:32:18.535: [INFO] Primary account changed.
+2026-08-06 02:32:18.535: [INFO] OnPrimaryAccountChanged PrimaryAccountChangeEvent::Type::kSet
+2026-08-06 02:32:18.539: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 3
+2026-08-06 02:32:18.548: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 3
+2026-08-06 02:32:22.546: [INFO] BookmarksSnapshot Shutdown total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1

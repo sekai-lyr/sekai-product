@@ -1,33 +1,4 @@
-# Build artifacts
-target/
-*.class
-*.jar
-*.war
-
-# IDE
-.idea/
-*.iml
-.vscode/
-
-# OS
+# OS system files
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log
-
-# Temp
-*.tmp
-*.bak
-
-# Large files
-*.cmo3
-*.vrm
-*.zip
-*.png
-*.sql
-*.sql.gz
-*.fbx
-*.obj
-*.blend
-*.psd
+desktop.ini

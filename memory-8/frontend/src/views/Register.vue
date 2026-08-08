@@ -1,7 +1,7 @@
 <template>
   <main class="auth-page">
     <section class="auth-panel">
-      <div class="auth-logo">创建账号</div>
+      <div class="auth-logo">未来电音背词</div>
       <h1>注册账号</h1>
       <p class="muted">每个用户拥有独立的错题本、收藏单词、自定义词库和学习记录。</p>
       <form @submit.prevent="submit" class="form">

@@ -1,0 +1,16 @@
+78098b89c88a74ebe8c20117b8754620
+::res://::1786156029
+README.md::TextFile::-1::1786155942::0::1::::<><><>0<>0<><>::
+::res://data/::1786155950
+cards.json::JSON::-1::1786155950::0::1::::<><><>0<>0<><>::
+::res://scenes/::1786155942
+main.tscn::PackedScene::-1::1786155942::0::1::::<><><>0<>0<><>::res://scripts/main.gd
+::res://scripts/::1786155942
+basic_ai.gd::GDScript::5328849285106771943::1786155942::0::1::::BasicAI<>RefCounted<><>0<>0<><>::
+card_catalog.gd::GDScript::6335758277035283107::1786155942::0::1::::<>Node<><>0<>0<><>::
+duel_engine.gd::GDScript::2724206323632349556::1786155942::0::1::::DuelEngine<>RefCounted<><>0<>0<><>::
+duel_state.gd::GDScript::3799633468636501147::1786155942::0::1::::DuelState<>RefCounted<><>0<>0<><>::
+main.gd::GDScript::716581016475866428::1786155942::0::1::::<>Control<><>0<>0<><>::
+pvp_client.gd::GDScript::8772523148083176689::1786155942::0::1::::PvpClient<>Node<><>0<>0<><>::
+::res://tests/::1786155942
+test_duel_engine.gd::GDScript::652982275800760466::1786155942::0::1::::<>SceneTree<><>0<>0<><>::

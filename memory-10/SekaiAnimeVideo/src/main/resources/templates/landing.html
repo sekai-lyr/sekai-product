@@ -174,11 +174,11 @@
         }
     </style>
 </head>
-<body style="background:var(--ink); margin:0; font-family:'Microsoft YaHei','PingFang SC',Arial,sans-serif; color:#e0e0e0;">
+<body style="background:var(--ink); margin:0; font-family:'Microsoft YaHei','PingFang SC',Arial,sans-serif; color:#e0d8e8;">
 <!-- Particle Starfield -->
 <canvas class="starfield-canvas sekai-starfield" data-count="150"></canvas>
 <!-- Sakura Petals -->
-<canvas class="canvas-sakura sekai-sakura" data-count="18"></canvas>
+<canvas class="canvas-sakura sekai-sakura" data-count="40"></canvas>
 <!-- Mouse Glow Trail -->
 <canvas class="canvas-glow sekai-glow"></canvas>
 <!-- Floating Orbs -->
@@ -189,6 +189,9 @@
 <canvas class="canvas-sekai-neon-shapes sekai-neon-shapes"></canvas>
 <!-- Click Ripple -->
 <canvas class="canvas-sekai-ripple-effect sekai-ripple-effect"></canvas>
+<!-- Sakura Corner Decorations -->
+<div class="sakura-decor-top" style="--r:15deg">🌸</div>
+<div class="sakura-decor-bottom" style="--r:-10deg">🌸</div>
 
 <nav class="landing-nav">
     <div class="nav-brand">🌸 Sekai Anime</div>
@@ -262,10 +265,10 @@
     </section>
 </main>
 
-<footer class="landing-footer">
-    <p>🌸 Sekai Anime Video Hub — 动漫中转站 &copy; 2026</p>
-</footer>
+    <footer class="landing-footer">
+        <p>🌸 Sekai Anime Video Hub — 樱花动漫中转站 &copy; 2026</p>
+    </footer>
 
-<script th:src="@{/js/effects.js}" src="/js/effects.js"></script>
+<script th:src="@{/js/effects.js(v='20260806-sakura3')}" src="/js/effects.js?v=20260806-sakura3"></script>
 </body>
 </html>

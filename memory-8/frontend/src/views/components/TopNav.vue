@@ -1,8 +1,8 @@
 <template>
   <nav class="top-nav">
     <router-link class="brand" to="/dashboard">
-      <span class="brand-mark">背</span>
-      <span>背词助手</span>
+      <span class="brand-mark">39</span>
+      <span>未来电音·背词</span>
     </router-link>
     <div class="nav-links">
       <router-link to="/dashboard">首页</router-link>
