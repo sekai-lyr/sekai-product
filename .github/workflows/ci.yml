@@ -1,0 +1,76 @@
+name: CI Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: memory-2 (eBusiness)
+            dir: memory-2
+            java: 21
+          - name: memory-3 (Memory Book)
+            dir: memory-3
+            java: 21
+          - name: memory-4 (Sekai Fortune)
+            dir: memory-4
+            java: 21
+          - name: memory-5 (Song Player)
+            dir: memory-5
+            java: 21
+          - name: memory-6 (Sekai 2048)
+            dir: memory-6
+            java: 21
+          - name: memory-7 (Wallpaper)
+            dir: memory-7
+            java: 21
+          - name: memory-8 (Word Learning)
+            dir: memory-8
+            java: 17
+          - name: memory-9 (SekaiForm)
+            dir: memory-9/SekaiForm
+            java: 21
+          - name: memory-10 (AnimeVideo)
+            dir: memory-10/SekaiAnimeVideo
+            java: 21
+          - name: memory-11 (SekaiGame)
+            dir: memory-11/SekaiGame
+            java: 21
+          - name: memory-12 (SekaiLearning)
+            dir: memory-12/SekaiLearning
+            java: 21
+          - name: memory-14 (anime-ai)
+            dir: memory-14
+            java: 21
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      - name: Build with Maven
+        working-directory: ${{ matrix.dir }}
+        run: mvn -B -ntp clean package -DskipTests
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.dir }}/target/*.jar
+          if-no-files-found: ignore

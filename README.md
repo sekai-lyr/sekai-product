@@ -3,8 +3,10 @@
 > 13 个可运行的完整项目，覆盖电商、社交、音乐、游戏、AI、RAG、视觉小说与 PvP 实时对战。
 > 从 `memory-2` 到 `memory-14`，每一段 memory 都是一个独立的实战项目。
 
-![Java](https://img.shields.io/badge/Java-17-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
+![Build](https://img.shields.io/github/actions/workflow/status/sekai-lyr/sekai-product/ci.yml?branch=main&label=CI%20Build&logo=github)
+![License](https://img.shields.io/github/license/sekai-lyr/sekai-product)
+![Java](https://img.shields.io/badge/Java-17|21-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x%20%7C%204.x-brightgreen)
 ![MyBatis](https://img.shields.io/badge/MyBatis-3-lightgrey)
 ![Vue 3](https://img.shields.io/badge/Vue%203-Composition-brightgreen)
 ![Godot 4](https://img.shields.io/badge/Godot-4.7-blue)
