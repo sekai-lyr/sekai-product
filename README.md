@@ -22,14 +22,14 @@
 ## 🎬 演示预览
 
 <p align="center">
-  <img src="demo/anime-ai-demo.gif" width="300" alt="anime-ai" />&nbsp;
-  <img src="demo/sekai-duel-demo.gif" width="300" alt="sekai-duel" />&nbsp;
-  <img src="demo/lies-ten-years-demo.gif" width="300" alt="lies-ten-years" />
+  <img src="demo/anime-ai-demo.webp" width="300" alt="anime-ai" />&nbsp;
+  <img src="demo/sekai-duel-demo.webp" width="300" alt="sekai-duel" />&nbsp;
+  <img src="demo/lies-ten-years-demo.webp" width="300" alt="lies-ten-years" />
 </p>
 <p align="center">
-  <img src="demo/sekai-song-player-demo.gif" width="300" alt="song-player" />&nbsp;
-  <img src="demo/sekai-memory-book-demo.gif" width="300" alt="memory-book" />&nbsp;
-  <img src="demo/english-word-learning-demo.gif" width="300" alt="word-learning" />
+  <img src="demo/sekai-song-player-demo.webp" width="300" alt="song-player" />&nbsp;
+  <img src="demo/sekai-memory-book-demo.webp" width="300" alt="memory-book" />&nbsp;
+  <img src="demo/english-word-learning-demo.webp" width="300" alt="word-learning" />
 </p>
 
 ---
