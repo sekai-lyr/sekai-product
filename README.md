@@ -29,12 +29,12 @@
 | [memory-6](memory-6/) | Sekai 2048 | 休闲游戏 | VIP 订阅、云存档、AI 教练、广告位 |
 | [memory-7](memory-7/) | Sekai Picture Wallpaper | 壁纸图库 | 上传、筛选、批量操作、运营看板 |
 | [memory-8](memory-8/) | English Word Learning | 单词学习 | Vue 3 + Spring Data JPA + 错题本 |
-| [memory-9](memory-9/) | SekaiForm AI 对话 | AI 表单 | 意图识别、工具调用、Live2D 角色 |
+| [memory-9](memory-9/) | SekaiForm AI 对话 ✅ | AI 表单 | 意图识别、工具调用、Live2D 角色（[独立仓库](https://github.com/sekai-lyr/sekai-form-ai)） |
 | [memory-10](memory-10/) | SekaiAnimeVideo | 动漫导航站 | 站点聚合与跳转服务 |
-| [memory-11](memory-11/) | Sekai Duel 夜曲决斗 | 卡牌游戏 | WebSocket PvP + Godot 4 客户端 + 游戏王规则 |
+| [memory-11](memory-11/) | Sekai Duel 夜曲决斗 ✅ | 卡牌游戏 | WebSocket PvP + Godot 4 客户端 + 游戏王规则（[独立仓库](https://github.com/sekai-lyr/sekai-duel)） |
 | [memory-12](memory-12/) | SekaiLearning | 学习平台 | 游戏化学习、积分、社群 |
 | [memory-13](memory-13/) | 谎言十年 | 视觉小说 AVG | Ren'Py 引擎、多语言、APK 发布 |
-| [memory-14](memory-14/) | anime-ai 动漫智能助手 | AI 应用 | 截图识番 + 角色识别 + Spring AI + RAG + TTS/ASR |
+| [memory-14](memory-14/) | anime-ai 动漫智能助手 ✅ | AI 应用 | 截图识番 + 角色识别 + Spring AI + RAG + TTS/ASR（[独立仓库](https://github.com/sekai-lyr/anime-ai)） |
 
 ---
 
