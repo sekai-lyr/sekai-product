@@ -16,6 +16,22 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8-4479A1)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3-005F0F)
 
+> 🎬 **全部 13 个项目均已拆分独立仓库，并带真实运行演示 GIF。**
+> 👤 **作者主页：[sekai-lyr](https://github.com/sekai-lyr)（作品集 + 演示预览）**
+
+## 🎬 演示预览
+
+<p align="center">
+  <img src="demo/anime-ai-demo.gif" width="300" alt="anime-ai" />&nbsp;
+  <img src="demo/sekai-duel-demo.gif" width="300" alt="sekai-duel" />&nbsp;
+  <img src="demo/lies-ten-years-demo.gif" width="300" alt="lies-ten-years" />
+</p>
+<p align="center">
+  <img src="demo/sekai-song-player-demo.gif" width="300" alt="song-player" />&nbsp;
+  <img src="demo/sekai-memory-book-demo.gif" width="300" alt="memory-book" />&nbsp;
+  <img src="demo/english-word-learning-demo.gif" width="300" alt="word-learning" />
+</p>
+
 ---
 
 ## ✨ 项目一览
