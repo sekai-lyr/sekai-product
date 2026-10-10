@@ -16,34 +16,36 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8-4479A1)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3-005F0F)
 
-> 🎬 **13 个项目配有真实运行演示，全部使用 WebP，打开仓库即可预览。**
+> 🎬 **15 个项目均配有当前版本演示，全部使用动画 WebP，打开仓库即可预览。**
 > 👤 **作者主页：[sekai-lyr](https://github.com/sekai-lyr)（作品集 + 演示预览）**
 
 ## 🎬 演示预览
 
 <table>
   <tr>
+    <td align="center"><a href="memory-1/"><img src="demo/sekai-data-object.webp" width="290" alt="Sekai Data Object 演示" /><br /><strong>Sekai Data Object</strong></a></td>
     <td align="center"><a href="memory-14/"><img src="demo/anime-ai.webp" width="290" alt="anime-ai 动漫智能助手演示" /><br /><strong>anime-ai · 动漫智能助手</strong></a></td>
+    <td align="center"><a href="memory-15/"><img src="demo/sekai-world-engine.webp" width="290" alt="Sekai World Engine 演示" /><br /><strong>Sekai World Engine</strong></a></td>
+  </tr>
+  <tr>
     <td align="center"><a href="memory-11/"><img src="demo/sekai-duel.webp" width="290" alt="Sekai Duel 卡牌对战演示" /><br /><strong>Sekai Duel · 实时卡牌对战</strong></a></td>
     <td align="center"><a href="memory-13/"><img src="demo/lies-ten-years.webp" width="290" alt="谎言十年视觉小说演示" /><br /><strong>谎言十年 · 视觉小说</strong></a></td>
+    <td align="center"><a href="memory-5/"><img src="demo/sekai-song-player.webp" width="290" alt="Sekai Song Player 演示" /><br /><strong>Sekai Song Player</strong></a></td>
   </tr>
   <tr>
-    <td align="center"><a href="memory-5/"><img src="demo/sekai-song-player.webp" width="290" alt="Sekai Song Player 演示" /><br /><strong>Sekai Song Player</strong></a></td>
     <td align="center"><a href="memory-3/"><img src="demo/sekai-memory-book.webp" width="290" alt="Sekai Memory Book 演示" /><br /><strong>Sekai Memory Book</strong></a></td>
     <td align="center"><a href="memory-8/"><img src="demo/english-word-learning.webp" width="290" alt="English Word Learning 演示" /><br /><strong>English Word Learning</strong></a></td>
+    <td align="center"><a href="memory-2/"><img src="demo/sekai-ebusiness.webp" width="290" alt="eBusiness 电商演示" /><br /><strong>eBusiness</strong></a></td>
   </tr>
   <tr>
-    <td align="center"><a href="memory-2/"><img src="demo/sekai-ebusiness.webp" width="290" alt="eBusiness 电商演示" /><br /><strong>eBusiness</strong></a></td>
     <td align="center"><a href="memory-4/"><img src="demo/sekai-fortune.webp" width="290" alt="Sekai Fortune 演示" /><br /><strong>Sekai Fortune</strong></a></td>
     <td align="center"><a href="memory-6/"><img src="demo/sekai-2048.webp" width="290" alt="Sekai 2048 演示" /><br /><strong>Sekai 2048</strong></a></td>
+    <td align="center"><a href="memory-7/"><img src="demo/sekai-wallpaper.webp" width="290" alt="Sekai Wallpaper 演示" /><br /><strong>Sekai Wallpaper</strong></a></td>
   </tr>
   <tr>
-    <td align="center"><a href="memory-7/"><img src="demo/sekai-wallpaper.webp" width="290" alt="Sekai Wallpaper 演示" /><br /><strong>Sekai Wallpaper</strong></a></td>
     <td align="center"><a href="memory-9/"><img src="demo/sekai-form-ai.webp" width="290" alt="SekaiForm AI 演示" /><br /><strong>SekaiForm AI</strong></a></td>
     <td align="center"><a href="memory-10/"><img src="demo/sekai-anime-video.webp" width="290" alt="SekaiAnimeVideo 演示" /><br /><strong>SekaiAnimeVideo</strong></a></td>
-  </tr>
-  <tr>
-    <td align="center" colspan="3"><a href="memory-12/"><img src="demo/sekai-learning.webp" width="290" alt="SekaiLearning 演示" /><br /><strong>SekaiLearning · 游戏化学习平台</strong></a></td>
+    <td align="center"><a href="memory-12/"><img src="demo/sekai-learning.webp" width="290" alt="SekaiLearning 演示" /><br /><strong>SekaiLearning · 游戏化学习平台</strong></a></td>
   </tr>
 </table>
 
