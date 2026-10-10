@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEKAI DUEL 夜曲决斗 · PV</title>
+<style>
+  :root{
+    --paper:#f4f1e9; --ink:#070a16;
+    --sg:#7568ff; --gold:#e7bd62;
+    --fire:#ff6b3d; --water:#46aaff; --wind:#6ef0aa;
+    --earth:#d7a550; --light:#ffe180; --dark:#aa6eff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#05060d; color:var(--paper);
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    overflow:hidden; -webkit-font-smoothing:antialiased;
+  }
+  #pv-root{position:fixed;inset:0;overflow:hidden;perspective:1400px}
+
+  /* 全屏星空底 */
+  #pv-root::before{
+    content:"";position:absolute;inset:0;z-index:0;
+    background:
+      radial-gradient(1200px 800px at 70% -10%, rgba(117,104,255,.20), transparent 60%),
+      radial-gradient(900px 700px at 10% 110%, rgba(231,189,98,.14), transparent 60%),
+      radial-gradient(circle at 50% 50%, #0b1024 0%, #05060d 70%);
+  }
+  #pv-stars{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.6}
+
+  .pv-scene{position:absolute;inset:0;z-index:2;display:grid;place-items:center;
+    opacity:0;pointer-events:none;will-change:opacity}
+  .pv-scene.is-active{opacity:1}
+
+  /* ===== 场景0 徽标/标题 ===== */
+  .pv-scene[data-scene="0"]{translate:0 -4vh}
+  .pv-emblem{width:min(33vmin,280px);filter:drop-shadow(0 0 40px rgba(117,104,255,.55))}
+  .pv-emblem svg{width:100%;height:auto;display:block}
+  .pv-title{margin-top:2.6vmin;font-weight:900;letter-spacing:.14em;
+    font-size:clamp(38px,9vmin,104px);
+    background:linear-gradient(100deg,#fff 18%,#c9c2ff 38%,#fff 50%,#8f86ff 64%,#c9c2ff 82%,#fff);
+    background-size:240% 100%;background-position:0 0;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 60px rgba(117,104,255,.35)}
+  .pv-sub{margin-top:1.4vmin;font-size:clamp(15px,2.6vmin,26px);
+    letter-spacing:.42em;color:rgba(244,241,233,.82);font-weight:700}
+  .pv-tag{margin-top:1.8vmin;font-size:clamp(12px,1.9vmin,17px);
+    letter-spacing:.28em;color:rgba(231,189,98,.9)}
+
+  /* ===== 场景1 六属性 · 角色阵容（动漫 PV 阵容） ===== */
+  .pv-scene[data-scene="1"]{translate:0 -5vh}
+  .pv-cast-wrap{position:relative;width:min(80vmin,740px);height:min(46vmin,420px)}
+  .pv-cast-glow{position:absolute;left:50%;top:50%;translate:-50% -50%;
+    width:88%;aspect-ratio:1.9;border-radius:50%;
+    background:radial-gradient(circle,rgba(117,104,255,.22),transparent 62%);
+    filter:blur(6px)}
+  .pv-cast{position:absolute;left:50%;top:50%;translate:-50% -50%;
+    width:12vmin;aspect-ratio:.62}
+  .pv-cast-inner{position:absolute;inset:0;will-change:transform,opacity}
+  .pv-cast-art{position:absolute;inset:0;overflow:hidden;border-radius:10px;
+    border:1px solid color-mix(in srgb,var(--c) 62%, transparent);
+    box-shadow:0 12px 34px rgba(0,0,0,.55),0 0 24px color-mix(in srgb,var(--c) 32%, transparent)}
+  .pv-cast-art img{width:100%;height:100%;object-fit:cover;display:block}
+  .pv-cast .streak{position:absolute;inset:-26% -55%;z-index:-1;opacity:.0;
+    background:repeating-linear-gradient(90deg,transparent 0 6px, color-mix(in srgb,var(--c) 38%, transparent) 6px 8px);
+    transform:rotate(-20deg)}
+  .pv-cast-name{position:absolute;left:50%;bottom:-5.2vmin;translate:-50% 0;white-space:nowrap;z-index:3;
+    font-weight:800;letter-spacing:.18em;text-indent:.18em;font-size:clamp(11px,1.8vmin,16px);
+    color:#fff;text-shadow:0 0 12px var(--c),0 2px 6px rgba(0,0,0,.8)}
+  .pv-cast-name::before{content:"";position:absolute;left:-13px;top:50%;width:7px;height:7px;
+    translate:0 -50%;rotate:45deg;background:var(--c);box-shadow:0 0 10px var(--c)}
+  .pv-cast-flash{position:absolute;inset:-26%;pointer-events:none;mix-blend-mode:screen;opacity:0;
+    background:radial-gradient(circle,var(--c),transparent 60%)}
+
+  /* 全局速度线（动漫 PV 质感） */
+  .pv-rays{position:absolute;inset:-30%;z-index:1;opacity:.32;pointer-events:none;
+    background:repeating-conic-gradient(from 0deg, rgba(255,255,255,.07) 0deg .8deg, transparent .8deg 4.2deg);
+    -webkit-mask:radial-gradient(circle at 50% 50%, transparent 24%, #000 70%, transparent 100%);
+    mask:radial-gradient(circle at 50% 50%, transparent 24%, #000 70%, transparent 100%);
+    animation:pvSpin 80s linear infinite}
+  @keyframes pvSpin{to{rotate:360deg}}
+
+  /* 竖排日文副标题（动漫 PV 标题语言） */
+  .pv-jp{writing-mode:vertical-rl;position:absolute;left:7%;top:50%;translate:0 -50%;
+    font-weight:700;letter-spacing:.34em;font-size:clamp(14px,2.4vmin,24px);
+    color:rgba(244,241,233,.55);text-shadow:0 0 18px rgba(117,104,255,.4)}
+
+  /* ===== 场景2 角色特写快切（番剧 OP 式） ===== */
+  .pv-cuts{position:absolute;inset:0}
+  .pv-cut{position:absolute;inset:0;display:flex;align-items:center;gap:4.5vmin;
+    padding:0 7vmin;opacity:0;will-change:opacity}
+  .pv-cut.right{flex-direction:row-reverse}
+  .pv-cut-art{position:relative;flex:0 0 28vw;height:64vh;overflow:hidden;border-radius:14px;
+    border:1px solid color-mix(in srgb,var(--c) 62%, transparent);
+    box-shadow:0 30px 70px rgba(0,0,0,.6),0 0 44px color-mix(in srgb,var(--c) 30%, transparent);
+    background:#0a0d19}
+  .pv-cut-art img{width:100%;height:100%;object-fit:cover;display:block}
+  .pv-cut-txt{flex:1;min-width:0}
+  .pv-cut-name{font-weight:900;font-size:clamp(22px,5.2vmin,56px);line-height:1.18;color:#fff;
+    text-shadow:0 4px 26px rgba(0,0,0,.8),0 0 34px var(--c)}
+  .pv-cut-meta{margin-top:2.2vmin;display:flex;gap:1.6vmin;align-items:center;flex-wrap:wrap}
+  .pv-cut-attr{padding:.7vmin 1.8vmin;border-radius:999px;border:1px solid var(--c);color:var(--c);
+    font-weight:800;letter-spacing:.2em;font-size:clamp(11px,1.8vmin,16px)}
+  .pv-cut-rar{letter-spacing:.26em;font-weight:800;font-size:clamp(12px,2vmin,18px);
+    color:var(--rc);text-shadow:0 0 18px var(--rc)}
+  .pv-cut-rays{position:absolute;inset:-20%;opacity:0;pointer-events:none;mix-blend-mode:screen;
+    background:repeating-linear-gradient(102deg,transparent 0 9px,
+      color-mix(in srgb,var(--c) 34%, transparent) 9px 11px)}
+  .pv-cut-wipe{position:absolute;inset:0;opacity:0;pointer-events:none;mix-blend-mode:screen;
+    background:linear-gradient(100deg,transparent 35%,color-mix(in srgb,var(--c) 55%, transparent) 50%,transparent 65%)}
+  .pv-cascade-cap{position:absolute;left:0;right:0;bottom:clamp(112px,17vmin,180px);text-align:center;
+    font-size:clamp(14px,2.4vmin,22px);letter-spacing:.3em;color:rgba(244,241,233,.8);
+    font-weight:700}
+
+  /* ===== 场景3 对决冲击 ===== */
+  .pv-clash{position:relative;width:100%;height:100%}
+  .pv-half{position:absolute;top:50%;width:clamp(120px,16vmin,200px);aspect-ratio:.7;
+    translate:-50% -50%;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.4);
+    box-shadow:0 20px 50px rgba(0,0,0,.6)}
+  .pv-half .art-media{position:absolute;inset:0}
+  .pv-half .art-media img{width:100%;height:100%;object-fit:cover}
+  .pv-half.left{left:24%}
+  .pv-half.right{left:76%}
+  .pv-impact{position:absolute;left:50%;top:50%;width:30vmin;aspect-ratio:1;
+    translate:-50% -50%;border-radius:50%;opacity:0;
+    background:radial-gradient(circle,#fff,rgba(255,255,255,0) 62%);
+    mix-blend-mode:screen;filter:blur(2px)}
+  .pv-clash-cap{position:absolute;left:0;right:0;bottom:clamp(112px,17vmin,180px);text-align:center;
+    font-size:clamp(16px,3vmin,30px);font-weight:900;letter-spacing:.4em;color:#fff;
+    text-shadow:0 0 30px rgba(255,133,224,.6)}
+
+  /* ===== 场景4 稀有度聚光 ===== */
+  .pv-spot{position:relative;width:100%;height:100%;display:grid;place-items:center}
+  .pv-wash{position:absolute;inset:0;z-index:0;opacity:0;mix-blend-mode:screen;
+    transition:background .4s}
+  .pv-hero{position:relative;z-index:2;width:clamp(150px,20vmin,260px);aspect-ratio:.7;
+    border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.6);
+    box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 60px rgba(170,110,255,.5);
+    opacity:0}
+  .pv-hero .art-media{position:absolute;inset:0}
+  .pv-hero .art-media img{width:100%;height:100%;object-fit:cover}
+  .pv-rarity{position:absolute;z-index:3;left:0;right:0;top:14vmin;text-align:center;
+    font-size:clamp(40px,11vmin,130px);font-weight:900;letter-spacing:.1em;opacity:0;
+    color:var(--gold);text-shadow:0 0 50px rgba(231,189,98,.7)}
+  .pv-hero-name{position:absolute;z-index:3;left:0;right:0;top:calc(50% + 13vmin);text-align:center;
+    font-size:clamp(16px,3vmin,30px);font-weight:800;letter-spacing:.3em;opacity:0;color:#fff;
+    text-shadow:0 2px 10px rgba(0,0,0,.7)}
+  .pv-hero-sub{position:absolute;z-index:3;left:0;right:0;top:calc(50% + 17.5vmin);text-align:center;
+    font-size:clamp(12px,1.9vmin,17px);letter-spacing:.26em;opacity:0;color:rgba(231,189,98,.92);
+    text-shadow:0 2px 8px rgba(0,0,0,.7)}
+
+  /* ===== 场景5 夜曲/音符 ===== */
+  .pv-notes{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+  .pv-note{position:absolute;bottom:-8vh;font-size:clamp(18px,3.4vmin,40px);
+    color:rgba(231,189,98,.85);opacity:0;will-change:transform,opacity}
+  .pv-notetext{position:relative;z-index:2;text-align:center}
+  .pv-notetext .big{font-size:clamp(46px,13vmin,150px);font-weight:900;letter-spacing:.2em;
+    background:linear-gradient(180deg,#fff,#c9c2ff);-webkit-background-clip:text;
+    background-clip:text;color:transparent}
+  .pv-notetext .en{font-size:clamp(13px,2.4vmin,22px);letter-spacing:.5em;color:rgba(244,241,233,.7);
+    margin-top:1.6vmin}
+  .pv-notetext .line{font-size:clamp(12px,1.9vmin,17px);letter-spacing:.3em;color:rgba(231,189,98,.9);
+    margin-top:2.4vmin}
+  .pv-eq{display:flex;gap:.55vmin;justify-content:center;align-items:flex-end;
+    height:5.5vmin;margin-top:3.4vmin}
+  .pv-eq i{width:.85vmin;border-radius:2px;transform-origin:bottom;
+    background:linear-gradient(180deg,var(--gold),rgba(231,189,98,.12));
+    box-shadow:0 0 8px rgba(231,189,98,.35)}
+
+  /* ===== 场景6 终幕 CTA ===== */
+  .pv-final{text-align:center}
+  .pv-final .pv-title{margin-top:0}
+  .pv-final .pv-tag{margin-top:3vmin}
+  .pv-cta{margin-top:4vmin;display:inline-block;padding:1.4vmin 4vmin;border-radius:999px;
+    border:1px solid rgba(231,189,98,.7);background:rgba(231,189,98,.10);
+    color:var(--gold);font-weight:800;letter-spacing:.34em;font-size:clamp(14px,2.4vmin,22px);
+    box-shadow:0 0 30px rgba(231,189,98,.25)}
+  .pv-final .credits{margin-top:4vmin;font-size:clamp(11px,1.7vmin,15px);
+    letter-spacing:.22em;color:rgba(244,241,233,.5)}
+
+  /* ===== HUD / 展示安排 ===== */
+  .pv-hud{position:fixed;left:0;right:0;bottom:0;z-index:20;
+    padding:14px 22px 18px;display:flex;flex-direction:column;gap:10px;
+    background:linear-gradient(0deg,rgba(3,4,10,.75),transparent)}
+  .pv-progress{height:3px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+  .pv-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sg),var(--gold));
+    transition:width .25s linear}
+  .pv-chapters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .pv-chap{flex:0 0 auto;padding:7px 12px;border-radius:8px;cursor:pointer;
+    border:1px solid rgba(244,241,233,.18);background:rgba(8,10,20,.6);
+    color:rgba(244,241,233,.7);font-size:12px;letter-spacing:.06em;white-space:nowrap;
+    transition:.18s}
+  .pv-chap:hover{border-color:rgba(231,189,98,.6);color:#fff}
+  .pv-chap.is-active{background:rgba(117,104,255,.25);border-color:rgba(117,104,255,.8);color:#fff}
+  .pv-actions{display:flex;gap:10px;justify-content:center}
+  .pv-btn{padding:7px 16px;border-radius:8px;cursor:pointer;border:1px solid rgba(244,241,233,.2);
+    background:rgba(8,10,20,.6);color:var(--paper);font-size:13px;letter-spacing:.1em}
+  .pv-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+  @media (prefers-reduced-motion: reduce){
+    .pv-scene{transition:none}
+  }
+</style>
+</head>
+<body>
+<div id="pv-root">
+  <div id="pv-stars"></div>
+  <div class="pv-rays"></div>
+
+  <!-- 场景0 -->
+  <section class="pv-scene" data-scene="0">
+    <div class="pv-emblem" id="emblem0"></div>
+    <div style="text-align:center">
+      <div class="pv-title">SEKAI DUEL</div>
+      <div class="pv-sub">夜 曲 决 斗</div>
+      <div class="pv-tag">次元决斗 · 元素召唤</div>
+      <div class="pv-jp">セカイ・デュエル</div>
+    </div>
+  </section>
+
+  <!-- 场景1 -->
+  <section class="pv-scene" data-scene="1">
+    <div class="pv-cast-wrap" id="castWrap"><div class="pv-cast-glow"></div></div>
+  </section>
+
+  <!-- 场景2 -->
+  <section class="pv-scene" data-scene="2">
+    <div class="pv-cuts" id="cuts"></div>
+    <div class="pv-cascade-cap">368 张卡牌 · 六属性次元</div>
+  </section>
+
+  <!-- 场景3 -->
+  <section class="pv-scene" data-scene="3">
+    <div class="pv-clash" id="clash">
+      <div class="pv-half left" id="clashL"></div>
+      <div class="pv-half right" id="clashR"></div>
+      <div class="pv-impact" id="impact"></div>
+    </div>
+    <div class="pv-clash-cap">召 唤 · 冲 突</div>
+  </section>
+
+  <!-- 场景4 -->
+  <section class="pv-scene" data-scene="4">
+    <div class="pv-wash" id="wash"></div>
+    <div class="pv-spot">
+      <div class="pv-rarity" id="rarityText">UR</div>
+      <div class="pv-hero" id="heroCard"></div>
+      <div class="pv-hero-name" id="heroName"></div>
+      <div class="pv-hero-sub" id="heroSub"></div>
+    </div>
+  </section>
+
+  <!-- 场景5 -->
+  <section class="pv-scene" data-scene="5">
+    <div class="pv-notes" id="noteField"></div>
+    <div class="pv-notetext">
+      <div class="big">夜 曲</div>
+      <div class="en">NIGHTCORD</div>
+      <div class="line">音乐，是连接次元的频率。</div>
+      <div class="pv-eq" id="eqBars"></div>
+    </div>
+  </section>
+
+  <!-- 场景6 -->
+  <section class="pv-scene" data-scene="6">
+    <div class="pv-final">
+      <div class="pv-title">SEKAI DUEL</div>
+      <div class="pv-tag">在夜的彼端，召唤你的次元。</div>
+      <div class="pv-cta">现 在 就 开 战 · ENTER</div>
+      <div class="credits">© SEKAI DUEL PROJECT · 次元决斗 元素召唤</div>
+    </div>
+  </section>
+
+  <div class="pv-hud">
+    <div class="pv-progress"><span id="pvBar"></span></div>
+    <div class="pv-chapters" id="chapters"></div>
+    <div class="pv-actions">
+      <button class="pv-btn" id="btnPrev">◀ 上一幕</button>
+      <button class="pv-btn" id="btnRestart">↻ 重播</button>
+      <button class="pv-btn" id="btnNext">下一幕 ▶</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import * as anime from "./node_modules/animejs/dist/modules/index.js";
+import { ALL_CARDS } from "./js/catalog.js";
+import { ELEMENT_NAMES, ELEMENT_ICONS } from "./js/cards.js";
+import { applyCardImageSources } from "./js/card-images.js";
+import { cardArtHtml } from "./js/card-view.js";
+
+const RARITY_COLOR = { N:"#9aa3b2", R:"#5b8bff", SR:"#c77dff", SSR:"#ffd66e", UR:"#ff86e0" };
+const ATTR_COLOR = { fire:"#ff6b3d", water:"#46aaff", wind:"#6ef0aa", earth:"#d7a550", light:"#ffe180", dark:"#aa6eff", none:"#7b72ff" };
+const ATTR_ORDER = ["fire","water","wind","earth","light","dark"];
+
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const A = (t,p)=>anime.animate(t,p);
+
+// 缺图回退：webp 缺失时退回原始 jpg
+document.addEventListener("error",(e)=>{
+  const el=e.target;
+  if(el && el.tagName==="IMG" && el.dataset.fallbackSrc){ el.src=el.dataset.fallbackSrc; el.removeAttribute("data-fallback-src"); }
+},true);
+
+// PV 是展示页：图片全部立即加载（cardArtHtml 默认 loading=lazy，快速播放/无头下会漏载）
+function forceEager(root){
+  root.querySelectorAll("img").forEach(img=>{ img.loading="eager"; img.decoding="sync"; });
+}
+
+/* ---------- SG 徽标 SVG ---------- */
+function emblemSvg(){
+  const dots = ATTR_ORDER.map((a,i)=>{
+    const ang=(i/6)*Math.PI*2 - Math.PI/2;
+    const x=(100+52*Math.cos(ang)).toFixed(1), y=(100+52*Math.sin(ang)).toFixed(1);
+    return `<circle cx="${x}" cy="${y}" r="6" fill="${ATTR_COLOR[a]}"/>`;
+  }).join("");
+  return `<svg viewBox="0 0 200 200">
+    <defs>
+      <radialGradient id="sg" cx="50%" cy="40%" r="65%">
+        <stop offset="0%" stop-color="#23284a"/><stop offset="100%" stop-color="#0a0e1f"/>
+      </radialGradient>
+    </defs>
+    <polygon points="100,186 25.5,143 25.5,57 100,14 174.5,57 174.5,143"
+      fill="url(#sg)" stroke="#7568ff" stroke-width="3"/>
+    <polygon points="100,168 41,135 41,65 100,32 159,65 159,135"
+      fill="none" stroke="rgba(231,189,98,.5)" stroke-width="1.4"/>
+    ${dots}
+    <text x="100" y="118" text-anchor="middle" font-size="58" font-weight="900"
+      fill="#f4f1e9" font-family="Arial" letter-spacing="-4">SG</text>
+  </svg>`;
+}
+
+/* ---------- 星空 ---------- */
+(function stars(){
+  const host=document.getElementById("pv-stars");
+  let s="";
+  for(let i=0;i<150;i++){
+    const x=Math.random()*100, y=Math.random()*100, r=(Math.random()*0.38+0.12).toFixed(2);
+    const o=(Math.random()*0.55+0.25).toFixed(2);
+    s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="${o}"/>`;
+  }
+  host.innerHTML=`<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">${s}</svg>`;
+})();
+
+  /* ---------- 场景1：六属性角色阵容（动漫 PV 阵容） ---------- */
+  const RANK={UR:5,SSR:4,SR:3,R:2,N:1};
+  const castCards = ATTR_ORDER.map(a=>{
+    const pool=ALL_CARDS.filter(c=>c.attribute===a && c.image && c.type==="monster")
+      .sort((x,y)=>(RANK[y.rarity]||0)-(RANK[x.rarity]||0));
+    return pool[0] || ALL_CARDS.find(c=>c.image) || null;
+  });
+  (function buildCast(){
+    const wrap=document.getElementById("castWrap");
+    // 两排错落阵容（动漫 PV 角色亮相构图），避开底部导览条
+    const POS=[[14,18],[50,10],[86,18],[14,76],[50,84],[86,76]];
+    ATTR_ORDER.forEach((a,i)=>{
+      const card=castCards[i]; if(!card) return;
+      const [x,y]=POS[i];
+      const el=document.createElement("div");
+      el.className="pv-cast"; el.style.left=x+"%"; el.style.top=y+"%";
+      el.style.setProperty("--c",ATTR_COLOR[a]);
+      const src=card.fullImage||card.image||card.thumbnail||"";
+      const fb=card.originalImage||"";
+      el.innerHTML=`<div class="pv-cast-inner">
+          <span class="streak"></span><span class="pv-cast-flash"></span>
+          <div class="pv-cast-art"><img src="${src}" data-fallback-src="${fb}" alt="${card.name}"></div>
+          <div class="pv-cast-name">${card.name}</div>
+        </div>`;
+      wrap.appendChild(el);
+    });
+    forceEager(wrap);
+  })();
+
+/* ---------- 场景2：角色特写快切（番剧 OP 式） ---------- */
+const cascadeCards = (()=>{
+  const imgs = ALL_CARDS.map(applyCardImageSources).filter(c=>c.image);
+  // 优先高稀有度，保证视觉密度，最多 14 张
+  const order={UR:5,SSR:4,SR:3,R:2,N:1};
+  imgs.sort((a,b)=>(order[b.rarity]||0)-(order[a.rarity]||0));
+  return imgs.slice(0,14);
+})();
+// 快切主角：每属性代表角色（复用阵容的 6 张）+ 补一张 UR 英雄，凑 6~7 个卡点
+const cutCards = (()=>{
+  const base=castCards.filter(Boolean).map(applyCardImageSources);
+  const extra=ALL_CARDS.filter(c=>c.image&&c.type==="monster"&&c.rarity==="SSR")
+    .map(applyCardImageSources).filter(c=>!base.some(b=>b.id===c.id));
+  return [...base,...extra].slice(0,6);
+})();
+(function buildCuts(){
+  const host=document.getElementById("cuts");
+  cutCards.forEach((c,i)=>{
+    const el=document.createElement("div");
+    el.className="pv-cut"+(i%2?" right":"");
+    el.style.setProperty("--c",ATTR_COLOR[c.attribute]||"#7b72ff");
+    el.style.setProperty("--rc",RARITY_COLOR[c.rarity]||"#ffd66e");
+    const src=c.fullImage||c.image||c.thumbnail||"";
+    el.innerHTML=`<div class="pv-cut-rays"></div><div class="pv-cut-wipe"></div>
+      <div class="pv-cut-art"><img src="${src}" data-fallback-src="${c.originalImage||""}" alt="${c.name}"></div>
+      <div class="pv-cut-txt">
+        <div class="pv-cut-name">${c.name}</div>
+        <div class="pv-cut-meta">
+          <span class="pv-cut-attr">${ELEMENT_NAMES[c.attribute]||"无"}</span>
+          <span class="pv-cut-rar">${c.rarity}</span>
+        </div>
+      </div>`;
+    host.appendChild(el);
+  });
+  forceEager(host);
+})();
+
+/* ---------- 场景3：对决双方 = 两张真实卡 ---------- */
+(function buildClash(){
+  const mons=cascadeCards.filter(c=>c.type==="monster");
+  const L=mons[0]||cascadeCards[0], R=mons[mons.length-1]||cascadeCards[1]||cascadeCards[0];
+  document.getElementById("clashL").innerHTML=cardArtHtml(L,"art-media",true);
+  document.getElementById("clashR").innerHTML=cardArtHtml(R,"art-media",true);
+  forceEager(document.getElementById("clash"));
+})();
+
+/* ---------- 场景4：UR 英雄卡聚光 ---------- */
+  const heroCard = (()=>{
+    // 优先"真角色"UR（排除 picture/source 生成图系列），朝比奈真冬是唯一的角色 UR
+    const pool=ALL_CARDS.filter(c=>c.rarity==="UR"&&c.image);
+    const pick = pool.find(c=>c.type==="monster" && !/picture|source/i.test(c.series))
+      || pool.find(c=>c.type==="monster")
+      || pool[0];
+    return applyCardImageSources(pick||cascadeCards[0]);
+  })();
+(function buildSpot(){
+  document.getElementById("heroCard").innerHTML=cardArtHtml(heroCard,"art-media",true);
+  forceEager(document.getElementById("heroCard"));
+  document.getElementById("heroName").textContent=heroCard.name||"";
+  document.getElementById("heroSub").textContent=
+    `${ELEMENT_NAMES[heroCard.attribute]||"无"}属性 · ${heroCard.series||"SEKAI"} · ${heroCard.type==="monster"?"怪兽":(heroCard.type||"卡")}`;
+  document.getElementById("rarityText").textContent=heroCard.rarity||"UR";
+  document.getElementById("rarityText").style.color=RARITY_COLOR[heroCard.rarity]||"#ffd66e";
+  document.getElementById("wash").style.background=
+    `radial-gradient(circle at 50% 45%, ${ATTR_COLOR[heroCard.attribute]||"#7b72ff"}, transparent 60%)`;
+})();
+
+/* ---------- 场景5：音符 ---------- */
+const noteGlyphs=["♪","♫","♬","✧","♩"];
+(function buildEq(){
+  document.getElementById("eqBars").innerHTML=
+    Array.from({length:26},()=>`<i style="height:${(18+Math.random()*82).toFixed(0)}%"></i>`).join("");
+})();
+(function buildNotes(){
+  const host=document.getElementById("noteField");
+  for(let i=0;i<26;i++){
+    const el=document.createElement("div");
+    el.className="pv-note";
+    el.textContent=noteGlyphs[i%noteGlyphs.length];
+    el.style.left=(Math.random()*100).toFixed(1)+"%";
+    el.style.fontSize=(Math.random()*2+1.4).toFixed(1)+"vmin";
+    el.dataset.dur=(Math.random()*2+3.5).toFixed(1);
+    el.dataset.drift=((Math.random()*2-1)*8).toFixed(1);
+    el.dataset.delay=(Math.random()*3).toFixed(1);
+    host.appendChild(el);
+  }
+})();
+
+/* ---------- 场景编排 ---------- */
+const scenes=Array.from(document.querySelectorAll(".pv-scene"));
+const TOTAL=20000;
+const SCENE_DUR=[2600,2500,4200,1900,2700,2400,3200]; // 各幕时长（场景2 快切 6×560ms + 字幕）
+let current=-1, advanceTimer=null;
+
+const chapters=document.getElementById("chapters");
+const CHAPTERS=[
+  {n:0,t:"开场 · 徽标"},{n:1,t:"六属性"},{n:2,t:"卡牌次元"},
+  {n:3,t:"召唤冲突"},{n:4,t:"UR 聚光"},{n:5,t:"夜曲"},{n:6,t:"终幕"}
+];
+CHAPTERS.forEach(c=>{
+  const b=document.createElement("button");
+  b.className="pv-chap"; b.textContent=c.t; b.dataset.scene=c.n;
+  b.onclick=()=>jumpTo(c.n);
+  chapters.appendChild(b);
+});
+function markChap(i){ chapters.querySelectorAll(".pv-chap").forEach(b=>b.classList.toggle("is-active",+b.dataset.scene===i)); }
+
+function showScene(i){
+  scenes.forEach((s,idx)=>{
+    if(idx===i && !s.classList.contains("is-active")){
+      s.classList.add("is-active");
+      // 镜头感转场：淡入 + 由 1.05 缓推到 1
+      anime.animate(s,{opacity:[0,1],scale:[1.05,1],duration:900,ease:"outExpo"});
+    }else if(idx!==i && s.classList.contains("is-active")){
+      s.classList.remove("is-active");
+      anime.animate(s,{opacity:[1,0],scale:[1,.985],duration:380,ease:"outQuad"});
+    }
+  });
+}
+
+function playScene(i){
+  current=i; showScene(i); markChap(i);
+  const bar=document.getElementById("pvBar");
+  bar.style.width=((i/ (scenes.length)) *100)+"%";
+  if(i===scenes.length-1) setTimeout(()=>bar.style.width="100%",SCENE_DUR[i]-300);
+
+  if(reduced){ // 减少动效：仅静态显示关键内容
+    if(i===0){ document.getElementById("emblem0").innerHTML=emblemSvg(); }
+    ["#heroCard","#heroName","#heroSub"].forEach(s=>{
+      const el=document.querySelector(s); if(el) el.style.opacity="1";
+    });
+    document.querySelectorAll(".pv-cast-inner").forEach(el=>el.style.opacity="1");
+    const cuts=document.querySelectorAll(".pv-cut");
+    if(cuts.length) cuts[cuts.length-1].style.opacity="1";
+    return;
+  }
+
+  if(i===0){
+    document.getElementById("emblem0").innerHTML=emblemSvg();
+    A("#emblem0",{scale:[0.2,1],opacity:[0,1],rotate:[0,360],duration:1500,ease:"outExpo"});
+    A(".pv-title",{opacity:[0,1],translateY:[34,0],letterSpacing:[".42em",".14em"],
+      duration:1100,delay:850,ease:"outExpo"});
+    // 光泽从左扫到右
+    anime.animate(".pv-title",{backgroundPosition:["120% 0","-20% 0"],duration:2400,delay:1000,ease:"inOutQuad"});
+    A(".pv-sub",{opacity:[0,1],translateY:[20,0],duration:800,delay:1350,ease:"outExpo"});
+    A(".pv-tag",{opacity:[0,1],duration:800,delay:1750,ease:"outExpo"});
+    A(".pv-jp",{opacity:[0,1],translateY:[24,0],duration:900,delay:1050,ease:"outExpo"});
+    // 徽标辉光呼吸
+    anime.animate("#emblem0",{filter:["drop-shadow(0 0 26px rgba(117,104,255,.5))","drop-shadow(0 0 58px rgba(117,104,255,.85))"],
+      duration:2400,loop:true,direction:"alternate",ease:"inOutSine"});
+  }
+  else if(i===1){
+    // 中心光晕先亮起
+    A(".pv-cast-glow",{opacity:[0,.9],scale:[.7,1],duration:900,ease:"outExpo"});
+    // 角色贴图从六方飞入落位（带旋转 + 回弹）
+    A(".pv-cast-inner",{
+      opacity:[0,1], scale:[.55,1], rotate:(el,idx)=>[(idx%2?-26:26),0],
+      translateX:(el,idx)=>{const a=(idx/6)*Math.PI*2-Math.PI/2; return [Math.cos(a)*150,0];},
+      translateY:(el,idx)=>{const a=(idx/6)*Math.PI*2-Math.PI/2; return [Math.sin(a)*150,0];},
+      duration:720, delay:anime.stagger(95,{start:260}), ease:"outBack"
+    });
+    // 落位闪光 + 速度线
+    document.querySelectorAll(".pv-cast").forEach((el,idx)=>{
+      anime.animate(el.querySelector(".pv-cast-flash"),{opacity:[0,.9,0],scale:[.4,1.7],
+        duration:520,delay:260+idx*95+520,ease:"outExpo"});
+    });
+  }
+  else if(i===2){
+    // 番剧 OP 式角色特写快切：每张 ~560ms，立绘推近 + 名字反向滑入 + 速度线扫过 + 光带扫过
+    const CUT=560;
+    document.querySelectorAll(".pv-cut").forEach((el,k)=>{
+      const t0=k*CUT, dir=(k%2?-1:1);
+      const art=el.querySelector(".pv-cut-art"), txt=el.querySelector(".pv-cut-txt");
+      const rays=el.querySelector(".pv-cut-rays"), wipe=el.querySelector(".pv-cut-wipe");
+      // 整体：淡入 → 保持 → 淡出（单次多关键帧，避免两个动画抢同一属性）
+      A(el,{opacity:[0,1,1,0],duration:CUT+140,delay:t0,ease:"linear"});
+      // 立绘：从侧面滑入并持续推近（Ken Burns）
+      A(art,{translateX:[dir*160,0],scale:[1,1.09],duration:CUT+140,delay:t0,ease:"outExpo"});
+      // 文字：反方向滑入
+      A(txt,{translateX:[dir*-110,0],opacity:[0,1],duration:430,delay:t0+110,ease:"outExpo"});
+      // 速度线 + 光带扫过
+      A(rays,{opacity:[0,.6,0],translateX:[dir*-26+"%",dir*26+"%"],duration:CUT,delay:t0,ease:"inOutSine"});
+      A(wipe,{opacity:[0,.85,0],translateX:[dir*-70+"%",dir*70+"%"],duration:CUT,delay:t0,ease:"inOutQuad"});
+    });
+    const total=document.querySelectorAll(".pv-cut").length*CUT;
+    A(".pv-cascade-cap",{opacity:[0,1],duration:700,delay:total,ease:"outExpo"});
+  }
+  else if(i===3){
+    A("#clashL",{left:["8%","24%"],opacity:[0,1],duration:700,ease:"outExpo"});
+    A("#clashR",{left:["92%","76%"],opacity:[0,1],duration:700,ease:"outExpo"});
+    A("#impact",{opacity:[0,1,0],scale:[0.2,2.2,2.6],duration:520,delay:720,ease:"outExpo"});
+    A(".pv-clash-cap",{opacity:[0,1],duration:600,delay:980,ease:"outExpo"});
+    // 屏幕微震
+    A("#pv-root",{translateX:[0,-8,8,-5,5,0],duration:420,delay:720,ease:"inOutSine"});
+  }
+  else if(i===4){
+    A("#wash",{opacity:[0,0.65],duration:900,ease:"outExpo"});
+    A("#heroCard",{scale:[0.4,1],opacity:[0,1],duration:1000,ease:"outExpo"});
+    A("#rarityText",{opacity:[0,1],scale:[0.6,1.15,1],duration:1000,delay:500,ease:"outBack"});
+    A("#heroName",{opacity:[0,1],translateY:[16,0],duration:700,delay:900,ease:"outExpo"});
+    A("#heroSub",{opacity:[0,1],translateY:[12,0],duration:700,delay:1150,ease:"outExpo"});
+    // 属性光晕呼吸
+    anime.animate("#wash",{opacity:[0.65,0.4,0.65],duration:2600,loop:true,ease:"inOutSine"});
+  }
+  else if(i===5){
+    A(".pv-notetext .big",{opacity:[0,1],scale:[0.8,1],duration:1000,ease:"outExpo"});
+    A(".pv-notetext .en",{opacity:[0,1],duration:800,delay:500,ease:"outExpo"});
+    A(".pv-notetext .line",{opacity:[0,1],duration:800,delay:850,ease:"outExpo"});
+    // 均衡器律动（从中心向两侧波浪）
+    anime.animate(".pv-eq i",{scaleY:[.12,1],duration:640,
+      delay:anime.stagger(48,{from:"center"}),loop:true,direction:"alternate",ease:"inOutSine"});
+    document.querySelectorAll(".pv-note").forEach(el=>{
+      anime.animate(el,{
+        translateY:["0vh","-118vh"],
+        translateX:()=>[0,(Number(el.dataset.drift))+"vw"],
+        opacity:[0,0.95,0],
+        rotate:()=>[0,(Math.random()*360-180).toFixed(0)],
+        duration:Number(el.dataset.dur)*1000,
+        delay:Number(el.dataset.delay)*1000,
+        loop:true, ease:"inOutSine"
+      });
+    });
+  }
+  else if(i===6){
+    A(".pv-final .pv-title",{opacity:[0,1],scale:[0.85,1],duration:1000,ease:"outExpo"});
+    A(".pv-final .pv-tag",{opacity:[0,1],duration:800,delay:500,ease:"outExpo"});
+    A(".pv-final .pv-cta",{opacity:[0,1],translateY:[20,0],duration:800,delay:850,ease:"outExpo"});
+    A(".pv-final .credits",{opacity:[0,1],duration:800,delay:1200,ease:"outExpo"});
+    anime.animate(".pv-final .pv-cta",{boxShadow:["0 0 30px rgba(231,189,98,.25)","0 0 60px rgba(231,189,98,.6)","0 0 30px rgba(231,189,98,.25)"],duration:2200,loop:true,ease:"inOutSine"});
+  }
+}
+
+function scheduleNext(){
+  clearTimeout(advanceTimer);
+  if(current<scenes.length-1){
+    advanceTimer=setTimeout(()=>playScene(current+1),SCENE_DUR[current]);
+  }else{
+    advanceTimer=setTimeout(()=>playScene(0),SCENE_DUR[current]+400); // 循环
+  }
+}
+function jumpTo(i){
+  i=Math.max(0,Math.min(scenes.length-1,i));
+  clearTimeout(advanceTimer);
+  playScene(i);
+  scheduleNext();
+}
+document.getElementById("btnNext").onclick=()=>jumpTo((current<0?0:current)+1>=scenes.length?0:(current+1));
+document.getElementById("btnPrev").onclick=()=>jumpTo(current<=0?scenes.length-1:current-1);
+document.getElementById("btnRestart").onclick=()=>jumpTo(0);
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="ArrowRight")document.getElementById("btnNext").click();
+  if(e.key==="ArrowLeft")document.getElementById("btnPrev").click();
+  if(e.key===" "){e.preventDefault();document.getElementById("btnRestart").click();}
+});
+
+// 星空缓慢漂移呼吸（常驻，增加纵深）
+anime.animate("#pv-stars",{scale:[1,1.06],opacity:[.55,.8],duration:16000,
+  loop:true,direction:"alternate",ease:"inOutSine"});
+
+// 启动：支持 ?scene=N 直达某一幕（展示安排/单幕验证用）
+const startScene=(()=>{ const v=parseInt(new URLSearchParams(location.search).get("scene"),10);
+  return Number.isInteger(v)?Math.max(0,Math.min(6,v)):0; })();
+jumpTo(startScene);
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>45 张陷阱卡 · 4×4 独立逐帧图集</title>
+  <style>
+    :root{color-scheme:dark;--bg:#08101f;--panel:#111c32;--line:#294162;--cyan:#67e8f9;--gold:#ffd37a}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#21375b 0,#0b1426 38%,var(--bg) 75%);color:#eaf4ff;font-family:"Microsoft YaHei","PingFang SC",sans-serif}
+    header{position:sticky;top:0;z-index:4;padding:18px clamp(16px,4vw,48px);background:#08101fe8;border-bottom:1px solid #294162;backdrop-filter:blur(14px)}
+    h1{margin:0;font-size:clamp(22px,3vw,38px)}header p{margin:7px 0 0;color:#9db1cc}.count{color:var(--cyan)}
+    main{max-width:1680px;margin:auto;padding:24px clamp(12px,3vw,42px) 70px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+    .card{appearance:none;text-align:left;color:inherit;background:linear-gradient(145deg,#15223a,#0d1729);border:1px solid var(--line);border-radius:15px;padding:10px;cursor:pointer;box-shadow:0 12px 30px #0006;transition:.2s transform,.2s border-color}
+    .card:hover{transform:translateY(-4px);border-color:var(--cyan)}.card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:#070d19;border-radius:9px}
+    .meta{padding:11px 4px 4px}.name{font-weight:800;font-size:17px}.sub{display:flex;justify-content:space-between;margin-top:6px;color:#8da5c5;font:12px ui-monospace,monospace}.rarity{color:var(--gold)}
+    dialog{width:min(94vw,980px);border:1px solid #4d7099;border-radius:18px;padding:0;color:inherit;background:#0b1426;box-shadow:0 30px 100px #000c}dialog::backdrop{background:#020611dc;backdrop-filter:blur(6px)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}.modal-head h2{margin:0;font-size:20px}.close{border:0;background:#243651;color:white;border-radius:99px;width:38px;height:38px;font-size:22px;cursor:pointer}
+    .stage{display:grid;grid-template-columns:minmax(280px,1fr) minmax(280px,1fr);gap:18px;padding:18px}.sheet{width:100%;border-radius:12px;background:#060b14}.player-wrap{display:grid;place-items:center;min-height:320px;background:radial-gradient(circle,#1b2a48,#070d19 70%);border-radius:12px;overflow:hidden}.player{width:min(74vw,390px);aspect-ratio:1;background-repeat:no-repeat;background-size:400% 400%;filter:drop-shadow(0 12px 18px #000b)}
+    .controls{display:flex;align-items:center;justify-content:center;gap:10px;padding:0 18px 20px}.controls button{border:1px solid #42658c;background:#172944;color:white;border-radius:9px;padding:10px 16px;cursor:pointer}.controls .play{background:#19778b;border-color:#67e8f9}.frame{min-width:72px;text-align:center;color:var(--cyan);font-family:ui-monospace,monospace}
+    @media(max-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:6px}.name{font-size:14px}.sub{font-size:9px}.stage{grid-template-columns:1fr;padding:10px}.sheet{display:none}.player-wrap{min-height:auto}.controls{padding-top:10px}}
+  </style>
+</head>
+<body>
+  <header><h1>陷阱卡独立逐帧图集 <span class="count" id="count">加载中…</span></h1><p>每张卡牌对应一份独立 1536×1536、4×4、16 帧图集。点击卡牌检查原图并播放动画。</p></header>
+  <main><section class="grid" id="grid"></section></main>
+  <dialog id="modal"><div class="modal-head"><h2 id="title"></h2><button class="close" id="close" aria-label="关闭">×</button></div><div class="stage"><img class="sheet" id="sheet" alt="完整 4×4 图集"><div class="player-wrap"><div class="player" id="player"></div></div></div><div class="controls"><button id="prev">上一帧</button><button class="play" id="play">暂停</button><span class="frame" id="frame">01 / 16</span><button id="next">下一帧</button></div></dialog>
+  <script type="module">
+    import {ALL_CARDS} from './js/catalog.js';
+    import {VFX_CARD_PROFILES} from './js/authored-card-scenes.js?v=25-trap-quality-complete';
+    const version='trap-quality-3';
+    const cards=ALL_CARDS.filter(card=>card.type==='trap'&&VFX_CARD_PROFILES[card.id]?.sheet);
+    const grid=document.querySelector('#grid'), modal=document.querySelector('#modal'), player=document.querySelector('#player'), sheet=document.querySelector('#sheet');
+    let current=0, timer=0, playing=true;
+    const imageUrl=card=>`./images/vfx/${VFX_CARD_PROFILES[card.id].sheet}?v=${version}`;
+    const paintFrame=()=>{const col=current%4,row=Math.floor(current/4);player.style.backgroundPosition=`${col*100/3}% ${row*100/3}%`;document.querySelector('#frame').textContent=`${String(current+1).padStart(2,'0')} / 16`;};
+    const start=()=>{clearInterval(timer);playing=true;document.querySelector('#play').textContent='暂停';timer=setInterval(()=>{current=(current+1)%16;paintFrame()},90)};
+    const open=card=>{const url=imageUrl(card);document.querySelector('#title').textContent=`${card.name} · ${card.id}`;sheet.src=url;player.style.backgroundImage=`url("${url}")`;current=0;paintFrame();modal.showModal();start()};
+    cards.forEach(card=>{const button=document.createElement('button');button.className='card';button.innerHTML=`<img loading="lazy" src="${imageUrl(card)}" alt="${card.name} 4×4 图集"><div class="meta"><div class="name">${card.name}</div><div class="sub"><span>${card.id}</span><span class="rarity">${card.rarity||''}</span></div></div>`;button.onclick=()=>open(card);grid.append(button)});
+    document.querySelector('#count').textContent=`${cards.length} / 45`;
+    document.querySelector('#close').onclick=()=>modal.close();modal.addEventListener('close',()=>clearInterval(timer));
+    document.querySelector('#prev').onclick=()=>{current=(current+15)%16;paintFrame()};document.querySelector('#next').onclick=()=>{current=(current+1)%16;paintFrame()};
+    document.querySelector('#play').onclick=()=>{if(playing){clearInterval(timer);playing=false;document.querySelector('#play').textContent='播放'}else start()};
+  </script>
+</body>
+</html>

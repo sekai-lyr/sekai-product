@@ -1,0 +1,416 @@
+/* Anime art direction. Keep battle geometry and effect transforms owned by the duel UI. */
+:root {
+    --anime-ink:#16243b;
+    --anime-paper:#fff9ef;
+    --anime-coral:#e64259;
+    --anime-cyan:#69ddd8;
+    --anime-gold:#ffcf6b;
+}
+body#sekai-game { background:var(--anime-ink); font-family:"Segoe UI","Microsoft YaHei",sans-serif; }
+body#sekai-game .game-shell {
+    --bg-0:#16243b; --bg-1:#1d3049; --bg-2:#263c53;
+    --panel:#20344dee; --panel-strong:#1a2b43;
+    --line:#8ab7c04d; --line-strong:#a6d8d488;
+    --text:#fff9ef; --text-2:#d4e3e8; --text-3:#a9c2cd;
+    --accent:#ff7381; --accent-2:#69ddd8; --gold:#ffcf6b;
+    background-image:radial-gradient(#8aaeb31c 1px,transparent 1px);
+    background-size:12px 12px;
+}
+body#sekai-game .game-shell .topbar { background:#16243bf2; border-bottom:2px solid #8ab7c04d; }
+body#sekai-game .game-shell :is(.rank-chip,.currency-chip,.profile-chip,.game-back,.hud-rail button) {
+    border-radius:9px; border-color:#8ab7c06b; background:#20344d; box-shadow:3px 3px 0 #0c1728;
+}
+body#sekai-game .game-shell :is(.rank-badge,.profile-avatar) { background:var(--anime-cyan); color:var(--anime-ink); border-radius:5px; box-shadow:none; }
+body#sekai-game .game-shell .rank-track > span { background:var(--anime-cyan); box-shadow:none; }
+body#sekai-game .game-shell .sidebar { border:2px solid var(--anime-ink); border-radius:12px; background:var(--anime-paper); box-shadow:5px 5px 0 #080f20a8; }
+body#sekai-game .game-shell .nav-item { border-radius:6px; color:#43546a; font-weight:700; }
+body#sekai-game .game-shell .nav-item:hover { background:#dcedec; color:var(--anime-ink); }
+body#sekai-game .game-shell .nav-item.active { background:var(--anime-ink); color:var(--anime-paper); box-shadow:none; }
+body#sekai-game .game-shell .nav-item.active::after { background:var(--anime-coral); height:3px; box-shadow:none; }
+body#sekai-game .game-shell .nav-item > span:last-child { color:inherit; }
+body#sekai-game .game-shell :is(.primary-action,#save-deck),body#sekai-game .primary-action,body#sekai-game .ctrl-btn.btn-end {
+    border:2px solid var(--anime-ink); border-radius:6px; background:var(--anime-coral); color:#fff;
+    box-shadow:4px 4px 0 var(--anime-ink); font-weight:800;
+}
+body#sekai-game .game-shell :is(.secondary-action,.deck-filter-btn),body#sekai-game .secondary-action {
+    border-radius:6px; border-color:#8ab7c080; background:#20344d; color:#e7f2f4;
+}
+body#sekai-game .game-shell .deck-filter-btn.active { background:var(--anime-cyan); border-color:var(--anime-cyan); color:var(--anime-ink); font-weight:800; }
+body#sekai-game .game-shell :is(input,select) { border-radius:6px; background:#112239; border-color:#7093a5; color:#fff9ef; }
+body#sekai-game :is(button,input,select,a):focus-visible { outline:3px solid var(--anime-cyan); outline-offset:4px; }
+body#sekai-game button:disabled { cursor:not-allowed; }
+body#sekai-game .game-shell .screen-heading h1 { font-weight:900; letter-spacing:.06em; text-shadow:3px 3px 0 #080f20; }
+body#sekai-game .game-shell .screen-heading .eyebrow { color:var(--anime-cyan); letter-spacing:.22em; }
+body#sekai-game .game-shell :is(.collection-detail,.deck-source,.deck-workspace,.settings-panel,.manual-index,.manual-pages .rule-panel,.featured-pack,.shop-side) {
+    border:2px solid #8ab7c061; border-radius:10px; background:var(--panel-strong); box-shadow:5px 5px 0 #0c172899;
+}
+body#sekai-game .game-shell .filter-bar { background:#20344d; border-radius:8px; border-color:#8ab7c061; }
+body#sekai-game .game-shell .collection-grid .catalog-card { border-radius:7px; border:2px solid #a9c2cd; box-shadow:3px 4px 0 #0b182d; }
+body#sekai-game .game-shell .collection-grid .catalog-card:hover { border-color:var(--anime-gold); box-shadow:4px 6px 0 #0b182d; }
+body#sekai-game .game-shell .detail-copy { background:var(--anime-paper); color:var(--anime-ink); }
+body#sekai-game .game-shell .collection-detail { max-height:calc(100dvh - var(--topbar-h) - var(--nav-h) - 28px); overflow:auto; overscroll-behavior:contain; }
+body#sekai-game .game-shell .detail-copy :is(h2,p,.eyebrow,.empty-copy,.detail-stats span) { color:#30445b; }
+body#sekai-game .game-shell .detail-copy .detail-stats strong { color:var(--anime-ink); }
+body#sekai-game .game-shell .detail-effect-field { margin:10px 0; padding:12px; border:1px solid #b9caca; border-left:4px solid #247d85; border-radius:4px; background:#fff; color:var(--anime-ink); }
+body#sekai-game .game-shell .detail-effect-field :is(strong,.detail-effect-text) { color:var(--anime-ink); line-height:1.8; }
+body#sekai-game .game-shell .detail-effect-field :is(.detail-effect-trigger,.detail-effect-label,.detail-effect-limit) { color:#526174; }
+body#sekai-game .game-shell .deck-list-item { background:#263c53; border-radius:6px; }
+body#sekai-game .game-shell .deck-count-control button { width:32px; height:32px; }
+body#sekai-game .game-shell .deck-errors { color:#ffe2a6; background:#563d27; border-radius:6px; }
+body#sekai-game .game-shell .settings-portrait { border-radius:10px; border:2px solid #8ab7c080; }
+body#sekai-game .game-shell .lobby-scenery { background:linear-gradient(115deg,#16243bd9,#16243b55),url('../assets/duel-scenes/spirit-forest.webp') center/cover; }
+body#sekai-game .game-shell .lobby-character { animation:none; }
+body#sekai-game .game-shell .lobby-light { background:linear-gradient(90deg,#16243bba,transparent 40%,#16243b44),linear-gradient(0deg,#16243b,transparent 45%); }
+body#sekai-game .game-shell .lobby-chapter h1 { font-family:"Microsoft YaHei",sans-serif; font-weight:900; transform:skewY(-4deg); text-shadow:4px 4px 0 var(--anime-ink),6px 6px 0 #69ddd899; }
+body#sekai-game .game-shell .lobby-chapter > span { display:inline-block; background:var(--anime-cyan); color:var(--anime-ink); padding:6px 10px; letter-spacing:.16em; font-weight:800; }
+body#sekai-game .game-shell .lobby-chapter p { margin-top:14px; color:var(--anime-paper); font-family:inherit; }
+body#sekai-game .game-shell .lobby-character-name { border-left:4px solid var(--anime-cyan); padding:12px 16px; background:#16243be8; border-radius:0 8px 8px 0; }
+body#sekai-game .game-shell .lobby-character-name strong { font-family:inherit; font-weight:800; }
+body#sekai-game .game-shell .lobby-character-name > span { color:var(--anime-cyan); letter-spacing:.15em; }
+body#sekai-game .game-shell .lobby-battle { border:3px solid var(--anime-ink); border-radius:10px 10px 10px 0; background:var(--anime-coral); box-shadow:6px 6px 0 var(--anime-cyan); }
+body#sekai-game .game-shell .lobby-battle strong { font-family:inherit; font-weight:900; text-shadow:2px 2px 0 #972335; }
+body#sekai-game .game-shell .lobby-battle .live-glow { display:none; }
+body#sekai-game .game-shell :is(.lobby-daily,.lobby-adventure,.lobby-deck,.lobby-change) { background:#1d3049f5; border:1px solid #8ab7c080; border-radius:6px; }
+body#sekai-game .game-shell .lobby-daily { border-left:4px solid var(--anime-gold); }
+body#sekai-game .game-shell .lobby-banner { border:2px solid var(--anime-paper); border-radius:6px; box-shadow:4px 4px 0 var(--anime-ink); }
+body#sekai-game .game-shell .lobby-banner small { color:var(--anime-gold); }
+body#sekai-game .auth-screen { background:radial-gradient(#69ddd825 1px,transparent 1px) 0 0/12px 12px,var(--anime-ink); }
+body#sekai-game .auth-ignition { background:linear-gradient(125deg,transparent 52%,#69ddd815 52%,#69ddd815 68%,transparent 68%); }
+body#sekai-game .auth-ignition-copy { color:var(--anime-paper); }
+body#sekai-game .auth-ignition-copy :is(strong,p,.auth-ignition-code) { color:var(--anime-paper); }
+body#sekai-game .auth-ignition-copy .eyebrow { color:var(--anime-cyan); }
+body#sekai-game .auth-ignition-copy strong { font-family:"Microsoft YaHei",sans-serif; font-weight:900; text-shadow:3px 3px 0 #0008; }
+body#sekai-game .auth-panel { background:linear-gradient(145deg,#203950f5,#14263cf5); color:#edf8fa; border:1px solid #69ddd866; border-radius:14px; box-shadow:0 24px 64px #07111f80,inset 0 1px 0 #c7fffa14; }
+body#sekai-game .auth-panel :is(.auth-panel-title,.auth-brand,.auth-field,.auth-panel-kicker,.auth-panel-copy,.auth-panel-footer) { color:#edf8fa; }
+body#sekai-game .auth-panel .brand-mark { background:#69ddd81a; color:var(--anime-cyan); border:1px solid #69ddd877; border-radius:8px; box-shadow:none; }
+body#sekai-game .auth-panel .auth-brand strong { color:#edf8fa; font-family:inherit; font-weight:900; }
+body#sekai-game .auth-panel .auth-tabs { gap:6px; padding:5px; background:var(--anime-ink); border:1px solid #69ddd833; border-radius:8px; box-shadow:none; }
+body#sekai-game .auth-panel .auth-tab { min-height:44px; border:2px solid transparent; border-radius:4px; background:transparent; color:#d4e3e8; transition:background .15s ease,color .15s ease; }
+body#sekai-game .auth-panel .auth-tab:hover { background:#263c53; color:var(--anime-paper); }
+body#sekai-game .auth-panel .auth-tab.active { color:var(--anime-ink); background:var(--anime-cyan); border-color:var(--anime-cyan); box-shadow:none; }
+body#sekai-game .auth-panel .auth-tab:focus-visible { outline:2px solid var(--anime-gold); outline-offset:1px; }
+body#sekai-game .auth-panel .auth-panel-kicker span { color:var(--anime-cyan); }
+body#sekai-game .auth-panel input { background:#0f2035; border:1px solid #66899d; border-radius:6px; color:#edf8fa; }
+body#sekai-game .auth-panel :is(.auth-brand small,.auth-field span,.auth-panel-copy,.auth-panel-footer) { color:#b2ccd7; }
+body#sekai-game .auth-panel .auth-panel-footer { border-color:#69ddd833; }
+body#sekai-game .auth-panel input:focus { border-color:var(--anime-cyan); box-shadow:0 0 0 3px #69ddd822; outline:none; }
+body#sekai-game .auth-panel .auth-submit { background:var(--anime-cyan); color:var(--anime-ink); border:1px solid #a6f6ed; border-radius:6px; box-shadow:0 5px 18px #69ddd818; }
+body#sekai-game .auth-panel .auth-submit:hover { background:#92ece5; box-shadow:0 5px 24px #69ddd830; }
+body#sekai-game .auth-panel .auth-submit:focus-visible { outline:2px solid var(--anime-paper); outline-offset:4px; }
+body#sekai-game .auth-panel .auth-submit small { color:#234657; }
+body#sekai-game .auth-panel .validation-line { color:#ff9bad; }
+body#sekai-game .auth-ignition-card { border:3px solid var(--anime-paper); border-radius:6px; box-shadow:7px 9px 0 #0b182daa; }
+body#sekai-game :is(.modal-panel,.stage-modal,.gameover-panel,.deck-order-panel,.detail-panel,.app-loading-card) { border:2px solid #86b6c0; border-radius:10px; background:#1a2b43; color:var(--anime-paper); box-shadow:7px 7px 0 #081324aa; }
+body#sekai-game:has(.game-shell:not(.is-hidden)) .stage-modal { background:#1a2b43; border-radius:10px; }
+body#sekai-game .modal-close { border-radius:5px; color:var(--anime-paper); background:#263c53; }
+body#sekai-game #detail-overlay { z-index:10000; }
+body#sekai-game .detail-info { min-width:0; }
+body#sekai-game .detail-effect-heading { flex-wrap:wrap; }
+body#sekai-game .duel-detail-panel :is(.detail-name,.detail-effect-heading strong) { color:var(--anime-paper); }
+body#sekai-game .duel-detail-panel :is(.detail-desc,.detail-effect-text) { color:#d4e3e8; }
+body#sekai-game .duel-header { background:#16243be8; border-bottom:2px solid #69ddd84d; }
+body#sekai-game .duel-title strong { color:var(--anime-paper); font-family:inherit; font-weight:900; letter-spacing:.1em; }
+body#sekai-game .duel-title span { color:var(--anime-cyan); }
+body#sekai-game :is(.duel-header-btn,.ctrl-btn) { border-radius:5px; border-color:#8ab7c080; }
+body#sekai-game .turn-badge { background:var(--anime-paper); color:var(--anime-ink); border:2px solid var(--anime-ink); border-radius:5px; font-weight:800; }
+body#sekai-game .ctrl-btn.danger { color:white; background:#a52e43; }
+body#sekai-game .log-panel { background:#16243bf5; border-color:#8ab7c080; }
+body#sekai-game .field-slot.can-attack { outline:2px solid var(--anime-cyan); outline-offset:2px; }
+body#sekai-game .field-slot.effect-target { outline:3px dashed var(--anime-gold); outline-offset:3px; }
+body#sekai-game .card-rule-status { background:#142338f2; color:#fff9ef; border-color:#69ddd8; }
+body#sekai-game .game-shell .deck-insight { margin:14px 0; padding:14px; border-left:4px solid var(--anime-cyan); background:#112239; border-radius:4px; }
+.deck-insight header { display:flex; justify-content:space-between; gap:12px; font-size:13px; }
+.deck-insight header span { color:#9fbac7; font-size:11px; }
+.deck-insight dl { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0; }
+.deck-insight dl div { border-top:1px solid #8ab7c04d; padding-top:8px; }
+.deck-insight dt { color:#b9cdd5; font-size:11px; }
+.deck-insight dd { margin:5px 0 0; color:var(--anime-gold); font-weight:800; font-size:19px; }
+.deck-insight p { color:#d4e3e8; font-size:12px; line-height:1.7; margin:6px 0 0; }
+.collection-results { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:12px 2px 0; color:#d4e3e8; font-size:12px; }
+.performance-stage { display:flex; align-items:center; justify-content:space-around; gap:16px; min-height:260px; background:#112239; border:1px solid #69ddd866; border-radius:8px; margin:20px 0; padding:16px; }
+.performance-source { width:120px; flex-shrink:0; }
+.performance-art { height:180px; }
+.performance-art img { width:100%; height:100%; object-fit:cover; }
+.performance-target,.performance-material { padding:14px 8px; border:1px dashed #69ddd8; color:#d4e3e8; font-size:12px; }
+.performance-caption { font-size:13px; line-height:1.8; color:#fff9ef; }
+.performance-preview a { color:#69ddd8; }
+@media(max-width:700px) {
+    body#sekai-game .duel-detail-panel { grid-template-columns:minmax(0,1fr); gap:16px; padding:24px 18px; width:calc(100vw - 24px); max-height:90dvh; align-items:start; }
+    body#sekai-game #detail-card-display .detail-card { width:154px; height:220px; margin:0 auto; }
+    body#sekai-game .detail-name { font-size:23px; }
+    body#sekai-game .detail-desc { margin-top:12px; }
+    body#sekai-game .game-shell .topbar { gap:6px; padding-inline:10px; }
+    body#sekai-game .game-shell .lobby-chapter h1 { font-size:36px; }
+    body#sekai-game .game-shell .lobby-character-name { padding:8px 10px; }
+    body#sekai-game .game-shell .lobby-battle { box-shadow:3px 3px 0 var(--anime-cyan); }
+    body#sekai-game .game-shell .sidebar { box-shadow:3px 3px 0 #080f20a8; }
+    body#sekai-game .game-shell .collection-detail { position:static; max-height:none; }
+    body#sekai-game .game-shell .detail-copy { padding:18px; }
+    .deck-insight header { flex-wrap:wrap; }
+    body#sekai-game .auth-panel { box-shadow:0 16px 40px #07111f80; }
+}
+@media(min-width:901px) {
+    body#sekai-game .game-shell .lobby-actions { right:90px; }
+}
+@media(prefers-reduced-motion:reduce) {
+    body#sekai-game .game-shell :is(.lobby-particles i,.lobby-breeze,.lobby-sheen) { animation:none; }
+    body#sekai-game .game-shell .catalog-card { transition:none; }
+}
+
+/* 战斗报告使用原生日志折叠区，键盘可展开。 */
+.log-settlement { margin-top: 10px; padding: 10px 12px; border: 1px solid #8bcbd440; border-radius: 8px; background: #102335; color: #dceef3; }
+.log-settlement summary { cursor: pointer; color: #9ee6ee; font-weight: 600; }
+.log-settlement summary:focus-visible { outline: 2px solid #9ee6ee; outline-offset: 4px; }
+.log-settlement ol { margin: 10px 0 0; padding-left: 20px; }
+.log-settlement li { padding: 3px 0; line-height: 1.6; overflow-wrap: anywhere; }
+
+.log-entry-v2.has-report:not(.has-card) .log-card-thumb { display: none; }
+
+.strategy-practice { max-width: 760px; }
+.strategy-practice p { line-height: 1.7; }
+.strategy-selectors { display: flex; flex-wrap: wrap; gap: 16px; margin: 18px 0; }
+.strategy-selectors label { flex: 1 1 180px; display: grid; gap: 8px; }
+.strategy-selectors select { width: 100%; padding: 10px; background: #14243a; color: #e3f2f8; border: 1px solid #66818e; border-radius: 6px; }
+.strategy-core { border-left: 2px solid #82d8e1; padding: 8px 14px; margin: 12px 0; }
+.strategy-core p { white-space: pre-line; margin: 6px 0; font-size: 13px; }
+.strategy-practice details { margin: 16px 0; }
+.strategy-practice summary { cursor: pointer; color: #9ee6ee; }
+
+/* A visible action entry also works on touch screens without a context menu. */
+.monster-row:has(.field-card-actions) { padding-bottom:34px; }
+.field-card-actions { position:absolute; top:calc(100% + 3px); left:0; width:100%; display:flex; gap:3px; z-index:7; }
+.field-card-actions :is(.card-actions-button,.pos-switch-btn) { position:static; transform:none; flex:1; min-width:0; min-height:28px; padding:3px; border:1px solid #8ccbd8; border-radius:5px; background:#14243a; color:#e7faff; font-size:11px; cursor:pointer; }
+.card-actions-button:focus-visible { outline:2px solid #ffda88; outline-offset:2px; }
+.skill-availability { display:block; flex-basis:100%; color:#b6d9df; font-size:12px; line-height:1.6; }
+#card-action-buttons button:disabled { opacity:.5; cursor:not-allowed; }
+.duel-transfer-card > .card { width:100%; height:100%; margin:0; }
+body[data-effect-quality="low"] #battle-screen :is(.card-breeze-image,.card-foil-shimmer) { animation:none; }
+body[data-effect-quality="low"] :is(.screen-flash,.rule-camera-impact) { animation:none!important; }
+/* Explicit grid tracks keep intrinsic card artwork from expanding a mobile slot. */
+.field-slot { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr); }
+.field-slot > .card.in-field { min-width:0; min-height:0; max-width:100%; max-height:100%; }
+
+/* Empty field-spell zones are logical drop targets only. Their old framed
+   placeholders floated between the two card rows and looked like overlapping
+   cards. Keep the space for targeting, but draw nothing until a card exists. */
+.field-zone-slot:not(.has-card) {
+    border-color:transparent;
+    background:transparent;
+    box-shadow:none;
+}
+.field-zone-slot:not(.has-card)::before,
+.field-zone-slot:not(.has-card) .field-zone-empty {
+    display:none;
+}
+
+/* Do not draw five empty monster/spell rectangles on each side. The slots stay
+   in the layout for placement and hit testing; a frame appears only when a
+   card occupies the slot or the rules ask the player to choose that slot. */
+.field-slot.empty:not(.targetable):not(.effect-target):not(.tribute-target) {
+    border-color:transparent;
+    background:transparent;
+    box-shadow:none;
+}
+.field-slot.empty:not(.targetable):not(.effect-target):not(.tribute-target)::before,
+.field-slot.empty:not(.targetable):not(.effect-target):not(.tribute-target)::after {
+    display:none;
+}
+
+/* Remove the large row panels behind monster/spell zones. They read as giant
+   overlapping cards in compact-height duel views. */
+.monster-row::before,
+.spell-trap-row::before,
+.battlefield > .field-half::after {
+    display:none;
+    content:none;
+}
+@media (pointer:coarse) {
+    .field-slot .pos-switch-btn { display:none; }
+}
+.skill-availability { grid-column:1 / -1; }
+.card-action-rules { margin-top:14px; color:#b9e4ec; }
+.card-action-rules summary { cursor:pointer; }
+@media (max-width:720px) {
+    .card-action-panel { gap:12px; padding:20px; }
+    .card-action-preview { min-height:0; }
+    .card-action-preview .action-card { width:84px; height:120px; }
+    .card-action-copy h2 { font-size:22px; margin:8px 0; }
+    .card-action-buttons { margin-top:12px; gap:6px; }
+    .card-action-buttons button { min-height:42px; }
+}
+.field-slot .card-frame { grid-template-columns:minmax(0,1fr); }
+
+/* Duel layouts intentionally diverge: desktop prioritizes board readability,
+   while phones retain the compact one-screen interaction model. */
+.ai-action-preview {
+    position:fixed; left:50%; top:46%; z-index:360; width:210px;
+    display:grid; justify-items:center; gap:7px; padding:12px 14px 14px;
+    transform:translate(-50%,-50%) scale(.78); opacity:0; pointer-events:none;
+    background:linear-gradient(160deg,rgba(10,19,35,.97),rgba(13,33,50,.94));
+    border:1px solid rgba(105,221,216,.72); box-shadow:0 22px 70px rgba(0,0,0,.7),0 0 28px rgba(105,221,216,.2);
+    transition:opacity .16s ease,transform .22s cubic-bezier(.2,.8,.2,1);
+}
+.ai-action-preview.active { opacity:1; transform:translate(-50%,-50%) scale(1); }
+.ai-action-preview-copy { display:grid; justify-items:center; gap:3px; text-transform:uppercase; }
+.ai-action-preview-copy small { color:#69ddd8; font-size:9px; letter-spacing:.26em; }
+.ai-action-preview-copy strong { color:#fff9ef; font-size:16px; letter-spacing:.08em; }
+.ai-action-preview-card { width:150px; height:213px; }
+.ai-action-preview-card > .card { width:100%; height:100%; margin:0; }
+.ai-action-preview-name { max-width:100%; color:#fff; font-size:12px; font-weight:800; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+body.reduce-motion .ai-action-preview { transition:none; }
+@media (prefers-reduced-motion: reduce) {
+    .ai-action-preview { transition:none; }
+}
+
+/* Desktop duel stage: the APK does not draw a separate pair of local field
+   spell trays. Keep their DOM nodes as rule/effect anchors, but remove them
+   from the visual layout and give the card rows the reclaimed space. */
+@media (min-width:901px) {
+    .battle-screen .battlefield {
+        top:54px;
+        bottom:164px;
+        width:min(1320px,94vw);
+        grid-template-rows:minmax(0,1fr) 0 minmax(0,1fr);
+        gap:8px;
+    }
+    .battle-screen .field-zone-center {
+        position:absolute;
+        width:1px;
+        height:1px;
+        overflow:hidden;
+        opacity:0;
+        pointer-events:none;
+    }
+    .battle-screen .monster-row { gap:clamp(16px,1.7vw,28px); }
+    .battle-screen .spell-trap-row { gap:clamp(12px,1.35vw,22px); }
+    .battle-screen .field-slot {
+        width:clamp(120px,8.5vw,146px);
+        height:clamp(160px,11.25vw,194px);
+    }
+    .battle-screen .spell-trap-row .field-slot {
+        width:clamp(108px,7.65vw,132px);
+        height:clamp(144px,10.2vw,176px);
+    }
+}
+
+/* 主控（CONTROLLER 2D）的全部样式已迁到 css/controller-2d.css。
+   那里是唯一来源：舞台几何尺寸与原值完全一致，本文件不再定义任何 .duel-controller-* /
+   .controller-picker* 规则，避免两处规则争夺优先级。 */
+.duel-header-actions { display:flex; gap:8px; }
+
+@media (min-width: 901px) {
+    .ai-action-preview { left:auto; right:clamp(28px,6vw,110px); transform:translateY(-50%) scale(.78); }
+    .ai-action-preview.active { transform:translateY(-50%) scale(1); }
+    .battlefield { width:min(920px,72vw); }
+    .monster-row, .spell-trap-row { gap:clamp(14px,1.5vw,24px); }
+    .field-slot { width:clamp(116px,8vw,138px); height:clamp(154px,10.5vw,184px); }
+    .spell-trap-row .field-slot { width:clamp(104px,7.2vw,124px); height:clamp(138px,9.4vw,166px); }
+    .in-field { width:calc(100% - 8px); height:calc(100% - 8px); }
+    .field-slot .card-name { font-size:9px; }
+    .field-slot .card-footer { font-size:9px; }
+}
+
+/* Desktop windows can be wide but very short (split-screen/browser panels).
+   In that case four vertical card rows cannot fit between the header and hand.
+   Put each player's monster and spell rows side by side and size by height. */
+@media (min-width: 901px) and (max-height: 600px) {
+    .battlefield {
+        top:58px;
+        bottom:108px;
+        width:min(960px,calc(100vw - 132px));
+        gap:4px;
+        grid-template-rows:minmax(0,1fr) 28px minmax(0,1fr);
+    }
+    .field-half {
+        min-height:0;
+        flex-direction:row;
+        align-items:center;
+        justify-content:center;
+        gap:clamp(12px,2.4vw,28px);
+    }
+    .monster-row,
+    .spell-trap-row {
+        width:auto;
+        gap:clamp(3px,.55vw,7px);
+    }
+    .field-slot {
+        width:clamp(44px,6.1vh,54px);
+        height:clamp(58px,16.2vh,68px);
+    }
+    .spell-trap-row .field-slot {
+        width:clamp(41px,5.7vh,50px);
+        height:clamp(54px,15vh,63px);
+    }
+    .field-zone-center { gap:8px; padding:0; }
+    .field-zone-slot { width:54px; height:26px; }
+    .field-slot .card-name { font-size:6px; }
+    .field-slot .card-footer { min-height:12px; padding:1px 2px; font-size:6px; }
+}
+@media (max-width:720px) {
+    .ai-action-preview { top:42%; width:136px; padding:8px 9px 9px; gap:4px; }
+    .ai-action-preview-card { width:88px; height:125px; }
+    .ai-action-preview-copy strong { font-size:11px; }
+    .ai-action-preview-copy small { font-size:6px; }
+    .ai-action-preview-name { font-size:9px; }
+    .field-slot .card-footer { gap:2px; padding:2px; }
+    .field-slot :is(.stat-atk,.stat-def) { min-width:0; font-size:7px; }
+    .field-slot :is(.stat-atk,.stat-def) > span { display:none; }
+    .field-slot .card-level { display:none; }
+}
+.card-action-preview .action-card .card-frame { grid-template-columns:minmax(0,1fr); }
+@media (max-width:720px) {
+    .card-action-preview .action-card .card-body { display:none; }
+    .card-action-preview .action-card .card-footer { font-size:7px; gap:2px; padding:2px; }
+    .card-action-preview .action-card .card-footer span span { display:none; }
+}
+
+/* Desktop composition follows the APK's visual rhythm: each side owns a
+   compact two-row block and the middle remains an intentional combat lane. */
+@media (min-width:901px) and (min-height:601px) {
+    .battle-screen .battlefield {
+        top:68px;
+        bottom:168px;
+        width:min(1320px,92vw);
+        grid-template-rows:max-content clamp(96px,12vh,124px) max-content;
+        align-content:center;
+        gap:0;
+    }
+    .battle-screen .field-half {
+        min-height:0;
+        gap:10px;
+    }
+    .battle-screen .opp-half { grid-row:1; }
+    .battle-screen .my-half { grid-row:3; }
+    .battle-screen .monster-row { gap:clamp(15px,1.5vw,26px); }
+    .battle-screen .spell-trap-row { gap:clamp(11px,1.15vw,20px); }
+    .battle-screen .field-slot {
+        width:clamp(92px,5.5vw,112px);
+        height:clamp(124px,7.35vw,150px);
+    }
+    .battle-screen .spell-trap-row .field-slot {
+        width:clamp(84px,4.9vw,100px);
+        height:clamp(112px,6.55vw,134px);
+    }
+    .battle-screen .field-zone-center {
+        position:relative;
+        grid-row:2;
+        width:100%;
+        height:100%;
+        overflow:hidden;
+        visibility:hidden;
+        pointer-events:none;
+    }
+    .battle-screen .field-slot.empty:not(.targetable):not(.effect-target):not(.tribute-target) {
+        border-color:rgba(135,151,198,.2);
+        background:rgba(11,14,28,.3);
+        box-shadow:inset 0 0 18px rgba(85,216,229,.025);
+        visibility:visible !important;
+    }
+    .battle-screen .field-slot.empty:not(.targetable):not(.effect-target):not(.tribute-target)::before {
+        display:block;
+    }
+    .battle-screen .field-slot.empty:not(.targetable):not(.effect-target):not(.tribute-target)::after {
+        display:block;
+        opacity:.35;
+    }
+}

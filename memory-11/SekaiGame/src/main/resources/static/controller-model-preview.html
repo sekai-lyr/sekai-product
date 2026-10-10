@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主控 2D 人物模型 · 标定与预览</title>
+<style>
+    :root { color-scheme: dark; }
+    body {
+        margin: 0; padding: 20px 24px 40px;
+        background: radial-gradient(circle at 50% 0%, #16243b, #070b14 70%);
+        color: #dfe9f5;
+        font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+    h1 { margin: 0 0 6px; font-size: 20px; letter-spacing: .08em; }
+    .sub { margin: 0 0 18px; color: #8fa3bb; font-size: 13px; line-height: 1.7; }
+    .sub code { color: #69ddd8; }
+    .stage-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+    .stage {
+        position: relative;
+        border: 1px solid #2c4a68;
+        border-radius: 10px;
+        background: linear-gradient(180deg, #101c2e, #070d18);
+        overflow: hidden;
+    }
+    .stage canvas { display: block; position: absolute; inset: 0; }
+    .stage .overlay { pointer-events: none; }
+    .stage-head {
+        padding: 10px 14px; border-bottom: 1px solid #24384f;
+        display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .stage-head strong { letter-spacing: .1em; }
+    .stats { color: #7f9ab5; font-size: 11px; font-variant-numeric: tabular-nums; }
+    .panel { padding: 12px 14px; display: grid; gap: 10px; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+    button {
+        padding: 6px 11px; border: 1px solid #3a5a7a; border-radius: 6px;
+        background: #16273c; color: #cfe2f2; font-size: 12px; cursor: pointer;
+    }
+    button:hover { border-color: #69ddd8; color: #fff; }
+    button.on { background: #69ddd8; color: #06202a; border-color: #69ddd8; font-weight: 700; }
+    .sliders { display: grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap: 6px 16px; }
+    .wind-row { display: grid; grid-template-columns: 46px 1fr 46px; align-items: center; gap: 8px; font-size: 11px; color: #9db4cb; }
+    label { display: grid; grid-template-columns: 88px 1fr 46px; align-items: center; gap: 8px; font-size: 11px; color: #9db4cb; }
+    input[type=range] { width: 100%; }
+    output { text-align: right; font-variant-numeric: tabular-nums; color: #69ddd8; }
+    .note { margin-top: 20px; color: #8fa3bb; font-size: 12px; line-height: 1.8; max-width: 900px; }
+    .note b { color: #ffd977; }
+</style>
+</head>
+<body>
+<h1>主控 2D 人物模型 · 标定与预览</h1>
+<p class="sub">
+    这一页直接用游戏运行时的同一套模块（<code>controller-mesh.js</code> / <code>controller-rigs.js</code> /
+    <code>controller-mesh-model.js</code>），所以这里看到的形变与游戏里完全一致。<br>
+    打开「骨架叠加」可以检查骨骼枢轴是否落在正确的人体部位上；拖动滑杆可以单独试每个姿态参数。
+</p>
+
+<div class="stage-row" id="stages"></div>
+<h2 style="margin:26px 0 6px;font-size:15px;letter-spacing:.08em">Live2D Cubism 技术验证 <span style="color:#8fa3bb;font-size:12px;letter-spacing:0">（官方示例模型 Hiyori · 非出场角色）</span></h2>
+<p class="sub" style="margin-bottom:12px">
+    这一格走的是真 Live2D 运行时：<code>live2dcubismcore.min.js</code> 解析 .moc3，<code>cubism-framework.esm.js</code>
+    负责动作 / 物理 / 自动眨眼 / 呼吸，主控事件映射到模型自带的动作组。<br>
+    如果这里显示「装配失败」或「WebGL 不可用」，说明当前环境跑不了 Cubism，游戏本身不受影响（会静默回退静态图后端）。
+</p>
+<div class="stage-row" id="live2d-stage"></div>
+
+<p class="note">
+    <b>怎么调 rig：</b>骨架与影响范围定义在 <code>js/controller-rigs.js</code>，坐标是
+    <b>归一化 alpha 包围盒坐标</b>（0..1，y 向下）。红色=身体骨骼，橙色=弹簧链骨骼，
+    圆圈=该骨骼的影响半径，青色框=矩形门控区域（道具/布料用）。<br>
+    <b>改完怎么验证：</b>命令行跑 <code>node SekaiGame/tools/verify-controller-mesh.mjs</code>
+    看数值验收，跑 <code>node SekaiGame/tools/render-controller-mesh.mjs --debug-rig</code>
+    输出骨架叠加 PNG，或直接刷新本页看实机效果。
+</p>
+
+<script type="module">
+import { CONTROLLER_RIGS } from "./js/controller-rigs.js";
+import { createMeshControllerModel } from "./js/controller-mesh-model.js";
+
+const STAGE_WIDTH = 330;
+const STAGE_HEIGHT = 440;
+
+const ACTIONS = ["link", "draw", "play", "summon", "spell", "trap", "attack", "hit", "critical"];
+const HOLDS = ["win", "lose", "drawGame"];
+const SLIDERS = [
+    { key: "headTurn", min: -1, max: 1, step: 0.05 },
+    { key: "headTilt", min: -1, max: 1, step: 0.05 },
+    { key: "headNod", min: -1, max: 1, step: 0.05 },
+    { key: "lean", min: -1, max: 1, step: 0.05 },
+    { key: "sway", min: -1, max: 1, step: 0.05 },
+    { key: "breath", min: 0, max: 1, step: 0.05 },
+    { key: "bodyLift", min: -1, max: 3, step: 0.1 },
+    { key: "squash", min: 0, max: 1, step: 0.05 },
+    { key: "armSwing", min: -1, max: 1, step: 0.05 },
+    { key: "rootX", min: -0.03, max: 0.03, step: 0.002 },
+    { key: "rootY", min: -0.03, max: 0.03, step: 0.002 },
+    { key: "scale", min: 0.94, max: 1.06, step: 0.005 },
+];
+
+const container = document.getElementById("stages");
+const instances = [];
+
+for (const [id, rig] of Object.entries(CONTROLLER_RIGS)) {
+    const image = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`无法加载 controller-${id}.png`));
+        img.src = `assets/characters/controller-${id}.png`;
+    });
+
+    const section = document.createElement("section");
+    section.className = "stage";
+    section.style.width = `${STAGE_WIDTH}px`;
+    section.innerHTML = `
+        <div class="stage-head"><strong>${id.toUpperCase()}</strong><span class="stats" data-stats>装配中…</span></div>
+        <div style="position:relative;width:${STAGE_WIDTH}px;height:${STAGE_HEIGHT}px">
+            <canvas data-gl></canvas>
+            <canvas class="overlay" data-overlay></canvas>
+        </div>
+        <div class="panel">
+            <div class="buttons" data-actions></div>
+            <div class="sub" style="margin:2px 0 0;font-size:11px">角色专属动作（idle 时会随机穿插播放）</div>
+            <div class="buttons" data-ambient></div>
+            <label class="wind-row">风力 <input type="range" data-wind min="0" max="2" step="0.1" value="1"><output>1.0</output></label>
+            <div class="buttons">
+                <button data-hold="win">win 保持</button>
+                <button data-hold="lose">lose 保持</button>
+                <button data-lowhp>lowHp 持续</button>
+                <button data-rig>骨架叠加</button>
+                <button data-reset>清除覆盖</button>
+            </div>
+            <div class="sliders" data-sliders></div>
+        </div>`;
+    container.appendChild(section);
+
+    const glCanvas = section.querySelector("[data-gl]");
+    const overlay = section.querySelector("[data-overlay]");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    glCanvas.width = overlay.width = Math.round(STAGE_WIDTH * dpr);
+    glCanvas.height = overlay.height = Math.round(STAGE_HEIGHT * dpr);
+    overlay.style.width = glCanvas.style.width = `${STAGE_WIDTH}px`;
+    overlay.style.height = glCanvas.style.height = `${STAGE_HEIGHT}px`;
+
+    let model = null;
+    try {
+        model = createMeshControllerModel({ rig, image, canvas: glCanvas, id });
+    } catch (error) {
+        section.querySelector("[data-stats]").textContent = `装配失败：${error.message}`;
+        continue;
+    }
+    if (!model) {
+        section.querySelector("[data-stats]").textContent = "WebGL 不可用";
+        continue;
+    }
+    model.resize(STAGE_WIDTH, STAGE_HEIGHT, dpr);
+    model.start();
+    section.querySelector("[data-stats]").textContent =
+        `${model.stats.cells} · 顶点 ${model.stats.vertices} · 三角 ${model.stats.triangles} · 骨骼 ${model.stats.bones} · 链 ${model.stats.chains}${model.webgl2 ? " · WebGL2" : " · WebGL1"}`;
+
+    const overrides = {};
+    const applyOverride = () => model.setOverride(Object.keys(overrides).length ? { ...overrides } : null);
+
+    // 动作按钮
+    const actionBox = section.querySelector("[data-actions]");
+    for (const name of ACTIONS) {
+        const button = document.createElement("button");
+        button.textContent = name;
+        button.addEventListener("click", () => { model.playAction(name); flash(button); });
+        actionBox.appendChild(button);
+    }
+    // 角色专属动作（每个角色的清单不同，来自 rig.ambient）
+    const ambientBox = section.querySelector("[data-ambient]");
+    for (const item of model.listAmbient()) {
+        const button = document.createElement("button");
+        button.textContent = item.label || item.name;
+        button.title = `${item.name} · ${((item.duration || 0) / 1000).toFixed(1)}s`;
+        button.addEventListener("click", () => { model.playAmbient(item.name); flash(button); });
+        ambientBox.appendChild(button);
+    }
+    // 风力：0 = 静风（精确还原原画），1 = 默认，2 = 强风
+    const windInput = section.querySelector("[data-wind]");
+    const windOutput = windInput.nextElementSibling;
+    windInput.addEventListener("input", () => {
+        const value = Number(windInput.value);
+        windOutput.value = value.toFixed(1);
+        model.setWindScale(value);
+    });
+    // 视线跟随已移除：跟随鼠标只能靠压扁头部假装转头，会压缩原画。
+    const holdButtons = [...section.querySelectorAll("[data-hold]")];
+    for (const button of holdButtons) {
+        button.addEventListener("click", () => {
+            const name = button.dataset.hold;
+            const active = !button.classList.contains("on");
+            holdButtons.forEach(other => other.classList.remove("on"));
+            if (active) {
+                button.classList.add("on");
+                model.setPersistent(name, true);
+            } else {
+                model.setPersistent(name, false);
+            }
+        });
+    }
+    const lowButton = section.querySelector("[data-lowhp]");
+    lowButton.addEventListener("click", () => {
+        const on = !lowButton.classList.contains("on");
+        lowButton.classList.toggle("on", on);
+        model.setPersistent("lowHp", on);
+    });
+    const resetButton = section.querySelector("[data-reset]");
+    resetButton.addEventListener("click", () => {
+        for (const key of Object.keys(overrides)) delete overrides[key];
+        section.querySelectorAll("input[type=range]").forEach(input => { input.value = 0; input.nextElementSibling.value = "0"; });
+        holdButtons.forEach(b => b.classList.remove("on"));
+        lowButton.classList.remove("on");
+        model.reset();
+        applyOverride();
+    });
+
+    // 滑杆
+    const sliderBox = section.querySelector("[data-sliders]");
+    for (const spec of SLIDERS) {
+        const label = document.createElement("label");
+        label.innerHTML = `<span>${spec.key}</span><input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}" value="0"><output>0</output>`;
+        const input = label.querySelector("input");
+        const output = label.querySelector("output");
+        input.addEventListener("input", () => {
+            const value = Number(input.value);
+            output.value = value === 0 ? "0" : String(value);
+            if (value === 0) delete overrides[spec.key];
+            else overrides[spec.key] = value;
+            applyOverride();
+        });
+        sliderBox.appendChild(label);
+    }
+
+    // 骨架叠加
+    let showRig = false;
+    section.querySelector("[data-rig]").addEventListener("click", event => {
+        showRig = !showRig;
+        event.currentTarget.classList.toggle("on", showRig);
+        drawOverlay();
+    });
+
+    function drawOverlay() {
+        const ctx = overlay.getContext("2d");
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+        if (!showRig) return;
+        const built = model.model;
+        const scale = Math.min((STAGE_WIDTH * dpr) / built.mesh.width, (STAGE_HEIGHT * dpr) / built.mesh.height);
+        const offsetX = ((STAGE_WIDTH * dpr) - built.mesh.width * scale) / 2;
+        const offsetY = (STAGE_HEIGHT * dpr) - built.mesh.height * scale;
+        const map = (x, y) => [offsetX + x * scale, offsetY + y * scale];
+
+        // 网格线
+        ctx.strokeStyle = "rgba(120,200,255,.16)";
+        ctx.lineWidth = 1;
+        const { cols, rows, indices } = built.mesh;
+        for (let i = 0; i < indices.length; i += 3) {
+            if ((i / 3) % 5) continue;
+            const from = map(built.mesh.positions[indices[i] * 2], built.mesh.positions[indices[i] * 2 + 1]);
+            const to = map(built.mesh.positions[indices[i + 1] * 2], built.mesh.positions[indices[i + 1] * 2 + 1]);
+            ctx.beginPath(); ctx.moveTo(from[0], from[1]); ctx.lineTo(to[0], to[1]); ctx.stroke();
+        }
+        void cols; void rows;
+
+        // 骨骼
+        for (const bone of built.skeleton.bones) {
+            const chain = bone.kind === "chain";
+            const [x0, y0] = map(bone.x, bone.y);
+            const [x1, y1] = map(bone.tipX, bone.tipY);
+            const [rx, ry] = map(bone.x + bone.radius, bone.y);
+            ctx.strokeStyle = chain ? "rgba(255,170,60,.75)" : "rgba(255,60,90,.85)";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+            ctx.strokeStyle = chain ? "rgba(255,255,90,.5)" : "rgba(90,255,140,.5)";
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(x0, y0, rx - x0, 0, Math.PI * 2); ctx.stroke();
+            if (bone.rect) {
+                const [ax, ay] = map(bone.rect[0], bone.rect[1]);
+                const [bx, by] = map(bone.rect[2], bone.rect[3]);
+                ctx.strokeStyle = "rgba(0,255,255,.8)";
+                ctx.strokeRect(ax, ay, bx - ax, by - ay);
+            }
+            ctx.fillStyle = "#fff";
+            ctx.beginPath(); ctx.arc(x0, y0, 2.6, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+    setInterval(drawOverlay, 100);
+
+    instances.push(model);
+}
+
+function flash(button) {
+    button.classList.add("on");
+    setTimeout(() => button.classList.remove("on"), 220);
+}
+
+window.addEventListener("pagehide", () => {
+    for (const model of instances) model.dispose();
+});
+
+/* ------------------------------------------------------------------ *
+ * Live2D 技术验证格（浏览器专属；失败只影响这一格）
+ * ------------------------------------------------------------------ */
+try {
+    const { createLive2DControllerModel } = await import("./js/controller-live2d-model.js");
+    const box = document.getElementById("live2d-stage");
+    const section = document.createElement("section");
+    section.className = "stage";
+    section.style.width = `${STAGE_WIDTH}px`;
+    section.innerHTML = `
+        <div class="stage-head"><strong>LIVE2D · HIYORI</strong><span class="stats" data-stats>装配中…</span></div>
+        <div style="position:relative;width:${STAGE_WIDTH}px;height:${STAGE_HEIGHT}px">
+            <canvas data-gl></canvas>
+        </div>
+        <div class="panel">
+            <div class="buttons" data-actions></div>
+            <div class="buttons"><button data-reset>回到 Idle</button></div>
+        </div>`;
+    box.appendChild(section);
+
+    const canvas = section.querySelector("[data-gl]");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(STAGE_WIDTH * dpr);
+    canvas.height = Math.round(STAGE_HEIGHT * dpr);
+    canvas.style.width = `${STAGE_WIDTH}px`;
+    canvas.style.height = `${STAGE_HEIGHT}px`;
+
+    const model = await createLive2DControllerModel({
+        modelDir: "assets/models/hiyori/",
+        modelJson: "hiyori_free_t08.model3.json",
+        canvas,
+        id: "hiyori-ref",
+        baseUrl: "",
+    });
+    model.resize(STAGE_WIDTH, STAGE_HEIGHT, dpr);
+    model.start();
+    const stats = model.stats;
+    section.querySelector("[data-stats]").textContent =
+        `参数 ${stats.parameters} · 绘制对象 ${stats.drawables} · 动作 ${stats.motions} · 物理 ${stats.hasPhysics ? "有" : "无"} · ${model.webgl2 ? "WebGL2" : "WebGL1"}`;
+
+    const actionBox = section.querySelector("[data-actions]");
+    for (const name of ACTIONS) {
+        const button = document.createElement("button");
+        button.textContent = name;
+        button.addEventListener("click", () => { model.playAction(name); flash(button); });
+        actionBox.appendChild(button);
+    }
+    section.querySelector("[data-reset]").addEventListener("click", () => model.reset());
+    instances.push(model);
+} catch (error) {
+    const box = document.getElementById("live2d-stage");
+    const note = document.createElement("p");
+    note.className = "sub";
+    note.style.color = "#ffb4c8";
+    note.textContent = `Live2D 装配失败：${error?.message || error}。这不影响游戏（主控会自动回退到自研网格 / 静态图后端）。`;
+    box.appendChild(note);
+}
+</script>
+</body>
+</html>

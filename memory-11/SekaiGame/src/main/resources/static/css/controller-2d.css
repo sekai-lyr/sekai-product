@@ -1,0 +1,743 @@
+/* ==========================================================================
+   controller-2d.css — 动态 2D 主控系统样式（唯一来源）
+   --------------------------------------------------------------------------
+   约束（改动前务必确认）：
+     · .duel-controller-2d 的位置/尺寸/断点与旧版完全一致，不改决斗台布局。
+     · 卡槽间距、中央战场宽度、手牌区一律不在这里定义。
+     · 主控层 pointer-events:none，只有选择窗口例外。
+     · 动画只使用 transform / opacity / filter。
+     · 所有动画在 prefers-reduced-motion 与 .is-reduced-motion 下都有降级。
+
+   素材只有单张透明 PNG，因此这里是「单图程序化动态」：
+   关键帧只做位移/缩放/倾斜/光影，不改变原画比例、五官、服装与配色。
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. 舞台（几何尺寸与旧版一一对应）
+   -------------------------------------------------------------------------- */
+.duel-controller-2d {
+    position:absolute;
+    z-index:3;
+    left:clamp(-92px,-4.5vw,-46px);
+    bottom:92px;
+    width:clamp(250px,22vw,360px);
+    height:min(72vh,680px);
+    pointer-events:none;
+    filter:drop-shadow(18px 14px 22px rgba(0,0,0,.55));
+    perspective:900px;
+
+    /* 主题色板默认值：由 JS 按主控配置覆盖 */
+    --ctl-primary:#69ddd8;
+    --ctl-secondary:#4a9ada;
+    --ctl-energy:#9a7bff;
+    --ctl-alert:#ff5b6e;
+    --ctl-victory:#ffd977;
+    --ctl-aura:rgba(86,196,255,.20);
+    --ctl-aura-outer:rgba(51,105,211,.07);
+    --ctl-rim:rgba(89,224,226,.78);
+    /* 动画参数默认值：由 JS 按主控配置覆盖 */
+    --ctl-idle-cycle:6800ms;
+    --ctl-idle-float:5px;
+    --ctl-idle-breath:1.006;
+    --ctl-idle-tilt:.4deg;
+    --ctl-aura-cycle:3700ms;
+    --ctl-aura-min:.5;
+    --ctl-aura-max:.9;
+    --ctl-attack-thrust:18px;
+    --ctl-orb-radius:clamp(70px,9vh,120px);
+}
+
+.duel-controller-rig {
+    position:absolute;
+    inset:0;
+    z-index:1;
+    transform-origin:42% 86%;
+    transform:translate3d(var(--controller-x, 0),var(--controller-y, 0),0) rotateY(var(--controller-ry, 0deg));
+    animation:controller-idle var(--ctl-cycle) ease-in-out infinite;
+    will-change:transform;
+    --ctl-cycle:var(--ctl-idle-cycle);
+}
+.duel-controller-2d img {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    /* 保留原画比例：只做等比 contain，绝不拉伸 */
+    object-fit:contain;
+    object-position:center bottom;
+    user-select:none;
+    -webkit-user-drag:none;
+}
+
+/* 光晕：慢速明暗呼吸，与角色呼吸不同步，避免机械叠加 */
+.duel-controller-aura {
+    position:absolute;
+    z-index:0;
+    left:20%;
+    bottom:4%;
+    width:68%;
+    height:58%;
+    border-radius:50%;
+    background:radial-gradient(ellipse,var(--ctl-aura),var(--ctl-aura-outer) 48%,transparent 72%);
+    filter:blur(13px);
+    animation:controller-aura var(--ctl-aura-cycle) ease-in-out infinite;
+}
+
+/* 特效层：后层在角色身后，前层在角色之前 */
+.duel-controller-fx {
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+}
+.duel-controller-fx-back { z-index:0; }
+.duel-controller-fx-front { z-index:2; }
+
+/* 抽卡光线所在的跨屏图层（手牌方向），z-index 低于卡牌与手牌 */
+#duel-controller-fx-layer {
+    position:absolute;
+    inset:0;
+    z-index:3;
+    pointer-events:none;
+    overflow:hidden;
+}
+
+/* --------------------------------------------------------------------------
+   1b. 网格模型后端（自研 2D 人物模型）
+   角色那一层换成 WebGL canvas；光晕/铭牌/状态/特效层全部沿用。
+   网格模式下 CSS 关键帧必须停掉，否则会和 canvas 里的顶点形变叠加成双份运动。
+   -------------------------------------------------------------------------- */
+.duel-controller-canvas {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:none;
+}
+.duel-controller-2d:not(.is-mesh-model) .duel-controller-canvas { display:none; }
+.duel-controller-2d.is-mesh-model .duel-controller-rig img { display:none; }
+.duel-controller-2d.is-mesh-model .duel-controller-rig {
+    /* 停掉 CSS 关键帧：形变由 controller-mesh-model.js 在顶点上完成。
+       静态图后端（无 WebGL / 无 rig）仍靠这些关键帧做动作，所以下面
+       各关键帧里的 var(--controller-x/y/ry, ...) 一律保留：
+       主控已不响应鼠标，这些变量不会再被写入，缺省值 0 即为正常状态，
+       变量本身不必删——删了反而要改 20 多条关键帧。 */
+    animation:none !important;
+}
+.duel-controller-2d.is-mesh-model .duel-controller-rig canvas { will-change:auto; }
+
+/* --------------------------------------------------------------------------
+   2. idle：呼吸 + 浮动(≤6px) + 极轻旋转 + 长停顿
+   关键帧后半段几乎不动 → 天然停顿，而不是匀速机械循环。
+   -------------------------------------------------------------------------- */
+@keyframes controller-idle {
+    0%,100% { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) + 2px),0) rotateY(var(--controller-ry,0deg)) rotate(calc(var(--ctl-idle-tilt) * -0.9)) scale(1); }
+    16%     { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - var(--ctl-idle-float)),0) rotateY(var(--controller-ry,0deg)) rotate(var(--ctl-idle-tilt)) scale(var(--ctl-idle-breath)); }
+    30%     { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) + 1px),0) rotateY(var(--controller-ry,0deg)) rotate(calc(var(--ctl-idle-tilt) * 0.4)) scale(1.001); }
+    44%     { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 1px),0) rotateY(var(--controller-ry,0deg)) rotate(calc(var(--ctl-idle-tilt) * -0.3)) scale(1.002); }
+    /* 44% → 100% 保持静止：随机停顿 */
+}
+@keyframes controller-aura {
+    0%,100% { opacity:var(--ctl-aura-min); transform:scale(.96); }
+    50%     { opacity:var(--ctl-aura-max); transform:scale(1.04); }
+}
+
+/* 随机停顿：JS 在 idle 期间偶尔挂上 .is-holding */
+.duel-controller-2d.is-holding .duel-controller-rig { animation-play-state:paused; }
+/* 页面不可见时暂停一切主控动画 */
+.duel-controller-2d.is-page-hidden .duel-controller-rig,
+.duel-controller-2d.is-page-hidden .duel-controller-aura,
+.duel-controller-2d.is-page-hidden .duel-controller-fx > * { animation-play-state:paused; }
+
+/* --------------------------------------------------------------------------
+   3. 一次性动作状态
+   -------------------------------------------------------------------------- */
+
+/* draw：快速看向手牌（向右转 + 前倾），结束后自然回到 idle */
+.duel-controller-2d.is-draw .duel-controller-rig {
+    animation:ctl-draw var(--ctl-dur-draw,820ms) cubic-bezier(.2,.8,.2,1),controller-idle var(--ctl-cycle) var(--ctl-dur-draw,820ms) ease-in-out infinite;
+}
+@keyframes ctl-draw {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotateY(var(--controller-ry,0deg)); }
+    30%  { transform:translate3d(calc(var(--controller-x,0) + 7px),calc(var(--controller-y,0) - 10px),40px) rotateY(calc(var(--controller-ry,0deg) + 7deg)) rotate(1.2deg) scale(1.02); filter:brightness(1.16); }
+    62%  { transform:translate3d(calc(var(--controller-x,0) + 3px),calc(var(--controller-y,0) - 5px),16px) rotateY(calc(var(--controller-ry,0deg) + 3deg)) rotate(-.4deg); filter:brightness(1.06); }
+    100% { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotateY(var(--controller-ry,0deg)); filter:brightness(1); }
+}
+
+/* link（切换主控）：一次轻微对频闪光 */
+.duel-controller-2d.is-link .duel-controller-rig {
+    animation:ctl-link var(--ctl-dur-link,520ms) ease-out,controller-idle var(--ctl-cycle) var(--ctl-dur-link,520ms) ease-in-out infinite;
+}
+@keyframes ctl-link {
+    0%   { filter:brightness(1) saturate(1); transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) scale(1); }
+    38%  { filter:brightness(1.35) saturate(1.25); transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 4px),10px) scale(1.012); }
+    100% { filter:brightness(1) saturate(1); transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) scale(1); }
+}
+
+/* play：盖放/设置卡牌，轻推送 */
+.duel-controller-2d.is-play .duel-controller-rig {
+    animation:ctl-play var(--ctl-dur-play,700ms) cubic-bezier(.2,.8,.2,1),controller-idle var(--ctl-cycle) var(--ctl-dur-play,700ms) ease-in-out infinite;
+}
+@keyframes ctl-play {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0); }
+    40%  { transform:translate3d(calc(var(--controller-x,0) + 14px),calc(var(--controller-y,0) - 6px),30px) rotateY(calc(var(--controller-ry,0deg) - 4deg)) scale(1.018); filter:brightness(1.14); }
+    100% { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0); }
+}
+
+/* summon：身体向上抬起 + 背后召唤环扩散 */
+.duel-controller-2d.is-summon .duel-controller-rig {
+    animation:ctl-summon var(--ctl-dur-summon,1080ms) cubic-bezier(.16,.9,.24,1),controller-idle var(--ctl-cycle) var(--ctl-dur-summon,1080ms) ease-in-out infinite;
+}
+@keyframes ctl-summon {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) scale(1); }
+    26%  { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 12px),26px) scale(1.028); filter:brightness(1.22); }
+    58%  { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 7px),10px) scale(1.014); filter:brightness(1.12); }
+    100% { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) scale(1); filter:brightness(1); }
+}
+
+/* spell：蓝紫能量环绕（不遮罩魔法卡 4×4 图集：特效全部留在主控自身盒内） */
+.duel-controller-2d.is-spell .duel-controller-rig {
+    animation:ctl-spell var(--ctl-dur-spell,960ms) cubic-bezier(.2,.8,.2,1),controller-idle var(--ctl-cycle) var(--ctl-dur-spell,960ms) ease-in-out infinite;
+}
+@keyframes ctl-spell {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotateY(var(--controller-ry,0deg)); }
+    34%  { transform:translate3d(calc(var(--controller-x,0) + 4px),calc(var(--controller-y,0) - 8px),22px) rotateY(calc(var(--controller-ry,0deg) + 4deg)) scale(1.022); filter:brightness(1.2) saturate(1.18) hue-rotate(-8deg); }
+    70%  { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 3px),8px) rotateY(calc(var(--controller-ry,0deg) + 1deg)); filter:brightness(1.08) saturate(1.08); }
+    100% { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0); filter:brightness(1) saturate(1); }
+}
+
+/* trap：短暂后退 + 警戒扫描线 */
+.duel-controller-2d.is-trap .duel-controller-rig {
+    animation:ctl-trap var(--ctl-dur-trap,860ms) cubic-bezier(.3,.7,.3,1),controller-idle var(--ctl-cycle) var(--ctl-dur-trap,860ms) ease-in-out infinite;
+}
+@keyframes ctl-trap {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0); }
+    22%  { transform:translate3d(calc(var(--controller-x,0) - 12px),calc(var(--controller-y,0) + 4px),-24px) rotateY(calc(var(--controller-ry,0deg) - 6deg)); filter:brightness(.94) contrast(1.12); }
+    52%  { transform:translate3d(calc(var(--controller-x,0) - 8px),calc(var(--controller-y,0) + 2px),-14px) rotateY(calc(var(--controller-ry,0deg) - 3deg)); }
+    100% { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0); filter:brightness(1); }
+}
+
+/* attack：快速前推约 18px + 轻微透视旋转，速度快、回位平滑 */
+.duel-controller-2d.is-attack .duel-controller-rig {
+    animation:ctl-attack var(--ctl-dur-attack,620ms) cubic-bezier(.14,.86,.24,1),controller-idle var(--ctl-cycle) var(--ctl-dur-attack,620ms) ease-in-out infinite;
+}
+@keyframes ctl-attack {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotateY(var(--controller-ry,0deg)) scale(1); }
+    22%  { transform:translate3d(calc(var(--controller-x,0) + var(--ctl-attack-thrust)),calc(var(--controller-y,0) - 4px),40px) rotateY(calc(var(--controller-ry,0deg) - 9deg)) scale(1.03); filter:brightness(1.2); }
+    46%  { transform:translate3d(calc(var(--controller-x,0) + 9px),calc(var(--controller-y,0) - 2px),18px) rotateY(calc(var(--controller-ry,0deg) - 4deg)) scale(1.012); filter:brightness(1.08); }
+    100% { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotateY(var(--controller-ry,0deg)) scale(1); filter:brightness(1); }
+}
+
+/* hit：向后震动两次 + 降饱和降亮度 + 红色边缘闪光 */
+.duel-controller-2d.is-hit .duel-controller-rig {
+    animation:ctl-hit var(--ctl-dur-hit,560ms) ease-out,controller-idle var(--ctl-cycle) var(--ctl-dur-hit,560ms) ease-in-out infinite;
+}
+@keyframes ctl-hit {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotate(0deg); filter:brightness(1) saturate(1); }
+    14%  { transform:translate3d(calc(var(--controller-x,0) - 13px),calc(var(--controller-y,0) + 3px),-10px) rotate(-1.8deg); filter:brightness(.78) saturate(.6); }
+    30%  { transform:translate3d(calc(var(--controller-x,0) - 4px),calc(var(--controller-y,0) + 1px),0) rotate(.5deg); filter:brightness(.9) saturate(.78); }
+    52%  { transform:translate3d(calc(var(--controller-x,0) - 9px),calc(var(--controller-y,0) + 2px),-6px) rotate(-1.1deg); filter:brightness(.84) saturate(.68); }
+    76%  { transform:translate3d(calc(var(--controller-x,0) - 2px),var(--controller-y,0),0) rotate(.3deg); filter:brightness(.96) saturate(.9); }
+    100% { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotate(0deg); filter:brightness(1) saturate(1); }
+}
+
+/* critical：低 LP 脉冲（优先级低于一切一次性动作） */
+.duel-controller-2d.is-critical .duel-controller-rig {
+    animation:ctl-critical var(--ctl-dur-critical,900ms) ease-out,controller-idle var(--ctl-cycle) var(--ctl-dur-critical,900ms) ease-in-out infinite;
+}
+@keyframes ctl-critical {
+    0%   { filter:brightness(1) saturate(1); transform:translate3d(var(--controller-x,0),var(--controller-y,0),0); }
+    26%  { filter:brightness(.82) saturate(.55) drop-shadow(0 0 14px rgba(255,91,110,.55)); transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) + 3px),0) scale(.995); }
+    60%  { filter:brightness(1.1) saturate(1.1); }
+    100% { filter:brightness(1) saturate(1); transform:translate3d(var(--controller-x,0),var(--controller-y,0),0); }
+}
+
+/* win / lose：保持最终姿态，直到新决斗开始 */
+.duel-controller-2d.is-win .duel-controller-rig {
+    animation:ctl-win 1.25s cubic-bezier(.16,.9,.24,1) both;
+}
+@keyframes ctl-win {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) scale(1); filter:brightness(1); }
+    38%  { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 20px),30px) scale(1.04); filter:brightness(1.3) drop-shadow(0 0 22px rgba(255,217,119,.6)); }
+    100% { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 9px),12px) scale(1.022); filter:brightness(1.14) drop-shadow(0 0 16px rgba(255,217,119,.38)); }
+}
+.duel-controller-2d.is-lose .duel-controller-rig {
+    animation:ctl-lose 1.4s ease-out both;
+}
+@keyframes ctl-lose {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotate(0deg); filter:brightness(1) saturate(1); }
+    34%  { transform:translate3d(calc(var(--controller-x,0) - 9px),calc(var(--controller-y,0) + 5px),-14px) rotate(-1.4deg); filter:brightness(.72) saturate(.55); }
+    100% { transform:translate3d(calc(var(--controller-x,0) - 4px),calc(var(--controller-y,0) + 14px),-8px) rotate(-.7deg); filter:brightness(.56) saturate(.48); }
+}
+.duel-controller-2d.is-draw-game .duel-controller-rig {
+    animation:ctl-draw-game 1.3s ease-out both;
+}
+@keyframes ctl-draw-game {
+    0%   { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0); filter:brightness(1); }
+    50%  { transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 6px),10px) rotate(1deg); filter:brightness(.86) saturate(.7); }
+    100% { transform:translate3d(var(--controller-x,0),var(--controller-y,0),0) rotate(0deg); filter:brightness(.82) saturate(.66); }
+}
+
+/* --------------------------------------------------------------------------
+   4. 低 LP 持续状态：呼吸加快 + 光晕蓝红交替
+   -------------------------------------------------------------------------- */
+.duel-controller-2d.is-low-hp .duel-controller-rig { --ctl-cycle:3400ms; }
+.duel-controller-2d.is-low-hp .duel-controller-aura {
+    animation:ctl-aura-critical 1700ms ease-in-out infinite;
+}
+@keyframes ctl-aura-critical {
+    0%,100% { opacity:.62; transform:scale(1.02); background:radial-gradient(ellipse,rgba(86,196,255,.24),rgba(51,105,211,.08) 48%,transparent 72%); }
+    50%     { opacity:.92; transform:scale(1.07); background:radial-gradient(ellipse,rgba(255,91,110,.28),rgba(150,30,60,.1) 48%,transparent 72%); }
+}
+
+/* --------------------------------------------------------------------------
+   5. 特效层元素
+   -------------------------------------------------------------------------- */
+
+/* 抽卡光线：从主控扫向手牌区域 */
+.ctl-draw-beam {
+    position:absolute;
+    left:var(--ctl-beam-x,0);
+    top:var(--ctl-beam-y,0);
+    width:var(--ctl-beam-length,300px);
+    height:16px;
+    margin-top:-8px;
+    border-radius:999px;
+    transform-origin:0 50%;
+    transform:rotate(var(--ctl-beam-angle,0deg)) scaleX(.05);
+    background:linear-gradient(90deg,transparent,var(--ctl-primary) 22%,#ffffff 55%,var(--ctl-primary) 78%,transparent);
+    filter:blur(1.5px) drop-shadow(0 0 10px var(--ctl-primary));
+    opacity:0;
+    animation:ctl-beam 820ms cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes ctl-beam {
+    0%   { opacity:0; transform:rotate(var(--ctl-beam-angle,0deg)) scaleX(.05); }
+    28%  { opacity:.95; }
+    58%  { opacity:.85; transform:rotate(var(--ctl-beam-angle,0deg)) scaleX(1); }
+    100% { opacity:0; transform:rotate(var(--ctl-beam-angle,0deg)) scaleX(1.03); }
+}
+
+/* 召唤环：角色背后扩散后消失 */
+.ctl-summon-ring {
+    position:absolute;
+    left:8%;
+    bottom:3%;
+    width:84%;
+    height:32%;
+    border-radius:50%;
+    border:2px solid var(--ctl-primary);
+    box-shadow:0 0 26px var(--ctl-primary),inset 0 0 34px rgba(105,221,216,.35);
+    opacity:0;
+    animation:ctl-ring 1000ms cubic-bezier(.16,.8,.24,1) both;
+    animation-delay:var(--ctl-ring-delay,0ms);
+}
+@keyframes ctl-ring {
+    0%   { opacity:0; transform:scale(.25) rotateX(64deg); }
+    22%  { opacity:.95; }
+    70%  { opacity:.55; }
+    100% { opacity:0; transform:scale(1.5) rotateX(64deg); }
+}
+
+/* 魔法能量：蓝紫光晕（后层）+ 环绕光点（前层） */
+.ctl-spell-halo {
+    position:absolute;
+    left:6%;
+    bottom:6%;
+    width:88%;
+    height:74%;
+    border-radius:50%;
+    background:radial-gradient(ellipse,var(--ctl-energy),transparent 68%);
+    filter:blur(20px);
+    opacity:0;
+    animation:ctl-halo 900ms ease-in-out both;
+}
+@keyframes ctl-halo {
+    0%   { opacity:0; transform:scale(.82); }
+    40%  { opacity:.62; }
+    100% { opacity:0; transform:scale(1.14); }
+}
+.ctl-spell-orb {
+    position:absolute;
+    left:50%;
+    top:52%;
+    width:12px;
+    height:12px;
+    margin:-6px 0 0 -6px;
+    border-radius:50%;
+    background:radial-gradient(circle,#fff,var(--ctl-energy) 45%,transparent 72%);
+    opacity:0;
+    animation:ctl-orb 900ms ease-out both;
+    animation-delay:var(--ctl-orb-delay,0ms);
+}
+@keyframes ctl-orb {
+    0%   { opacity:0; transform:rotate(var(--ctl-orb-angle,0deg)) translateY(0) scale(.4); }
+    28%  { opacity:1; }
+    100% { opacity:0; transform:rotate(var(--ctl-orb-angle,0deg)) translateY(calc(var(--ctl-orb-radius) * -1)) scale(1.15); }
+}
+
+/* 陷阱警戒：扫描线 + 角框（仅覆盖主控自身，不触碰陷阱卡图集） */
+.ctl-trap-scanlines {
+    position:absolute;
+    inset:0;
+    background:repeating-linear-gradient(180deg,rgba(255,91,110,.34) 0 1.5px,transparent 1.5px 9px);
+    mix-blend-mode:screen;
+    opacity:0;
+    animation:ctl-scan 780ms linear both;
+}
+@keyframes ctl-scan {
+    0%   { opacity:0; transform:translateY(-14%); }
+    18%  { opacity:.85; }
+    72%  { opacity:.5; }
+    100% { opacity:0; transform:translateY(14%); }
+}
+.ctl-trap-frame {
+    position:absolute;
+    inset:6% 8% 10%;
+    border:1px solid var(--ctl-alert);
+    box-shadow:inset 0 0 22px rgba(255,91,110,.22);
+    opacity:0;
+    animation:ctl-frame 820ms ease-out both;
+}
+.ctl-trap-frame::before,
+.ctl-trap-frame::after {
+    content:"";
+    position:absolute;
+    width:16px;
+    height:16px;
+    border:3px solid var(--ctl-alert);
+}
+.ctl-trap-frame::before { left:-2px; top:-2px; border-right:0; border-bottom:0; }
+.ctl-trap-frame::after  { right:-2px; bottom:-2px; border-left:0; border-top:0; }
+@keyframes ctl-frame {
+    0%   { opacity:0; transform:scale(1.04); }
+    22%  { opacity:1; transform:scale(1); }
+    100% { opacity:0; transform:scale(1); }
+}
+
+/* 攻击推进：速度线 */
+.ctl-thrust-line {
+    position:absolute;
+    left:-4%;
+    top:var(--ctl-line-y,40%);
+    width:52%;
+    height:2px;
+    border-radius:2px;
+    background:linear-gradient(90deg,transparent,var(--ctl-primary) 40%,#fff);
+    opacity:0;
+    animation:ctl-thrust 560ms cubic-bezier(.14,.86,.24,1) both;
+    animation-delay:var(--ctl-line-delay,0ms);
+}
+@keyframes ctl-thrust {
+    0%   { opacity:0; transform:translateX(-26%) scaleX(.5); }
+    26%  { opacity:.9; }
+    100% { opacity:0; transform:translateX(120%) scaleX(1.15); }
+}
+
+/* 受击：红色边缘闪光 */
+.ctl-hit-flash {
+    position:absolute;
+    inset:-4%;
+    background:
+        linear-gradient(90deg,rgba(255,60,80,.55),transparent 18%),
+        linear-gradient(270deg,rgba(255,60,80,.4),transparent 18%),
+        radial-gradient(ellipse at 50% 50%,transparent 52%,rgba(255,60,80,.42) 100%);
+    opacity:0;
+    animation:ctl-flash 520ms ease-out both;
+}
+@keyframes ctl-flash {
+    0%   { opacity:0; }
+    12%  { opacity:.95; }
+    46%  { opacity:.28; }
+    100% { opacity:0; }
+}
+
+/* 低 LP 脉冲：红蓝交替环 */
+.ctl-critical-ring {
+    position:absolute;
+    left:14%;
+    bottom:4%;
+    width:72%;
+    height:26%;
+    border-radius:50%;
+    border:2px solid var(--ctl-alert);
+    box-shadow:0 0 22px var(--ctl-alert);
+    opacity:0;
+    animation:ctl-critical-ring 1000ms ease-out both;
+}
+@keyframes ctl-critical-ring {
+    0%   { opacity:0; transform:scale(.5) rotateX(64deg); border-color:var(--ctl-alert); }
+    30%  { opacity:.9; }
+    60%  { opacity:.6; border-color:var(--ctl-primary); }
+    100% { opacity:0; transform:scale(1.35) rotateX(64deg); border-color:var(--ctl-alert); }
+}
+
+/* 胜利光晕 */
+.ctl-victory-halo {
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:86%;
+    border-radius:50%;
+    background:radial-gradient(ellipse at 50% 74%,rgba(255,217,119,.34),rgba(105,221,216,.12) 46%,transparent 74%);
+    filter:blur(16px);
+    opacity:0;
+    animation:ctl-victory 2200ms ease-in-out both;
+}
+@keyframes ctl-victory {
+    0%   { opacity:0; transform:scale(.86); }
+    40%  { opacity:.9; transform:scale(1.04); }
+    100% { opacity:.6; transform:scale(1); }
+}
+
+/* 盖放/设置卡牌：一圈冷光 */
+.ctl-card-link {
+    position:absolute;
+    left:16%;
+    bottom:6%;
+    width:68%;
+    height:26%;
+    border-radius:50%;
+    border:1px solid var(--ctl-primary);
+    box-shadow:0 0 16px rgba(105,221,216,.45);
+    opacity:0;
+    animation:ctl-ring 780ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+/* --------------------------------------------------------------------------
+   6. 铭牌与状态文字
+   -------------------------------------------------------------------------- */
+.duel-controller-name {
+    position:absolute;
+    z-index:3;
+    left:clamp(76px,7vw,116px);
+    bottom:18px;
+    display:grid;
+    gap:2px;
+    padding:7px 13px 7px 20px;
+    border-left:2px solid var(--ctl-rim);
+    background:linear-gradient(90deg,rgba(5,13,26,.9),rgba(5,13,26,0));
+    text-shadow:0 2px 8px #000;
+}
+.duel-controller-name strong { color:#f0d9a2; font-size:14px; letter-spacing:.18em; }
+.duel-controller-name span { color:var(--ctl-primary); font-size:7px; letter-spacing:.24em; transition:color .2s ease; }
+.duel-controller-2d.is-hit .duel-controller-name span,
+.duel-controller-2d.is-trap .duel-controller-name span,
+.duel-controller-2d.is-low-hp .duel-controller-name span { color:var(--ctl-alert); }
+.duel-controller-2d.is-win .duel-controller-name span { color:var(--ctl-victory); }
+.duel-controller-2d.is-lose .duel-controller-name span { color:#8fa3bb; }
+
+/* --------------------------------------------------------------------------
+   7. 资源加载失败的安全占位（不影响决斗）
+   -------------------------------------------------------------------------- */
+.duel-controller-fallback { display:none; }
+.duel-controller-2d.is-link-broken .duel-controller-rig img { visibility:hidden; }
+.duel-controller-2d.is-link-broken .duel-controller-fallback {
+    position:absolute;
+    z-index:2;
+    left:16%;
+    bottom:8%;
+    width:68%;
+    height:66%;
+    display:grid;
+    align-content:center;
+    justify-items:center;
+    gap:4px;
+    border:1px dashed var(--ctl-rim);
+    border-radius:10px;
+    background:linear-gradient(180deg,rgba(38,58,86,.5),rgba(12,22,38,.7));
+    color:var(--ctl-primary);
+    font-size:10px;
+    letter-spacing:.28em;
+    text-align:center;
+}
+.duel-controller-2d.is-link-broken .duel-controller-fallback strong { font-size:13px; letter-spacing:.2em; }
+.duel-controller-2d.is-link-broken .duel-controller-aura { animation:none; opacity:.4; }
+
+/* --------------------------------------------------------------------------
+   8. 主控选择界面（fixed 覆盖层，不改动决斗台结构）
+   -------------------------------------------------------------------------- */
+.controller-picker {
+    position:fixed;
+    inset:0;
+    z-index:9500;
+    display:grid;
+    place-items:center;
+    padding:24px;
+    background:rgba(2,7,17,.72);
+    backdrop-filter:blur(8px);
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .2s ease,visibility .2s;
+}
+.controller-picker.active { opacity:1; visibility:visible; }
+.controller-picker-panel {
+    width:min(820px,calc(100vw - 32px));
+    max-height:min(720px,calc(100vh - 48px));
+    overflow:auto;
+    border:1px solid rgba(105,221,216,.5);
+    border-radius:8px;
+    background:linear-gradient(145deg,rgba(19,35,58,.98),rgba(7,14,28,.98));
+    box-shadow:0 24px 80px rgba(0,0,0,.65),inset 0 0 50px rgba(73,165,207,.07);
+}
+.controller-picker-panel > header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 22px 15px;
+    border-bottom:1px solid rgba(105,221,216,.2);
+}
+.controller-picker-panel h2 { margin:2px 0 0; color:#f4f7ff; font-size:22px; letter-spacing:.08em; }
+.controller-picker-panel small { color:#69ddd8; letter-spacing:.22em; }
+.controller-picker-panel > header button {
+    width:36px;
+    height:36px;
+    border:1px solid rgba(143,184,201,.45);
+    border-radius:4px;
+    color:#dcecff;
+    background:#22364b;
+    font-size:24px;
+    cursor:pointer;
+}
+.controller-picker-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:16px;
+    padding:20px 22px;
+}
+.controller-choice {
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    min-height:330px;
+    overflow:hidden;
+    padding:0;
+    border:1px solid rgba(126,171,195,.42);
+    border-radius:7px;
+    color:#e9f4ff;
+    background:linear-gradient(180deg,#182b46,#0d1728);
+    cursor:pointer;
+    text-align:left;
+    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+    --ctl-primary:#69ddd8;
+}
+.controller-choice:hover { transform:translateY(-3px); border-color:var(--ctl-primary); box-shadow:0 12px 30px rgba(0,0,0,.38); }
+.controller-choice.selected { border-color:var(--ctl-primary); box-shadow:inset 0 0 0 1px var(--ctl-primary),0 0 24px rgba(80,224,229,.18); }
+.controller-choice-stage {
+    display:block;
+    width:100%;
+    height:245px;
+    background:radial-gradient(circle at 50% 65%,rgba(74,162,217,.22),transparent 60%);
+}
+.controller-choice-stage img { display:block; width:100%; height:100%; object-fit:contain; object-position:center bottom; }
+.controller-choice.is-link-broken .controller-choice-stage img { visibility:hidden; }
+.controller-choice.is-link-broken .controller-choice-stage::after {
+    content:"LINK OFFLINE";
+    display:grid;
+    place-items:center;
+    height:100%;
+    border:1px dashed var(--ctl-primary);
+    color:var(--ctl-primary);
+    font-size:11px;
+    letter-spacing:.24em;
+}
+.controller-choice-info { display:grid; gap:5px; padding:13px 15px 15px; }
+.controller-choice-info strong { font-size:15px; letter-spacing:.09em; }
+.controller-choice-info > span { color:var(--ctl-primary); font-size:11px; }
+.controller-choice-info small { color:#9babc0; line-height:1.45; }
+.controller-choice-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+.controller-choice-tags em {
+    padding:2px 7px;
+    border:1px solid rgba(143,184,201,.4);
+    border-radius:999px;
+    color:#9dd7dd;
+    font-size:9px;
+    font-style:normal;
+    letter-spacing:.14em;
+}
+.controller-choice-badge {
+    position:absolute;
+    z-index:2;
+    top:12px;
+    right:12px;
+    padding:5px 8px;
+    border:1px solid rgba(116,217,221,.55);
+    background:rgba(7,20,34,.82);
+    color:#86f0eb;
+    font-size:10px;
+    letter-spacing:.12em;
+}
+.controller-choice.selected .controller-choice-badge { background:var(--ctl-primary); color:#07172a; border-color:var(--ctl-primary); font-weight:800; }
+.controller-picker-note { margin:0; padding:0 22px 20px; color:#8294aa; font-size:12px; }
+
+/* --------------------------------------------------------------------------
+   9. 响应式：矮窗口 / 窄桌面 / 小于 900px 隐藏主控
+   -------------------------------------------------------------------------- */
+/* 矮桌面窗口（含 1366×768 这类高度）：收窄主控，保证不会压进中央战场与卡槽。
+   1080p / 900px 以上高度不受影响。 */
+@media (max-height:800px) and (min-width:901px) {
+    .duel-controller-2d {
+        bottom:84px;
+        height:min(66vh,560px);
+        width:clamp(215px,19vw,300px);
+    }
+}
+@media (max-width:1180px) {
+    .duel-controller-2d { width:230px; left:-76px; opacity:.82; }
+}
+@media (max-width:900px) {
+    .duel-controller-2d { display:none; }
+    #duel-controller-fx-layer { display:none; }
+}
+@media (max-width:600px) {
+    .controller-picker-grid { grid-template-columns:1fr; }
+    .controller-choice { min-height:280px; }
+    .controller-choice-stage { height:200px; }
+}
+
+/* --------------------------------------------------------------------------
+   10. 动画降级：系统偏好 + 游戏内 reduce-motion 设置
+   -------------------------------------------------------------------------- */
+.duel-controller-2d.is-reduced-motion .duel-controller-rig,
+.duel-controller-2d.is-reduced-motion .duel-controller-aura { animation:none !important; }
+.duel-controller-2d.is-reduced-motion .duel-controller-fx > * { display:none !important; }
+.duel-controller-2d.is-reduced-motion.is-win .duel-controller-rig {
+    transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 9px),0) scale(1.02);
+    filter:brightness(1.12);
+}
+.duel-controller-2d.is-reduced-motion.is-lose .duel-controller-rig {
+    transform:translate3d(calc(var(--controller-x,0) - 4px),calc(var(--controller-y,0) + 14px),0);
+    filter:brightness(.58) saturate(.5);
+}
+.duel-controller-2d.is-reduced-motion.is-hit .duel-controller-rig {
+    filter:brightness(.82) saturate(.62);
+}
+.duel-controller-2d.is-reduced-motion.is-low-hp .duel-controller-aura {
+    opacity:.72;
+    background:radial-gradient(ellipse,rgba(255,91,110,.26),transparent 70%);
+}
+body.reduce-motion .duel-controller-2d .duel-controller-rig,
+body.reduce-motion .duel-controller-2d .duel-controller-aura { animation:none !important; }
+body.reduce-motion .duel-controller-2d [class^="ctl-"] { display:none !important; }
+
+@media (prefers-reduced-motion:reduce) {
+    .duel-controller-rig,
+    .duel-controller-aura { animation:none !important; }
+    .duel-controller-fx > *,
+    #duel-controller-fx-layer > * { display:none !important; }
+    .duel-controller-2d.is-win .duel-controller-rig {
+        transform:translate3d(var(--controller-x,0),calc(var(--controller-y,0) - 9px),0) scale(1.02);
+        filter:brightness(1.12);
+    }
+    .duel-controller-2d.is-lose .duel-controller-rig {
+        transform:translate3d(calc(var(--controller-x,0) - 4px),calc(var(--controller-y,0) + 14px),0);
+        filter:brightness(.58) saturate(.5);
+    }
+    .duel-controller-2d.is-hit .duel-controller-rig { filter:brightness(.82) saturate(.62); }
+    .duel-controller-2d.is-low-hp .duel-controller-aura {
+        opacity:.72;
+        background:radial-gradient(ellipse,rgba(255,91,110,.26),transparent 70%);
+    }
+    .controller-picker { transition:none; }
+    .controller-choice { transition:none; }
+}

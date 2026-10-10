@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>卡背验收 · Sekai Duel</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+    body { margin:0; padding:26px 30px 34px; background:#0b0d1a; background-image:
+        radial-gradient(120% 80% at 50% 0%, rgba(47,51,120,.45), transparent 62%); }
+    h1 { margin:0 0 4px; font-size:17px; color:#f5f0e5; letter-spacing:.06em; }
+    p.hint { margin:0 0 22px; color:#877f72; font-size:11px; letter-spacing:.04em; }
+    h2 { margin:0 0 12px; font-size:11px; color:#d7ac55; letter-spacing:.22em; font-weight:700; }
+    .row { display:flex; gap:34px; align-items:flex-end; margin-bottom:30px; }
+    .cell { text-align:center; }
+    .cell > .cap { margin-top:10px; color:#877f72; font-size:10px; letter-spacing:.08em; line-height:1.6; }
+    /* 只为预览服务的最小舞台：让绝对定位/尺寸规则与游戏里一致 */
+    .stage { position:relative; }
+    .big { width:268px; aspect-ratio:.7; position:relative; overflow:hidden; border-radius:6px; }
+    .pack { width:200px; aspect-ratio:.7; position:relative; }
+    .battle-bg { padding:14px; border-radius:10px; background:
+        linear-gradient(180deg, rgba(10,12,26,.9), rgba(6,8,20,.9));
+        border:1px solid rgba(236,218,174,.1); }
+</style>
+</head>
+<body>
+<h1>卡背验收 · 全场景实尺寸</h1>
+<p class="hint">使用真实 css/style.css 与真实容器结构；卡片尺寸取自线上实际值。</p>
+
+<h2>决斗场上的实际尺寸</h2>
+<div class="row battle-bg">
+    <div class="cell">
+        <div class="stage field-slot" style="width:110px;height:145px;">
+            <div class="card in-field">
+                <div class="card-frame face-down-frame">
+                    <span class="sekai-card-back" aria-hidden="true"><span class="sekai-card-back-sheen"></span><span class="sekai-back-label">SET</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="cap">里侧盖牌<br>场地槽 110×145</div>
+    </div>
+    <div class="cell">
+        <div class="deck-pile stage" style="position:relative;width:72px;">
+            <div class="deck-card-back"><span>NC</span></div>
+            <strong style="display:block;margin-top:8px;color:#f5f0e5;font-size:18px;">32</strong>
+            <small style="display:block;color:#877f72;font-size:7px;letter-spacing:.16em;">DECK</small>
+        </div>
+        <div class="cap">卡组堆 64×88</div>
+    </div>
+    <div class="cell">
+        <div class="graveyard-pile stage" style="position:relative;width:72px;">
+            <div class="graveyard-card-back"><span>GY</span></div>
+            <strong style="display:block;margin-top:8px;color:#f5f0e5;font-size:18px;">7</strong>
+            <small style="display:block;color:#877f72;font-size:7px;letter-spacing:.16em;">GY</small>
+        </div>
+        <div class="cap">墓地堆 64×88</div>
+    </div>
+    <div class="cell">
+        <div class="stage" style="position:relative;width:58px;height:80px;display:grid;place-items:center;">
+            <div class="opponent-hand-card">
+                <span class="sekai-card-back" aria-hidden="true"><span class="sekai-card-back-sheen"></span></span>
+            </div>
+        </div>
+        <div class="cap">对手手牌 58×80</div>
+    </div>
+    <div class="cell">
+        <div class="stage" style="position:relative;width:96px;height:140px;">
+            <div class="deck-order-back" style="width:100%;height:100%;">
+                <span class="sekai-card-back" aria-hidden="true"><span class="sekai-card-back-sheen"></span></span>
+            </div>
+        </div>
+        <div class="cap">卡序列表背面</div>
+    </div>
+</div>
+
+<h2>演出尺寸</h2>
+<div class="row">
+    <div class="cell">
+        <div class="big"><span class="sekai-card-back" aria-hidden="true"><span class="sekai-card-back-sheen"></span></span></div>
+        <div class="cap">启动演出 / 卡包过载 268×383</div>
+    </div>
+    <div class="cell">
+        <div class="pack"><span class="sekai-card-back" aria-hidden="true"><span class="sekai-card-back-sheen"></span><span class="sekai-back-label">NC</span></span></div>
+        <div class="cap">卡包翻面 200×286</div>
+    </div>
+    <div class="cell">
+        <div class="big" style="width:120px;"><span class="sekai-card-back" aria-hidden="true"><span class="sekai-card-back-sheen"></span><span class="sekai-back-label">TRAP</span></span></div>
+        <div class="cap">盖放陷阱 120×171</div>
+    </div>
+</div>
+</body>
+</html>

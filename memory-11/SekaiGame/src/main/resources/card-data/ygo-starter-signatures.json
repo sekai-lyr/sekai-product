@@ -1,0 +1,478 @@
+{
+  "ygo_n_89631139": [
+    {
+      "trigger": "onSummon",
+      "type": "destroyAllEnemyMonsters",
+      "value": 0,
+      "skillName": "毁灭的爆裂疾风弹",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：破坏对方场上全部怪兽。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_46986414": [
+    {
+      "trigger": "onSummon",
+      "type": "destroyAllEnemySpellTraps",
+      "value": 0,
+      "skillName": "黑·魔·导",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：破坏对方场上全部魔法与陷阱卡。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_74677422": [
+    {
+      "trigger": "onSummon",
+      "type": "directDamage",
+      "value": 1200,
+      "skillName": "黑炎弹",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：给予对方1200点伤害。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_70781052": [
+    {
+      "trigger": "onSummon",
+      "type": "debuffAllEnemyAttack",
+      "value": 700,
+      "skillName": "魔降雷",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：对方全部怪兽攻击力下降700。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_91152256": [
+    {
+      "trigger": "onSummon",
+      "type": "gainAttackByCount",
+      "value": 250,
+      "skillName": "剑舞连斩",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：己方场上每有1只怪兽，这张卡攻击力上升250。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_15025844": [
+    {
+      "trigger": "onSummon",
+      "type": "healPlayer",
+      "value": 900,
+      "skillName": "圣泉祝福",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：回复900LP。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_5053103": [
+    {
+      "trigger": "onSummon",
+      "type": "buffSelfAttack",
+      "value": 600,
+      "skillName": "巨斧粉碎",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：这张卡攻击力上升600。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_32452818": [
+    {
+      "trigger": "onSummon",
+      "type": "buffSelfDefense",
+      "value": 700,
+      "skillName": "筑坝壁垒",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：这张卡守备力上升700。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_13039848": [
+    {
+      "trigger": "onSummon",
+      "type": "targetProtect",
+      "value": 0,
+      "skillName": "磐岩壁障",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：直到下个回合开始，这张卡不会成为对方效果的对象。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_76812113": [
+    {
+      "trigger": "onSummon",
+      "type": "tokenSummon",
+      "value": 700,
+      "skillName": "女郎幻影",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：特殊召唤1只攻击力与守备力均为700的衍生物。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_97590747": [
+    {
+      "trigger": "onDestroyed",
+      "type": "discardCards",
+      "value": 1,
+      "skillName": "鬼火惊扰",
+      "skillLabel": "遗志技",
+      "description": "被破坏时：对方随机丢弃1张手牌。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_23771716": [
+    {
+      "trigger": "onSummon",
+      "type": "debuffEnemyDefense",
+      "value": 600,
+      "skillName": "虹鳞蚀甲",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：对方攻击力最高的怪兽守备力下降600，守备力变为0则破坏。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "highestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_85639257": [
+    {
+      "trigger": "onSummon",
+      "type": "temporaryBanish",
+      "value": 0,
+      "skillName": "水镜放逐",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：将对方攻击力最高的怪兽暂时除外，回合结束时返回。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "highestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_48305365": [
+    {
+      "trigger": "onSummon",
+      "type": "damageAndHeal",
+      "value": 500,
+      "skillName": "血斧斩",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：对方攻击力最高的怪兽守备力下降500，自己回复实际减少的数值。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "highestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_69140098": [
+    {
+      "trigger": "onSummon",
+      "type": "searchDeck",
+      "value": 1,
+      "skillName": "精灵引导",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：从卡组将1只怪兽加入手牌。",
+      "target": { "owner": "self", "zone": "deck", "filters": { "type": "monster" } },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_49881766": [
+    {
+      "trigger": "onDestroyed",
+      "type": "damageBothPlayers",
+      "value": 400,
+      "skillName": "地狱契约",
+      "skillLabel": "遗志技",
+      "description": "被破坏时：双方各受到400点伤害。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_14898066": [
+    {
+      "trigger": "onSummon",
+      "type": "banishEnemyGraveyard",
+      "value": 2,
+      "skillName": "噬魂",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：从对方墓地除外最多2张卡。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_11091375": [
+    {
+      "trigger": "onSummon",
+      "type": "returnToHand",
+      "value": 1,
+      "skillName": "宝石风暴",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：将对方攻击力最高的怪兽返回手牌。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "highestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_16587243": [
+    {
+      "trigger": "onSummon",
+      "type": "debuffEnemyAttack",
+      "value": 600,
+      "skillName": "腐蚀粘液",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：对方攻击力最高的怪兽攻击力下降600。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "highestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_37265642": [
+    {
+      "trigger": "onSummon",
+      "type": "destroyTarget",
+      "value": 0,
+      "skillName": "三角突袭",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：破坏对方攻击力最低的怪兽。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "lowestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_7359741": [
+    {
+      "trigger": "onSummon",
+      "type": "directAttackDamage",
+      "value": 600,
+      "skillName": "穿甲弹",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：给予对方600点直接伤害。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_69247929": [
+    {
+      "trigger": "onSummon",
+      "type": "modifyStat",
+      "value": 400,
+      "skillName": "野性基因",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：己方攻击力最高的怪兽攻击力与守备力上升400。",
+      "target": { "owner": "self", "zone": "monster", "selector": "highestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_43096270": [
+    {
+      "trigger": "onSummon",
+      "type": "buffAllAlliesAttack",
+      "value": 300,
+      "skillName": "翠玉辉光",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：己方场上全部怪兽攻击力上升300。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_58831685": [
+    {
+      "trigger": "onSummon",
+      "type": "cannotAttack",
+      "value": 1,
+      "skillName": "深海缠绕",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：对方攻击力最高的怪兽本回合不能攻击。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "highestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_49003308": [
+    {
+      "trigger": "onSummon",
+      "type": "debuffEnemyAttack",
+      "value": 400,
+      "skillName": "蛮力震慑",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：对方攻击力最低的怪兽攻击力下降400。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "lowestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_42071342": [
+    {
+      "trigger": "onSummon",
+      "type": "destroySpellTrap",
+      "value": 1,
+      "skillName": "暗潮破阵",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：破坏对方1张魔法或陷阱卡。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_30532390": [
+    {
+      "trigger": "onSummon",
+      "type": "searchDeck",
+      "value": 1,
+      "skillName": "天眼侦察",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：从卡组将1只光属性怪兽加入手牌。",
+      "target": { "owner": "self", "zone": "deck", "filters": { "type": "monster", "attribute": ["light"] } },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_66672569": [
+    {
+      "trigger": "onDestroyed",
+      "type": "buffAllyOnDestroy",
+      "value": 400,
+      "skillName": "腐龙遗念",
+      "skillLabel": "遗志技",
+      "description": "被破坏时：己方1只4星以下怪兽攻击力与守备力上升400。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_20277860": [
+    {
+      "trigger": "onDestroyed",
+      "type": "healPlayer",
+      "value": 600,
+      "skillName": "不死执念",
+      "skillLabel": "遗志技",
+      "description": "被破坏时：回复600LP。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_92667214": [
+    {
+      "trigger": "onSummon",
+      "type": "discardCards",
+      "value": 1,
+      "skillName": "惊悚戏法",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：对方随机丢弃1张手牌。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_41392891": [
+    {
+      "trigger": "onSummon",
+      "type": "conditionalBuff",
+      "value": 400,
+      "skillName": "恶魔契约",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：己方有盖放的后场时守备力上升400，否则攻击力上升400。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_90357090": [
+    {
+      "trigger": "onSummon",
+      "type": "buffSelfAttack",
+      "value": 400,
+      "skillName": "银牙撕咬",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：这张卡攻击力上升400。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_87796900": [
+    {
+      "trigger": "onSummon",
+      "type": "priorityTarget",
+      "value": 0,
+      "skillName": "要塞守护",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：本回合只要己方场上还有其他怪兽，对方就不能攻击这张卡。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_28279543": [
+    {
+      "trigger": "onDestroyed",
+      "type": "directDamage",
+      "value": 600,
+      "skillName": "诅咒之焰",
+      "skillLabel": "遗志技",
+      "description": "被破坏时：给予对方600点伤害。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_6368038": [
+    {
+      "trigger": "onSummon",
+      "type": "destroyTarget",
+      "value": 0,
+      "skillName": "螺旋枪杀",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：破坏对方攻击力最高的怪兽。",
+      "target": { "owner": "opponent", "zone": "monster", "selector": "highestAttack", "count": 1 },
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_30113682": [
+    {
+      "trigger": "onSummon",
+      "type": "additionalNormalSummon",
+      "value": 1,
+      "skillName": "最终审判",
+      "skillLabel": "登场技",
+      "description": "召唤成功时：本回合追加1次通常召唤。",
+      "oncePerTurn": true,
+      "hardOncePerTurn": true
+    }
+  ],
+  "ygo_n_55144522": [
+    {
+      "trigger": "manual",
+      "type": "drawCards",
+      "value": 2,
+      "description": "抽2张卡。"
+    }
+  ],
+  "ygo_n_79571449": [
+    {
+      "trigger": "manual",
+      "type": "drawCards",
+      "value": 3,
+      "description": "抽3张卡。"
+    }
+  ],
+  "ygo_n_44095762": [
+    {
+      "trigger": "onAttacked",
+      "type": "destroyAllAttackers",
+      "value": 0,
+      "description": "对方攻击宣言时：那次攻击无效，并破坏对方全部攻击表示怪兽。"
+    }
+  ],
+  "ygo_n_83887306": [
+    {
+      "trigger": "onAttacked",
+      "type": "counterAndDamage",
+      "value": 700,
+      "description": "对方攻击宣言时：那次攻击无效，并反击700点伤害。"
+    }
+  ]
+}

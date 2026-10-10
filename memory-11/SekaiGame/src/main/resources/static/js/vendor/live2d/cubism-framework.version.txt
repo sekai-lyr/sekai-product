@@ -1,0 +1,6 @@
+CubismSdkForWeb（Core 与 Framework 同源）
+SDK 目录: CubismSdkForWeb-5-r.4
+框架版本: unknown
+打包时间: 2026-10-08T10:10:32.150Z
+源文件: 46
+产物字节: 183140

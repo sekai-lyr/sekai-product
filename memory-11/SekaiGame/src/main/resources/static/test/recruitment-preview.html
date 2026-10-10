@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <base href="../">
+    <title>世界回响 · 演出预览</title>
+    <link rel="stylesheet" href="css/style.css?v=2.3.0-echo">
+    <style>
+        body { background:#f7f1e9; color:#58495d; font-family:system-ui,sans-serif; }
+        main { max-width:640px; margin:12vh auto; padding:24px; }
+        h1 { font-family:SimSun,serif; } p { line-height:1.8; }
+        .preview-options { display:flex; gap:16px; flex-wrap:wrap; margin:28px 0; }
+        label { display:flex; align-items:center; gap:8px; }
+        select,button { padding:12px 20px; background:white; color:#58495d; border:1px solid #bba6b8; border-radius:4px; }
+        #preview-message { min-height:2em; }
+    </style>
+</head>
+<body>
+    <main>
+        <p>次元决斗 · 元素召唤</p><h1>世界回响</h1>
+        <p>仅预览演出，不消耗次元币，也不会修改收藏。可以切换稀有度，对比最后一拍的升格。</p>
+        <div class="preview-options">
+            <label>稀有度 <select id="rarity"><option>R</option><option>SR</option><option>SSR</option><option selected>UR</option></select></label>
+            <label>数量 <select id="count"><option value="1">单抽</option><option value="10" selected>十连</option></select></label>
+            <label><input id="reduced" type="checkbox">减少动态效果</label>
+        </div>
+        <button id="play" disabled>素材准备中</button>
+        <p id="preview-message" role="status"></p>
+    </main>
+    <div class="modal-root" id="modal-root"></div>
+    <script type="module">
+        import { CardGameApp } from './js/app.js?v=2.3.0-echo';
+        import { ALL_CARDS, hydrateCardArt } from './js/catalog.js?v=1.8.6-original';
+        const app = Object.create(CardGameApp.prototype);
+        app.modalRoot = document.getElementById('modal-root');
+        app.collection = { settings: {} };
+        app.showPackResults = (reveals, count) => {
+            app.closeModal();
+            document.getElementById('preview-message').textContent = `演出结束：${count} 张卡牌（仅预览）`;
+            document.getElementById('play').focus();
+        };
+        window.previewApp = app;
+        document.getElementById('play').disabled = false;
+        document.getElementById('play').textContent = '播放演出';
+        document.getElementById('play').onclick = () => {
+            const rarity = document.getElementById('rarity').value;
+            const count = Number(document.getElementById('count').value);
+            app.collection.settings.reduceAnimations = document.getElementById('reduced').checked || matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const hero = ALL_CARDS.find(card => card.rarity === rarity && card.type === 'monster' && card.series !== 'starter_ygo');
+            const ordinary = ALL_CARDS.filter(card => card.rarity === 'R' && card.type === 'monster' && card.series !== 'starter_ygo');
+            const reveals = Array.from({length:count}, (_, i) => ({card:hydrateCardArt(i === 0 ? hero : ordinary[i % ordinary.length]),newCard:false,newArt:false,shards:0}));
+            app.showPackAnimation(reveals, count);
+        };
+    </script>
+</body>
+</html>
