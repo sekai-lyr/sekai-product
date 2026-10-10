@@ -1,7 +1,7 @@
 # Sekai Product · 次元产品集
 
-> 13 个可运行的完整项目，覆盖电商、社交、音乐、游戏、AI、RAG、视觉小说与 PvP 实时对战。
-> 从 `memory-2` 到 `memory-14`，每一段 memory 都是一个独立的实战项目。
+> 15 个可运行的完整项目，覆盖数据管理、电商、音乐、游戏、AI、RAG、视觉小说与世界模拟。
+> 从 `memory-1` 到 `memory-15`，每一段 memory 都是一个独立的实战项目。
 
 ![Build](https://img.shields.io/github/actions/workflow/status/sekai-lyr/sekai-product/ci.yml?branch=main&label=CI%20Build&logo=github)
 ![License](https://img.shields.io/github/license/sekai-lyr/sekai-product)
@@ -16,21 +16,36 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8-4479A1)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3-005F0F)
 
-> 🎬 **全部 13 个项目均已拆分独立仓库，并带真实运行演示 GIF。**
+> 🎬 **13 个项目配有真实运行演示，全部使用 WebP，打开仓库即可预览。**
 > 👤 **作者主页：[sekai-lyr](https://github.com/sekai-lyr)（作品集 + 演示预览）**
 
 ## 🎬 演示预览
 
-<p align="center">
-  <img src="demo/anime-ai-demo.webp" width="300" alt="anime-ai" />&nbsp;
-  <img src="demo/sekai-duel-demo.webp" width="300" alt="sekai-duel" />&nbsp;
-  <img src="demo/lies-ten-years-demo.webp" width="300" alt="lies-ten-years" />
-</p>
-<p align="center">
-  <img src="demo/sekai-song-player-demo.webp" width="300" alt="song-player" />&nbsp;
-  <img src="demo/sekai-memory-book-demo.webp" width="300" alt="memory-book" />&nbsp;
-  <img src="demo/english-word-learning-demo.webp" width="300" alt="word-learning" />
-</p>
+<table>
+  <tr>
+    <td align="center"><a href="memory-14/"><img src="demo/anime-ai.webp" width="290" alt="anime-ai 动漫智能助手演示" /><br /><strong>anime-ai · 动漫智能助手</strong></a></td>
+    <td align="center"><a href="memory-11/"><img src="demo/sekai-duel.webp" width="290" alt="Sekai Duel 卡牌对战演示" /><br /><strong>Sekai Duel · 实时卡牌对战</strong></a></td>
+    <td align="center"><a href="memory-13/"><img src="demo/lies-ten-years.webp" width="290" alt="谎言十年视觉小说演示" /><br /><strong>谎言十年 · 视觉小说</strong></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="memory-5/"><img src="demo/sekai-song-player.webp" width="290" alt="Sekai Song Player 演示" /><br /><strong>Sekai Song Player</strong></a></td>
+    <td align="center"><a href="memory-3/"><img src="demo/sekai-memory-book.webp" width="290" alt="Sekai Memory Book 演示" /><br /><strong>Sekai Memory Book</strong></a></td>
+    <td align="center"><a href="memory-8/"><img src="demo/english-word-learning.webp" width="290" alt="English Word Learning 演示" /><br /><strong>English Word Learning</strong></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="memory-2/"><img src="demo/sekai-ebusiness.webp" width="290" alt="eBusiness 电商演示" /><br /><strong>eBusiness</strong></a></td>
+    <td align="center"><a href="memory-4/"><img src="demo/sekai-fortune.webp" width="290" alt="Sekai Fortune 演示" /><br /><strong>Sekai Fortune</strong></a></td>
+    <td align="center"><a href="memory-6/"><img src="demo/sekai-2048.webp" width="290" alt="Sekai 2048 演示" /><br /><strong>Sekai 2048</strong></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="memory-7/"><img src="demo/sekai-wallpaper.webp" width="290" alt="Sekai Wallpaper 演示" /><br /><strong>Sekai Wallpaper</strong></a></td>
+    <td align="center"><a href="memory-9/"><img src="demo/sekai-form-ai.webp" width="290" alt="SekaiForm AI 演示" /><br /><strong>SekaiForm AI</strong></a></td>
+    <td align="center"><a href="memory-10/"><img src="demo/sekai-anime-video.webp" width="290" alt="SekaiAnimeVideo 演示" /><br /><strong>SekaiAnimeVideo</strong></a></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><a href="memory-12/"><img src="demo/sekai-learning.webp" width="290" alt="SekaiLearning 演示" /><br /><strong>SekaiLearning · 游戏化学习平台</strong></a></td>
+  </tr>
+</table>
 
 ---
 
@@ -38,6 +53,7 @@
 
 | Memory | 项目 | 类型 | 亮点技术 |
 |--------|------|------|----------|
+| [memory-1](memory-1/) | Sekai Data Object ✅ | 动漫数据管理 | 作品、角色与台词数据管理，完整分层架构 |
 | [memory-2](memory-2/) | eBusiness 电商练习 ✅ | 电商 Web | Spring Boot + MyBatis 分层架构（[独立仓库](https://github.com/sekai-lyr/sekai-ebusiness)） |
 | [memory-3](memory-3/) | Sekai Memory Book ✅ | 二次元回忆录 | 番剧/角色/台词记录，带盐哈希密码（[独立仓库](https://github.com/sekai-lyr/sekai-memory-book)） |
 | [memory-4](memory-4/) | Sekai Fortune 抽签 ✅ | 运势抽签 MVP | 会员闭环、后台审批、环境变量化配置（[独立仓库](https://github.com/sekai-lyr/sekai-fortune)） |
@@ -51,6 +67,7 @@
 | [memory-12](memory-12/) | SekaiLearning ✅ | 学习平台 | 游戏化学习、积分、社群（[独立仓库](https://github.com/sekai-lyr/sekai-learning)） |
 | [memory-13](memory-13/) | 谎言十年 ✅ | 视觉小说 AVG | Ren'Py 引擎、多语言、APK 发布（[独立仓库](https://github.com/sekai-lyr/lies-ten-years)） |
 | [memory-14](memory-14/) | anime-ai 动漫智能助手 ✅ | AI 应用 | 截图识番 + 角色识别 + Spring AI + RAG + TTS/ASR（[独立仓库](https://github.com/sekai-lyr/anime-ai)） |
+| [memory-15](memory-15/) | Sekai World Engine ✅ | 世界模拟引擎 | 确定性模拟、时间线审计、分支世界与 Vue 3 控制台 |
 
 ---
 
