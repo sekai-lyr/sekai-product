@@ -1,0 +1,64 @@
+EXPERIMENTAL ANIME CHARACTER EDITORIAL POSTER — 16:9 ULTRA-WIDE LANDSCAPE.
+Part of a unified 368-piece visual archive titled "SEKAI ARCHIVE".
+
+ART DIRECTION
+Avant-garde editorial design. Modernist graphic design, structuralism, constructivism,
+experimental art magazine, art-exhibition key visual, concept-design archive sheet.
+Cool, restrained, conceptual, experimental, strongly structural, high art direction.
+This is NOT a commercial anime promotional image.
+
+SUBJECT
+The subject is a deconstructed anime figure — 巨型红海蛇.
+
+DECOMPOSITION MANDATE
+Do NOT render an ordinary complete full-body character illustration.
+Do NOT stand the character in front of a decorative background.
+Treat the figure as raw material for the layout: crop the figure at two or more frame edges; show a magnified facial or eye slice as an inset window; offset a ghosted duplicate by a few millimetres; separate the line drawing from its colour block and shift them apart; cut the silhouette with the grid so the background shows through the body; render part of the body as pure flat plane and part as bare line art.
+It may appear incomplete, cropped, transparent, repeated, fragmented or partially erased.
+Recognisability must survive through: tide bands and salt-crust edge tone; a water body as layered horizontal strata.
+
+VISUAL MOTIFS — abstract design language derived from the subject. Never literal symbols.
+  1. layered horizontal water strata with the body dissolving into them
+  2. extreme scale contrast: a small human module against an oversized plate
+  3. a water body as layered horizontal strata; one edge dissolving into paper
+
+FIGURE / GROUND FUSION
+extend the hair, clothing or weapon beyond the body as structural line work that continues into the layout grid; let garment planes bleed out into the background colour fields; dissolve the lower body into paper grain.
+There must be no separation between figure and ground — they are one printed system,
+sharing the same grid, the same tone, the same paper.
+
+LAYOUT
+16:9 wide format. Asymmetric composition, generous negative space. The figure sits
+RIGHT of frame — never centred, never in a normal poster pose. Build a clear horizontal
+visual flow across the frame. Use: a non-symmetrical modular grid, hairline frames,
+coordinate points, tick marks, a proportional scale bar, module rectangles, diagonal
+construction lines, transparent overlays, collage edges cut by the frame,
+one magnified inset window, and an archive data block.
+
+COLOUR
+Restrained, desaturated, high-end. Base: slate grey-blue, cold paper-white.
+One accent only: desaturated teal (#4E7C86). The accent touches ONLY the key nodes — part of the
+figure, the eye, an ability trace, one graphic module, the archive numbering, a
+hairline, or the title mark. No cheap neon, no large saturated fields, no glow bloom.
+
+MATERIAL / TEXTURE
+wet paper, salt bloom, condensation on glass.
+
+TEXT
+Render EXACTLY the text strings below, verbatim and legible, as clean typographic lockups. No other words anywhere in the image. No fake glyphs, no counterfeit lettering, no gibberish, no watermark, no logo, no signature, no caption.
+------------------------------------------------------------
+  - "TITLE: 巨型红海蛇"
+  - "ARCHIVE No. YGO_N_58831685"
+  - "CLASS N / MONSTER / WATER"
+  - "DATA LV 04  ATK 1800  DEF 0800"
+  - "SERIES SEKAI ARCHIVE / 368"
+------------------------------------------------------------
+
+NEGATIVE
+No ordinary anime poster. No complete full-body standing illustration. No figure placed
+in front of a background. No figure/ground separation. No light-novel cover feel.
+No moe commercial poster. No idol promotional image. No generic cyberpunk background.
+No templated geometric ornament. No pile-up of symbols. No over-literal character
+features. No cheap neon. No excessive glow. No over-complicated visual chaos.
+No photorealistic human. No 3D photorealistic render. No watermark. No extra logo.
+No garbled text. No low quality. No deformed limbs. No broken facial features.
