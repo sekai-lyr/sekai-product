@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${series.title + ' - 二次元数据锡通'}">番剧详情</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <meta name="theme-color" content="#0b0c0e">
+</head>
+<body>
+<!-- THESIS: 番剧详情页是关系档案，不是海报放大页，作品信息、登场人物和经典台词必须在一个连续阅读路径中成立。 OWN-WORLD: 深色档案室、幽灵段码、暖橙红强调色、软角边框和真实本地素材。 STORY: 用户确认作品身份，再向下读角色和台词，必要时切换到编辑状态。 FIRST VIEWPORT: 左侧封面建立作品锚点，右侧大标题与字段建立身份，操作位于关系信息之前。 FORM: 候选 5，七段数码显示器家族，seed 35146822。 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance -->
+<nav class="top-nav" aria-label="主导航">
+    <a class="nav-brand" href="/home">
+        <span class="nav-logo">SDO</span>
+        <span>
+            <span class="nav-title">二次元数据锡通</span>
+            <span class="nav-subtitle">Sekai Data Object</span>
+        </span>
+    </a>
+    <div class="nav-links">
+        <a href="/home">首页</a>
+        <a href="/series" class="active">番剧</a>
+        <a href="/characters">人物</a>
+        <a href="/quotes">台词</a>
+    </div>
+    <div class="nav-user">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换主题">浅色</button>
+        <span class="user-nick" th:text="${loginUser.nickName != null and !loginUser.nickName.isEmpty() ? loginUser.nickName : loginUser.userName}">成员</span>
+        <a href="/logout" class="logout-link">退出</a>
+        <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="mobileNavPanel">菜单</button>
+    </div>
+</nav>
+<nav id="mobileNavPanel" class="mobile-nav-panel" aria-label="移动端导航" hidden>
+    <a href="/home">首页</a>
+    <a href="/series" class="active">番剧</a>
+    <a href="/characters">人物</a>
+    <a href="/quotes">台词</a>
+</nav>
+
+<main class="container">
+    <div class="flash-message success" th:if="${message}" th:text="${message}" role="status" aria-live="polite"></div>
+    <div class="flash-message error" th:if="${error}" th:text="${error}" role="alert"></div>
+
+    <section class="detail-card" aria-labelledby="series-detail-title">
+        <div class="detail-cover">
+            <img th:if="${series.coverUrl != null and !series.coverUrl.isEmpty()}" th:src="${series.coverUrl}" th:alt="${series.title + ' 封面'}">
+            <span class="cover-placeholder large" th:unless="${series.coverUrl != null and !series.coverUrl.isEmpty()}"><span th:text="${series.title}">番剧名</span></span>
+        </div>
+        <div class="detail-info">
+            <h1 id="series-detail-title" th:text="${series.title}">番剧名</h1>
+            <p class="original-title" th:if="${series.originalTitle != null and !series.originalTitle.isEmpty()}" th:text="${series.originalTitle}">原名</p>
+            <div class="detail-meta">
+                <span class="meta-item" data-label="类型" th:if="${series.type != null}" th:text="${series.type}">TV</span>
+                <span class="meta-item" data-label="制作公司" th:if="${series.studio != null}" th:text="${series.studio}">制作公司</span>
+                <span class="meta-item" data-label="首播日期" th:if="${series.releaseDate != null}" th:text="${series.releaseDate}">首播日期</span>
+                <span class="meta-item" data-label="总集数" th:if="${series.totalEpisodes != null}" th:text="${series.totalEpisodes + ' 集'}">集数</span>
+                <span class="meta-item score" data-label="官方评分" th:if="${series.score != null}" th:text="${series.score}">评分</span>
+            </div>
+            <div class="series-tags" th:if="${tagList != null and !tagList.isEmpty()}">
+                <span class="tag" th:each="tag : ${tagList}" th:text="${tag}">标签</span>
+            </div>
+            <p class="synopsis" th:if="${series.synopsis != null and !series.synopsis.isEmpty()}" th:text="${series.synopsis}">简介</p>
+            <div class="detail-actions">
+                <a th:if="${series.officialUrl != null and !series.officialUrl.isEmpty()}" th:href="${series.officialUrl}" target="_blank" rel="noreferrer" class="btn outline">打开官网</a>
+                <button class="btn primary edit-toggle" type="button" data-toggle-target="editPanel" data-open-label="收起编辑" data-closed-label="编辑番剧" aria-expanded="false">编辑番剧</button>
+                <form method="post" th:action="@{/series/delete/{id}(id=${series.id})}" class="inline-form" onsubmit="return confirm('确定删除这部番剧及其相关信息吗？');">
+                    <button type="submit" class="btn danger">删除番剧</button>
+                </form>
+                <a href="/series" class="btn ghost">返回列表</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="add-panel" id="editPanel" hidden aria-labelledby="edit-series-title">
+        <div class="panel-header">
+            <h2 id="edit-series-title">编辑番剧</h2>
+            <span>保存后返回当前档案</span>
+        </div>
+        <form method="post" th:action="@{/series/update/{id}(id=${series.id})}" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="editTitle">番剧名称 *</label>
+                    <input id="editTitle" type="text" name="title" th:value="${series.title}" required>
+                </div>
+                <div class="field">
+                    <label for="editOriginalTitle">番剧原名</label>
+                    <input id="editOriginalTitle" type="text" name="originalTitle" th:value="${series.originalTitle}">
+                </div>
+                <div class="field">
+                    <label for="editType">类型</label>
+                    <select id="editType" name="type">
+                        <option value="TV" th:selected="${series.type == 'TV'}">TV</option>
+                        <option value="剧场版" th:selected="${series.type == '剧场版'}">剧场版</option>
+                        <option value="OVA" th:selected="${series.type == 'OVA'}">OVA</option>
+                        <option value="网络动画" th:selected="${series.type == '网络动画'}">网络动画</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="editStudio">制作公司</label>
+                    <input id="editStudio" type="text" name="studio" th:value="${series.studio}">
+                </div>
+                <div class="field">
+                    <label for="editReleaseDate">首播日期</label>
+                    <input id="editReleaseDate" type="date" name="releaseDate" th:value="${series.releaseDate}">
+                </div>
+                <div class="field">
+                    <label for="editTotalEpisodes">总集数</label>
+                    <input id="editTotalEpisodes" type="number" name="totalEpisodes" min="1" th:value="${series.totalEpisodes}">
+                </div>
+                <div class="field">
+                    <label for="editScore">官方评分</label>
+                    <input id="editScore" type="number" name="score" min="0" max="10" step="0.1" th:value="${series.score}">
+                </div>
+                <div class="field">
+                    <label for="editTags">标签（逗号分隔）</label>
+                    <input id="editTags" type="text" name="tags" th:value="${series.tags}">
+                </div>
+                <div class="field">
+                    <label for="editCoverUrl">封面图片 URL</label>
+                    <input id="editCoverUrl" type="url" name="coverUrl" th:value="${series.coverUrl}">
+                </div>
+                <div class="field">
+                    <label for="editCoverFile">或上传新封面</label>
+                    <input id="editCoverFile" type="file" name="coverFile" accept="image/*">
+                </div>
+                <div class="field wide">
+                    <label for="editSynopsis">官方简介</label>
+                    <textarea id="editSynopsis" name="synopsis" rows="3" th:text="${series.synopsis}"></textarea>
+                </div>
+                <div class="field wide">
+                    <label for="editOfficialUrl">官网链接</label>
+                    <input id="editOfficialUrl" type="url" name="officialUrl" th:value="${series.officialUrl}">
+                </div>
+            </div>
+            <button type="submit" class="btn primary">保存修改</button>
+        </form>
+    </section>
+
+    <section class="section-block relation-grid">
+        <div>
+            <div class="section-head">
+                <div>
+                    <h2 id="cast-title">登场人物</h2>
+                    <p>这部作品关联的人物与声优。</p>
+                </div>
+                <a href="/characters" class="more-link">人物库</a>
+            </div>
+            <div class="compact-character-grid" aria-labelledby="cast-title">
+                <div class="character-chip reveal" data-reveal-delay="40" th:each="character : ${characterList}">
+                    <div class="chip-avatar">
+                        <img th:if="${character.imageUrl != null and !character.imageUrl.isEmpty()}" th:src="${character.imageUrl}" th:alt="${character.name + ' 立绘'}">
+                        <span th:unless="${character.imageUrl != null and !character.imageUrl.isEmpty()}" class="chip-placeholder" th:text="${#strings.substring(character.name, 0, 1)}">人</span>
+                    </div>
+                    <div>
+                        <div class="chip-name" th:text="${character.name}">人物</div>
+                        <div class="chip-voice" th:if="${character.voiceActor != null and !character.voiceActor.isEmpty()}" th:text="${'CV ' + character.voiceActor}">CV</div>
+                    </div>
+                </div>
+                <div class="card-empty" th:if="${characterList.isEmpty()}">该番剧暂无人物信息，去<a href="/characters">人物库</a>添加。</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-head">
+                <div>
+                    <h2 id="classic-quotes-title">经典台词</h2>
+                    <p>原文、集数和可播放的角色原声。</p>
+                </div>
+                <a href="/quotes" class="more-link">台词库</a>
+            </div>
+            <div class="quote-list" aria-labelledby="classic-quotes-title">
+                <article class="quote-item reveal" data-reveal-delay="70" th:each="quote : ${quoteList}">
+                    <div class="quote-content" th:text="${quote.content}">台词</div>
+                    <div class="quote-meta">
+                        <span th:text="${quote.characterName != null and !quote.characterName.isEmpty() ? quote.characterName : '未知角色'}">未知角色</span>
+                        <span th:if="${quote.episode != null}" th:text="${'第 ' + quote.episode + ' 集'}">集数</span>
+                        <span class="audio-tag" th:if="${quote.audioUrl != null and !quote.audioUrl.isEmpty()}">原声可播放</span>
+                    </div>
+                    <audio th:if="${quote.audioUrl != null and !quote.audioUrl.isEmpty()}" th:src="${quote.audioUrl}" controls preload="none" class="mini-audio" aria-label="台词原声音频"></audio>
+                </article>
+                <div class="card-empty" th:if="${quoteList.isEmpty()}">该番剧暂无台词数据，去<a href="/quotes">台词库</a>收录。</div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="page-footer">© 2026 Sekai Data Object / 二次元数据锡通</footer>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+</body>
+</html>

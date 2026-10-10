@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sekai.dataobject.mapper.SekaiDataObjectQuoteMapper">
+
+    <resultMap id="BaseResultMap" type="com.sekai.dataobject.dataobject.SekaiDataObjectQuoteDO">
+        <id property="id" column="id"/>
+        <result property="seriesId" column="series_id"/>
+        <result property="characterId" column="character_id"/>
+        <result property="characterName" column="character_name"/>
+        <result property="content" column="content"/>
+        <result property="episode" column="episode"/>
+        <result property="timePoint" column="time_point"/>
+        <result property="audioUrl" column="audio_url"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, series_id, character_id, character_name, content, episode, time_point, audio_url, create_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_quote
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_quote
+        ORDER BY series_id, episode, time_point, id
+    </select>
+
+    <select id="selectBySeriesId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_quote
+        WHERE series_id = #{seriesId}
+        ORDER BY episode, time_point, id
+    </select>
+
+    <select id="selectByCharacterId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_quote
+        WHERE character_id = #{characterId}
+        ORDER BY episode, time_point, id
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_quote
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (content LIKE CONCAT('%', #{keyword}, '%')
+                OR character_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="seriesId != null">
+                AND series_id = #{seriesId}
+            </if>
+            <if test="characterId != null">
+                AND character_id = #{characterId}
+            </if>
+        </where>
+        ORDER BY series_id, episode, time_point, id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM sekai_dataobject_anime_quote
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (content LIKE CONCAT('%', #{keyword}, '%')
+                OR character_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="seriesId != null">
+                AND series_id = #{seriesId}
+            </if>
+            <if test="characterId != null">
+                AND character_id = #{characterId}
+            </if>
+        </where>
+    </select>
+
+    <select id="countWithAudio" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM sekai_dataobject_anime_quote
+        WHERE audio_url IS NOT NULL AND audio_url != ''
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM sekai_dataobject_anime_quote
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="insert"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectQuoteDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO sekai_dataobject_anime_quote (
+        series_id,
+        character_id,
+        character_name,
+        content,
+        episode,
+        time_point,
+        audio_url
+        ) VALUES (
+        #{seriesId},
+        #{characterId},
+        #{characterName},
+        #{content},
+        #{episode},
+        #{timePoint},
+        #{audioUrl}
+        )
+    </insert>
+
+    <insert id="insertSelective"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectQuoteDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO sekai_dataobject_anime_quote
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="seriesId != null">series_id,</if>
+            <if test="characterId != null">character_id,</if>
+            <if test="characterName != null">character_name,</if>
+            <if test="content != null">content,</if>
+            <if test="episode != null">episode,</if>
+            <if test="timePoint != null">time_point,</if>
+            <if test="audioUrl != null">audio_url,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="seriesId != null">#{seriesId},</if>
+            <if test="characterId != null">#{characterId},</if>
+            <if test="characterName != null">#{characterName},</if>
+            <if test="content != null">#{content},</if>
+            <if test="episode != null">#{episode},</if>
+            <if test="timePoint != null">#{timePoint},</if>
+            <if test="audioUrl != null">#{audioUrl},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectQuoteDO">
+        UPDATE sekai_dataobject_anime_quote
+        <set>
+            <if test="seriesId != null">series_id = #{seriesId},</if>
+            <if test="characterId != null">character_id = #{characterId},</if>
+            <if test="characterName != null">character_name = #{characterName},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="episode != null">episode = #{episode},</if>
+            <if test="timePoint != null">time_point = #{timePoint},</if>
+            <if test="audioUrl != null">audio_url = #{audioUrl},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateByPrimaryKey"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectQuoteDO">
+        UPDATE sekai_dataobject_anime_quote
+        SET series_id = #{seriesId},
+        character_id = #{characterId},
+        character_name = #{characterName},
+        content = #{content},
+        episode = #{episode},
+        time_point = #{timePoint},
+        audio_url = #{audioUrl}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

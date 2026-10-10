@@ -3,76 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sekai Anime - 数据看板</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <meta name="theme-color" content="#071722">
+    <title>Sekai Anime | 数据看板</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260830-motion-layer')}" href="/css/app.css?v=20260830-motion-layer">
 </head>
-<body style="background:var(--ink);">
-<!-- Particle Starfield -->
-<canvas class="starfield-canvas sekai-starfield" data-count="80"></canvas>
-<!-- Sakura Petals -->
-<canvas class="canvas-sakura sekai-sakura" data-count="25"></canvas>
-<!-- Mouse Glow Trail -->
-<canvas class="canvas-glow sekai-glow"></canvas>
-<!-- Floating Orbs -->
-<canvas class="canvas-orbs sekai-orbs"></canvas>
-<!-- Sparkle Trail -->
-<canvas class="canvas-sekai-sparkles sekai-sparkles"></canvas>
-<!-- Neon Shapes -->
-<canvas class="canvas-sekai-neon-shapes sekai-neon-shapes"></canvas>
-<!-- Sakura Corner Decorations -->
-<div class="sakura-decor-top" style="--r:15deg">🌸</div>
-<div class="sakura-decor-bottom" style="--r:-10deg">🌸</div>
-
-<nav class="app-nav">
-    <div class="nav-brand">🌸 Sekai Anime</div>
-    <div class="nav-links">
-        <a href="/home">首页</a>
-        <a href="/anime">🎬 看番</a>
-        <a href="/anime-hub">🌐 聚合</a>
+<body>
+<!--
+THESIS: 看板只回答一个问题，你的站点入口最近如何被使用，拒绝伪造趋势和装饰性图表。
+OWN-WORLD: 统计沿索引柜的横向刻度展开，排行使用稀疏行，真实夜景负责把数据放回观看场景。
+STORY: 用户先看到规模，再看热门入口，最后确认分类结构，然后回到站点地图继续整理。
+FIRST VIEWPORT: 标题和四项统计在顶部，左侧为热门列表，右侧为主图与分类，信息无需穿过多层卡片。
+FORM: 深夜录像租赁店的索引柜，第 6 个自定义方向，seed cae93715。FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->
+<header class="site-header app-nav">
+    <a class="brand" href="/home" aria-label="Sekai Anime 首页">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span class="brand-copy">
+            <span class="brand-name">Sekai Anime</span>
+            <span class="brand-sub">personal anime index</span>
+        </span>
+    </a>
+    <nav class="site-nav" aria-label="应用导航">
+        <a href="/home">站点地图</a>
+        <a href="/anime">看番</a>
+        <a href="/anime-hub">聚合</a>
         <a href="/dashboard" class="active">数据看板</a>
         <span class="nav-user" th:text="${loginUser.nickName}">Sekai</span>
         <a href="/logout" class="nav-logout">退出</a>
-    </div>
-</nav>
+    </nav>
+</header>
 
 <main class="app-main">
-    <h2 class="reveal">📊 数据看板</h2>
+    <section class="page-intro">
+        <div>
+            <h1>你的观看入口，正在如何流动。</h1>
+            <p>只展示来自站点收藏的真实计数，帮助你发现最常用的路径。</p>
+        </div>
+    </section>
 
-    <div class="dashboard-stats">
-        <div class="dash-card reveal"><div class="dash-icon">🔗</div><div class="dash-value" th:text="${stats.siteCount}">0</div><div class="dash-label">收录站点</div></div>
-        <div class="dash-card reveal" style="transition-delay:0.05s"><div class="dash-icon">📂</div><div class="dash-value" th:text="${stats.categoryCount}">0</div><div class="dash-label">分类数量</div></div>
-        <div class="dash-card reveal" style="transition-delay:0.1s"><div class="dash-icon">⭐</div><div class="dash-value" th:text="${stats.favoriteCount}">0</div><div class="dash-label">收藏站点</div></div>
-        <div class="dash-card reveal" style="transition-delay:0.15s"><div class="dash-icon">👆</div><div class="dash-value" th:text="${stats.totalClicks}">0</div><div class="dash-label">总点击量</div></div>
-    </div>
+    <dl class="dashboard-stats">
+        <div class="dash-card reveal">
+            <dt class="dash-label">收录站点</dt>
+            <dd class="dash-value" th:text="${stats.siteCount}">0</dd>
+        </div>
+        <div class="dash-card reveal">
+            <dt class="dash-label">分类数量</dt>
+            <dd class="dash-value" th:text="${stats.categoryCount}">0</dd>
+        </div>
+        <div class="dash-card reveal">
+            <dt class="dash-label">收藏站点</dt>
+            <dd class="dash-value" th:text="${stats.favoriteCount}">0</dd>
+        </div>
+        <div class="dash-card reveal">
+            <dt class="dash-label">总点击量</dt>
+            <dd class="dash-value" th:text="${stats.totalClicks}">0</dd>
+        </div>
+    </dl>
 
-    <div class="dashboard-section reveal">
-        <h3>🏆 热门站点 TOP 10</h3>
-        <div class="top-list" th:if="${not #lists.isEmpty(hotSites)}">
-            <div class="top-item" th:each="site,iterStat : ${hotSites}">
-                <span class="top-rank" th:classappend="${iterStat.index < 3} ? 'top3'">
-                    <span th:if="${iterStat.index == 0}">🥇</span>
-                    <span th:if="${iterStat.index == 1}">🥈</span>
-                    <span th:if="${iterStat.index == 2}">🥉</span>
-                    <span th:if="${iterStat.index > 2}" th:text="${iterStat.index + 1}">4</span>
-                </span>
-                <span class="top-name" th:text="${site.siteName}">站点名</span>
-                <span class="top-url" th:text="${site.siteUrl}">url</span>
-                <span class="top-clicks" th:text="${site.clickCount + ' 次'}">0 次</span>
+    <div class="dashboard-layout">
+        <div>
+            <section class="dashboard-section reveal" aria-labelledby="top-sites-title">
+                <h2 id="top-sites-title">热门入口</h2>
+                <div class="top-list" th:if="${not #lists.isEmpty(hotSites)}">
+                    <div class="top-item" th:each="site,iterStat : ${hotSites}">
+                        <span class="top-rank" th:text="${iterStat.index + 1}">1</span>
+                        <span class="top-name" th:text="${site.siteName}">站点名</span>
+                        <span class="top-url" th:text="${site.siteUrl}">url</span>
+                        <span class="top-clicks" th:text="${site.clickCount + ' 次'}">0 次</span>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${#lists.isEmpty(hotSites)}">
+                    <p>还没有点击数据。去站点地图添加你的第一个入口。</p>
+                </div>
+            </section>
+
+            <section class="dashboard-section reveal" aria-labelledby="categories-title">
+                <h2 id="categories-title">分类结构</h2>
+                <div class="category-bubbles" th:if="${not #lists.isEmpty(categories)}">
+                    <span class="bubble" th:each="cat : ${categories}" th:text="${cat.name}">分类</span>
+                </div>
+                <div class="empty-state" th:if="${#lists.isEmpty(categories)}">
+                    <p>还没有分类。分类能让入口更容易被找回。</p>
+                </div>
+            </section>
+        </div>
+
+        <aside class="dashboard-visual reveal" aria-label="夜间站点索引图">
+            <div class="dashboard-visual-copy">
+                <span>your night route</span>
+                <strong>每一次点击，都在让下一次打开更顺手。</strong>
             </div>
-        </div>
-        <div class="empty-state" th:if="${#lists.isEmpty(hotSites)}">
-            <p>还没有数据，去首页添加站点吧！</p>
-        </div>
-    </div>
-
-    <div class="dashboard-section reveal">
-        <h3>📂 分类分布</h3>
-        <div class="category-bubbles" th:if="${not #lists.isEmpty(categories)}">
-            <span class="bubble" th:each="cat : ${categories}" th:text="${cat.name}">分类</span>
-        </div>
+        </aside>
     </div>
 </main>
 
-<script th:src="@{/js/effects.js(v='20260806-sakura3')}" src="/js/effects.js?v=20260806-sakura3"></script>
+<script th:src="@{/js/effects.js(v='20260830-motion-layer')}" src="/js/effects.js?v=20260830-motion-layer"></script>
 </body>
 </html>

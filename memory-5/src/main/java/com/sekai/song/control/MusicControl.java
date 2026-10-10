@@ -1,19 +1,16 @@
 package com.sekai.song.control;
 
 import com.sekai.song.model.NeteaseImportResult;
-import com.sekai.song.model.LicenseStatus;
 import com.sekai.song.model.MusicImportResult;
 import com.sekai.song.model.Playlist;
 import com.sekai.song.model.Song;
 import com.sekai.song.model.User;
 import com.sekai.song.service.BilibiliImportService;
 import com.sekai.song.service.CloudLyricService;
-import com.sekai.song.service.LicenseService;
 import com.sekai.song.service.NeteaseImportService;
 import com.sekai.song.service.PlaylistService;
 import com.sekai.song.service.QqImportService;
 import com.sekai.song.service.SongService;
-import com.sekai.song.service.VipQuotaService;
 import com.sekai.song.util.UploadPathUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
@@ -53,12 +50,14 @@ import java.util.stream.Stream;
 @Controller
 public class MusicControl {
     private static final Set<String> AUDIO_EXTENSIONS = Set.of(".mp3", ".flac", ".m4a", ".wav", ".ogg", ".aac");
-    private static final Set<String> LYRIC_EXTENSIONS = Set.of(".lrc");
+    private static final Set<String> LYRIC_EXTENSIONS = Set.of(".lrc", ".txt");
     private static final Set<String> VIDEO_EXTENSIONS = Set.of(".mp4", ".webm", ".m4v", ".mov", ".mkv");
+    private static final Set<String> COVER_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp");
     private static final Charset GB18030 = Charset.forName("GB18030");
     private static final Pattern LRC_TIMESTAMP = Pattern.compile("\\[(\\d{1,2}):(\\d{2})(?:\\.(\\d{1,3}))?]");
     private static final Path AUDIO_UPLOAD_ROOT = UploadPathUtil.uploadRoot().resolve("audio").normalize();
     private static final Path VIDEO_UPLOAD_ROOT = UploadPathUtil.uploadRoot().resolve("video").normalize();
+    private static final Path COVER_UPLOAD_ROOT = UploadPathUtil.uploadRoot().resolve("covers").normalize();
     private static final Path EXTERNAL_UPLOAD_ROOT = externalUploadRoot();
 
     @Resource
@@ -79,21 +78,11 @@ public class MusicControl {
     @Resource
     private CloudLyricService cloudLyricService;
 
-    @Resource
-    private LicenseService licenseService;
-
-    @Resource
-    private VipQuotaService vipQuotaService;
-
     @PostMapping("/songs/add")
     public String addSong(Song song, HttpSession session, RedirectAttributes redirectAttributes) {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
-        }
-        if (!vipQuotaService.canAddSong(user)) {
-            redirectAttributes.addFlashAttribute("error", vipQuotaService.songLimitMessage(user));
-            return "redirect:/license";
         }
         song.setUserId(user.getId());
         boolean success = songService.add(song);
@@ -147,9 +136,6 @@ public class MusicControl {
         if (user == null) {
             return "redirect:/login";
         }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
-        }
         Song song = songService.getByIdAndUserId(id, user.getId());
         if (song == null) {
             redirectAttributes.addFlashAttribute("error", "歌曲不存在");
@@ -175,9 +161,21 @@ public class MusicControl {
             Files.copy(audioFile.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
             String audioUrl = "/uploads/audio/" + fileName;
             AudioFileMetadata metadata = readAudioFileMetadata(target);
+            boolean extractedTimedLyric = hasTimedLyrics(metadata.lyricText());
+            boolean extractedPlainLyric = metadata.lyricText() != null && !metadata.lyricText().isBlank();
             metadata = withCloudLyricFallback(song, metadata);
             songService.updateLocalAudioMetadata(id, user.getId(), audioUrl, metadata.lyricText(), metadata.durationSeconds());
-            redirectAttributes.addFlashAttribute("message", "本地音频已上传，现在优先使用项目播放器播放");
+            String message = "本地音频已上传，现在优先使用项目播放器播放";
+            if (extractedTimedLyric) {
+                message += "；已提取文件内或同名文件中的同步歌词";
+            } else if (hasTimedLyrics(metadata.lyricText())) {
+                message += "；文件未带同步歌词，已从云端自动补全";
+            } else if (extractedPlainLyric) {
+                message += "；已提取纯文本歌词，但原文件没有时间戳";
+            } else {
+                message += "；文件未包含歌词且云端未匹配，请提供同名 LRC";
+            }
+            redirectAttributes.addFlashAttribute("message", message);
         } catch (IOException e) {
             redirectAttributes.addFlashAttribute("error", "音频上传失败，请换一个文件再试");
         }
@@ -193,9 +191,6 @@ public class MusicControl {
         if (user == null) {
             return "redirect:/login";
         }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
-        }
         Song song = songService.getByIdAndUserId(id, user.getId());
         if (song == null) {
             redirectAttributes.addFlashAttribute("error", "歌曲不存在");
@@ -203,6 +198,81 @@ public class MusicControl {
         }
         MetadataSyncResult result = resyncLocalAudioMetadata(List.of(song), user.getId());
         redirectAttributes.addFlashAttribute(result.success() ? "message" : "error", result.message());
+        return redirectTo(returnTo, "/player/" + id);
+    }
+
+    @PostMapping("/songs/lyrics/{id}/fetch")
+    public String fetchCloudLyrics(@PathVariable Long id,
+                                   @RequestParam(value = "returnTo", required = false) String returnTo,
+                                   @RequestParam(value = "force", defaultValue = "false") boolean force,
+                                   HttpSession session,
+                                   RedirectAttributes redirectAttributes) {
+        User user = requireUser(session);
+        if (user == null) {
+            return "redirect:/login";
+        }
+        Song song = songService.getByIdAndUserId(id, user.getId());
+        if (song == null) {
+            redirectAttributes.addFlashAttribute("error", "歌曲不存在");
+            return "redirect:/songs";
+        }
+        if (!force && song.getLyricText() != null && !song.getLyricText().isBlank()) {
+            redirectAttributes.addFlashAttribute("message", "这首歌已经有歌词了，无需重复获取");
+            return redirectTo(returnTo, "/player/" + id);
+        }
+        String lyricText = cloudLyricForSong(song);
+        if (lyricText == null) {
+            redirectAttributes.addFlashAttribute("error", "网易云、QQ 音乐和 LRCLIB 均未找到可靠的同步歌词；请检查歌曲标题/歌手，或手动导入 LRC");
+            return redirectTo(returnTo, "/player/" + id);
+        }
+        songService.updateLyricMetadata(id, user.getId(), lyricText);
+        redirectAttributes.addFlashAttribute("message", force ? "已重新匹配并更新同步歌词" : "已从云端获取同步歌词，四种演出将共用这条时间轴");
+        return redirectTo(returnTo, "/player/" + id);
+    }
+
+    @PostMapping("/songs/cover/{id}")
+    public String uploadCover(@PathVariable Long id,
+                              @RequestParam("coverFile") MultipartFile coverFile,
+                              @RequestParam(value = "returnTo", required = false) String returnTo,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        User user = requireUser(session);
+        if (user == null) {
+            return "redirect:/login";
+        }
+        Song song = songService.getByIdAndUserId(id, user.getId());
+        if (song == null) {
+            redirectAttributes.addFlashAttribute("error", "歌曲不存在");
+            return "redirect:/songs";
+        }
+        if (coverFile == null || coverFile.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "请选择一张封面图片");
+            return redirectTo(returnTo, "/player/" + id);
+        }
+        String extension = extensionOf(coverFile.getOriginalFilename()).toLowerCase(Locale.ROOT);
+        if (!COVER_EXTENSIONS.contains(extension)) {
+            redirectAttributes.addFlashAttribute("error", "只支持 jpg、jpeg、png、webp、gif、bmp 图片文件");
+            return redirectTo(returnTo, "/player/" + id);
+        }
+        if (coverFile.getSize() > 15L * 1024 * 1024) {
+            redirectAttributes.addFlashAttribute("error", "封面图片不能超过 15MB");
+            return redirectTo(returnTo, "/player/" + id);
+        }
+        try {
+            Files.createDirectories(COVER_UPLOAD_ROOT);
+            String fileName = user.getId() + "-" + id + "-" + System.currentTimeMillis() + extension;
+            Path target = COVER_UPLOAD_ROOT.resolve(fileName).normalize();
+            if (!target.startsWith(COVER_UPLOAD_ROOT)) {
+                redirectAttributes.addFlashAttribute("error", "文件名不安全");
+                return redirectTo(returnTo, "/player/" + id);
+            }
+            Files.copy(coverFile.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+            String coverUrl = "/uploads/covers/" + fileName;
+            songService.updateCoverUrl(id, user.getId(), coverUrl);
+            redirectAttributes.addFlashAttribute("message", "封面已更新，播放页左侧封面与转盘效果将使用这张图片");
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("error", "封面上传失败，请换一张图片再试");
+        }
         return redirectTo(returnTo, "/player/" + id);
     }
 
@@ -215,9 +285,6 @@ public class MusicControl {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
-        }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
         }
         Song song = songService.getByIdAndUserId(id, user.getId());
         if (song == null) {
@@ -264,9 +331,6 @@ public class MusicControl {
         if (user == null) {
             return "redirect:/login";
         }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
-        }
         Playlist playlist = playlistService.getByIdAndUserId(playlistId, user.getId());
         if (playlist == null) {
             redirectAttributes.addFlashAttribute("error", "歌单不存在");
@@ -295,9 +359,6 @@ public class MusicControl {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
-        }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
         }
         Playlist playlist = playlistService.getByIdAndUserId(playlistId, user.getId());
         if (playlist == null) {
@@ -333,9 +394,6 @@ public class MusicControl {
         if (user == null) {
             return "redirect:/login";
         }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
-        }
         Playlist playlist = playlistService.getByIdAndUserId(playlistId, user.getId());
         if (playlist == null) {
             redirectAttributes.addFlashAttribute("error", "歌单不存在");
@@ -357,9 +415,6 @@ public class MusicControl {
         if (user == null) {
             return "redirect:/login";
         }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
-        }
         List<AudioCandidate> candidates = usableAudioFiles(audioFiles);
         if (candidates.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "请选择包含 mp3、flac、m4a、wav、ogg 或 aac 的本地音乐文件夹");
@@ -380,9 +435,6 @@ public class MusicControl {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
-        }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
         }
         List<AudioCandidate> candidates;
         try {
@@ -424,7 +476,8 @@ public class MusicControl {
                 copyCandidate(candidate, target);
                 AudioCandidate enrichedCandidate = enrichCandidateWithAudioFile(candidate, target);
                 AudioFileMetadata syncedMetadata = withCloudLyricFallback(song,
-                        new AudioFileMetadata(enrichedCandidate.lyricText(), enrichedCandidate.durationSeconds()));
+                        new AudioFileMetadata(enrichedCandidate.lyricText(), enrichedCandidate.durationSeconds(),
+                                enrichedCandidate.title(), enrichedCandidate.artist(), enrichedCandidate.album()));
                 boolean updated = songService.updateLocalAudioMetadata(
                         song.getId(),
                         userId,
@@ -440,7 +493,7 @@ public class MusicControl {
                 if (syncedMetadata.lyricText() != null) {
                     syncedLyrics++;
                 }
-                if (syncedMetadata.durationSeconds() != null) {
+                if (hasTimedLyrics(syncedMetadata.lyricText())) {
                     syncedTimeline++;
                 }
             }
@@ -500,10 +553,10 @@ public class MusicControl {
                 }
                 playlistService.addSong(playlist.getId(), song.getId(), user.getId());
                 imported++;
-                if (enrichedCandidate.lyricText() != null) {
+                if (song.getLyricText() != null) {
                     syncedLyrics++;
                 }
-                if (enrichedCandidate.durationSeconds() != null) {
+                if (hasTimedLyrics(song.getLyricText())) {
                     syncedTimeline++;
                 }
             }
@@ -594,9 +647,6 @@ public class MusicControl {
         if (playlistId != null && playlistId > 0) {
             return playlistService.getByIdAndUserId(playlistId, user.getId());
         }
-        if (!vipQuotaService.canAddPlaylist(user)) {
-            return null;
-        }
         String cleanName = playlistName == null || playlistName.isBlank()
                 ? "本地音乐导入"
                 : playlistName.trim();
@@ -609,22 +659,27 @@ public class MusicControl {
     }
 
     private Song buildLocalAudioSong(AudioCandidate candidate, Playlist playlist, Long userId, String localAudioUrl) {
-        AudioMetadata metadata = inferAudioMetadata(candidate.originalName());
+        AudioMetadata inferred = inferAudioMetadata(candidate.originalName());
+        String title = firstNonBlank(candidate.title(), inferred.title());
+        String artist = firstNonBlank(candidate.artist(), inferred.artist());
+        String album = firstNonBlank(candidate.album(), playlist.getName());
         Song song = new Song();
         song.setUserId(userId);
-        song.setTitle(fit(metadata.title(), 160));
-        song.setArtist(fit(metadata.artist(), 160));
+        song.setTitle(fit(title, 160));
+        song.setArtist(fit(artist, 160));
         song.setAnimeTitle("本地音乐");
-        song.setAlbumName(fit(playlist.getName(), 160));
+        song.setAlbumName(fit(album, 160));
         song.setCoverUrl(playlist.getCoverUrl());
         song.setAudioUrl("");
         song.setLocalAudioUrl(localAudioUrl);
         song.setSkinUrl("/images/login-music-room.png");
         song.setTags("本地导入");
         song.setMood("本地");
-        song.setLyricText(candidate.lyricText() == null
-                ? cloudLyricService.fetchBestLyric(song.getTitle(), song.getArtist())
-                : candidate.lyricText());
+        String extractedLyric = candidate.lyricText();
+        String lyricText = hasTimedLyrics(extractedLyric)
+                ? extractedLyric
+                : cloudLyricService.fetchBestLyric(song.getTitle(), song.getArtist(), song.getAlbumName(), song.getDurationSeconds());
+        song.setLyricText(firstNonBlank(lyricText, extractedLyric));
         song.setDurationSeconds(candidate.durationSeconds());
         song.setFavorite(false);
         return song;
@@ -632,30 +687,39 @@ public class MusicControl {
 
     private AudioFileMetadata withCloudLyricFallback(Song song, AudioFileMetadata metadata) {
         if (metadata == null) {
-            metadata = new AudioFileMetadata(null, null);
+            metadata = new AudioFileMetadata(null, null, null, null, null);
         }
-        if (metadata.lyricText() != null || song == null) {
+        if (hasTimedLyrics(metadata.lyricText()) || song == null) {
             return metadata;
         }
         String lyricText = cloudLyricForSong(song);
         return lyricText == null
                 ? metadata
-                : new AudioFileMetadata(lyricText, metadata.durationSeconds());
+                : new AudioFileMetadata(lyricText, metadata.durationSeconds(),
+                        metadata.title(), metadata.artist(), metadata.album());
     }
 
     private String cloudLyricForSong(Song song) {
         String neteaseSongId = song.getNeteaseSongId();
         if (neteaseSongId != null && !neteaseSongId.isBlank()) {
-            return cloudLyricService.fetchNeteaseLyric(neteaseSongId);
+            String lyricText = cloudLyricService.fetchNeteaseLyric(neteaseSongId);
+            if (lyricText != null && !lyricText.isBlank()) {
+                return lyricText;
+            }
         }
         String qqValue = song.getQqSongMid();
         if (qqValue != null && !qqValue.isBlank()) {
+            String lyricText;
             if (qqValue.chars().allMatch(Character::isDigit)) {
-                return cloudLyricService.fetchQqLyric(null, Long.parseLong(qqValue));
+                lyricText = cloudLyricService.fetchQqLyric(null, Long.parseLong(qqValue));
+            } else {
+                lyricText = cloudLyricService.fetchQqLyric(qqValue, null);
             }
-            return cloudLyricService.fetchQqLyric(qqValue, null);
+            if (lyricText != null && !lyricText.isBlank()) {
+                return lyricText;
+            }
         }
-        return cloudLyricService.fetchBestLyric(song.getTitle(), song.getArtist());
+        return cloudLyricService.fetchBestLyric(song.getTitle(), song.getArtist(), song.getAlbumName(), song.getDurationSeconds());
     }
 
     private AudioMetadata inferAudioMetadata(String originalName) {
@@ -677,10 +741,6 @@ public class MusicControl {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
-        }
-        if (!vipQuotaService.canAddPlaylist(user)) {
-            redirectAttributes.addFlashAttribute("error", vipQuotaService.playlistLimitMessage(user));
-            return "redirect:/license";
         }
         playlist.setUserId(user.getId());
         boolean success = playlistService.add(playlist);
@@ -749,9 +809,6 @@ public class MusicControl {
         if (user == null) {
             return "redirect:/login";
         }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
-        }
         if ((songIds == null || songIds.isBlank()) && link != null) {
             songIds = link;
         }
@@ -775,9 +832,6 @@ public class MusicControl {
         if (user == null) {
             return "redirect:/login";
         }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
-        }
         if ((songIds == null || songIds.isBlank()) && link != null) {
             songIds = link;
         }
@@ -800,9 +854,6 @@ public class MusicControl {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
-        }
-        if (!requireVip(user, redirectAttributes)) {
-            return "redirect:/license";
         }
         if ((videoIds == null || videoIds.isBlank()) && link != null) {
             videoIds = link;
@@ -863,7 +914,10 @@ public class MusicControl {
                         extension,
                         normalizedName,
                         lyricText,
-                        inferDurationSeconds(lyricText)));
+                        inferDurationSeconds(lyricText),
+                        null,
+                        null,
+                        null));
             }
         }
         return usableFiles;
@@ -908,7 +962,10 @@ public class MusicControl {
                     extension,
                     normalizedName,
                     lyricText,
-                    inferDurationSeconds(lyricText)));
+                    inferDurationSeconds(lyricText),
+                    null,
+                    null,
+                    null));
         }
         return candidates;
     }
@@ -937,12 +994,15 @@ public class MusicControl {
                 candidate.extension(),
                 candidate.normalizedName(),
                 lyricText,
-                durationSeconds);
+                durationSeconds,
+                metadata.title(),
+                metadata.artist(),
+                metadata.album());
     }
 
     private AudioFileMetadata readAudioFileMetadata(Path audioPath) {
         if (audioPath == null || !Files.isRegularFile(audioPath)) {
-            return new AudioFileMetadata(null, null);
+            return new AudioFileMetadata(null, null, null, null, null);
         }
         String sidecarLyric = readSidecarLyric(audioPath);
         try {
@@ -952,9 +1012,15 @@ public class MusicControl {
             if (durationSeconds == null) {
                 durationSeconds = inferDurationSeconds(lyricText);
             }
-            return new AudioFileMetadata(lyricText, durationSeconds);
+            Tag tag = audioFile.getTag();
+            return new AudioFileMetadata(
+                    lyricText,
+                    durationSeconds,
+                    safeTagValue(tag, FieldKey.TITLE),
+                    safeTagValue(tag, FieldKey.ARTIST),
+                    safeTagValue(tag, FieldKey.ALBUM));
         } catch (Exception e) {
-            return new AudioFileMetadata(sidecarLyric, inferDurationSeconds(sidecarLyric));
+            return new AudioFileMetadata(sidecarLyric, inferDurationSeconds(sidecarLyric), null, null, null);
         }
     }
 
@@ -1062,6 +1128,10 @@ public class MusicControl {
             maxSeconds = Math.max(maxSeconds, minutes * 60 + seconds);
         }
         return maxSeconds >= 0 ? Math.min(maxSeconds + 8, 24 * 60 * 60) : null;
+    }
+
+    private boolean hasTimedLyrics(String lyricText) {
+        return lyricText != null && LRC_TIMESTAMP.matcher(lyricText).find();
     }
 
     private String cleanLyric(String text) {
@@ -1199,15 +1269,6 @@ public class MusicControl {
                 && song.getAudioUrl().contains("bilibili.com");
     }
 
-    private boolean requireVip(User user, RedirectAttributes redirectAttributes) {
-        LicenseStatus status = licenseService.statusOf(user);
-        if (status.isVip()) {
-            return true;
-        }
-        redirectAttributes.addFlashAttribute("error", "这是 VIP 高级功能，请先激活专业版或永久版授权码。");
-        return false;
-    }
-
     private User requireUser(HttpSession session) {
         Object loginUser = session.getAttribute("loginUser");
         if (loginUser instanceof User user) {
@@ -1233,7 +1294,10 @@ public class MusicControl {
                                   String extension,
                                   String normalizedName,
                                   String lyricText,
-                                  Integer durationSeconds) {
+                                  Integer durationSeconds,
+                                  String title,
+                                  String artist,
+                                  String album) {
     }
 
     private record Match(AudioCandidate candidate, int score) {
@@ -1251,6 +1315,10 @@ public class MusicControl {
     private record AudioMetadata(String title, String artist) {
     }
 
-    private record AudioFileMetadata(String lyricText, Integer durationSeconds) {
+    private record AudioFileMetadata(String lyricText,
+                                     Integer durationSeconds,
+                                     String title,
+                                     String artist,
+                                     String album) {
     }
 }

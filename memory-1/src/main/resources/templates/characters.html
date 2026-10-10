@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二次元数据锡通 - 人物</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <meta name="theme-color" content="#0b0c0e">
+</head>
+<body>
+<!-- THESIS: 人物图鉴不把角色压缩成头像墙，而是让姓名、原名、声优和所属番剧成为可检索的档案字段。 OWN-WORLD: 深色档案室、幽灵段码、暖橙红强调色、软角边框和真实本地素材。 STORY: 用户先按关键词或作品筛选，再从立绘进入角色记录和编辑状态。 FIRST VIEWPORT: 入口标题、双条件检索和新增动作占据上方，下面以大图立绘和紧凑元数据形成索引。 FORM: 候选 5，七段数码显示器家族，seed 35146822。 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance -->
+<nav class="top-nav" aria-label="主导航">
+    <a class="nav-brand" href="/home">
+        <span class="nav-logo">SDO</span>
+        <span>
+            <span class="nav-title">二次元数据锡通</span>
+            <span class="nav-subtitle">Sekai Data Object</span>
+        </span>
+    </a>
+    <div class="nav-links">
+        <a href="/home">首页</a>
+        <a href="/series">番剧</a>
+        <a href="/characters" class="active">人物</a>
+        <a href="/quotes">台词</a>
+    </div>
+    <div class="nav-user">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换主题">浅色</button>
+        <span class="user-nick" th:text="${loginUser.nickName != null and !loginUser.nickName.isEmpty() ? loginUser.nickName : loginUser.userName}">成员</span>
+        <a href="/logout" class="logout-link">退出</a>
+        <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="mobileNavPanel">菜单</button>
+    </div>
+</nav>
+<nav id="mobileNavPanel" class="mobile-nav-panel" aria-label="移动端导航" hidden>
+    <a href="/home">首页</a>
+    <a href="/series">番剧</a>
+    <a href="/characters" class="active">人物</a>
+    <a href="/quotes">台词</a>
+</nav>
+
+<main class="container">
+    <div class="flash-message success" th:if="${message}" th:text="${message}" role="status" aria-live="polite"></div>
+    <div class="flash-message error" th:if="${error}" th:text="${error}" role="alert"></div>
+
+    <header class="page-head">
+        <h1>人物图鉴</h1>
+        <p>从姓名、原名、声优到所属番剧，把每个角色放回作品关系里。</p>
+    </header>
+
+    <form class="search-bar" method="get" action="/characters" role="search">
+        <div class="search-field">
+            <label for="characterKeyword">检索人物</label>
+            <input id="characterKeyword" type="search" name="keyword" th:value="${keyword}" placeholder="人物名、原名或声优">
+        </div>
+        <div class="filter-field">
+            <label for="characterSeries">所属番剧</label>
+            <select id="characterSeries" name="seriesId">
+                <option value="">全部番剧</option>
+                <option th:each="option : ${seriesOptions}" th:value="${option.id}" th:selected="${filterSeriesId != null and filterSeriesId == option.id}" th:text="${option.title}">番剧</option>
+            </select>
+        </div>
+        <button type="submit" class="btn primary">检索</button>
+    </form>
+
+    <div class="toolbar-row">
+        <span class="toolbar-note" th:text="${totalCount + ' 条人物记录'}">0 条人物记录</span>
+        <button class="btn outline add-toggle" type="button" data-toggle-target="addPanel" data-open-label="收起录入" data-closed-label="新增人物" aria-expanded="false">新增人物</button>
+    </div>
+
+    <section class="add-panel" id="addPanel" hidden aria-labelledby="add-character-title">
+        <div class="panel-header">
+            <h2 id="add-character-title">新增人物</h2>
+            <span>姓名和所属关系是必填之外的核心信息</span>
+        </div>
+        <form method="post" action="/characters/add" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="seriesId">所属番剧</label>
+                    <select id="seriesId" name="seriesId">
+                        <option value="">未选择</option>
+                        <option th:each="option : ${seriesOptions}" th:value="${option.id}" th:text="${option.title}">番剧</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="name">人物名称 *</label>
+                    <input id="name" type="text" name="name" required placeholder="如：利威尔">
+                </div>
+                <div class="field">
+                    <label for="originalName">人物原名</label>
+                    <input id="originalName" type="text" name="originalName" placeholder="如：リヴァイ">
+                </div>
+                <div class="field">
+                    <label for="role">人物定位</label>
+                    <input id="role" type="text" name="role" placeholder="如：主角、配角或反派">
+                </div>
+                <div class="field">
+                    <label for="voiceActor">声优（CV）</label>
+                    <input id="voiceActor" type="text" name="voiceActor" placeholder="如：神谷浩史">
+                </div>
+                <div class="field">
+                    <label for="imageUrl">立绘图片 URL</label>
+                    <input id="imageUrl" type="url" name="imageUrl" placeholder="https://...">
+                </div>
+                <div class="field">
+                    <label for="imageFile">或上传立绘</label>
+                    <input id="imageFile" type="file" name="imageFile" accept="image/*">
+                </div>
+                <div class="field wide">
+                    <label for="description">人物简介</label>
+                    <textarea id="description" name="description" rows="3" placeholder="官方人物简介"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn primary">保存人物</button>
+        </form>
+    </section>
+
+    <section class="character-grid" th:if="${!characterList.isEmpty()}" aria-label="人物列表">
+        <article class="character-card reveal" data-reveal-delay="40" th:each="character : ${characterList}">
+            <div class="character-cover">
+                <img th:if="${character.imageUrl != null and !character.imageUrl.isEmpty()}" th:src="${character.imageUrl}" th:alt="${character.name + ' 立绘'}">
+                <span class="cover-placeholder" th:unless="${character.imageUrl != null and !character.imageUrl.isEmpty()}"><span th:text="${character.name}">人物名</span></span>
+            </div>
+            <div class="character-info">
+                <div class="character-name" th:text="${character.name}">人物名</div>
+                <div class="character-meta" th:if="${character.originalName != null and !character.originalName.isEmpty()}" th:text="${character.originalName}">原名</div>
+                <div class="character-meta" th:if="${character.role != null and !character.role.isEmpty()}" th:text="${character.role}">人物定位</div>
+                <div class="character-meta" th:if="${seriesById != null and seriesById.containsKey(character.seriesId)}" th:text="${seriesById.get(character.seriesId).title}">所属番剧</div>
+                <div class="character-meta" th:if="${character.voiceActor != null and !character.voiceActor.isEmpty()}" th:text="${'CV ' + character.voiceActor}">CV</div>
+                <p class="character-desc" th:if="${character.description != null and !character.description.isEmpty()}" th:text="${character.description}">简介</p>
+                <div class="detail-actions">
+                    <button class="btn outline small" type="button" th:attr="data-toggle-target=${'editCharacter__' + character.id}" data-open-label="收起编辑" data-closed-label="编辑" aria-expanded="false">编辑</button>
+                    <form method="post" th:action="@{/characters/delete/{id}(id=${character.id})}" class="inline-form" onsubmit="return confirm('确定删除该人物吗？');">
+                        <button type="submit" class="btn danger small">删除</button>
+                    </form>
+                </div>
+                <div class="edit-panel" th:id="${'editCharacter__' + character.id}" hidden>
+                    <form method="post" th:action="@{/characters/update/{id}(id=${character.id})}" enctype="multipart/form-data">
+                        <div class="form-grid">
+                            <div class="field">
+                                <label th:for="${'editName__' + character.id}">人物名称 *</label>
+                                <input th:id="${'editName__' + character.id}" type="text" name="name" th:value="${character.name}" required>
+                            </div>
+                            <div class="field">
+                                <label th:for="${'editOriginalName__' + character.id}">人物原名</label>
+                                <input th:id="${'editOriginalName__' + character.id}" type="text" name="originalName" th:value="${character.originalName}">
+                            </div>
+                            <div class="field">
+                                <label th:for="${'editRole__' + character.id}">人物定位</label>
+                                <input th:id="${'editRole__' + character.id}" type="text" name="role" th:value="${character.role}">
+                            </div>
+                            <div class="field">
+                                <label th:for="${'editVoiceActor__' + character.id}">声优（CV）</label>
+                                <input th:id="${'editVoiceActor__' + character.id}" type="text" name="voiceActor" th:value="${character.voiceActor}">
+                            </div>
+                            <div class="field">
+                                <label th:for="${'editSeries__' + character.id}">所属番剧</label>
+                                <select th:id="${'editSeries__' + character.id}" name="seriesId">
+                                    <option value="">未选择</option>
+                                    <option th:each="option : ${seriesOptions}" th:value="${option.id}" th:selected="${character.seriesId != null and character.seriesId == option.id}" th:text="${option.title}">番剧</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label th:for="${'editImageUrl__' + character.id}">立绘图片 URL</label>
+                                <input th:id="${'editImageUrl__' + character.id}" type="url" name="imageUrl" th:value="${character.imageUrl}">
+                            </div>
+                            <div class="field wide">
+                                <label th:for="${'editDescription__' + character.id}">人物简介</label>
+                                <textarea th:id="${'editDescription__' + character.id}" name="description" rows="3" th:text="${character.description}"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn primary small">保存修改</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+    </section>
+    <div class="card-empty" th:if="${characterList.isEmpty()}">没有找到匹配的人物。调整筛选条件，或去<a href="/characters">新增人物</a>。</div>
+
+    <nav class="pagination" th:if="${totalPages > 1}" aria-label="人物分页">
+        <a th:if="${currentPage > 1}" th:href="@{/characters(page=${currentPage - 1}, keyword=${keyword}, seriesId=${filterSeriesId})}">上一页</a>
+        <span class="page-info" th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
+        <a th:if="${currentPage < totalPages}" th:href="@{/characters(page=${currentPage + 1}, keyword=${keyword}, seriesId=${filterSeriesId})}">下一页</a>
+    </nav>
+</main>
+
+<footer class="page-footer">© 2026 Sekai Data Object / 二次元数据锡通</footer>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+</body>
+</html>

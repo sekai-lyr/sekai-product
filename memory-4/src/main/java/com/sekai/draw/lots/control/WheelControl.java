@@ -1,11 +1,9 @@
 package com.sekai.draw.lots.control;
 
-import com.sekai.draw.lots.model.MembershipStatus;
 import com.sekai.draw.lots.model.Result;
 import com.sekai.draw.lots.model.User;
 import com.sekai.draw.lots.model.WheelOption;
 import com.sekai.draw.lots.model.WheelSpinResult;
-import com.sekai.draw.lots.service.MembershipService;
 import com.sekai.draw.lots.service.WheelService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
@@ -24,23 +22,16 @@ public class WheelControl {
     @Resource
     private WheelService wheelService;
 
-    @Resource
-    private MembershipService membershipService;
-
     @GetMapping("/wheel")
     public String wheel(HttpSession session, Model model) {
         User user = requireLogin(session);
         if (user == null) {
             return "redirect:/login";
         }
-        MembershipStatus membership = membershipService.getStatus(user);
-        boolean premium = membershipService.isPremium(user);
         model.addAttribute("loginUser", user);
-        model.addAttribute("membership", membership);
-        model.addAttribute("premium", premium);
         model.addAttribute("options", wheelService.options(user));
         model.addAttribute("recentSpins", wheelService.recentSpins(user, 8));
-        model.addAttribute("vipSuggestions", premium ? wheelService.vipSuggestions(user) : java.util.List.of());
+        model.addAttribute("suggestions", wheelService.suggestions(user));
         return "wheel";
     }
 
@@ -73,18 +64,14 @@ public class WheelControl {
         return "redirect:/wheel";
     }
 
-    @PostMapping("/wheel/vip/import")
-    public String importVipSuggestions(HttpSession session,
-                                       RedirectAttributes redirectAttributes) {
+    @PostMapping("/wheel/import-suggestions")
+    public String importSuggestions(HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
         User user = requireLogin(session);
         if (user == null) {
             return "redirect:/login";
         }
-        if (!membershipService.isPremium(user)) {
-            redirectAttributes.addFlashAttribute("error", "智能补全转盘是会员功能，请先开通会员。");
-            return "redirect:/membership?locked=wheel-vip";
-        }
-        Result<Integer> result = wheelService.importVipSuggestions(user);
+        Result<Integer> result = wheelService.importSuggestions(user);
         addFlash(result, redirectAttributes);
         return "redirect:/wheel";
     }

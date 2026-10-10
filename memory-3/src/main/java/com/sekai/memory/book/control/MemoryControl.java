@@ -6,6 +6,7 @@ import com.sekai.memory.book.model.Quote;
 import com.sekai.memory.book.model.User;
 import com.sekai.memory.book.service.AnimeService;
 import com.sekai.memory.book.service.CharacterFavoriteService;
+import com.sekai.memory.book.service.MetadataEnrichmentService;
 import com.sekai.memory.book.service.QuoteService;
 import com.sekai.memory.book.util.UploadPathUtil;
 import jakarta.annotation.Resource;
@@ -39,6 +40,9 @@ public class MemoryControl {
     @Resource
     private QuoteService quoteService;
 
+    @Resource
+    private MetadataEnrichmentService metadataEnrichmentService;
+
     @PostMapping("/anime/add")
     public String addAnime(Anime anime,
                            HttpSession session,
@@ -53,9 +57,10 @@ public class MemoryControl {
             return "redirect:/pro";
         }
         anime.setUserId(user.getId());
+        boolean enriched = metadataEnrichmentService.enrichAnime(anime);
         boolean success = animeService.add(anime);
         redirectAttributes.addFlashAttribute(success ? "message" : "error",
-                success ? "番剧已经加入回忆档案" : "番剧名称不能为空");
+                success ? (enriched ? "番剧已加入，资料已自动补全" : "番剧已加入，暂未查到可补全的资料") : "番剧名称不能为空");
         return redirectTo(returnTo, "/anime");
     }
 
@@ -134,9 +139,10 @@ public class MemoryControl {
             return "redirect:/pro";
         }
         characterFavorite.setUserId(user.getId());
+        boolean enriched = metadataEnrichmentService.enrichCharacter(characterFavorite, animeService.listByUserId(user.getId()));
         boolean success = characterFavoriteService.add(characterFavorite);
         redirectAttributes.addFlashAttribute(success ? "message" : "error",
-                success ? "角色已经加入收藏" : "角色名称不能为空");
+                success ? (enriched ? "角色已收藏，资料已自动补全" : "角色已收藏，暂未查到可补全的资料") : "角色名称不能为空");
         return redirectTo(returnTo, "/characters");
     }
 

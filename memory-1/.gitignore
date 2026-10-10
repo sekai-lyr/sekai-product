@@ -1,0 +1,11 @@
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.idea/
+*.iml
+.DS_Store
+uploads/
+data-build/
+build-data-clean/
+dist/

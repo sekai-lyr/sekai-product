@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="980" viewBox="0 0 620 980">
+  <title>初音未来 · DivaStage 自建 2D 立绘</title>
+  <desc>项目内手绘的矢量舞台角色：青绿色双马尾、黑色袖套与蓝绿色舞台服。</desc>
+  <defs>
+    <linearGradient id="hair" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c9fff7"/>
+      <stop offset="0.45" stop-color="#34d9d0"/>
+      <stop offset="1" stop-color="#087f9a"/>
+    </linearGradient>
+    <linearGradient id="hairDeep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0c7895"/>
+      <stop offset="0.52" stop-color="#33d6cf"/>
+      <stop offset="1" stop-color="#a5fff4"/>
+    </linearGradient>
+    <linearGradient id="jacket" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#20394d"/>
+      <stop offset="0.55" stop-color="#101d32"/>
+      <stop offset="1" stop-color="#07101d"/>
+    </linearGradient>
+    <linearGradient id="skirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5de8dc"/>
+      <stop offset="0.5" stop-color="#1b9eb2"/>
+      <stop offset="1" stop-color="#11506f"/>
+    </linearGradient>
+    <linearGradient id="boot" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#304e67"/>
+      <stop offset="1" stop-color="#080d19"/>
+    </linearGradient>
+    <radialGradient id="skin" cx="38%" cy="25%" r="75%">
+      <stop offset="0" stop-color="#fff7f0"/>
+      <stop offset="1" stop-color="#f1c9c5"/>
+    </radialGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Stage shadow -->
+  <ellipse cx="310" cy="932" rx="178" ry="22" fill="#20dccc" opacity=".18" filter="url(#shadow)"/>
+  <ellipse cx="310" cy="927" rx="142" ry="12" fill="#051725" opacity=".8"/>
+
+  <!-- Twin tails behind the body -->
+  <path d="M204 215 C132 250 82 335 90 468 C96 578 52 671 111 793 C145 862 192 866 219 786 C238 726 216 651 232 552 L250 322 Z" fill="url(#hairDeep)" stroke="#083d68" stroke-width="7"/>
+  <path d="M416 215 C488 250 538 335 530 468 C524 578 568 671 509 793 C475 862 428 866 401 786 C382 726 404 651 388 552 L370 322 Z" fill="url(#hairDeep)" stroke="#083d68" stroke-width="7"/>
+  <path d="M159 315 C121 434 155 554 111 674 M461 315 C499 434 465 554 509 674" fill="none" stroke="#9dfff5" stroke-width="9" opacity=".42" stroke-linecap="round"/>
+  <path d="M119 736 C146 793 168 812 188 785 M501 736 C474 793 452 812 432 785" fill="none" stroke="#092f58" stroke-width="13" opacity=".65"/>
+
+  <!-- Ribbon clips -->
+  <path d="M190 254 L145 227 L156 286 L190 295 Z" fill="#e84170" stroke="#591d4c" stroke-width="5"/>
+  <path d="M430 254 L475 227 L464 286 L430 295 Z" fill="#e84170" stroke="#591d4c" stroke-width="5"/>
+  <path d="M158 228 L176 276 M462 228 L444 276" stroke="#ff9cac" stroke-width="5" opacity=".7"/>
+
+  <!-- Legs -->
+  <path d="M242 696 C244 752 241 814 225 860 L291 870 C302 810 307 755 303 702 Z" fill="url(#skin)" stroke="#7b3d55" stroke-width="6"/>
+  <path d="M317 702 C313 755 318 810 329 870 L395 860 C379 814 376 752 378 696 Z" fill="url(#skin)" stroke="#7b3d55" stroke-width="6"/>
+  <path d="M221 845 L296 852 L303 885 L283 922 L203 912 L206 882 Z" fill="url(#boot)" stroke="#07152a" stroke-width="7"/>
+  <path d="M399 845 L324 852 L317 885 L337 922 L417 912 L414 882 Z" fill="url(#boot)" stroke="#07152a" stroke-width="7"/>
+  <path d="M208 866 L296 875 M412 866 L324 875" stroke="#4ce8dc" stroke-width="9"/>
+  <path d="M226 898 L277 904 M394 898 L343 904" stroke="#93fff5" stroke-width="4" opacity=".6"/>
+
+  <!-- Arms and long black sleeves -->
+  <path d="M221 458 C175 486 148 545 159 597 C168 639 195 654 220 625 L252 544 Z" fill="url(#jacket)" stroke="#07152a" stroke-width="8"/>
+  <path d="M399 458 C445 486 472 545 461 597 C452 639 425 654 400 625 L368 544 Z" fill="url(#jacket)" stroke="#07152a" stroke-width="8"/>
+  <path d="M160 590 C142 619 140 654 159 671 C181 691 211 674 218 647 L198 612 Z" fill="url(#skin)" stroke="#7b3d55" stroke-width="6"/>
+  <path d="M460 590 C478 619 480 654 461 671 C439 691 409 674 402 647 L422 612 Z" fill="url(#skin)" stroke="#7b3d55" stroke-width="6"/>
+  <path d="M162 606 L210 635 M458 606 L410 635" stroke="#5de8dc" stroke-width="8" opacity=".8"/>
+
+  <!-- Torso, collar and tie -->
+  <path d="M219 439 C239 414 271 401 310 401 C349 401 381 414 401 439 L431 638 C393 671 355 689 310 689 C265 689 227 671 189 638 Z" fill="url(#jacket)" stroke="#07152a" stroke-width="8"/>
+  <path d="M242 429 L275 408 L310 445 L345 408 L378 429 L360 498 L310 522 L260 498 Z" fill="#f3f5f2" stroke="#0a1f34" stroke-width="6"/>
+  <path d="M310 446 L329 488 L310 552 L291 488 Z" fill="#28c9c6" stroke="#083d68" stroke-width="5"/>
+  <path d="M291 488 L310 518 L329 488" fill="none" stroke="#b7fff7" stroke-width="4" opacity=".8"/>
+  <path d="M225 473 L248 485 M395 473 L372 485" stroke="#53f0e1" stroke-width="6"/>
+  <path d="M213 603 C246 622 273 629 310 630 C347 629 374 622 407 603 L420 654 C382 680 349 692 310 692 C271 692 238 680 200 654 Z" fill="#162c46" stroke="#07152a" stroke-width="7"/>
+  <path d="M200 652 C239 680 270 692 310 692 C350 692 381 680 420 652" fill="none" stroke="#ff527b" stroke-width="7"/>
+
+  <!-- Pleated skirt -->
+  <path d="M201 642 C237 660 272 669 310 669 C348 669 383 660 419 642 L467 783 C419 817 367 833 310 833 C253 833 201 817 153 783 Z" fill="url(#skirt)" stroke="#062c55" stroke-width="8"/>
+  <path d="M190 681 L219 787 M237 692 L258 812 M286 699 L292 824 M334 699 L328 824 M383 692 L362 812 M430 681 L401 787" fill="none" stroke="#a2fff3" stroke-width="6" opacity=".54"/>
+  <path d="M156 782 C207 817 253 833 310 833 C367 833 413 817 464 782" fill="none" stroke="#ff527b" stroke-width="8"/>
+  <path d="M188 757 C228 777 269 786 310 786 C351 786 392 777 432 757" fill="none" stroke="#113f66" stroke-width="9" opacity=".8"/>
+
+  <!-- Neck and head base (facial features are a separate expression layer) -->
+  <path d="M278 366 L278 430 C294 447 326 447 342 430 L342 366 Z" fill="url(#skin)" stroke="#7b3d55" stroke-width="6"/>
+  <path d="M216 202 C217 124 261 75 310 75 C359 75 403 124 404 202 L397 293 C383 349 352 382 310 387 C268 382 237 349 223 293 Z" fill="url(#skin)" stroke="#7b3d55" stroke-width="7"/>
+
+  <!-- Hair cap, side locks and fringe -->
+  <path d="M209 211 C183 155 202 81 261 51 C305 28 371 44 405 90 C425 117 432 164 411 217 L389 239 L367 183 L348 226 L322 169 L295 222 L265 173 L234 239 Z" fill="url(#hair)" stroke="#083d68" stroke-width="8"/>
+  <path d="M218 186 C202 246 214 300 248 337 L226 407 C196 374 178 322 181 262 Z" fill="url(#hairDeep)" stroke="#083d68" stroke-width="7"/>
+  <path d="M402 186 C418 246 406 300 372 337 L394 407 C424 374 442 322 439 262 Z" fill="url(#hairDeep)" stroke="#083d68" stroke-width="7"/>
+  <path d="M249 91 C288 60 348 62 380 96" fill="none" stroke="#e0fffa" stroke-width="8" opacity=".58" stroke-linecap="round"/>
+  <path d="M232 272 C243 309 265 334 289 344 M388 272 C377 309 355 334 331 344" fill="none" stroke="#c3fff7" stroke-width="5" opacity=".6"/>
+
+  <!-- Headset and stage details -->
+  <path d="M226 203 C197 198 178 211 181 245 C183 266 197 277 218 273" fill="none" stroke="#e84170" stroke-width="10"/>
+  <path d="M394 203 C423 198 442 211 439 245 C437 266 423 277 402 273" fill="none" stroke="#e84170" stroke-width="10"/>
+  <path d="M184 232 L164 224 L164 251 L184 247 Z M436 232 L456 224 L456 251 L436 247 Z" fill="#f1f5f3" stroke="#083d68" stroke-width="5"/>
+  <circle cx="170" cy="238" r="5" fill="#49e7dc" filter="url(#softGlow)"/>
+  <circle cx="450" cy="238" r="5" fill="#49e7dc" filter="url(#softGlow)"/>
+
+  <!-- Arm markings and tiny stage sparkles -->
+  <path d="M180 514 L204 514 M416 514 L440 514" stroke="#e84170" stroke-width="9"/>
+  <path d="M177 530 L207 530 M413 530 L443 530" stroke="#5de8dc" stroke-width="5"/>
+  <path d="M91 420 l5 13 13 5-13 5-5 13-5-13-13-5 13-5z M529 420 l5 13 13 5-13 5-5 13-5-13-13-5 13-5z" fill="#adfff4" opacity=".8"/>
+</svg>

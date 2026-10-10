@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二次元数据锡通 - 番剧</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <meta name="theme-color" content="#0b0c0e">
+</head>
+<body>
+<!-- THESIS: 番剧库是资料中心的入口，先让封面和关键字段可扫读，再让用户进入完整关系档案。 OWN-WORLD: 深色档案室、幽灵段码、暖橙红强调色、软角边框和真实本地素材。 STORY: 用户检索作品，快速扫过卡片，再进入一个明确的番剧档案。 FIRST VIEWPORT: 左侧大标题和检索控件，下面是非对称封面网格，新增入口与列表保持同一条操作线。 FORM: 候选 5，七段数码显示器家族，seed 35146822。 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance -->
+<nav class="top-nav" aria-label="主导航">
+    <a class="nav-brand" href="/home">
+        <span class="nav-logo">SDO</span>
+        <span>
+            <span class="nav-title">二次元数据锡通</span>
+            <span class="nav-subtitle">Sekai Data Object</span>
+        </span>
+    </a>
+    <div class="nav-links">
+        <a href="/home">首页</a>
+        <a href="/series" class="active">番剧</a>
+        <a href="/characters">人物</a>
+        <a href="/quotes">台词</a>
+    </div>
+    <div class="nav-user">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换主题">浅色</button>
+        <span class="user-nick" th:text="${loginUser.nickName != null and !loginUser.nickName.isEmpty() ? loginUser.nickName : loginUser.userName}">成员</span>
+        <a href="/logout" class="logout-link">退出</a>
+        <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="mobileNavPanel">菜单</button>
+    </div>
+</nav>
+<nav id="mobileNavPanel" class="mobile-nav-panel" aria-label="移动端导航" hidden>
+    <a href="/home">首页</a>
+    <a href="/series" class="active">番剧</a>
+    <a href="/characters">人物</a>
+    <a href="/quotes">台词</a>
+</nav>
+
+<main class="container">
+    <div class="flash-message success" th:if="${message}" th:text="${message}" role="status" aria-live="polite"></div>
+    <div class="flash-message error" th:if="${error}" th:text="${error}" role="alert"></div>
+
+    <header class="page-head">
+        <h1>番剧档案库</h1>
+        <p>用官方名称、原名、制作公司和标签定位作品，再进入完整的角色与台词关系。</p>
+    </header>
+
+    <form class="search-bar search-bar-simple" method="get" action="/series" role="search">
+        <div class="search-field">
+            <label for="seriesKeyword">检索番剧</label>
+            <input id="seriesKeyword" type="search" name="keyword" th:value="${keyword}" placeholder="名称、原名、制作公司或标签">
+        </div>
+        <button type="submit" class="btn primary">检索</button>
+    </form>
+
+    <div class="toolbar-row">
+        <span class="toolbar-note" th:text="${totalCount + ' 条记录'}">0 条记录</span>
+        <button class="btn outline add-toggle" type="button" data-toggle-target="addPanel" data-open-label="收起录入" data-closed-label="新增番剧" aria-expanded="false">新增番剧</button>
+    </div>
+
+    <section class="add-panel" id="addPanel" hidden aria-labelledby="add-series-title">
+        <div class="panel-header">
+            <h2 id="add-series-title">新增番剧</h2>
+            <span>字段会进入番剧档案</span>
+        </div>
+        <form method="post" action="/series/add" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="title">番剧名称 *</label>
+                    <input id="title" type="text" name="title" required placeholder="如：进击的巨人">
+                </div>
+                <div class="field">
+                    <label for="originalTitle">番剧原名</label>
+                    <input id="originalTitle" type="text" name="originalTitle" placeholder="如：進撃の巨人">
+                </div>
+                <div class="field">
+                    <label for="type">类型</label>
+                    <select id="type" name="type">
+                        <option value="TV">TV</option>
+                        <option value="剧场版">剧场版</option>
+                        <option value="OVA">OVA</option>
+                        <option value="网络动画">网络动画</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="studio">制作公司</label>
+                    <input id="studio" type="text" name="studio" placeholder="如：WIT STUDIO">
+                </div>
+                <div class="field">
+                    <label for="releaseDate">首播日期</label>
+                    <input id="releaseDate" type="date" name="releaseDate">
+                </div>
+                <div class="field">
+                    <label for="totalEpisodes">总集数</label>
+                    <input id="totalEpisodes" type="number" name="totalEpisodes" min="1" placeholder="如：25">
+                </div>
+                <div class="field">
+                    <label for="score">官方评分</label>
+                    <input id="score" type="number" name="score" min="0" max="10" step="0.1" placeholder="如：8.9">
+                </div>
+                <div class="field">
+                    <label for="tags">标签（逗号分隔）</label>
+                    <input id="tags" type="text" name="tags" placeholder="如：热血,战斗,奇幻">
+                </div>
+                <div class="field">
+                    <label for="coverUrl">封面图片 URL</label>
+                    <input id="coverUrl" type="url" name="coverUrl" placeholder="https://...">
+                </div>
+                <div class="field">
+                    <label for="coverFile">或上传封面</label>
+                    <input id="coverFile" type="file" name="coverFile" accept="image/*">
+                </div>
+                <div class="field wide">
+                    <label for="synopsis">官方简介</label>
+                    <textarea id="synopsis" name="synopsis" rows="3" placeholder="官方剧情简介"></textarea>
+                </div>
+                <div class="field wide">
+                    <label for="officialUrl">官网链接</label>
+                    <input id="officialUrl" type="url" name="officialUrl" placeholder="https://official-site.example.com">
+                </div>
+            </div>
+            <button type="submit" class="btn primary">保存番剧</button>
+        </form>
+    </section>
+
+    <section class="archive-grid" th:if="${!seriesList.isEmpty()}" aria-label="番剧档案列表">
+        <article class="series-card reveal" data-reveal-delay="40" th:each="series : ${seriesList}">
+            <a th:href="@{/series/{id}(id=${series.id})}" class="series-cover">
+                <img th:if="${series.coverUrl != null and !series.coverUrl.isEmpty()}" th:src="${series.coverUrl}" th:alt="${series.title + ' 封面'}">
+                <span class="cover-placeholder" th:unless="${series.coverUrl != null and !series.coverUrl.isEmpty()}"><span th:text="${series.title}">番剧名</span></span>
+            </a>
+            <div class="series-info">
+                <div class="series-title" th:text="${series.title}">番剧名</div>
+                <div class="series-meta" th:if="${series.originalTitle != null and !series.originalTitle.isEmpty()}" th:text="${series.originalTitle}">原名</div>
+                <div class="series-meta" th:text="${series.type != null ? series.type : 'TV'}">TV</div>
+                <div class="record-line">
+                    <span class="record-label">评分</span>
+                    <span class="record-value" th:text="${series.score != null ? series.score : '未记录'}">未记录</span>
+                </div>
+                <div class="series-meta" th:if="${series.studio != null and !series.studio.isEmpty()}" th:text="${series.studio}">制作公司</div>
+                <div class="series-tags" th:if="${series.tags != null and !series.tags.isEmpty()}">
+                    <span class="tag" th:each="tag : ${#strings.arraySplit(#strings.trim(series.tags), ',')}" th:text="${tag}">标签</span>
+                </div>
+                <a th:href="@{/series/{id}(id=${series.id})}" class="card-link">查看档案</a>
+            </div>
+        </article>
+    </section>
+    <div class="card-empty" th:if="${seriesList.isEmpty()}">没有找到匹配的番剧。换一个关键词，或去<a href="/series">新增一条记录</a>。</div>
+
+    <nav class="pagination" th:if="${totalPages > 1}" aria-label="番剧分页">
+        <a th:if="${currentPage > 1}" th:href="@{/series(page=${currentPage - 1}, keyword=${keyword})}">上一页</a>
+        <span class="page-info" th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
+        <a th:if="${currentPage < totalPages}" th:href="@{/series(page=${currentPage + 1}, keyword=${keyword})}">下一页</a>
+    </nav>
+</main>
+
+<footer class="page-footer">© 2026 Sekai Data Object / 二次元数据锡通</footer>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+</body>
+</html>

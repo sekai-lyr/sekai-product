@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-28T14:45:00.000Z",
+  "title": "Design System: Sekai Data Object",
+  "extensions": {
+    "colorMeta": {
+      "bg": { "role": "neutral", "displayName": "Black Room", "canonical": "#0b0c0e", "tonalRamp": ["#08090a", "#101214", "#16191c", "#202329", "#3a3d41", "#676a64", "#96988f", "#f0eee8"] },
+      "bg-deep": { "role": "neutral", "displayName": "Deep Room", "canonical": "#08090a", "tonalRamp": ["#08090a", "#0d0f10", "#131517", "#1b1e20", "#2b2e33", "#41454d", "#676a64", "#96988f"] },
+      "surface": { "role": "neutral", "displayName": "Archive Surface", "canonical": "#121416", "tonalRamp": ["#0b0c0e", "#121416", "#191b1f", "#202329", "#2b2e33", "#41454d", "#96988f", "#f0eee8"] },
+      "surface-strong": { "role": "neutral", "displayName": "Raised Surface", "canonical": "#191b1f", "tonalRamp": ["#0b0c0e", "#121416", "#191b1f", "#202329", "#2b2e33", "#41454d", "#96988f", "#f0eee8"] },
+      "surface-soft": { "role": "neutral", "displayName": "Soft Surface", "canonical": "#202329", "tonalRamp": ["#121416", "#191b1f", "#202329", "#2b2e33", "#41454d", "#676a64", "#96988f", "#c7c5bd"] },
+      "line": { "role": "neutral", "displayName": "Quiet Line", "canonical": "#2b2e33", "tonalRamp": ["#121416", "#191b1f", "#202329", "#2b2e33", "#41454d", "#676a64", "#96988f", "#c7c5bd"] },
+      "line-strong": { "role": "neutral", "displayName": "Strong Line", "canonical": "#41454d", "tonalRamp": ["#191b1f", "#202329", "#2b2e33", "#41454d", "#676a64", "#96988f", "#c7c5bd", "#f0eee8"] },
+      "text": { "role": "neutral", "displayName": "Warm Paper", "canonical": "#f0eee8", "tonalRamp": ["#20211f", "#4f514c", "#6e706a", "#96988f", "#c7c5bd", "#e7e4dc", "#f0eee8", "#fbfaf6"] },
+      "text-soft": { "role": "neutral", "displayName": "Soft Paper", "canonical": "#c7c5bd", "tonalRamp": ["#20211f", "#4f514c", "#6e706a", "#96988f", "#c7c5bd", "#e7e4dc", "#f0eee8", "#fbfaf6"] },
+      "muted": { "role": "neutral", "displayName": "Archive Muted", "canonical": "#96988f", "tonalRamp": ["#20211f", "#4f514c", "#6e706a", "#96988f", "#c7c5bd", "#e7e4dc", "#f0eee9", "#fbfaf6"] },
+      "faint": { "role": "neutral", "displayName": "Archive Faint", "canonical": "#676a64", "tonalRamp": ["#20211f", "#4f514c", "#676a64", "#6e706a", "#96988f", "#c7c5bd", "#e7e4dc", "#f0eee8"] },
+      "accent": { "role": "primary", "displayName": "Archive Signal", "canonical": "#ff744f", "tonalRamp": ["#4a170f", "#6a2115", "#8d2c1c", "#b33a24", "#d85234", "#ff744f", "#ff997b", "#ffd3c8"] },
+      "accent-strong": { "role": "primary", "displayName": "Archive Signal Bright", "canonical": "#ff997b", "tonalRamp": ["#6a2115", "#8d2c1c", "#b33a24", "#d85234", "#ff744f", "#ff997b", "#ffc1b0", "#ffe3dc"] },
+      "success": { "role": "tertiary", "displayName": "Recorded Success", "canonical": "#9bd7b5", "tonalRamp": ["#173f2a", "#24613e", "#317d53", "#5aa879", "#9bd7b5", "#c4ecd0", "#e1f7e6", "#f3fcf5"] },
+      "danger": { "role": "tertiary", "displayName": "Recorded Danger", "canonical": "#ff8d87", "tonalRamp": ["#5a1717", "#7b2220", "#ae3d37", "#d25f58", "#ff8d87", "#ffc1bd", "#ffe0de", "#fff3f2"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Archive Display", "purpose": "Large home thesis and instrument-like dashboard statements." },
+      "headline": { "displayName": "Section Headline", "purpose": "Collection page titles and editorial section headings." },
+      "label": { "displayName": "Archive Mono", "purpose": "Index labels, metadata, codes, status tags, and field labels." }
+    },
+    "shadows": [
+      { "name": "archive-ambient", "value": "0 24px 70px rgba(0, 0, 0, .28)", "purpose": "Ambient depth for large dark-mode panels and hero visual surfaces." },
+      { "name": "paper-ambient", "value": "0 18px 46px rgba(47, 45, 37, .10)", "purpose": "Ambient depth for light-mode surfaces." }
+    ],
+    "motion": [
+      { "name": "state-standard", "value": "cubic-bezier(.16, 1, .3, 1)", "purpose": "Short tactile hover and panel state transitions." },
+      { "name": "entrance-archive", "value": "cubic-bezier(.16, 1, .3, 1)", "purpose": "One-time hero and scroll reveal motion, with reduced-motion fallback." }
+    ],
+    "breakpoints": [
+      { "name": "archive-md", "value": "1040px" },
+      { "name": "archive-sm", "value": "760px" },
+      { "name": "archive-xs", "value": "400px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High-priority archive action with tactile state feedback.",
+      "html": "<button class=\"ds-btn-primary\">BROWSE ARCHIVE</button>",
+      "css": ".ds-btn-primary { background: var(--accent); color: #1b100d; border: 1px solid var(--accent); border-radius: 10px; padding: 13px 18px; font: 600 10px/1.2 \"Cascadia Code\", monospace; letter-spacing: .14em; transition: background-color .2s ease, border-color .2s ease, transform .2s ease; } .ds-btn-primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); transform: translateY(-2px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 3px; } .ds-btn-primary:active { transform: translateY(0); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action that preserves the archive field around it.",
+      "html": "<button class=\"ds-btn-outline\">VIEW QUOTES</button>",
+      "css": ".ds-btn-outline { background: transparent; color: var(--text); border: 1px solid var(--line-strong); border-radius: 10px; padding: 13px 18px; font: 600 10px/1.2 \"Cascadia Code\", monospace; letter-spacing: .14em; transition: background-color .2s ease, border-color .2s ease, transform .2s ease; } .ds-btn-outline:hover { background: var(--accent-soft); border-color: var(--accent); transform: translateY(-2px); } .ds-btn-outline:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 3px; } .ds-btn-outline:active { transform: translateY(0); }"
+    },
+    {
+      "name": "Archive Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labeled field for search and structured archive entry.",
+      "html": "<label class=\"ds-field\"><span>SEARCH ARCHIVE</span><input type=\"search\" placeholder=\"Series, studio, tag\"></label>",
+      "css": ".ds-field { display: grid; gap: 8px; color: var(--muted); font: 600 10px/1.2 \"Cascadia Code\", monospace; letter-spacing: .14em; } .ds-field input { width: 100%; background: var(--surface-strong); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 12px 13px; font: 400 15px/1.5 \"Avenir Next\", sans-serif; letter-spacing: 0; transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease; } .ds-field input::placeholder { color: var(--faint); } .ds-field input:hover { border-color: var(--line-strong); } .ds-field input:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }"
+    },
+    {
+      "name": "Archive Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat-at-rest series record with a strong image and visible metadata.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-image\"></div><div class=\"ds-card-body\"><span>TV / 2026</span><h3>Series Record</h3><a href=\"#\">OPEN RECORD</a></div></article>",
+      "css": ".ds-card { overflow: hidden; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 16px; transition: border-color .25s ease, transform .25s ease, background-color .25s ease; } .ds-card:hover { border-color: var(--line-strong); transform: translateY(-4px); background: var(--surface-strong); } .ds-card-image { height: 180px; background: linear-gradient(135deg, var(--surface-soft), var(--line)); } .ds-card-body { display: grid; gap: 8px; padding: 18px; } .ds-card-body span { color: var(--muted); font: 600 10px/1.2 \"Cascadia Code\", monospace; letter-spacing: .12em; } .ds-card-body h3 { font: 700 1.05rem/1.25 \"Avenir Next\", sans-serif; } .ds-card-body a { color: var(--accent-strong); font: 600 10px/1.2 \"Cascadia Code\", monospace; letter-spacing: .14em; }"
+    },
+    {
+      "name": "Archive Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Compact informational tag for series taxonomy and state.",
+      "html": "<span class=\"ds-chip\">SCI-FI</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 5px 9px; background: var(--surface-soft); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; font: 600 10px/1.2 \"Cascadia Code\", monospace; letter-spacing: .08em; transition: border-color .2s ease, color .2s ease, background-color .2s ease; } .ds-chip:hover { border-color: var(--accent); color: var(--accent-strong); background: var(--accent-soft); } .ds-chip:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 3px; }"
+    },
+    {
+      "name": "Archive Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Sticky route index with an explicit active underline.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-brand\" href=\"#\">SDO</a><a class=\"ds-link ds-active\" href=\"#\">ARCHIVE</a><a class=\"ds-link\" href=\"#\">CHARACTERS</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 24px; min-height: 64px; padding: 0 24px; background: color-mix(in srgb, var(--bg) 88%, transparent); border-bottom: 1px solid var(--line); } .ds-brand { color: var(--accent); font: 800 14px/1 \"Cascadia Code\", monospace; letter-spacing: .16em; } .ds-link { position: relative; color: var(--muted); font: 600 10px/1.2 \"Cascadia Code\", monospace; letter-spacing: .14em; } .ds-link:hover, .ds-link.ds-active { color: var(--text); } .ds-link.ds-active::after { content: \"\"; position: absolute; right: 0; bottom: -10px; left: 0; height: 2px; background: var(--accent); } .ds-link:focus-visible, .ds-brand:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 3px; }"
+    },
+    {
+      "name": "Seven Segment Readout",
+      "kind": "custom",
+      "refersTo": "segment-number",
+      "description": "Accessible numeric dashboard readout built from real segment pieces.",
+      "html": "<div class=\"ds-readout\" aria-label=\"200\"><span class=\"ds-digit ds-digit-2\"></span><span class=\"ds-digit ds-digit-0\"></span><span class=\"ds-digit ds-digit-0\"></span></div>",
+      "css": ".ds-readout { display: inline-flex; gap: 8px; color: var(--accent); } .ds-digit { position: relative; display: block; width: 22px; height: 38px; } .ds-digit::before, .ds-digit::after { content: \"\"; position: absolute; background: currentColor; opacity: .12; } .ds-digit::before { inset: 0 7px; } .ds-digit::after { inset: 7px 0; } .ds-digit-2 { color: var(--accent-strong); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Seven-Segment Archive",
+    "overview": "Sekai Data Object treats anime knowledge like a living archive instrument. The interface is dark, editorial, and slightly mechanical: warm paper text sits inside a near-black CRT room, while a single orange-red accent marks active state, playback, and the rare moment that deserves attention. The generated archive-atlas image is atmosphere, not a fake product screenshot.\n\nThe system favors a clear working surface over decorative density. Metadata is visible, images remain legible, and the navigation behaves like a catalog index. Rounded corners are soft but restrained, borders are quiet, and the signature seven-segment counters turn dashboard totals into an unmistakable archive readout.",
+    "keyCharacteristics": ["Near-black archive room with warm off-white type.", "One orange-red signal color used sparingly for action and state.", "Editorial split layouts, visible metadata, and uneven but intentional card rhythm.", "Seven-segment metric display as the signature instrument.", "Motion is short, tactile, and disabled cleanly for reduced-motion users."],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Keep the orange-red accent as the only chromatic voice. Its rarity is what makes an active state feel important.", "section": "colors" },
+      { "name": "The Legible Archive Rule", "body": "Never place essential text directly over the artwork. Use a separate text block, label, or tonal surface.", "section": "colors" },
+      { "name": "The Two-Speed Type Rule", "body": "Use the sans face for reading and the mono face for indexing. Do not make body copy look like system output.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are quiet at rest. Use borders, tonal shifts, and state changes before reaching for stronger shadow.", "section": "elevation" }
+    ],
+    "dos": ["Do keep one orange-red signal color for action, active state, and playback.", "Do expose metadata as text labels and small record rows so the archive remains scannable.", "Do use the actual local artwork or a clearly marked placeholder; preserve the image's subject and legibility.", "Do keep focus-visible rings and visible field labels on every interactive surface.", "Do reveal content once with short opacity and vertical motion, and honor prefers-reduced-motion."],
+    "donts": ["Don't add purple gradients, neon dashboard chrome, decorative starbursts, or random glyph icons.", "Don't put core copy over busy poster art or use a fake UI screenshot as atmosphere.", "Don't turn every panel into a floating shadow card or every label into uppercase mono text.", "Don't replace the seven-segment metric with a decorative font that only resembles it.", "Don't hide the mobile navigation, form labels, audio controls, or destructive action meaning behind icons alone."]
+  }
+}

@@ -15,18 +15,13 @@
         <a th:href="@{/characters}">伙伴库</a>
         <a th:href="@{/history}">历史</a>
         <a th:href="@{/favorites}">收藏</a>
-        <a th:href="@{/insights}">分析</a>
-        <a th:href="@{/coach}">行动</a>
-        <a th:href="@{/tasks}">任务</a>
-        <a th:href="@{/focus}">专注</a>
-        <a th:href="@{/membership}">会员</a>
     </nav>
     <form th:action="@{/user/logout}" action="/user/logout" method="post">
         <button class="icon-btn" type="submit">退出</button>
     </form>
 </header>
 
-<main class="dashboard" th:data-premium="${membership.active}">
+<main class="dashboard">
     <section class="draw-panel">
         <div class="draw-copy">
             <p class="eyebrow">今日抽签</p>
@@ -69,22 +64,6 @@
         </div>
     </section>
 
-    <section class="member-upsell" th:unless="${membership.active}">
-        <div>
-            <strong>会员解锁三连签、深度分析、任务和专注冲刺</strong>
-            <p>免费版可以每日抽签；开通会员后可使用三连签仪式、趋势报告、7 天行动计划、任务看板和专注冲刺。</p>
-        </div>
-        <a th:href="@{/membership}">开通会员</a>
-    </section>
-
-    <section class="member-upsell active-member" th:if="${membership.active}">
-        <div>
-            <strong th:text="${membership.planName + ' 已开通'}">会员已开通</strong>
-            <p th:text="'剩余 ' + ${membership.daysLeft} + ' 天，可使用三连签仪式、深度分析、行动计划、任务看板和专注冲刺。'">剩余 31 天。</p>
-        </div>
-        <a th:href="@{/focus}">开始专注冲刺</a>
-    </section>
-
     <section class="stats-grid">
         <div><strong th:text="${stats.totalCharacters}">0</strong><span>伙伴数</span></div>
         <div><strong th:text="${stats.totalDraws}">0</strong><span>累计抽签</span></div>
@@ -94,7 +73,7 @@
     </section>
 
     <section class="panel achievement-panel">
-        <div class="section-title"><h2>成就徽章</h2><a th:href="@{/insights}">查看分析</a></div>
+        <div class="section-title"><h2>成就徽章</h2></div>
         <div class="achievement-grid">
             <article class="achievement-card"
                      th:each="achievement : ${achievements}"
@@ -138,6 +117,6 @@
         </div>
     </section>
 </main>
-<script th:src="@{/js/app.js(v=202605092230)}" src="/js/app.js?v=202605092230"></script>
+<script th:src="@{/js/app.js(v=2026083001)}" src="/js/app.js?v=2026083001"></script>
 </body>
 </html>

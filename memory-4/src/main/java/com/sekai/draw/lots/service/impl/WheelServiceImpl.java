@@ -4,10 +4,9 @@ import com.sekai.draw.lots.dataobject.SekaiDrawLotsWheelOptionDO;
 import com.sekai.draw.lots.dataobject.SekaiDrawLotsWheelSpinDO;
 import com.sekai.draw.lots.mapper.SekaiDrawLotsWheelOptionMapper;
 import com.sekai.draw.lots.mapper.SekaiDrawLotsWheelSpinMapper;
-import com.sekai.draw.lots.model.CoachStep;
+import com.sekai.draw.lots.model.DrawRecord;
 import com.sekai.draw.lots.model.Result;
 import com.sekai.draw.lots.model.User;
-import com.sekai.draw.lots.model.VipCoachPlan;
 import com.sekai.draw.lots.model.WheelOption;
 import com.sekai.draw.lots.model.WheelSpinRecord;
 import com.sekai.draw.lots.model.WheelSpinResult;
@@ -19,9 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -66,16 +67,16 @@ public class WheelServiceImpl implements WheelService {
     }
 
     @Override
-    public List<WheelSuggestion> vipSuggestions(User user) {
+    public List<WheelSuggestion> suggestions(User user) {
         if (user == null || user.getId() == null) {
             return List.of();
         }
-        return buildVipSuggestions(drawLotsService.getVipCoachPlan(user));
+        return buildSuggestions(drawLotsService.recentRecords(user, 21));
     }
 
     @Override
     @Transactional
-    public Result<Integer> importVipSuggestions(User user) {
+    public Result<Integer> importSuggestions(User user) {
         if (user == null || user.getId() == null) {
             return Result.fail("请先登录");
         }
@@ -90,7 +91,7 @@ public class WheelServiceImpl implements WheelService {
 
         int sortOrder = existingOptions.size() + 1;
         int added = 0;
-        for (WheelSuggestion suggestion : vipSuggestions(user)) {
+        for (WheelSuggestion suggestion : suggestions(user)) {
             String key = normalizeTitle(suggestion.getTitle());
             if (key == null || existingTitles.contains(key)) {
                 continue;
@@ -101,7 +102,7 @@ public class WheelServiceImpl implements WheelService {
         }
 
         Result<Integer> result = Result.ok(added);
-        result.setMessage(added > 0 ? "已导入 " + added + " 个 VIP 智能分区。" : "智能分区已经在转盘里，不需要重复导入。");
+        result.setMessage(added > 0 ? "已导入 " + added + " 个智能分区。" : "智能分区已经在转盘里，不需要重复导入。");
         return result;
     }
 
@@ -223,11 +224,32 @@ public class WheelServiceImpl implements WheelService {
         optionMapper.insert(optionDO);
     }
 
-    private List<WheelSuggestion> buildVipSuggestions(VipCoachPlan plan) {
-        String theme = defaultText(plan == null ? null : plan.getPrimaryTheme(), "今日运势");
-        String rhythm = defaultText(plan == null ? null : plan.getRhythm(), "轻量推进");
-        String risk = defaultText(plan == null ? null : plan.getRiskLevel(), "普通");
+    private List<WheelSuggestion> buildSuggestions(List<DrawRecord> records) {
+        List<DrawRecord> recent = records == null ? List.of() : records;
         List<WheelSuggestion> suggestions = new ArrayList<>();
+
+        DrawRecord best = null;
+        int sum = 0;
+        int highest = 0;
+        int lowest = Integer.MAX_VALUE;
+        for (DrawRecord record : recent) {
+            int score = record.getLuckScore() == null ? 0 : record.getLuckScore();
+            sum += score;
+            if (score > highest) {
+                highest = score;
+                best = record;
+            }
+            if (score < lowest) {
+                lowest = score;
+            }
+        }
+        int count = recent.size();
+        int average = count == 0 ? 0 : Math.round((float) sum / count);
+        int volatility = count == 0 ? 0 : highest - lowest;
+        DrawRecord latest = count == 0 ? null : recent.get(0);
+        String theme = mostFrequentText(recent, "今日运势");
+        String rhythm = rhythmLabel(average, volatility, count);
+        String risk = riskLabel(average, volatility);
 
         suggestions.add(suggestion(
                 "推进「" + theme + "」15 分钟",
@@ -236,35 +258,20 @@ public class WheelServiceImpl implements WheelService {
                 "#78d5ff",
                 "来自最近抽签主线"
         ));
-        suggestions.add(suggestion(
-                "复盘最高分签",
-                "回看最近最高分的建议，把其中一句改写成今天的执行规则。",
-                2,
-                "#ffe08a",
-                "来自 VIP 高分复用"
-        ));
-
-        List<CoachStep> steps = plan == null || plan.getSteps() == null ? List.of() : plan.getSteps();
-        int importedSteps = 0;
-        for (CoachStep step : steps) {
-            if (step == null || trimToNull(step.getTitle()) == null || importedSteps >= 2) {
-                continue;
-            }
+        if (best != null) {
+            String bestAdvice = best.getFortune() == null ? "先完成一个能收尾的小动作。" : best.getFortune().getAdvice();
             suggestions.add(suggestion(
-                    "Day " + defaultText(step.getDayIndex() == null ? null : String.valueOf(step.getDayIndex()), "?")
-                            + "：" + step.getTitle(),
-                    defaultText(step.getAction(), "完成一个可以收尾的小动作。"),
+                    "复盘最高分签",
+                    "回看最近最高分「" + scoreText(best) + "」的建议：" + bestAdvice,
                     2,
-                    SAFE_COLORS.get(Math.floorMod(importedSteps + 3, SAFE_COLORS.size())),
-                    "来自 7 天行动计划"
+                    "#ffe08a",
+                    "来自抽签高分回顾"
             ));
-            importedSteps++;
         }
-
         suggestions.add(suggestion(
                 "阻力清单 3 条",
                 "列出最容易卡住的 3 个点，每个点只写一个应对动作。",
-                "高".equals(risk) ? 3 : 2,
+                "高波动".equals(risk) ? 3 : 2,
                 "#a7a3ff",
                 "风险等级：" + risk
         ));
@@ -275,11 +282,22 @@ public class WheelServiceImpl implements WheelService {
                 "#78e08f",
                 "根据当前节奏调整"
         ));
+        if (latest != null) {
+            String partnerName = latest.getCharacter() == null ? "守护伙伴" : latest.getCharacter().getDisplayName();
+            String latestAdvice = latest.getFortune() == null ? "先完成一个能收尾的小动作。" : latest.getFortune().getAdvice();
+            suggestions.add(suggestion(
+                    partnerName + " 的提醒",
+                    "「" + theme + "」按 " + partnerName + " 的建议做一次最小推进：" + latestAdvice,
+                    2,
+                    SAFE_COLORS.get(5),
+                    "来自最新守护伙伴"
+            ));
+        }
 
         if (suggestions.size() < 6) {
             suggestions.add(suggestion(
                     "抽一签校准方向",
-                    "回到首页抽一次固定签，让今天的任务有一个新的二次元锚点。",
+                    "回到首页抽一次固定签，让今天的转盘有一个新的二次元锚点。",
                     1,
                     "#ff8fc7",
                     "样本不足时自动补位"
@@ -288,12 +306,59 @@ public class WheelServiceImpl implements WheelService {
         return suggestions.stream().limit(6).toList();
     }
 
+    private String scoreText(DrawRecord record) {
+        return record.getLuckScore() == null ? "高分签" : record.getLuckScore() + " 分";
+    }
+
+    private String rhythmLabel(int averageScore, int volatility, int count) {
+        if (count < 4) {
+            return "样本积累中";
+        }
+        if (averageScore >= 86 && volatility <= 18) {
+            return "高能冲刺";
+        }
+        if (averageScore >= 72) {
+            return volatility >= 28 ? "稳中有波动" : "稳定推进";
+        }
+        if (averageScore >= 58) {
+            return "先修复节奏";
+        }
+        return "低速恢复";
+    }
+
+    private String riskLabel(int averageScore, int volatility) {
+        if (volatility >= 36) {
+            return "高波动";
+        }
+        if (averageScore < 58) {
+            return "偏低迷";
+        }
+        if (volatility >= 24) {
+            return "中波动";
+        }
+        return "可控";
+    }
+
+    private String mostFrequentText(List<DrawRecord> records, String fallback) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (DrawRecord record : records) {
+            String value = trimToNull(record.getWishTopic());
+            if (value != null) {
+                counts.put(value, counts.getOrDefault(value, 0) + 1);
+            }
+        }
+        return counts.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(fallback);
+    }
+
     private WheelSuggestion suggestion(String title, String detail, Integer weight, String color, String reason) {
         return new WheelSuggestion(limitText(defaultText(title, "今日小任务"), 80),
                 limitText(defaultText(detail, "完成一个可以收尾的小动作。"), 180),
                 Math.max(1, Math.min(weight == null ? 1 : weight, 10)),
                 color,
-                limitText(defaultText(reason, "VIP 智能建议"), 80));
+                limitText(defaultText(reason, "智能建议"), 80));
     }
 
     private WheelOption chooseWeighted(List<WheelOption> options) {

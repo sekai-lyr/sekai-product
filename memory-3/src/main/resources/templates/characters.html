@@ -24,14 +24,12 @@
         <div class="content-grid">
             <form class="form-card" action="/characters/add" method="post">
                 <input type="hidden" name="returnTo" th:value="@{/characters(page=${currentPage})}">
-                <h3>添加角色</h3>
+                <h3>快速添加角色</h3>
+                <p class="form-hint">只填角色名和星级，角色图片及已收藏的所属番剧将自动补全。</p>
                 <div class="server-message success" th:if="${message}" th:text="${message}"></div>
                 <div class="server-message error" th:if="${error}" th:text="${error}"></div>
                 <div class="form-group"><label for="characterName">角色名</label><input id="characterName" name="characterName" type="text" placeholder="请输入角色名" required></div>
-                <div class="form-group"><label for="animeId">所属番剧</label><select id="animeId" name="animeId"><option value="">不关联</option><option th:each="anime : ${animeOptions}" th:value="${anime.id}" th:text="${anime.title}">番剧标题</option></select></div>
-                <div class="form-group"><label for="imageUrl">角色图片 URL</label><input id="imageUrl" name="imageUrl" type="url" placeholder="https://..."></div>
                 <div class="form-group"><label for="favoriteLevel">喜欢程度</label><select id="favoriteLevel" name="favoriteLevel"><option value="5">5 星</option><option value="4">4 星</option><option value="3">3 星</option><option value="2">2 星</option><option value="1">1 星</option></select></div>
-                <div class="form-group"><label for="reason">喜欢理由</label><textarea id="reason" name="reason" placeholder="为什么喜欢这个角色"></textarea></div>
                 <button class="primary-btn" type="submit">保存角色</button>
             </form>
             <section class="list-panel">

@@ -5,7 +5,6 @@ import com.sekai.draw.lots.model.AnimeCharacter;
 import com.sekai.draw.lots.model.DrawRecord;
 import com.sekai.draw.lots.model.Fortune;
 import com.sekai.draw.lots.model.User;
-import com.sekai.draw.lots.service.MembershipService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.CacheControl;
@@ -29,17 +28,11 @@ public class ShareCardControl {
     @Resource
     private SekaiDrawLotsRecordMapper recordMapper;
 
-    @Resource
-    private MembershipService membershipService;
-
     @GetMapping("/share/records/{id}.svg")
     public ResponseEntity<byte[]> recordShareCard(@PathVariable("id") Long id, HttpSession session) {
         User user = requireLogin(session);
         if (user == null) {
-            return simpleCard(HttpStatus.UNAUTHORIZED, "请先登录", "登录后可以生成会员分享卡。");
-        }
-        if (!membershipService.isPremium(user)) {
-            return simpleCard(HttpStatus.FORBIDDEN, "会员专属分享卡", "开通会员后可生成可保存、可转发的抽签卡片。");
+            return simpleCard(HttpStatus.UNAUTHORIZED, "请先登录", "登录后可以生成抽签分享卡。");
         }
         DrawRecord record = recordMapper.selectByIdForUser(id, user.getId());
         if (record == null) {
@@ -126,7 +119,7 @@ public class ShareCardControl {
                   <text x="210" y="1164" font-family="Arial, sans-serif" font-size="30" fill="#344054">__ADVICE_TWO__</text>
 
                   <text x="156" y="1262" font-family="Arial, sans-serif" font-size="28" fill="#667085">由 __OWNER__ 生成</text>
-                  <text x="924" y="1262" text-anchor="end" font-family="Arial, sans-serif" font-size="28" font-weight="900" fill="#172033">会员分享卡</text>
+                  <text x="924" y="1262" text-anchor="end" font-family="Arial, sans-serif" font-size="28" font-weight="900" fill="#172033">抽签分享卡</text>
                 </svg>
                 """
                 .replace("__TIME__", escapeXml(time))

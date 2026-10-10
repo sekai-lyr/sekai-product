@@ -5,7 +5,6 @@ import com.sekai.draw.lots.model.Result;
 import com.sekai.draw.lots.model.RitualResult;
 import com.sekai.draw.lots.model.User;
 import com.sekai.draw.lots.service.DrawLotsService;
-import com.sekai.draw.lots.service.MembershipService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,9 +17,6 @@ public class DrawLotsControl {
 
     @Resource
     private DrawLotsService drawLotsService;
-
-    @Resource
-    private MembershipService membershipService;
 
     @PostMapping("/draw/roll")
     public Result<DrawRecord> roll(@RequestParam(value = "mood", required = false) String mood,
@@ -53,9 +49,6 @@ public class DrawLotsControl {
         Object loginUser = session.getAttribute("loginUser");
         if (!(loginUser instanceof User user)) {
             return Result.fail("请先登录");
-        }
-        if (!membershipService.isPremium(user)) {
-            return Result.fail("三连签仪式是会员功能，请先开通会员。");
         }
         return drawLotsService.ritualDraw(user, mood, wishTopic, focus);
     }

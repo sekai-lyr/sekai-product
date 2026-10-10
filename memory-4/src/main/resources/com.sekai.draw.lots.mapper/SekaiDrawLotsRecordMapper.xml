@@ -135,31 +135,4 @@
         ORDER BY r.draw_time DESC, r.id DESC
         LIMIT #{limit}
     </select>
-
-    <select id="selectMoodStats" resultType="com.sekai.draw.lots.model.InsightMetric">
-        SELECT COALESCE(mood, '平静') AS label, COUNT(*) AS count, ROUND(AVG(fortune_score)) AS score
-        FROM sekai_Draw_lots_record
-        WHERE user_id = #{userId}
-        GROUP BY COALESCE(mood, '平静')
-        ORDER BY count DESC, score DESC
-    </select>
-
-    <select id="selectCharacterStats" resultType="com.sekai.draw.lots.model.InsightMetric">
-        SELECT c.english_name AS label, COUNT(*) AS count, MAX(r.fortune_score) AS score
-        FROM sekai_Draw_lots_record r
-        JOIN sekai_Draw_lots_character c ON r.character_id = c.id
-        WHERE r.user_id = #{userId}
-        GROUP BY c.id, c.english_name
-        ORDER BY count DESC, score DESC
-        LIMIT #{limit}
-    </select>
-
-    <select id="selectWishStats" resultType="com.sekai.draw.lots.model.InsightMetric">
-        SELECT wish_topic AS label, COUNT(*) AS count, ROUND(AVG(fortune_score)) AS score
-        FROM sekai_Draw_lots_record
-        WHERE user_id = #{userId}
-        GROUP BY wish_topic
-        ORDER BY count DESC, score DESC
-        LIMIT #{limit}
-    </select>
 </mapper>

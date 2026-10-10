@@ -2,7 +2,6 @@ package com.sekai.draw.lots.mapper;
 
 import com.sekai.draw.lots.dataobject.SekaiDrawLotsRecordDO;
 import com.sekai.draw.lots.model.DrawRecord;
-import com.sekai.draw.lots.model.InsightMetric;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -24,7 +23,4 @@ public interface SekaiDrawLotsRecordMapper {
                                     @Param("mood") String mood,
                                     @Param("minScore") Integer minScore,
                                     @Param("limit") int limit);
-    List<InsightMetric> selectMoodStats(@Param("userId") Long userId);
-    List<InsightMetric> selectCharacterStats(@Param("userId") Long userId, @Param("limit") int limit);
-    List<InsightMetric> selectWishStats(@Param("userId") Long userId, @Param("limit") int limit);
 }

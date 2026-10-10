@@ -1,0 +1,19 @@
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+__pycache__/
+
+# Local runtime data and generated media
+data/
+SekaiForm/data/
+*.mv.db
+*.trace.db
+*.mv.db.*
+*.trace.db.*
+
+# IDE and build output
+.idea/
+target/
+*.iml
+*.class

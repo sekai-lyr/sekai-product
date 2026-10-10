@@ -7,6 +7,7 @@ const wheelState = {
     spinning: false,
     slices: []
 };
+const wheelReduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function drawWheel() {
     if (!wheelCanvas) {
@@ -88,11 +89,14 @@ async function spinWheel() {
     wheelState.spinning = true;
     spinButton.disabled = true;
     spinButton.textContent = "世界线收束中";
+    document.body.classList.add("wheel-spinning");
+    wheelResult?.setAttribute("aria-busy", "true");
     try {
         const response = await fetch("/wheel/spin", { method: "POST" });
         const result = await response.json();
         if (!result.success) {
             renderFailure(result.message || "转盘失败");
+            finishSpin("转动命运");
             return;
         }
         const option = result.data.option;
@@ -100,20 +104,26 @@ async function spinWheel() {
         const centerDeg = slice ? slice.centerDeg : -90;
         const turns = 6 + Math.floor(Math.random() * 3);
         const targetRotation = turns * 360 + (-90 - centerDeg);
-        wheelState.rotation += targetRotation;
-        wheelCanvas.style.transform = `rotate(${wheelState.rotation}deg)`;
+        if (!wheelReduceMotion.matches) {
+            wheelState.rotation += targetRotation;
+            wheelCanvas.style.transform = `rotate(${wheelState.rotation}deg)`;
+        }
         window.setTimeout(() => {
             renderResult(result.data);
-            wheelState.spinning = false;
-            spinButton.disabled = false;
-            spinButton.textContent = "再转一次";
-        }, 4300);
+            finishSpin("再转一次");
+        }, wheelReduceMotion.matches ? 80 : 4300);
     } catch (error) {
         renderFailure("转盘连接失败，请稍后再试");
-        wheelState.spinning = false;
-        spinButton.disabled = false;
-        spinButton.textContent = "转动命运";
+        finishSpin("转动命运");
     }
+}
+
+function finishSpin(buttonText) {
+    wheelState.spinning = false;
+    spinButton.disabled = false;
+    spinButton.textContent = buttonText;
+    document.body.classList.remove("wheel-spinning");
+    wheelResult?.setAttribute("aria-busy", "false");
 }
 
 function renderResult(data) {
@@ -128,6 +138,9 @@ function renderResult(data) {
         <p>${escapeHtml(option.detail || data.line || "先从这件事开始。")}</p>
         <small>${escapeHtml(record.moodLine || data.line || "主角请入场。")}</small>`;
     wheelResult.style.setProperty("--swatch", option.color || "#78e08f");
+    wheelResult.classList.remove("is-revealing");
+    void wheelResult.offsetWidth;
+    wheelResult.classList.add("is-revealing");
 }
 
 function renderFailure(message) {
@@ -135,6 +148,7 @@ function renderFailure(message) {
         return;
     }
     wheelResult.innerHTML = `<span>转盘卡住了</span><h2>!</h2><p>${escapeHtml(message)}</p>`;
+    wheelResult.setAttribute("aria-busy", "false");
 }
 
 function truncate(value, limit) {

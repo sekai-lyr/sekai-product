@@ -79,7 +79,7 @@ public class PageControl {
         if (user == null) {
             return "redirect:/login";
         }
-        int pageSize = 8;
+        int pageSize = 30;
         int total = songService.countLibraryByUserId(user.getId(), keyword);
         int totalPages = Math.max((int) Math.ceil(total / (double) pageSize), 1);
         int currentPage = Math.min(Math.max(page, 1), totalPages);
@@ -106,7 +106,10 @@ public class PageControl {
     }
 
     @GetMapping("/playlists/{id}")
-    public String playlistDetail(@PathVariable Long id, HttpSession session, Model model) {
+    public String playlistDetail(@PathVariable Long id,
+                                 @RequestParam(value = "page", defaultValue = "1") int page,
+                                 HttpSession session,
+                                 Model model) {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -115,9 +118,21 @@ public class PageControl {
         if (playlist == null) {
             return "redirect:/playlists";
         }
+        List<Song> allPlaylistSongs = playlistService.listSongs(id, user.getId());
+        int pageSize = 30;
+        int total = allPlaylistSongs.size();
+        int totalPages = Math.max((int) Math.ceil(total / (double) pageSize), 1);
+        int currentPage = Math.min(Math.max(page, 1), totalPages);
+        int pageOffset = Math.min((currentPage - 1) * pageSize, total);
+        int pageEnd = Math.min(pageOffset + pageSize, total);
+        List<Song> playlistSongs = allPlaylistSongs.subList(pageOffset, pageEnd);
         model.addAttribute("loginUser", user);
         model.addAttribute("playlist", playlist);
-        model.addAttribute("playlistSongs", playlistService.listSongs(id, user.getId()));
+        model.addAttribute("playlistSongs", playlistSongs);
+        model.addAttribute("playlistSongTotal", total);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageOffset", pageOffset);
         model.addAttribute("songs", songService.listLibraryByUserId(user.getId()));
         return "playlist-detail";
     }
@@ -158,6 +173,7 @@ public class PageControl {
     public String player(@PathVariable Long id,
                          @RequestParam(value = "playlistId", required = false) Long playlistId,
                          @RequestParam(value = "autoplay", required = false) String autoplay,
+                         @RequestParam(value = "mode", defaultValue = "disc") String mode,
                          HttpSession session,
                          Model model) {
         User user = requireUser(session);
@@ -187,6 +203,13 @@ public class PageControl {
         model.addAttribute("isBilibiliVideo", isBilibiliVideoMusic(song));
         model.addAttribute("playableLocalVideo", isPlayableLocalVideo(song));
         model.addAttribute("startAutoplay", "1".equals(autoplay));
+        String stageMode = "folia".equalsIgnoreCase(mode)
+                ? "folia"
+                : ("folia-classic".equalsIgnoreCase(mode)
+                        ? "folia-classic"
+                        : ("lyrics".equalsIgnoreCase(mode) ? "lyrics" : "disc"));
+        model.addAttribute("stageMode", stageMode);
+        model.addAttribute("lyricMode", !"disc".equals(stageMode));
         model.addAttribute("lyricLines", songService.parseLyrics(song.getLyricText()));
         model.addAttribute("queue", queue);
         return "player";
@@ -213,19 +236,6 @@ public class PageControl {
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("results", buildSearchResults(q, songService.listLibraryByUserId(user.getId()), playlistService.listByUserId(user.getId())));
         return "search";
-    }
-
-    @GetMapping("/business")
-    public String business(HttpSession session, Model model) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        if (!isBusinessAdmin(user)) {
-            return "redirect:/home";
-        }
-        model.addAttribute("loginUser", user);
-        return "business";
     }
 
     @GetMapping("/netease")
@@ -367,7 +377,4 @@ public class PageControl {
         return null;
     }
 
-    private boolean isBusinessAdmin(User user) {
-        return user != null && "sekai".equalsIgnoreCase(user.getUserName());
-    }
 }

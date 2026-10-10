@@ -9,7 +9,7 @@
 <body>
 <header class="topbar">
     <a class="logo" th:href="@{/home}">灵感伙伴签</a>
-    <nav><a th:href="@{/home}">抽签</a><a class="active" th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a><a th:href="@{/insights}">分析</a><a th:href="@{/coach}">行动</a><a th:href="@{/tasks}">任务</a><a th:href="@{/focus}">专注</a><a th:href="@{/membership}">会员</a></nav>
+    <nav><a th:href="@{/home}">抽签</a><a class="active" th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a></nav>
 </header>
 <main class="dashboard">
     <section class="wheel-hero">
@@ -75,38 +75,27 @@
                 </form>
             </section>
 
-            <section class="wheel-panel vip-wheel-panel" th:if="${premium}">
+            <section class="wheel-panel vip-wheel-panel">
                 <div class="section-title">
                     <div>
-                        <p class="eyebrow">VIP Smart Wheel</p>
+                        <p class="eyebrow">Smart Wheel</p>
                         <h2>智能补全转盘</h2>
                     </div>
                 </div>
-                <p>根据最近抽签主线和 7 天行动计划，生成一组能直接执行的二次元任务分区。</p>
+                <p>根据最近抽签历史生成一组能直接执行的二次元小任务分区，可以一键导入到转盘里。</p>
                 <div class="wheel-suggestion-list">
-                    <article th:each="suggestion : ${vipSuggestions}" th:style="'--swatch:' + ${suggestion.color}">
+                    <article th:each="suggestion : ${suggestions}" th:style="'--swatch:' + ${suggestion.color}">
                         <div>
                             <strong th:text="${suggestion.title}">推进主题 15 分钟</strong>
                             <span th:text="${suggestion.detail}">先完成一个小动作。</span>
-                            <small th:text="${suggestion.reason}">来自 VIP 智能建议</small>
+                            <small th:text="${suggestion.reason}">来自抽签趋势</small>
                         </div>
                         <em th:text="${'权重 ' + suggestion.weight}">权重 2</em>
                     </article>
                 </div>
-                <form class="vip-wheel-import" th:action="@{/wheel/vip/import}" method="post">
+                <form class="vip-wheel-import" th:action="@{/wheel/import-suggestions}" method="post">
                     <button type="submit">一键导入智能分区</button>
                 </form>
-            </section>
-
-            <section class="wheel-panel vip-wheel-panel locked" th:unless="${premium}">
-                <div class="section-title">
-                    <div>
-                        <p class="eyebrow">VIP Smart Wheel</p>
-                        <h2>智能补全转盘</h2>
-                    </div>
-                </div>
-                <p>普通用户可以手动添加分区；会员会自动把抽签历史和行动计划转成可导入的任务池。</p>
-                <a class="soft-link" th:href="@{/membership(locked='wheel-vip')}">开通会员</a>
             </section>
 
             <section class="wheel-panel">
@@ -143,6 +132,7 @@
 <script th:inline="javascript">
     window.sekaiWheelOptions = /*[[${options}]]*/ [];
 </script>
+<script th:src="@{/js/app.js(v=2026083001)}" src="/js/app.js?v=2026083001"></script>
 <script th:src="@{/js/wheel.js(v=202605271840)}" src="/js/wheel.js?v=202605271840"></script>
 </body>
 </html>

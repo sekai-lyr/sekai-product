@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二次元数据锡通 - 注册</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}" href="/css/login.css">
+    <meta name="theme-color" content="#0b0c0e">
+</head>
+<body>
+<!-- THESIS: 注册页延续资料中心的仪表语言，只保留建立账号所需的四个字段。 OWN-WORLD: 深色档案室、幽灵段码、暖橙红强调色和生成的资料氛围素材。 STORY: 先理解资料库范围，再建立成员身份，最后返回登录。 FIRST VIEWPORT: 左侧固定品牌和档案模块，右侧按标签顺序填写账号信息。 FORM: 候选 5，七段数码显示器家族，seed 35146822。 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance -->
+<main class="login-page">
+    <section class="brand-area" aria-labelledby="brand-title">
+        <div class="brand-copy">
+            <span class="brand-mark">SDO</span>
+            <div class="brand-title">
+                <h1 id="brand-title">Sekai Data Object</h1>
+                <p>二次元数据锡通</p>
+            </div>
+        </div>
+        <div class="brand-slogan">
+            <p>建立一个账号，继续整理番剧档案与角色原声台词。</p>
+        </div>
+        <div class="brand-records" aria-label="资料库模块">
+            <span>番剧档案</span>
+            <span>人物图鉴</span>
+            <span>台词原声</span>
+        </div>
+    </section>
+
+    <section class="form-area" aria-labelledby="register-title">
+        <div class="auth-topbar">
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换主题">浅色</button>
+        </div>
+        <div class="login-card">
+            <div class="card-header">
+                <div class="header-rule"></div>
+                <h2 id="register-title">创建账号</h2>
+                <p>注册你的二次元数据账号</p>
+            </div>
+
+            <div class="server-message error" th:if="${error}" th:text="${error}" role="alert"></div>
+
+            <form id="registerForm" th:action="@{/user/register}" action="/user/register" method="post">
+                <div class="form-group">
+                    <label for="userName">用户名</label>
+                    <div class="input-box">
+                        <span class="input-code" aria-hidden="true">ID</span>
+                        <input type="text" id="userName" name="userName" placeholder="请输入用户名" autocomplete="username" required>
+                    </div>
+                    <div class="error-text" id="userNameError" aria-live="polite"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="nickName">昵称</label>
+                    <div class="input-box">
+                        <span class="input-code" aria-hidden="true">NM</span>
+                        <input type="text" id="nickName" name="nickName" placeholder="请输入昵称（可选）" autocomplete="nickname">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <div class="input-box">
+                        <span class="input-code" aria-hidden="true">PW</span>
+                        <input type="password" id="password" name="password" placeholder="6-30 位密码" autocomplete="new-password" required>
+                    </div>
+                    <div class="error-text" id="passwordError" aria-live="polite"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <div class="input-box">
+                        <span class="input-code" aria-hidden="true">CK</span>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="请再次输入密码" autocomplete="new-password" required>
+                    </div>
+                    <div class="error-text" id="confirmPasswordError" aria-live="polite"></div>
+                </div>
+
+                <button type="submit" class="login-btn">注册</button>
+
+                <div class="bottom-tip">已有账号？ <a th:href="@{/login}" href="/login">去登录</a></div>
+            </form>
+        </div>
+        <footer class="auth-footer">© 2026 Sekai Data Object / 二次元数据锡通</footer>
+    </section>
+</main>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script th:src="@{/js/register.js}" src="/js/register.js"></script>
+</body>
+</html>

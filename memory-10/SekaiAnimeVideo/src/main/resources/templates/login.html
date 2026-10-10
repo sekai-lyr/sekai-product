@@ -3,47 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sekai Anime - 登录</title>
-    <link rel="stylesheet" th:href="@{/css/login.css(v=999)}" href="/css/login.css?v=999">
+    <meta name="theme-color" content="#071722">
+    <title>Sekai Anime | 登录</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260830-motion-layer')}" href="/css/app.css?v=20260830-motion-layer">
+    <link rel="stylesheet" th:href="@{/css/login.css(v='20260830-motion-layer')}" href="/css/login.css?v=20260830-motion-layer">
 </head>
-<body>
-<!-- Particle Starfield -->
-<canvas class="starfield-canvas sekai-starfield" data-count="120"></canvas>
-<!-- Sakura Petals -->
-<canvas class="canvas-sakura sekai-sakura" data-count="30"></canvas>
-<!-- Mouse Glow Trail -->
-<canvas class="canvas-glow sekai-glow"></canvas>
-<!-- Floating Orbs -->
-<canvas class="canvas-orbs sekai-orbs"></canvas>
-<!-- Sparkle Trail -->
-<canvas class="canvas-sekai-sparkles sekai-sparkles"></canvas>
-<!-- Neon Shapes -->
-<canvas class="canvas-sekai-neon-shapes sekai-neon-shapes"></canvas>
-<!-- Click Ripple -->
-<canvas class="canvas-sekai-ripple-effect sekai-ripple-effect"></canvas>
-
-<main class="login-page">
-    <div class="login-card">
-        <h2>欢迎回来 👋</h2>
-        <p>登录你的动漫中转站</p>
-        <div class="server-message success" th:if="${message}" th:text="${message}"></div>
-        <div class="server-message error" th:if="${error}" th:text="${error}"></div>
-        <form action="/user/login" method="post" id="loginForm">
-            <label for="userName">用户名 / 昵称</label>
-            <input id="userName" name="userName" type="text" placeholder="请输入用户名" autocomplete="username" required>
-            <label for="password">密码</label>
-            <div class="password-row">
-                <input id="password" name="password" type="password" placeholder="请输入密码" autocomplete="current-password" required>
-                <button type="button" id="togglePassword">显示</button>
+<body class="auth-body">
+<!--
+THESIS: 登录不是一道门槛，而是回到个人追番索引柜的入口。
+OWN-WORLD: 深蓝夜景承载记忆，浅色表单像纸卡，信号橙只标记继续前进的动作。
+STORY: 用户看见熟悉的夜间入口，理解这是自己的站点空间，完成登录后回到首页。
+FIRST VIEWPORT: 左侧大幅真实夜景，右侧清晰表单，字段标签在输入框上方，主要动作保持单行可见。
+FORM: 深夜录像租赁店的索引柜，第 6 个自定义方向，seed cae93715。FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->
+<main class="auth-shell">
+    <section class="auth-visual" aria-label="Sekai Anime 介绍">
+        <div class="auth-visual-copy">
+            <a class="brand" href="/" aria-label="返回 Sekai Anime 首页">
+                <span class="brand-mark" aria-hidden="true">S</span>
+                <span class="brand-copy">
+                    <span class="brand-name">Sekai Anime</span>
+                    <span class="brand-sub">personal anime index</span>
+                </span>
+            </a>
+            <h1>把下一集留在<span>顺手的位置。</span></h1>
+            <p>登录后继续管理自己的站点、分类和收藏，从一个入口回到熟悉的观看路径。</p>
+            <div class="auth-visual-foot" aria-label="产品能力">
+                <span>收藏站点</span>
+                <span>快速搜索</span>
+                <span>直接观看</span>
             </div>
-            <button class="primary-btn sekai-btn" type="submit">✨ 登录</button>
-        </form>
-        <a class="secondary-btn sekai-btn" href="/register">📝 创建新账号</a>
-        <a class="back-link" href="/">← 返回首页</a>
-    </div>
+        </div>
+    </section>
+
+    <section class="auth-content">
+        <div class="auth-card">
+            <h2>欢迎回来</h2>
+            <p>登录你的个人追番导航。</p>
+            <div class="server-message success" th:if="${message}" th:text="${message}"></div>
+            <div class="server-message error" th:if="${error}" th:text="${error}"></div>
+            <form action="/user/login" method="post" id="loginForm" class="auth-form">
+                <label for="userName">用户名或昵称</label>
+                <input id="userName" name="userName" type="text" placeholder="请输入用户名" autocomplete="username" required>
+                <label for="password">密码</label>
+                <div class="password-row">
+                    <input id="password" name="password" type="password" placeholder="请输入密码" autocomplete="current-password" required>
+                    <button type="button" id="togglePassword" aria-label="显示或隐藏密码">显示</button>
+                </div>
+                <button class="primary-btn" type="submit">登录</button>
+            </form>
+            <div class="auth-links">
+                <a class="secondary-btn" href="/register">创建新账号</a>
+            </div>
+            <a class="back-link" href="/">返回首页</a>
+        </div>
+    </section>
 </main>
 
-<script th:src="@{/js/login.js}" src="/js/login.js"></script>
-<script th:src="@{/js/effects.js(v='20260806-sakura3')}" src="/js/effects.js?v=20260806-sakura3"></script>
+<script th:src="@{/js/login.js(v='20260830-motion-layer')}" src="/js/login.js?v=20260830-motion-layer"></script>
+<script th:src="@{/js/effects.js(v='20260830-motion-layer')}" src="/js/effects.js?v=20260830-motion-layer"></script>
 </body>
 </html>

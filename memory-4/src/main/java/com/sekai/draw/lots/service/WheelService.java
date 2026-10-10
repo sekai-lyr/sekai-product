@@ -12,8 +12,8 @@ import java.util.List;
 public interface WheelService {
     List<WheelOption> options(User user);
     List<WheelSpinRecord> recentSpins(User user, int limit);
-    List<WheelSuggestion> vipSuggestions(User user);
-    Result<Integer> importVipSuggestions(User user);
+    List<WheelSuggestion> suggestions(User user);
+    Result<Integer> importSuggestions(User user);
     Result<WheelOption> addOption(User user, String title, String detail, Integer weight, String color);
     Result<Boolean> deleteOption(User user, Long optionId);
     Result<WheelSpinResult> spin(User user);

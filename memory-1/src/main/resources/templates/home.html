@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二次元数据锡通 - 首页</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <meta name="theme-color" content="#0b0c0e">
+</head>
+<body>
+<!-- THESIS: 用七段数码仪表把番剧、人物、台词和原声音频还原成一套可检索的关系档案，拒绝普通的三列看板。 OWN-WORLD: 深色档案室、幽灵段码、暖橙红强调色、软角边框和真实本地素材。 STORY: 用户先读懂资料中心，再进入一个真实档案库。 FIRST VIEWPORT: 左侧是清晰的首页主张和两个入口，右侧是档案氛围图，统计段码紧随其后。 FORM: 候选 5，七段数码显示器家族，seed 35146822。 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance -->
+<nav class="top-nav" aria-label="主导航">
+    <a class="nav-brand" href="/home">
+        <span class="nav-logo">SDO</span>
+        <span>
+            <span class="nav-title">二次元数据锡通</span>
+            <span class="nav-subtitle">Sekai Data Object</span>
+        </span>
+    </a>
+    <div class="nav-links">
+        <a href="/home" class="active">首页</a>
+        <a href="/series">番剧</a>
+        <a href="/characters">人物</a>
+        <a href="/quotes">台词</a>
+    </div>
+    <div class="nav-user">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换主题">浅色</button>
+        <span class="user-nick" th:text="${loginUser.nickName != null and !loginUser.nickName.isEmpty() ? loginUser.nickName : loginUser.userName}">成员</span>
+        <a href="/logout" class="logout-link">退出</a>
+        <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="mobileNavPanel">菜单</button>
+    </div>
+</nav>
+<nav id="mobileNavPanel" class="mobile-nav-panel" aria-label="移动端导航" hidden>
+    <a href="/home" class="active">首页</a>
+    <a href="/series">番剧</a>
+    <a href="/characters">人物</a>
+    <a href="/quotes">台词</a>
+</nav>
+
+<main class="container">
+    <div class="flash-message success" th:if="${message}" th:text="${message}" role="status" aria-live="polite"></div>
+    <div class="flash-message error" th:if="${error}" th:text="${error}" role="alert"></div>
+
+    <section class="home-hero" aria-labelledby="home-title">
+        <div class="hero-copy">
+            <h1 id="home-title">一处检索，连起整座资料库。</h1>
+            <p>番剧、人物、台词与原声音频，按官方字段归档，关系清晰可追溯。</p>
+            <div class="action-row">
+                <a class="btn primary" href="/series">浏览番剧</a>
+                <a class="btn outline" href="/quotes">查看台词</a>
+            </div>
+        </div>
+        <div class="hero-visual" role="img" aria-label="二次元资料档案氛围图">
+            <div class="hero-visual-note">ARCHIVE ATLAS<br>生成的氛围素材，不代表具体条目。</div>
+        </div>
+    </section>
+
+    <section class="metrics-band" aria-label="资料库统计">
+        <div class="metric-cell">
+            <div class="metric-value segment-number" th:text="${stats.seriesCount}">0</div>
+            <div class="metric-label">收录番剧</div>
+        </div>
+        <div class="metric-cell">
+            <div class="metric-value segment-number" th:text="${stats.characterCount}">0</div>
+            <div class="metric-label">收录人物</div>
+        </div>
+        <div class="metric-cell">
+            <div class="metric-value segment-number" th:text="${stats.quoteCount}">0</div>
+            <div class="metric-label">台词条目</div>
+        </div>
+        <div class="metric-cell">
+            <div class="metric-value segment-number" th:text="${stats.audioCount}">0</div>
+            <div class="metric-label">原声音频</div>
+        </div>
+    </section>
+
+    <section class="section-block" aria-labelledby="recent-series-title">
+        <div class="section-head">
+            <div>
+                <h2 id="recent-series-title">最近加入的番剧</h2>
+                <p>从档案封面开始，进入每一部作品的原名、制作和关系信息。</p>
+            </div>
+            <a href="/series" class="more-link">查看全部</a>
+        </div>
+        <div class="poster-grid">
+            <article class="series-card reveal" data-reveal-delay="40" th:each="series : ${recentSeriesList}">
+                <a th:href="@{/series/{id}(id=${series.id})}" class="poster-frame">
+                    <img th:if="${series.coverUrl != null and !series.coverUrl.isEmpty()}" th:src="${series.coverUrl}" th:alt="${series.title + ' 封面'}">
+                    <span class="poster-placeholder" th:unless="${series.coverUrl != null and !series.coverUrl.isEmpty()}"><span th:text="${series.title}">番剧名</span></span>
+                </a>
+                <div class="series-info">
+                    <div class="series-title" th:text="${series.title}">番剧名</div>
+                    <div class="series-meta" th:text="${series.originalTitle != null and !series.originalTitle.isEmpty() ? series.originalTitle : (series.type != null ? series.type : 'TV')}">原名</div>
+                    <div class="record-line">
+                        <span class="record-label">评分</span>
+                        <span class="record-value" th:text="${series.score != null ? series.score : '未记录'}">未记录</span>
+                    </div>
+                    <a th:href="@{/series/{id}(id=${series.id})}" class="card-link">查看档案</a>
+                </div>
+            </article>
+            <div class="card-empty" th:if="${#lists.isEmpty(recentSeriesList)}">暂无番剧数据，去<a href="/series">番剧库</a>录入第一部。</div>
+        </div>
+    </section>
+
+    <section class="section-block home-columns">
+        <div>
+            <div class="section-head">
+                <div>
+                    <h2 id="characters-title">人物索引</h2>
+                    <p>角色、声优与所属番剧在同一条索引上。</p>
+                </div>
+                <a href="/characters" class="more-link">进入人物库</a>
+            </div>
+            <div class="character-row" aria-labelledby="characters-title">
+                <div class="character-chip reveal" data-reveal-delay="40" th:each="character : ${topCharacterList}">
+                    <div class="chip-avatar">
+                        <img th:if="${character.imageUrl != null and !character.imageUrl.isEmpty()}" th:src="${character.imageUrl}" th:alt="${character.name + ' 立绘'}">
+                        <span th:unless="${character.imageUrl != null and !character.imageUrl.isEmpty()}" class="chip-placeholder" th:text="${#strings.substring(character.name, 0, 1)}">人</span>
+                    </div>
+                    <div>
+                        <div class="chip-name" th:text="${character.name}">人物</div>
+                        <div class="chip-voice" th:if="${character.voiceActor != null and !character.voiceActor.isEmpty()}" th:text="${'CV ' + character.voiceActor}">CV</div>
+                        <div class="chip-series" th:if="${seriesById != null and seriesById.containsKey(character.seriesId)}" th:text="${seriesById.get(character.seriesId).title}">所属番剧</div>
+                    </div>
+                </div>
+                <div class="card-empty" th:if="${#lists.isEmpty(topCharacterList)}">暂无人物数据，去<a href="/characters">人物库</a>添加记录。</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-head">
+                <div>
+                    <h2 id="quotes-title">最近台词</h2>
+                    <p>原文和原声一起保存，方便回到具体作品。</p>
+                </div>
+                <a href="/quotes" class="more-link">进入台词库</a>
+            </div>
+            <div class="quote-list" aria-labelledby="quotes-title">
+                <article class="quote-item reveal" data-reveal-delay="60" th:each="quote : ${recentQuoteList}">
+                    <div class="quote-content" th:text="${quote.content}">台词</div>
+                    <div class="quote-meta">
+                        <span th:text="${quote.characterName != null and !quote.characterName.isEmpty() ? quote.characterName : '未知角色'}">未知角色</span>
+                        <span th:if="${seriesById != null and seriesById.containsKey(quote.seriesId)}" th:text="${seriesById.get(quote.seriesId).title}">所属番剧</span>
+                        <span class="audio-tag" th:if="${quote.audioUrl != null and !quote.audioUrl.isEmpty()}">原声可播放</span>
+                    </div>
+                </article>
+                <div class="card-empty" th:if="${#lists.isEmpty(recentQuoteList)}">暂无台词数据，去<a href="/quotes">台词库</a>收录。</div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="page-footer">© 2026 Sekai Data Object / 二次元数据锡通</footer>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+</body>
+</html>

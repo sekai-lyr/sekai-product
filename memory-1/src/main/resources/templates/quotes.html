@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二次元数据锡通 - 台词</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <meta name="theme-color" content="#0b0c0e">
+</head>
+<body>
+<!-- THESIS: 台词库的核心不是一张长列表，而是让原文、角色、作品、集数和原声音频在同一条记录中可读可听。 OWN-WORLD: 深色档案室、幽灵段码、暖橙红强调色、软角边框和真实本地素材。 STORY: 用户按文字或番剧筛选，播放原声，并在同一处维护台词字段。 FIRST VIEWPORT: 标题和检索先行，新增动作保持在检索结果上方，台词用纵向阅读节奏承载音频。 FORM: 候选 5，七段数码显示器家族，seed 35146822。 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance -->
+<nav class="top-nav" aria-label="主导航">
+    <a class="nav-brand" href="/home">
+        <span class="nav-logo">SDO</span>
+        <span>
+            <span class="nav-title">二次元数据锡通</span>
+            <span class="nav-subtitle">Sekai Data Object</span>
+        </span>
+    </a>
+    <div class="nav-links">
+        <a href="/home">首页</a>
+        <a href="/series">番剧</a>
+        <a href="/characters">人物</a>
+        <a href="/quotes" class="active">台词</a>
+    </div>
+    <div class="nav-user">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换主题">浅色</button>
+        <span class="user-nick" th:text="${loginUser.nickName != null and !loginUser.nickName.isEmpty() ? loginUser.nickName : loginUser.userName}">成员</span>
+        <a href="/logout" class="logout-link">退出</a>
+        <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="mobileNavPanel">菜单</button>
+    </div>
+</nav>
+<nav id="mobileNavPanel" class="mobile-nav-panel" aria-label="移动端导航" hidden>
+    <a href="/home">首页</a>
+    <a href="/series">番剧</a>
+    <a href="/characters">人物</a>
+    <a href="/quotes" class="active">台词</a>
+</nav>
+
+<main class="container">
+    <div class="flash-message success" th:if="${message}" th:text="${message}" role="status" aria-live="polite"></div>
+    <div class="flash-message error" th:if="${error}" th:text="${error}" role="alert"></div>
+
+    <header class="page-head">
+        <h1>台词原声库</h1>
+        <p>把官方台词与角色原声音频放在同一个可检索的记录里。</p>
+    </header>
+
+    <form class="search-bar" method="get" action="/quotes" role="search">
+        <div class="search-field">
+            <label for="quoteKeyword">检索台词</label>
+            <input id="quoteKeyword" type="search" name="keyword" th:value="${keyword}" placeholder="台词内容或角色名">
+        </div>
+        <div class="filter-field">
+            <label for="quoteSeries">所属番剧</label>
+            <select id="quoteSeries" name="seriesId">
+                <option value="">全部番剧</option>
+                <option th:each="option : ${seriesOptions}" th:value="${option.id}" th:selected="${filterSeriesId != null and filterSeriesId == option.id}" th:text="${option.title}">番剧</option>
+            </select>
+        </div>
+        <button type="submit" class="btn primary">检索</button>
+    </form>
+
+    <div class="toolbar-row">
+        <span class="toolbar-note" th:text="${totalCount + ' 条台词记录'}">0 条台词记录</span>
+        <button class="btn outline add-toggle" type="button" data-toggle-target="addPanel" data-open-label="收起录入" data-closed-label="新增台词" aria-expanded="false">新增台词</button>
+    </div>
+
+    <section class="add-panel" id="addPanel" hidden aria-labelledby="add-quote-title">
+        <div class="panel-header">
+            <h2 id="add-quote-title">新增台词</h2>
+            <span>可以同时关联作品与原声音频</span>
+        </div>
+        <form method="post" action="/quotes/add" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="quoteSeriesId">所属番剧</label>
+                    <select id="quoteSeriesId" name="seriesId">
+                        <option value="">未选择</option>
+                        <option th:each="option : ${seriesOptions}" th:value="${option.id}" th:text="${option.title}">番剧</option>
+                    </select>
+                </div>
+                <div class="field wide">
+                    <label for="content">台词内容 *</label>
+                    <textarea id="content" name="content" rows="3" required placeholder="官方台词原文"></textarea>
+                </div>
+                <div class="field">
+                    <label for="characterName">角色名</label>
+                    <input id="characterName" type="text" name="characterName" placeholder="如：利威尔">
+                </div>
+                <div class="field">
+                    <label for="episode">集数</label>
+                    <input id="episode" type="number" name="episode" min="1" placeholder="如：5">
+                </div>
+                <div class="field">
+                    <label for="timePoint">出现时间点（秒）</label>
+                    <input id="timePoint" type="number" name="timePoint" min="0" step="0.1" placeholder="如：132.5">
+                </div>
+                <div class="field">
+                    <label for="audioUrl">音频 URL</label>
+                    <input id="audioUrl" type="url" name="audioUrl" placeholder="https://... 或 /uploads/...">
+                </div>
+                <div class="field">
+                    <label for="audioFile">或上传原音频</label>
+                    <input id="audioFile" type="file" name="audioFile" accept="audio/*">
+                </div>
+            </div>
+            <button type="submit" class="btn primary">保存台词</button>
+        </form>
+    </section>
+
+    <section class="quote-list" th:if="${!quoteList.isEmpty()}" aria-label="台词列表">
+        <article class="quote-item reveal" data-reveal-delay="40" th:each="quote : ${quoteList}">
+            <div class="quote-content" th:text="${quote.content}">台词</div>
+            <div class="quote-meta">
+                <span th:text="${quote.characterName != null and !quote.characterName.isEmpty() ? quote.characterName : '未知角色'}">未知角色</span>
+                <span th:if="${seriesById != null and seriesById.containsKey(quote.seriesId)}" th:text="${seriesById.get(quote.seriesId).title}">所属番剧</span>
+                <span th:if="${quote.episode != null}" th:text="${'第 ' + quote.episode + ' 集'}">第 1 集</span>
+                <span th:if="${quote.timePoint != null}" th:text="${'出现于 ' + quote.timePoint + ' 秒'}">出现时间</span>
+                <span class="audio-tag" th:if="${quote.audioUrl != null and !quote.audioUrl.isEmpty()}">原声可播放</span>
+            </div>
+            <div class="quote-audio-row" th:if="${quote.audioUrl != null and !quote.audioUrl.isEmpty()}">
+                <audio th:src="${quote.audioUrl}" controls preload="none" class="quote-audio" aria-label="台词原声音频"></audio>
+            </div>
+            <div class="quote-actions">
+                <button class="btn outline small" type="button" th:attr="data-toggle-target=${'editQuote__' + quote.id}" data-open-label="收起编辑" data-closed-label="编辑台词" aria-expanded="false">编辑台词</button>
+                <form method="post" th:action="@{/quotes/delete/{id}(id=${quote.id})}" class="inline-form" onsubmit="return confirm('确定删除该台词吗？');">
+                    <button type="submit" class="btn danger small">删除</button>
+                </form>
+            </div>
+            <div class="edit-panel" th:id="${'editQuote__' + quote.id}" hidden>
+                <form method="post" th:action="@{/quotes/update/{id}(id=${quote.id})}" enctype="multipart/form-data">
+                    <div class="form-grid">
+                        <div class="field wide">
+                            <label th:for="${'editContent__' + quote.id}">台词内容 *</label>
+                            <textarea th:id="${'editContent__' + quote.id}" name="content" rows="3" required th:text="${quote.content}"></textarea>
+                        </div>
+                        <div class="field">
+                            <label th:for="${'editSeries__' + quote.id}">所属番剧</label>
+                            <select th:id="${'editSeries__' + quote.id}" name="seriesId">
+                                <option value="">未选择</option>
+                                <option th:each="option : ${seriesOptions}" th:value="${option.id}" th:selected="${quote.seriesId != null and quote.seriesId == option.id}" th:text="${option.title}">番剧</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label th:for="${'editCharacter__' + quote.id}">角色名</label>
+                            <input th:id="${'editCharacter__' + quote.id}" type="text" name="characterName" th:value="${quote.characterName}">
+                        </div>
+                        <div class="field">
+                            <label th:for="${'editEpisode__' + quote.id}">集数</label>
+                            <input th:id="${'editEpisode__' + quote.id}" type="number" name="episode" min="1" th:value="${quote.episode}">
+                        </div>
+                        <div class="field">
+                            <label th:for="${'editTimePoint__' + quote.id}">出现时间点（秒）</label>
+                            <input th:id="${'editTimePoint__' + quote.id}" type="number" name="timePoint" min="0" step="0.1" th:value="${quote.timePoint}">
+                        </div>
+                        <div class="field">
+                            <label th:for="${'editAudioUrl__' + quote.id}">音频 URL</label>
+                            <input th:id="${'editAudioUrl__' + quote.id}" type="url" name="audioUrl" th:value="${quote.audioUrl}">
+                        </div>
+                        <div class="field">
+                            <label th:for="${'editAudioFile__' + quote.id}">或上传新音频</label>
+                            <input th:id="${'editAudioFile__' + quote.id}" type="file" name="audioFile" accept="audio/*">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn primary small">保存修改</button>
+                </form>
+            </div>
+        </article>
+    </section>
+    <div class="card-empty" th:if="${quoteList.isEmpty()}">没有找到匹配的台词。调整筛选条件，或去<a href="/quotes">新增台词</a>。</div>
+
+    <nav class="pagination" th:if="${totalPages > 1}" aria-label="台词分页">
+        <a th:if="${currentPage > 1}" th:href="@{/quotes(page=${currentPage - 1}, keyword=${keyword}, seriesId=${filterSeriesId})}">上一页</a>
+        <span class="page-info" th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
+        <a th:if="${currentPage < totalPages}" th:href="@{/quotes(page=${currentPage + 1}, keyword=${keyword}, seriesId=${filterSeriesId})}">下一页</a>
+    </nav>
+</main>
+
+<footer class="page-footer">© 2026 Sekai Data Object / 二次元数据锡通</footer>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+</body>
+</html>

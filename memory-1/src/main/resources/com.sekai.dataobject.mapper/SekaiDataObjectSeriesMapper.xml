@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sekai.dataobject.mapper.SekaiDataObjectSeriesMapper">
+
+    <resultMap id="BaseResultMap" type="com.sekai.dataobject.dataobject.SekaiDataObjectSeriesDO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="originalTitle" column="original_title"/>
+        <result property="type" column="type"/>
+        <result property="studio" column="studio"/>
+        <result property="releaseDate" column="release_date"/>
+        <result property="totalEpisodes" column="total_episodes"/>
+        <result property="score" column="score"/>
+        <result property="synopsis" column="synopsis"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="tags" column="tags"/>
+        <result property="officialUrl" column="official_url"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, title, original_title, type, studio, release_date, total_episodes,
+        score, synopsis, cover_url, tags, official_url, create_time, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_series
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_series
+        ORDER BY score DESC, id DESC
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_series
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (title LIKE CONCAT('%', #{keyword}, '%')
+                OR original_title LIKE CONCAT('%', #{keyword}, '%')
+                OR studio LIKE CONCAT('%', #{keyword}, '%')
+                OR tags LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY score DESC, id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM sekai_dataobject_anime_series
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (title LIKE CONCAT('%', #{keyword}, '%')
+                OR original_title LIKE CONCAT('%', #{keyword}, '%')
+                OR studio LIKE CONCAT('%', #{keyword}, '%')
+                OR tags LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM sekai_dataobject_anime_series
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="insert"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectSeriesDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO sekai_dataobject_anime_series (
+        title,
+        original_title,
+        type,
+        studio,
+        release_date,
+        total_episodes,
+        score,
+        synopsis,
+        cover_url,
+        tags,
+        official_url
+        ) VALUES (
+        #{title},
+        #{originalTitle},
+        #{type},
+        #{studio},
+        #{releaseDate},
+        #{totalEpisodes},
+        #{score},
+        #{synopsis},
+        #{coverUrl},
+        #{tags},
+        #{officialUrl}
+        )
+    </insert>
+
+    <insert id="insertSelective"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectSeriesDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO sekai_dataobject_anime_series
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="originalTitle != null">original_title,</if>
+            <if test="type != null">type,</if>
+            <if test="studio != null">studio,</if>
+            <if test="releaseDate != null">release_date,</if>
+            <if test="totalEpisodes != null">total_episodes,</if>
+            <if test="score != null">score,</if>
+            <if test="synopsis != null">synopsis,</if>
+            <if test="coverUrl != null">cover_url,</if>
+            <if test="tags != null">tags,</if>
+            <if test="officialUrl != null">official_url,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="originalTitle != null">#{originalTitle},</if>
+            <if test="type != null">#{type},</if>
+            <if test="studio != null">#{studio},</if>
+            <if test="releaseDate != null">#{releaseDate},</if>
+            <if test="totalEpisodes != null">#{totalEpisodes},</if>
+            <if test="score != null">#{score},</if>
+            <if test="synopsis != null">#{synopsis},</if>
+            <if test="coverUrl != null">#{coverUrl},</if>
+            <if test="tags != null">#{tags},</if>
+            <if test="officialUrl != null">#{officialUrl},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectSeriesDO">
+        UPDATE sekai_dataobject_anime_series
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="originalTitle != null">original_title = #{originalTitle},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="studio != null">studio = #{studio},</if>
+            <if test="releaseDate != null">release_date = #{releaseDate},</if>
+            <if test="totalEpisodes != null">total_episodes = #{totalEpisodes},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="synopsis != null">synopsis = #{synopsis},</if>
+            <if test="coverUrl != null">cover_url = #{coverUrl},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="officialUrl != null">official_url = #{officialUrl},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateByPrimaryKey"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectSeriesDO">
+        UPDATE sekai_dataobject_anime_series
+        SET title = #{title},
+        original_title = #{originalTitle},
+        type = #{type},
+        studio = #{studio},
+        release_date = #{releaseDate},
+        total_episodes = #{totalEpisodes},
+        score = #{score},
+        synopsis = #{synopsis},
+        cover_url = #{coverUrl},
+        tags = #{tags},
+        official_url = #{officialUrl},
+        update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

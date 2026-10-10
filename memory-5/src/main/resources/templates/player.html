@@ -4,67 +4,233 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${song.title + ' - Sekai Song'}">Player</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=20260601a)}" href="/css/app.css?v=20260601a">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20260830b)}" href="/css/app.css?v=20260830b">
+    <link rel="stylesheet" th:href="@{/css/player-stage.css(v=20261010a)}" href="/css/player-stage.css?v=20261010a">
 </head>
-<body>
+<body th:classappend="${stageMode == 'folia' ? ' immersive-lyrics-page stage-mode-folia' : (stageMode == 'folia-classic' ? ' immersive-lyrics-page stage-mode-folia stage-mode-folia-classic' : (stageMode == 'lyrics' ? ' immersive-lyrics-page stage-mode-lyrics' : ''))}">
 <div class="app-shell player-bg" th:style="${#strings.isEmpty(song.skinUrl) ? '' : 'background-image: linear-gradient(90deg, rgba(10,15,30,.86), rgba(10,15,30,.62)), url(' + song.skinUrl + ')'}">
     <div th:replace="~{fragments :: sidebar('songs')}"></div>
     <main class="content player-layout">
-        <aside class="queue-panel">
-            <div class="queue-title">
-                <h2 th:text="${playlist != null ? playlist.name : '播放队列'}">播放队列</h2>
-                <span th:text="${#lists.size(queue) + ' 首'}">0 首</span>
-            </div>
-            <input class="queue-search" type="search" placeholder="搜索队列" data-queue-search>
-            <div class="queue-list">
-                <a th:each="item : ${queue}"
-                   th:classappend="${item.id == song.id} ? 'active'"
-                   th:href="${playlistId == null ? '/player/' + item.id : '/player/' + item.id + '?playlistId=' + playlistId}">
-                    <strong th:text="${item.title}">Song</strong>
-                    <span th:text="${item.artist}">Artist</span>
-                </a>
-            </div>
-        </aside>
 
-        <section class="now-playing"
-                 th:classappend="${isBilibiliVideo} ? 'bilibili-video-mode'"
+        <!-- L1 全屏清晰背景：封面大图铺满整个视口（固定层，不随舞台滚动） -->
+        <div class="stage-bg" aria-hidden="true" th:unless="${isBilibiliVideo}">
+            <img class="stage-bg-img" th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
+            <span class="stage-bg-veil"></span>
+        </div>
+
+        <!-- ================================================================
+             五层动画舞台（本地可播放音频歌曲）：
+             L1 全屏封面背景 / L2 左侧方形封面 / L3 封面后方的圆形 CD（只露右半）
+             L4 右侧歌词 / L5 底部控件；频谱按固定规律跳动。
+             所有动画由 player-stage.js 的单一主时间线驱动。
+        ================================================================= -->
+        <section class="now-playing lyric-stage"
+                 th:if="${!isBilibiliVideo and lyricMode}"
                  th:data-song-id="${song.id}"
                  th:data-song-title="${song.title}"
                  th:data-song-artist="${song.artist}"
                  th:data-start-autoplay="${startAutoplay}"
-                 th:data-song-url="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
-            <img class="cover-large" th:unless="${isBilibiliVideo}" th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
-            <div class="player-copy">
-                <p class="eyebrow" th:text="${song.animeTitle}">Anime</p>
-                <h1 th:text="${song.title}">Song</h1>
-                <p th:text="${song.artist + ' · ' + song.albumName}">Artist</p>
-                <p class="playing-from" th:if="${playlist != null}" th:text="${'正在播放歌单：' + playlist.name}">正在播放歌单</p>
+                 th:data-stage-mode="${stageMode}"
+                 th:data-song-url="${playlistId == null ? '/player/' + song.id + '?mode=' + stageMode : '/player/' + song.id + '?playlistId=' + playlistId + '&mode=' + stageMode}">
 
-                <div class="playback-controls" aria-label="播放控制">
-                    <button type="button" data-player-action="previous" title="上一首">上一首</button>
-                    <button type="button" data-player-action="mode" title="切换播放模式">
+            <div class="lyric-backdrop" aria-hidden="true">
+                <img th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
+                <span class="lyric-backdrop-wash"></span>
+                <span class="lyric-backdrop-vignette"></span>
+            </div>
+
+            <div class="lyric-grid" aria-hidden="true"></div>
+            <div class="lyric-geometry" aria-hidden="true">
+                <span class="lyric-corner lyric-corner-tl"></span>
+                <span class="lyric-corner lyric-corner-tr"></span>
+                <span class="lyric-corner lyric-corner-bl"></span>
+                <span class="lyric-corner lyric-corner-br"></span>
+                <span class="lyric-orbit lyric-orbit-a"></span>
+                <span class="lyric-orbit lyric-orbit-b"></span>
+                <span class="lyric-diamond"></span>
+                <i class="lyric-particle"></i>
+                <i class="lyric-particle"></i>
+                <i class="lyric-particle"></i>
+                <i class="lyric-particle"></i>
+                <i class="lyric-particle"></i>
+                <i class="lyric-particle"></i>
+            </div>
+
+            <div class="folia-geometry" aria-hidden="true">
+                <span class="folia-line folia-line-a"></span>
+                <span class="folia-line folia-line-b"></span>
+                <span class="folia-frame folia-frame-a"></span>
+                <span class="folia-frame folia-frame-b"></span>
+                <span class="folia-frame folia-frame-c"></span>
+                <span class="folia-bar folia-bar-a"></span>
+                <span class="folia-bar folia-bar-b"></span>
+                <span class="folia-flower folia-flower-a">✿</span>
+                <span class="folia-flower folia-flower-b">✿</span>
+                <span class="folia-circle folia-circle-a"></span>
+                <span class="folia-circle folia-circle-b"></span>
+                <span class="folia-cross folia-cross-a">＋</span>
+                <span class="folia-cross folia-cross-b">＋</span>
+                <span class="folia-square folia-square-a"></span>
+                <span class="folia-square folia-square-b"></span>
+                <span class="folia-arc folia-arc-a"></span>
+                <span class="folia-arc folia-arc-b"></span>
+                <span class="folia-axis folia-axis-a"></span>
+                <span class="folia-axis folia-axis-b"></span>
+                <div class="folia-side-label">SEKAI SONG · LYRIC VISUAL</div>
+                <div class="folia-meter"><i></i></div>
+            </div>
+
+            <header class="lyric-identity">
+                <span class="lyric-status-dot"></span>
+                <span>IMMERSIVE LYRIC MODE</span>
+                <span class="lyric-identity-rule"></span>
+                <span th:text="${song.animeTitle}">SEKAI SONG PLAYER</span>
+            </header>
+
+            <div class="lyric-song-meta">
+                <p class="lyric-kicker">NOW PLAYING / <span th:text="${playlist != null ? playlist.name : 'LIBRARY'}">LIBRARY</span></p>
+                <h1 th:text="${song.title}">Song</h1>
+                <p th:text="${song.artist + ' · ' + song.albumName}">Artist · Album</p>
+            </div>
+
+            <div class="lyric-scene" data-immersive-lyrics aria-live="polite">
+                <span class="lyric-scene-index">LYRICS <b data-lyric-index>01</b></span>
+                <div class="folia-article" data-folia-article aria-hidden="true"></div>
+                <div class="immersive-line immersive-line-prev" data-lyric-slot="prev"></div>
+                <div class="immersive-line immersive-line-active" data-lyric-slot="active"></div>
+                <div class="immersive-line immersive-line-next" data-lyric-slot="next"></div>
+                <span class="folia-subtitle" data-folia-subtitle></span>
+                <span class="lyric-scene-caption">SYNCHRONIZED TEXT / <span data-lyric-progress>00.00</span></span>
+            </div>
+
+            <!-- 原始歌词时间戳仅作为渲染数据，不在视觉层重复显示。 -->
+            <div class="lyric-data" id="lyrics" aria-hidden="true">
+                <p th:each="line : ${lyricLines}" th:data-time="${line.seconds}">
+                    <b th:text="${line.text}">Lyric</b>
+                </p>
+                <p class="empty" th:if="${#lists.isEmpty(lyricLines)}">还没有歌词。请先在碟片舞台的「更多工具」里获取同步歌词。</p>
+            </div>
+
+            <div class="lyric-player-bar">
+                <div class="lyric-track-mini">
+                    <img th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
+                    <div>
+                        <strong th:text="${song.title}">Song</strong>
+                        <span th:text="${song.artist}">Artist</span>
+                    </div>
+                </div>
+                <div class="lyric-bar-actions" aria-label="播放控制">
+                    <button type="button" data-player-action="previous" title="上一首">⏮</button>
+                    <button type="button" class="lyric-play" data-player-action="play" title="播放 / 暂停">▶</button>
+                    <button type="button" data-player-action="next" title="下一首">⏭</button>
+                </div>
+                <div class="lyric-progress">
+                    <span data-stage-time-current>0:00</span>
+                    <input class="lyric-seek" type="range" min="0" max="1000" value="0" data-stage-seek aria-label="播放进度">
+                    <span data-stage-time-total>0:00</span>
+                </div>
+                <button type="button" class="lyric-queue-button" data-stage-queue-toggle>
+                    队列 <span class="stage-queue-badge" th:text="${#lists.size(queue)}">0</span>
+                </button>
+            </div>
+
+            <audio class="stage-audio" th:if="${playableAudio}" th:src="${song.localAudioUrl}" preload="auto"></audio>
+        </section>
+
+        <section class="now-playing player-stage"
+                 th:unless="${isBilibiliVideo or lyricMode}"
+                 th:data-song-id="${song.id}"
+                 th:data-song-title="${song.title}"
+                 th:data-song-artist="${song.artist}"
+                 th:data-start-autoplay="${startAutoplay}"
+                 th:data-stage-mode="disc"
+                 th:data-song-url="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
+
+            <!-- 操作结果提示（上传封面 / 获取歌词等） -->
+            <div class="stage-flash">
+                <p class="server-message success" th:if="${message}" th:text="${message}"></p>
+                <p class="server-message error" th:if="${error}" th:text="${error}"></p>
+            </div>
+
+            <!-- L2 左侧方形封面（静态）+ L3 右侧大圆唱片（封面圆形，匀速旋转）+ 光效粒子 -->
+            <div class="stage-art">
+                <div class="stage-copy">
+                    <p class="eyebrow">NOW PLAYING</p>
+                    <p class="stage-copy-anime" th:text="${song.animeTitle}">Anime</p>
+                    <h1 th:text="${song.title}">Song</h1>
+                    <p class="stage-copy-sub" th:text="${song.artist + ' · ' + song.albumName}">Artist · Album</p>
+                    <p class="stage-copy-note" th:if="${playlist != null}" th:text="${'来自歌单：' + playlist.name}">来自歌单</p>
+                </div>
+                <img class="cover-large" th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
+                <div class="stage-disc" aria-hidden="true">
+                    <div class="stage-disc-glow"></div>
+                    <span class="stage-disc-ring"></span>
+                    <img class="stage-disc-cover" th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
+                    <span class="stage-disc-hole"></span>
+                    <span class="stage-disc-shine"></span>
+                    <div class="stage-particles">
+                        <i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- L4 右侧歌词区域 -->
+            <div class="stage-lyrics">
+                <div class="lyrics" id="lyrics" data-stage-lyrics>
+                    <p th:each="line : ${lyricLines}" th:data-time="${line.seconds}">
+                        <b th:text="${line.text}">Lyric</b>
+                    </p>
+                    <p class="empty" th:if="${#lists.isEmpty(lyricLines)}">还没有歌词。点右下角「更多 ▾」→「获取同步歌词」自动匹配网易云、QQ 音乐和 LRCLIB，或在歌曲库粘贴 LRC。</p>
+                </div>
+            </div>
+
+            <!-- 频谱：按固定规律跳动（同一条时间线驱动） -->
+            <canvas class="stage-spectrum" data-visualizer width="960" height="132" aria-label="音频频谱"></canvas>
+
+            <!-- L5 底部控件 -->
+            <div class="stage-controls">
+                <div class="stage-progress">
+                    <span class="stage-time" data-stage-time-current>0:00</span>
+                    <input class="stage-seek" type="range" min="0" max="1000" value="0" data-stage-seek aria-label="播放进度">
+                    <span class="stage-time" data-stage-time-total>0:00</span>
+                </div>
+                <div class="stage-buttons">
+                    <button type="button" class="stage-btn" data-player-action="previous" title="上一首">⏮</button>
+                    <button type="button" class="stage-btn stage-play" data-player-action="play" title="播放 / 暂停">▶</button>
+                    <button type="button" class="stage-btn" data-player-action="next" title="下一首">⏭</button>
+                    <button type="button" class="stage-btn stage-mode" data-player-action="mode" title="切换播放模式">
                         <span data-play-mode-label>顺序播放</span>
                     </button>
-                    <button type="button" data-player-action="next" title="下一首">下一首</button>
+                    <button type="button" class="stage-btn stage-queue-toggle" data-stage-queue-toggle title="播放队列 / 书签 / 最近播放">
+                        队列
+                        <span class="stage-queue-badge" th:text="${#lists.size(queue)}">0</span>
+                    </button>
                 </div>
-                <div class="netease-embed bilibili-embed"
-                     th:if="${isBilibiliVideo && !#strings.isEmpty(song.bilibiliEmbedParam)}"
-                     data-bilibili-video="true"
-                     th:data-bilibili-duration="${song.durationSeconds == null ? 270 : song.durationSeconds}">
-                    <video class="bilibili-player bilibili-native-player"
-                           data-bilibili-native-player
-                           controls
-                           playsinline
-                           preload="auto"
-                           th:autoplay="${startAutoplay}"
-                           th:src="${playableLocalVideo ? song.localVideoUrl : '/bilibili/direct/' + song.id + '?quality=80'}"
-                           th:data-bilibili-local-video="${playableLocalVideo}"
-                           th:data-bilibili-direct-src="@{/bilibili/direct/{id}(id=${song.id},quality=80)}"
-                           th:data-bilibili-fallback-src="@{/bilibili/stream/{id}(id=${song.id},quality=80)}"></video>
+                <div class="stage-sliders">
+                    <label class="stage-volume">
+                        音量
+                        <input type="range" min="0" max="100" value="100" data-volume-control>
+                    </label>
+                    <label class="stage-rate">
+                        速度
+                        <select data-playback-rate>
+                            <option value="0.75">0.75x</option>
+                            <option value="1">1.00x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.50x</option>
+                            <option value="2">2.00x</option>
+                        </select>
+                    </label>
                 </div>
+                <button type="button" class="stage-tools-toggle" data-stage-tools-toggle title="更多工具">更多 ▾</button>
+            </div>
 
-                <audio th:if="${playableAudio}" controls th:src="${song.localAudioUrl}"></audio>
-                <div class="player-tools" th:unless="${isBilibiliVideo}">
+            <!-- 音频元素：隐藏原生控件，由舞台自定义控件接管 -->
+            <audio class="stage-audio" th:if="${playableAudio}" th:src="${song.localAudioUrl}" preload="auto"></audio>
+
+            <!-- 高级工具抽屉（保留原有 data 绑定，位置不影响功能） -->
+            <div class="stage-tools" data-stage-tools hidden>
+                <div class="player-tools">
                     <label>
                         睡眠定时
                         <select data-sleep-timer>
@@ -76,43 +242,60 @@
                         </select>
                     </label>
                     <span data-sleep-status>未开启</span>
-                    <label>
-                        播放速度
-                        <select data-playback-rate>
-                            <option value="0.75">0.75x</option>
-                            <option value="1">1.00x</option>
-                            <option value="1.25">1.25x</option>
-                            <option value="1.5">1.50x</option>
-                            <option value="2">2.00x</option>
-                        </select>
-                    </label>
-                    <label class="volume-tool">
-                        音量
-                        <input type="range" min="0" max="100" value="100" data-volume-control>
-                    </label>
                 </div>
-                <div class="loop-tools" th:unless="${isBilibiliVideo}">
+                <div class="loop-tools">
                     <button type="button" data-loop-action="set-a">设置 A 点</button>
                     <button type="button" data-loop-action="set-b">设置 B 点</button>
                     <button type="button" data-loop-action="clear">清除片段循环</button>
                     <span data-loop-status>未设置 A-B 循环</span>
                 </div>
-                <div class="visualizer-panel" th:unless="${isBilibiliVideo}">
-                    <div class="visualizer-toolbar">
-                        <label>
-                            均衡器
-                            <select data-eq-preset>
-                                <option value="flat">标准</option>
-                                <option value="bass">低音增强</option>
-                                <option value="vocal">人声突出</option>
-                                <option value="bright">明亮</option>
-                                <option value="night">夜间柔和</option>
-                            </select>
-                        </label>
-                        <span data-eq-status>标准</span>
-                    </div>
-                    <canvas data-visualizer width="720" height="120" aria-label="音频频谱"></canvas>
+                <div class="visualizer-toolbar">
+                    <label>
+                        均衡器
+                        <select data-eq-preset>
+                            <option value="flat">标准</option>
+                            <option value="bass">低音增强</option>
+                            <option value="vocal">人声突出</option>
+                            <option value="bright">明亮</option>
+                            <option value="night">夜间柔和</option>
+                        </select>
+                    </label>
+                    <span data-eq-status>标准</span>
                 </div>
+                <form class="audio-upload" th:action="@{/songs/audio/{id}(id=${song.id})}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
+                    <label for="audioFile">本地音频</label>
+                    <input id="audioFile" name="audioFile" type="file" accept=".mp3,.flac,.m4a,.wav,.ogg,.aac,audio/*" required>
+                    <button type="submit">上传并播放</button>
+                </form>
+                <form class="audio-upload lyric-fetch"
+                      th:action="@{/songs/lyrics/{id}/fetch(id=${song.id})}"
+                      method="post">
+                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
+                    <input type="hidden" name="force" th:value="${!#strings.isEmpty(song.lyricText)}">
+                    <label>云端歌词</label>
+                    <button type="submit" th:text="${#strings.isEmpty(song.lyricText) ? '获取同步歌词' : '重新匹配歌词'}">获取同步歌词</button>
+                </form>
+                <form class="audio-upload cover-upload"
+                      th:action="@{/songs/cover/{id}(id=${song.id})}"
+                      method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
+                    <label for="coverFile">上传封面</label>
+                    <input id="coverFile" name="coverFile" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" required>
+                    <button type="submit">更新封面</button>
+                </form>
+                <form class="audio-upload metadata-resync-form"
+                      th:if="${playableAudio}"
+                      th:action="@{/songs/audio/{id}/metadata/resync(id=${song.id})}"
+                      method="post">
+                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
+                    <label>歌词/时长</label>
+                    <button type="submit">重新读取本地音频</button>
+                </form>
+                <form th:action="@{/songs/favorite/{id}(id=${song.id})}" method="post">
+                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
+                    <button class="pill-btn" type="submit" th:text="${song.favorite} ? '取消收藏' : '收藏这首'">收藏这首</button>
+                </form>
                 <div class="netease-embed" th:if="${!playableAudio && !#strings.isEmpty(song.neteaseSongId)}">
                     <iframe class="netease-player"
                             th:src="@{'https://music.163.com/outchain/player?type=2&id=' + ${song.neteaseSongId} + '&auto=0&height=66'}"
@@ -130,69 +313,142 @@
                 <div class="fake-player" th:if="${!playableAudio && #strings.isEmpty(song.neteaseSongId) && #strings.isEmpty(song.qqSongMid) && #strings.isEmpty(song.bilibiliEmbedParam)}">
                     这首歌还没有可播放音频。上传本地音频后会优先使用项目播放器。
                 </div>
+            </div>
+        </section>
 
-                <form class="audio-upload" th:unless="${isBilibiliVideo}" th:action="@{/songs/audio/{id}(id=${song.id})}" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
-                    <label for="audioFile">本地音频</label>
-                    <input id="audioFile" name="audioFile" type="file" accept=".mp3,.flac,.m4a,.wav,.ogg,.aac,audio/*" required>
-                    <button type="submit">上传并播放</button>
-                </form>
-                <form class="audio-upload metadata-resync-form"
-                      th:if="${playableAudio}"
-                      th:action="@{/songs/audio/{id}/metadata/resync(id=${song.id})}"
-                      method="post">
-                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
-                    <label>歌词/时长</label>
-                    <button type="submit">重新读取本地音频</button>
-                </form>
+        <div class="stage-view-switcher" data-stage-view-switcher th:unless="${isBilibiliVideo}">
+            <button type="button" class="stage-view-toggle" data-stage-view-toggle aria-expanded="false">
+                <span class="stage-view-toggle-mark">◈</span>
+                <span>
+                    <small>播放形式</small>
+                <strong data-stage-view-label th:text="${stageMode == 'folia' ? 'Folia 最新' : (stageMode == 'folia-classic' ? 'Folia 经典' : (stageMode == 'lyrics' ? '字阵舞台' : '唱片舞台'))}">唱片舞台</strong>
+                </span>
+                <span class="stage-view-toggle-chevron">⌃</span>
+            </button>
+            <div class="stage-view-menu" data-stage-view-menu hidden>
+                <p>选择播放形式</p>
+                <a href="#" data-stage-view-option="disc" th:classappend="${stageMode == 'disc' ? 'active' : ''}">
+                    <strong>唱片舞台</strong><span>左方封面 · 右侧圆盘</span>
+                </a>
+                <a href="#" data-stage-view-option="lyrics" th:classappend="${stageMode == 'lyrics' ? 'active' : ''}">
+                    <strong>字阵舞台</strong><span>规范化动态歌词</span>
+                </a>
+                <a href="#" data-stage-view-option="folia-classic" th:classappend="${stageMode == 'folia-classic' ? 'active' : ''}">
+                    <strong>Folia 经典</strong><span>v2 · 几何字块构图</span>
+                </a>
+                <a href="#" data-stage-view-option="folia" th:classappend="${stageMode == 'folia' ? 'active' : ''}">
+                    <strong>Folia 最新</strong><span>长画布 · 文章镜头追踪</span>
+                </a>
+            </div>
+        </div>
 
-                <form class="audio-upload video-upload" th:if="${isBilibiliVideo}" th:action="@{/songs/video/{id}(id=${song.id})}" method="post" enctype="multipart/form-data">
+        <!-- 右侧抽屉：播放队列 / 时间书签 / 最近播放（默认隐藏，点控件栏「队列」呼出） -->
+        <div class="stage-drawer" data-stage-drawer th:unless="${isBilibiliVideo}" aria-hidden="true">
+            <div class="stage-drawer-head">
+                <h2 th:text="${playlist != null ? playlist.name : '播放队列'}">播放队列</h2>
+                <span th:text="${#lists.size(queue) + ' 首'}">0 首</span>
+                <button class="stage-drawer-close" type="button" data-stage-drawer-close title="关闭">✕</button>
+            </div>
+            <input class="queue-search" type="search" placeholder="搜索队列" data-queue-search>
+            <div class="queue-list">
+                <a th:each="item : ${queue}"
+                   th:classappend="${item.id == song.id} ? 'active'"
+                   th:href="${playlistId == null ? '/player/' + item.id : '/player/' + item.id + '?playlistId=' + playlistId}">
+                    <strong th:text="${item.title}">Song</strong>
+                    <span th:text="${item.artist}">Artist</span>
+                </a>
+            </div>
+            <div class="stage-drawer-body">
+                <div class="stage-drawer-section">
+                    <div class="section-title">
+                        <h3>时间书签</h3>
+                        <button class="text-action" type="button" data-add-bookmark>添加当前时间</button>
+                    </div>
+                    <div class="bookmark-list" data-bookmark-list>
+                        <p class="empty">还没有时间书签</p>
+                    </div>
+                </div>
+                <div class="stage-drawer-section">
+                    <div class="section-title">
+                        <h3>最近播放</h3>
+                        <button class="text-action" type="button" data-clear-history>清空</button>
+                    </div>
+                    <div class="history-list" data-play-history>
+                        <p class="empty">播放后会记录在这里</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ B 站视频：经典布局 ============ -->
+        <section class="now-playing bilibili-video-mode"
+                 th:if="${isBilibiliVideo}"
+                 th:data-song-id="${song.id}"
+                 th:data-song-title="${song.title}"
+                 th:data-song-artist="${song.artist}"
+                 th:data-start-autoplay="${startAutoplay}"
+                 th:data-song-url="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
+            <div class="player-copy">
+                <p class="eyebrow" th:text="${song.animeTitle}">Anime</p>
+                <h1 th:text="${song.title}">Song</h1>
+                <p th:text="${song.artist + ' · ' + song.albumName}">Artist</p>
+                <p class="playing-from" th:if="${playlist != null}" th:text="${'正在播放歌单：' + playlist.name}">正在播放歌单</p>
+
+                <div class="playback-controls" aria-label="播放控制">
+                    <button type="button" data-player-action="previous" title="上一首">上一首</button>
+                    <button type="button" data-player-action="mode" title="切换播放模式"><span data-play-mode-label>顺序播放</span></button>
+                    <button type="button" data-player-action="next" title="下一首">下一首</button>
+                </div>
+
+                <div class="netease-embed bilibili-embed"
+                     th:if="${isBilibiliVideo && !#strings.isEmpty(song.bilibiliEmbedParam)}"
+                     data-bilibili-video="true"
+                     th:data-bilibili-duration="${song.durationSeconds == null ? 270 : song.durationSeconds}">
+                    <video class="bilibili-player bilibili-native-player"
+                           data-bilibili-native-player
+                           controls
+                           playsinline
+                           preload="auto"
+                           th:autoplay="${startAutoplay}"
+                           th:src="${playableLocalVideo ? song.localVideoUrl : '/bilibili/stream/' + song.id + '?quality=80'}"
+                           th:data-bilibili-local-video="${playableLocalVideo}"
+                           th:data-bilibili-direct-src="@{/bilibili/direct/{id}(id=${song.id},quality=80)}"
+                           th:data-bilibili-fallback-src="@{/bilibili/stream/{id}(id=${song.id},quality=80)}"></video>
+                    <p class="bilibili-load-status" data-bilibili-status role="status" aria-live="polite" hidden></p>
+                </div>
+
+                <form class="audio-upload video-upload" th:action="@{/songs/video/{id}(id=${song.id})}" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
                     <label for="videoFile">本地视频</label>
                     <input id="videoFile" name="videoFile" type="file" accept=".mp4,.webm,.m4v,.mov,.mkv,video/*" required>
                     <button type="submit" th:text="${playableLocalVideo ? '替换本地视频' : '上传本地视频'}">上传本地视频</button>
                 </form>
 
-                <form th:unless="${isBilibiliVideo}" th:action="@{/songs/favorite/{id}(id=${song.id})}" method="post">
+                <form th:action="@{/songs/favorite/{id}(id=${song.id})}" method="post">
                     <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
                     <button class="pill-btn" type="submit" th:text="${song.favorite} ? '取消收藏' : '收藏这首'">收藏这首</button>
                 </form>
             </div>
         </section>
 
-        <section class="lyrics-panel" th:unless="${isBilibiliVideo}">
-            <div class="section-title"><h2>同步歌词</h2><span>LRC</span></div>
-            <div class="lyrics" id="lyrics">
-                <p th:each="line : ${lyricLines}" th:data-time="${line.seconds}">
-                    <b th:text="${line.text}">Lyric</b>
-                </p>
-                <p class="empty" th:if="${#lists.isEmpty(lyricLines)}">还没有歌词。歌曲库里支持粘贴 LRC 格式歌词。</p>
+        <aside class="queue-panel bilibili-queue" th:if="${isBilibiliVideo}">
+            <div class="queue-title">
+                <h2 th:text="${playlist != null ? playlist.name : '播放队列'}">播放队列</h2>
+                <span th:text="${#lists.size(queue) + ' 首'}">0 首</span>
             </div>
-        </section>
-        <section class="lyrics-panel bookmark-panel" th:unless="${isBilibiliVideo}">
-            <div class="section-title">
-                <h2>时间书签</h2>
-                <button class="text-action" type="button" data-add-bookmark>添加当前时间</button>
+            <input class="queue-search" type="search" placeholder="搜索队列" data-queue-search>
+            <div class="queue-list">
+                <a th:each="item : ${queue}" th:classappend="${item.id == song.id} ? 'active'" th:href="${playlistId == null ? '/player/' + item.id : '/player/' + item.id + '?playlistId=' + playlistId}">
+                    <strong th:text="${item.title}">Song</strong>
+                    <span th:text="${item.artist}">Artist</span>
+                </a>
             </div>
-            <div class="bookmark-list" data-bookmark-list>
-                <p class="empty">还没有时间书签</p>
-            </div>
-        </section>
-        <section class="lyrics-panel history-panel" th:unless="${isBilibiliVideo}">
-            <div class="section-title">
-                <h2>最近播放</h2>
-                <button class="text-action" type="button" data-clear-history>清空</button>
-            </div>
-            <div class="history-list" data-play-history>
-                <p class="empty">播放后会记录在这里</p>
-            </div>
-        </section>
+        </aside>
     </main>
 </div>
-<script th:src="@{/js/player.js(v=20260601a)}" src="/js/player.js?v=20260601a"></script>
+<script th:src="@{/js/player-stage.js(v=20261009b)}" src="/js/player-stage.js?v=20261009b"></script>
+<script th:src="@{/js/lyrics-stage.js(v=20261010c)}" src="/js/lyrics-stage.js?v=20261010c"></script>
+<script th:src="@{/js/stage-mode.js(v=20261010a)}" src="/js/stage-mode.js?v=20261010a"></script>
+<script th:src="@{/js/player.js(v=20260830a)}" src="/js/player.js?v=20260830a"></script>
 </body>
 </html>
-
-
-
-

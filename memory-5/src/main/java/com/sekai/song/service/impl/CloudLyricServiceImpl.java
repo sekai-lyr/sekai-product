@@ -7,25 +7,29 @@ import com.sekai.song.service.CloudLyricService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URI;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 @Service
 public class CloudLyricServiceImpl implements CloudLyricService {
     private static final String NETEASE_LYRIC_API = "https://music.163.com/api/song/lyric?id=%s&lv=1&kv=1&tv=-1";
-    private static final String NETEASE_SEARCH_API = "https://music.163.com/api/search/get/web?s=%s&type=1&limit=8&offset=0";
+    private static final String NETEASE_SEARCH_API = "https://music.163.com/api/search/get/web?s=%s&type=1&limit=20&offset=0";
     private static final String QQ_MUSICU_API = "https://u.y.qq.com/cgi-bin/musicu.fcg?data=";
-    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(8))
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .build();
-
+    private static final String LRCLIB_GET_API = "https://lrclib.net/api/get";
+    private static final String LRCLIB_SEARCH_API = "https://lrclib.net/api/search";
+    private static final Pattern TIMED_LYRIC = Pattern.compile("(?m)^\\[(?:\\d{1,3}:)?\\d{1,2}(?:[.:]\\d{1,3})?].+");
+    private static final Pattern TITLE_DECORATION = Pattern.compile("\\s*[（(【\\[][^）)】\\]]*(?:ver(?:sion)?|版本|翻唱|伴奏|instrumental|remaster(?:ed)?|live|cover|feat\\.?)[^）)】\\]]*[）)】\\]]", Pattern.CASE_INSENSITIVE);
+    private static final Set<String> GENERIC_ARTISTS = Set.of("本地文件", "未知歌手", "unknown", "unknownartist", "variousartists");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -34,18 +38,13 @@ public class CloudLyricServiceImpl implements CloudLyricService {
             return null;
         }
         try {
-            HttpResponse<String> response = HTTP_CLIENT.send(
-                    request(String.format(NETEASE_LYRIC_API, songId), "https://music.163.com/"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            WebResponse response = get(String.format(NETEASE_LYRIC_API, songId), "https://music.163.com/");
             if (!ok(response)) {
                 return null;
             }
             JsonNode root = objectMapper.readTree(response.body());
             return cleanLyric(firstText(root.path("lrc"), "lyric"));
-        } catch (IOException | InterruptedException | IllegalArgumentException e) {
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
+        } catch (IOException | IllegalArgumentException e) {
             return null;
         }
     }
@@ -67,7 +66,7 @@ public class CloudLyricServiceImpl implements CloudLyricService {
     }
 
     @Override
-    public String fetchBestLyric(String title, String artist) {
+    public String fetchBestLyric(String title, String artist, String album, Integer durationSeconds) {
         if (isBlank(title)) {
             return null;
         }
@@ -75,100 +74,173 @@ public class CloudLyricServiceImpl implements CloudLyricService {
         if (!isBlank(lyric)) {
             return lyric;
         }
-        return fetchBestQqLyric(title, artist);
+        lyric = fetchBestQqLyric(title, artist);
+        if (!isBlank(lyric)) {
+            return lyric;
+        }
+        return fetchBestLrclibLyric(title, artist, album, durationSeconds);
+    }
+
+    private String fetchBestLrclibLyric(String title, String artist, String album, Integer durationSeconds) {
+        String cleanTitle = cleanSearchText(title);
+        String cleanArtist = cleanArtist(artist);
+        if (cleanTitle.isBlank()) {
+            return null;
+        }
+        if (!cleanArtist.isBlank()) {
+            try {
+                StringBuilder exactUrl = new StringBuilder(LRCLIB_GET_API)
+                        .append("?track_name=").append(encoded(cleanTitle))
+                        .append("&artist_name=").append(encoded(cleanArtist));
+                if (!isBlank(album) && !"本地音乐".equals(album)) {
+                    exactUrl.append("&album_name=").append(encoded(album));
+                }
+                if (durationSeconds != null && durationSeconds > 0 && durationSeconds <= 3600) {
+                    exactUrl.append("&duration=").append(durationSeconds);
+                }
+                WebResponse response = get(exactUrl.toString(), "https://lrclib.net/");
+                if (ok(response)) {
+                    String lyric = cleanLyric(firstText(objectMapper.readTree(response.body()), "syncedLyrics"));
+                    if (!isBlank(lyric)) {
+                        return lyric;
+                    }
+                }
+            } catch (IOException | IllegalArgumentException ignored) {
+                // The broader search below is the fallback for exact-match misses.
+            }
+        }
+        for (String queryTitle : List.of(cleanTitle, title.trim())) {
+            try {
+                StringBuilder searchUrl = new StringBuilder(LRCLIB_SEARCH_API)
+                        .append("?track_name=").append(encoded(queryTitle));
+                if (!cleanArtist.isBlank()) {
+                    searchUrl.append("&artist_name=").append(encoded(cleanArtist));
+                }
+                WebResponse response = get(searchUrl.toString(), "https://lrclib.net/");
+                if (!ok(response)) {
+                    continue;
+                }
+                JsonNode records = objectMapper.readTree(response.body());
+                if (!records.isArray()) {
+                    continue;
+                }
+                List<ScoredSong> candidates = new ArrayList<>();
+                for (JsonNode record : records) {
+                    String syncedLyric = firstText(record, "syncedLyrics");
+                    if (isBlank(syncedLyric)) {
+                        continue;
+                    }
+                    int score = matchScore(title, artist,
+                            firstText(record, "trackName", "name"), firstText(record, "artistName"));
+                    int recordDuration = record.path("duration").asInt(0);
+                    if (durationSeconds != null && recordDuration > 0
+                            && Math.abs(durationSeconds - recordDuration) <= 3) {
+                        score += 18;
+                    }
+                    if (score >= 45) {
+                        candidates.add(new ScoredSong(record, score));
+                    }
+                }
+                candidates.sort(Comparator.comparingInt(ScoredSong::score).reversed());
+                for (ScoredSong candidate : candidates) {
+                    String lyric = cleanLyric(firstText(candidate.song(), "syncedLyrics"));
+                    if (!isBlank(lyric)) {
+                        return lyric;
+                    }
+                }
+            } catch (IOException | IllegalArgumentException ignored) {
+                // Continue with the remaining title variant.
+            }
+        }
+        return null;
     }
 
     private String fetchBestNeteaseLyric(String title, String artist) {
-        try {
-            String query = joinQuery(title, artist);
-            HttpResponse<String> response = HTTP_CLIENT.send(
-                    request(String.format(NETEASE_SEARCH_API, URLEncoder.encode(query, StandardCharsets.UTF_8)), "https://music.163.com/"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (!ok(response)) {
-                return null;
-            }
-            JsonNode songs = objectMapper.readTree(response.body()).path("result").path("songs");
-            if (!songs.isArray()) {
-                return null;
-            }
-            JsonNode best = null;
-            int bestScore = 0;
-            for (JsonNode song : songs) {
-                int score = matchScore(title, artist, firstText(song, "name"), joinArtists(song.path("artists")));
-                if (score > bestScore) {
-                    best = song;
-                    bestScore = score;
+        Set<Long> attemptedIds = new HashSet<>();
+        for (String query : searchQueries(title, artist)) {
+            try {
+                WebResponse response = get(String.format(NETEASE_SEARCH_API, URLEncoder.encode(query, StandardCharsets.UTF_8)), "https://music.163.com/");
+                if (!ok(response)) {
+                    continue;
                 }
+                JsonNode songs = objectMapper.readTree(response.body()).path("result").path("songs");
+                if (!songs.isArray()) {
+                    continue;
+                }
+                List<ScoredSong> candidates = new ArrayList<>();
+                for (JsonNode song : songs) {
+                    int score = matchScore(title, artist, firstText(song, "name"), joinArtists(song.path("artists")));
+                    if (score >= 45) {
+                        candidates.add(new ScoredSong(song, score));
+                    }
+                }
+                candidates.sort(Comparator.comparingInt(ScoredSong::score).reversed());
+                for (ScoredSong candidate : candidates) {
+                    long id = candidate.song().path("id").asLong(0);
+                    if (id > 0 && attemptedIds.add(id)) {
+                        String lyric = fetchNeteaseLyric(String.valueOf(id));
+                        if (!isBlank(lyric)) {
+                            return lyric;
+                        }
+                    }
+                }
+            } catch (IOException | IllegalArgumentException ignored) {
+                // Continue with the next query variant and then the other provider.
             }
-            if (best == null || bestScore < 55) {
-                return null;
-            }
-            long id = best.path("id").asLong(0);
-            return id > 0 ? fetchNeteaseLyric(String.valueOf(id)) : null;
-        } catch (IOException | InterruptedException | IllegalArgumentException e) {
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
-            return null;
         }
+        return null;
     }
 
     private String fetchBestQqLyric(String title, String artist) {
-        try {
-            String payload = qqSearchPayload(joinQuery(title, artist));
-            HttpResponse<String> response = HTTP_CLIENT.send(
-                    request(QQ_MUSICU_API + URLEncoder.encode(payload, StandardCharsets.UTF_8), "https://y.qq.com/"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (!ok(response)) {
-                return null;
-            }
-            JsonNode list = objectMapper.readTree(response.body())
-                    .path("search")
-                    .path("data")
-                    .path("body")
-                    .path("song")
-                    .path("list");
-            if (!list.isArray()) {
-                return null;
-            }
-            JsonNode best = null;
-            int bestScore = 0;
-            for (JsonNode song : list) {
-                int score = matchScore(title, artist, firstText(song, "title", "name"), joinArtists(song.path("singer")));
-                if (score > bestScore) {
-                    best = song;
-                    bestScore = score;
+        Set<String> attemptedIds = new HashSet<>();
+        for (String query : searchQueries(title, artist)) {
+            try {
+                String payload = qqSearchPayload(query);
+                WebResponse response = get(QQ_MUSICU_API + URLEncoder.encode(payload, StandardCharsets.UTF_8), "https://y.qq.com/");
+                if (!ok(response)) {
+                    continue;
                 }
+                JsonNode list = objectMapper.readTree(response.body())
+                        .path("search").path("data").path("body").path("song").path("list");
+                if (!list.isArray()) {
+                    continue;
+                }
+                List<ScoredSong> candidates = new ArrayList<>();
+                for (JsonNode song : list) {
+                    int score = matchScore(title, artist, firstText(song, "title", "name"), joinArtists(song.path("singer")));
+                    if (score >= 45) {
+                        candidates.add(new ScoredSong(song, score));
+                    }
+                }
+                candidates.sort(Comparator.comparingInt(ScoredSong::score).reversed());
+                for (ScoredSong candidate : candidates) {
+                    String mid = firstText(candidate.song(), "mid", "songmid");
+                    long id = candidate.song().path("id").asLong(0);
+                    String key = !isBlank(mid) ? mid : String.valueOf(id);
+                    if (!isBlank(key) && attemptedIds.add(key)) {
+                        String lyric = fetchQqLyric(mid, id > 0 ? id : null);
+                        if (!isBlank(lyric)) {
+                            return lyric;
+                        }
+                    }
+                }
+            } catch (IOException | IllegalArgumentException ignored) {
+                // Continue with the next query variant.
             }
-            if (best == null || bestScore < 55) {
-                return null;
-            }
-            String mid = firstText(best, "mid", "songmid");
-            long id = best.path("id").asLong(0);
-            return fetchQqLyric(mid, id > 0 ? id : null);
-        } catch (IOException | InterruptedException | IllegalArgumentException e) {
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
-            return null;
         }
+        return null;
     }
 
     private String fetchQqLyricByMusicu(String songMid, Long songId) {
         try {
             String payload = qqLyricPayload(songMid, songId);
-            HttpResponse<String> response = HTTP_CLIENT.send(
-                    request(QQ_MUSICU_API + URLEncoder.encode(payload, StandardCharsets.UTF_8), "https://y.qq.com/"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            WebResponse response = get(QQ_MUSICU_API + URLEncoder.encode(payload, StandardCharsets.UTF_8), "https://y.qq.com/");
             if (!ok(response)) {
                 return null;
             }
             JsonNode data = objectMapper.readTree(response.body()).path("lyric").path("data");
             return firstDecodedLyric(data, "lyric", "trans");
-        } catch (IOException | InterruptedException | IllegalArgumentException e) {
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
+        } catch (IOException | IllegalArgumentException e) {
             return null;
         }
     }
@@ -182,18 +254,13 @@ public class CloudLyricServiceImpl implements CloudLyricService {
             if (songId != null && songId > 0) {
                 url.append("&songid=").append(songId);
             }
-            HttpResponse<String> response = HTTP_CLIENT.send(
-                    request(url.toString(), "https://y.qq.com/"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            WebResponse response = get(url.toString(), "https://y.qq.com/");
             if (!ok(response)) {
                 return null;
             }
             JsonNode root = objectMapper.readTree(response.body());
             return firstDecodedLyric(root, "lyric", "trans");
-        } catch (IOException | InterruptedException | IllegalArgumentException e) {
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
+        } catch (IOException | IllegalArgumentException e) {
             return null;
         }
     }
@@ -226,7 +293,7 @@ public class CloudLyricServiceImpl implements CloudLyricService {
         ObjectNode param = search.putObject("param");
         param.put("query", keyword);
         param.put("page_num", 1);
-        param.put("num_per_page", 8);
+        param.put("num_per_page", 20);
         param.put("search_type", 0);
         return objectMapper.writeValueAsString(root);
     }
@@ -262,7 +329,7 @@ public class CloudLyricServiceImpl implements CloudLyricService {
             return null;
         }
         String lyric = value.replace("\r\n", "\n").replace('\r', '\n').trim();
-        return lyric.contains("[") && lyric.contains("]") ? lyric : null;
+        return TIMED_LYRIC.matcher(lyric).find() ? lyric : null;
     }
 
     private String firstText(JsonNode node, String... fields) {
@@ -276,7 +343,45 @@ public class CloudLyricServiceImpl implements CloudLyricService {
     }
 
     private String joinQuery(String title, String artist) {
-        return isBlank(artist) ? title.trim() : title.trim() + " " + artist.trim();
+        return isGenericArtist(artist) ? title.trim() : title.trim() + " " + artist.trim();
+    }
+
+    private List<String> searchQueries(String title, String artist) {
+        LinkedHashSet<String> queries = new LinkedHashSet<>();
+        String cleanTitle = cleanSearchText(title);
+        String cleanArtist = cleanArtist(artist);
+        queries.add(joinQuery(title, artist));
+        if (!cleanTitle.isBlank()) {
+            queries.add(joinQuery(cleanTitle, cleanArtist));
+            queries.add(cleanTitle);
+        }
+        queries.add(title.trim());
+        queries.removeIf(String::isBlank);
+        return List.copyOf(queries);
+    }
+
+    private String cleanSearchText(String value) {
+        if (isBlank(value)) {
+            return "";
+        }
+        return TITLE_DECORATION.matcher(value).replaceAll("")
+                .replaceFirst("(?i)\\.(?:flac|mp3|m4a|wav|aac)$", "")
+                .trim();
+    }
+
+    private String encoded(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    private String cleanArtist(String artist) {
+        if (isGenericArtist(artist)) {
+            return "";
+        }
+        return artist.split("(?i)\\s+(?:feat\\.?|ft\\.?)\\s+|[/、;&]", 2)[0].trim();
+    }
+
+    private boolean isGenericArtist(String artist) {
+        return isBlank(artist) || GENERIC_ARTISTS.contains(normalize(artist));
     }
 
     private String joinArtists(JsonNode artists) {
@@ -355,21 +460,56 @@ public class CloudLyricServiceImpl implements CloudLyricService {
         return builder.toString();
     }
 
-    private HttpRequest request(String url, String referer) {
-        return HttpRequest.newBuilder(URI.create(url))
-                .timeout(Duration.ofSeconds(15))
-                .header("User-Agent", "Mozilla/5.0 SekaiSong/1.0")
-                .header("Referer", referer)
-                .header("Origin", referer.endsWith("/") ? referer.substring(0, referer.length() - 1) : referer)
-                .GET()
-                .build();
+    private WebResponse get(String url, String referer) throws IOException {
+        IOException lastError = null;
+        for (int attempt = 0; attempt < 2; attempt++) {
+            try {
+                WebResponse response = getOnce(url, referer);
+                if (response.statusCode() < 500 || attempt == 1) {
+                    return response;
+                }
+            } catch (IOException e) {
+                lastError = e;
+                if (attempt == 1) {
+                    throw e;
+                }
+            }
+        }
+        throw lastError == null ? new IOException("Cloud lyric request failed") : lastError;
     }
 
-    private boolean ok(HttpResponse<String> response) {
+    private WebResponse getOnce(String url, String referer) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.setConnectTimeout(8000);
+        connection.setReadTimeout(15000);
+        connection.setInstanceFollowRedirects(true);
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 SekaiSong/1.0");
+        connection.setRequestProperty("Referer", referer);
+        connection.setRequestProperty("Origin", referer.endsWith("/") ? referer.substring(0, referer.length() - 1) : referer);
+        try {
+            int statusCode = connection.getResponseCode();
+            if (statusCode < 200 || statusCode >= 300) {
+                return new WebResponse(statusCode, "");
+            }
+            return new WebResponse(statusCode,
+                    new String(connection.getInputStream().readAllBytes(), StandardCharsets.UTF_8));
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private boolean ok(WebResponse response) {
         return response.statusCode() >= 200 && response.statusCode() < 300;
     }
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private record WebResponse(int statusCode, String body) {
+    }
+
+    private record ScoredSong(JsonNode song, int score) {
     }
 }

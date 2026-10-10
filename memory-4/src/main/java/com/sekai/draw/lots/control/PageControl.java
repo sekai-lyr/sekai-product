@@ -2,7 +2,6 @@ package com.sekai.draw.lots.control;
 
 import com.sekai.draw.lots.model.User;
 import com.sekai.draw.lots.service.DrawLotsService;
-import com.sekai.draw.lots.service.MembershipService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -16,9 +15,6 @@ public class PageControl {
 
     @Resource
     private DrawLotsService drawLotsService;
-
-    @Resource
-    private MembershipService membershipService;
 
     @GetMapping({"/", "/login"})
     public String login() {
@@ -38,42 +34,10 @@ public class PageControl {
         }
         model.addAttribute("loginUser", user);
         model.addAttribute("stats", drawLotsService.getStats(user));
-        model.addAttribute("membership", membershipService.getStatus(user));
         model.addAttribute("achievements", drawLotsService.getAchievements(user));
         model.addAttribute("recentRecords", drawLotsService.recentRecords(user, 6));
         model.addAttribute("topCharacters", drawLotsService.topCharacters(8));
         return "home";
-    }
-
-    @GetMapping("/insights")
-    public String insights(HttpSession session, Model model) {
-        User user = requireLogin(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        if (!membershipService.isPremium(user)) {
-            return "redirect:/membership?locked=insights";
-        }
-        model.addAttribute("loginUser", user);
-        model.addAttribute("insight", drawLotsService.getInsight(user));
-        model.addAttribute("report", drawLotsService.getReport(user));
-        model.addAttribute("achievements", drawLotsService.getAchievements(user));
-        return "insights";
-    }
-
-    @GetMapping("/coach")
-    public String coach(HttpSession session, Model model) {
-        User user = requireLogin(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        if (!membershipService.isPremium(user)) {
-            return "redirect:/membership?locked=coach";
-        }
-        model.addAttribute("loginUser", user);
-        model.addAttribute("membership", membershipService.getStatus(user));
-        model.addAttribute("coachPlan", drawLotsService.getVipCoachPlan(user));
-        return "coach";
     }
 
     @GetMapping("/characters")

@@ -1,263 +1,246 @@
-* { box-sizing: border-box; }
-
-:root {
-    --ink: #0d0818;
-    --ink2: #1a1028;
-    --muted: #a894b8;
-    --pink: #ff72b8;
-    --sakura-light: #ffb7c5;
-    --sakura: #ff8da1;
-    --sakura-deep: #e8607a;
-    --cyan: #7ad8ff;
-    --mint: #7ee6c5;
-    --violet: #c49bff;
-    --purple: #c49bff;
-    --glow-pink: 0 0 20px rgba(255,114,184,0.5);
-    --glow-sakura: 0 0 18px rgba(255,141,161,0.45);
-    --glow-cyan: 0 0 20px rgba(122,216,255,0.4);
+.auth-body {
+    background:
+        radial-gradient(circle at 20% 18%, rgba(240, 138, 98, 0.12), transparent 28rem),
+        var(--ink);
 }
 
-body {
-    margin: 0;
-    height: 100vh;
+.auth-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+    min-height: 100dvh;
+}
+
+.auth-visual {
+    position: relative;
+    display: flex;
+    min-height: 100dvh;
+    align-items: flex-end;
     overflow: hidden;
-    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
-    color: #fff;
-    background: var(--ink);
+    padding: clamp(26px, 5vw, 76px);
+    background:
+        linear-gradient(180deg, rgba(7, 23, 34, 0.06), rgba(7, 23, 34, 0.82)),
+        url('/images/sekai-night-route.png') center / cover;
 }
 
-.canvas-layer {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+.auth-visual::after {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    content: "";
+    border-right: 1px solid rgba(226, 234, 235, 0.16);
+    background: linear-gradient(120deg, rgba(7, 23, 34, 0.2), transparent 45%, rgba(240, 138, 98, 0.08));
 }
 
-.login-page {
+.auth-visual-copy {
     position: relative;
     z-index: 1;
-    height: 100vh;
+    max-width: 520px;
+}
+
+.auth-visual-copy .brand {
+    margin-bottom: 28px;
+}
+
+.auth-visual-copy h1 {
+    max-width: 10ch;
+    margin: 0;
+    color: var(--paper);
+    font-size: clamp(2.8rem, 6vw, 6rem);
+    font-weight: 850;
+    letter-spacing: -0.07em;
+    line-height: 0.94;
+}
+
+.auth-visual-copy h1 span {
+    color: var(--accent-strong);
+}
+
+.auth-visual-copy p {
+    max-width: 32rem;
+    margin: 22px 0 0;
+    color: var(--muted-strong);
+    font-size: 1rem;
+}
+
+.auth-visual-foot {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 20px 50vh;
-    background: transparent;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin-top: 34px;
+    color: var(--paper);
+    font-size: 12px;
 }
 
-@keyframes border-rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-@keyframes glow-pulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.65; }
+.auth-visual-foot span {
+    padding-right: 18px;
+    border-right: 1px solid rgba(226, 234, 235, 0.28);
 }
 
-.login-card {
-    width: 100%;
-    max-width: 400px;
-    padding: 36px 32px;
-    border-radius: 16px;
-    background: rgba(26, 16, 38, 0.92);
-    color: #e0d8e8;
-    border: 1px solid rgba(255,141,161,0.2);
-    box-shadow: 0 8px 60px rgba(0,0,0,0.4), 0 0 80px rgba(255,141,161,0.06);
-    position: relative;
-    overflow: hidden;
-    transition: box-shadow 0.3s;
-    text-align: center;
-}
-.login-card::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    z-index: -1;
-    border-radius: 18px;
-    background: conic-gradient(
-        var(--sakura-light), var(--sakura), var(--pink), var(--sakura-deep), var(--purple), var(--sakura-light)
-    );
-    animation: border-rotate 4s linear infinite;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    -webkit-mask-composite: xor;
-    padding: 2px;
-    opacity: 0.5;
-    transition: opacity 0.3s;
-}
-.login-card:hover::before { opacity: 1; }
-.login-card:hover {
-    box-shadow: 0 8px 60px rgba(0,0,0,0.5), 0 0 100px rgba(255,141,161,0.18);
+.auth-visual-foot span:last-child {
+    padding-right: 0;
+    border-right: 0;
 }
 
-/* Sakura petal decoration on card */
-.login-card::after {
-    content: '🌸';
-    position: absolute;
-    top: -15px;
-    right: -10px;
-    font-size: 40px;
-    opacity: 0.08;
-    pointer-events: none;
-    animation: petalSpin 10s linear infinite;
-}
-@keyframes petalSpin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.login-card h2 {
-    margin: 0 0 4px;
-    font-size: 28px;
-    background: linear-gradient(135deg, var(--sakura-light), var(--sakura), var(--pink), var(--sakura-deep));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-size: 300% 300%;
-    animation: bg-shift 4s ease-in-out infinite;
-}
-
-@keyframes bg-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-.login-card p {
-    margin: 0 0 28px;
-    color: var(--muted);
-    font-size: 14px;
-}
-
-form {
-    text-align: left;
-}
-
-label {
-    display: block;
-    margin: 14px 0 6px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #d0c8e0;
-}
-
-input {
-    width: 100%;
-    height: 46px;
-    border: 1px solid rgba(255,141,161,0.15);
-    border-radius: 10px;
-    padding: 0 14px;
-    font-size: 15px;
-    outline: none;
-    background: rgba(13, 8, 24, 0.7);
-    color: #fff;
-    font-family: inherit;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-input::placeholder {
-    color: rgba(255,255,255,0.18);
-}
-input:hover {
-    border-color: rgba(255,141,161,0.4);
-}
-input:focus {
-    border-color: var(--sakura);
-    box-shadow: 0 0 12px rgba(255,141,161,0.25), 0 0 0 3px rgba(255,141,161,0.08);
-    animation: glow-pulse 2s ease-in-out infinite;
-}
-
-.password-row {
-    display: flex;
-    gap: 8px;
-}
-.password-row input {
-    flex: 1;
-}
-.password-row button {
-    width: 68px;
-    border: 0;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--cyan), var(--purple));
-    background-size: 200% 200%;
-    color: #fff;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 700;
-    transition: filter 0.2s;
-}
-.password-row button:hover {
-    filter: brightness(1.2);
-    animation: bg-shift 2s ease-in-out infinite;
-}
-
-.primary-btn {
-    width: 100%;
-    height: 48px;
-    margin-top: 20px;
-    border: 0;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--sakura), var(--pink), var(--sakura-deep), var(--sakura-light));
-    background-size: 300% 300%;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.primary-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 28px rgba(255,141,161,0.4);
-    animation: bg-shift 2s ease-in-out infinite;
-}
-
-.secondary-btn {
+.auth-content {
     display: grid;
+    min-height: 100dvh;
     place-items: center;
-    width: 100%;
-    height: 48px;
-    margin-top: 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,141,161,0.3);
-    background: rgba(255,141,161,0.08);
-    color: #e0c8d8;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 700;
-    transition: border-color 0.2s, background 0.2s;
-}
-.secondary-btn:hover {
-    border-color: var(--sakura);
-    background: rgba(255,141,161,0.18);
-    color: #fff;
-    box-shadow: 0 0 20px rgba(255,141,161,0.18);
+    padding: 34px clamp(20px, 5vw, 76px);
 }
 
-.back-link {
-    display: block;
-    text-align: center;
-    margin-top: 12px;
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    transition: color 0.2s;
+.auth-card {
+    width: min(100%, 430px);
 }
-.back-link:hover {
-    color: var(--sakura-light);
+
+.auth-card h2 {
+    max-width: 12ch;
+    margin: 0;
+    color: var(--paper);
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    font-weight: 820;
+    letter-spacing: -0.06em;
+    line-height: 1;
+}
+
+.auth-card > p {
+    margin: 14px 0 28px;
+    color: var(--muted);
 }
 
 .server-message {
-    margin: 12px 0;
-    padding: 10px 14px;
-    border-radius: 8px;
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
     font-size: 13px;
-    font-weight: 700;
-}
-.server-message.success {
-    color: var(--mint);
-    background: rgba(126,230,197,0.1);
-    border: 1px solid rgba(126,230,197,0.2);
-}
-.server-message.error {
-    color: var(--sakura);
-    background: rgba(255,141,161,0.1);
-    border: 1px solid rgba(255,141,161,0.2);
 }
 
-@media (max-width: 500px) {
-    .login-card { padding: 28px 20px; }
+.server-message.success {
+    border-color: rgba(168, 200, 183, 0.38);
+    color: var(--success);
+}
+
+.auth-form {
+    display: grid;
+    gap: 9px;
+}
+
+.auth-form label {
+    margin-top: 8px;
+    color: var(--muted-strong);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.auth-form input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    outline: 0;
+    background: var(--ink-raised);
+    color: var(--paper);
+}
+
+.auth-form input::placeholder {
+    color: #91a4ad;
+}
+
+.auth-form input:focus {
+    border-color: rgba(240, 138, 98, 0.76);
+    box-shadow: 0 0 0 3px rgba(240, 138, 98, 0.12);
+}
+
+.password-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+}
+
+.password-row button {
+    min-width: 64px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted-strong);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.password-row button:hover {
+    border-color: rgba(240, 138, 98, 0.52);
+    color: var(--paper);
+}
+
+.auth-form .primary-btn {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 18px;
+    padding: 0 18px;
+}
+
+.auth-links {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.auth-links .secondary-btn {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 18px;
+}
+
+.back-link {
+    display: inline-flex;
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 12px;
+    text-underline-offset: 4px;
+}
+
+.back-link:hover {
+    color: var(--accent-strong);
+}
+
+@media (max-width: 860px) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-visual {
+        min-height: 42dvh;
+        padding: 34px 24px;
+    }
+
+    .auth-visual-copy h1 {
+        max-width: 13ch;
+        font-size: clamp(2.7rem, 12vw, 4.5rem);
+    }
+
+    .auth-visual-foot {
+        margin-top: 24px;
+    }
+
+    .auth-content {
+        min-height: auto;
+        padding: 56px 24px 64px;
+    }
+}
+
+@media (max-width: 520px) {
+    .auth-visual {
+        min-height: 38dvh;
+    }
+
+    .auth-visual-copy .brand {
+        margin-bottom: 18px;
+    }
+
+    .auth-visual-copy p {
+        margin-top: 14px;
+        font-size: 0.92rem;
+    }
 }

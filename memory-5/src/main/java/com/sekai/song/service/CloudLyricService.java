@@ -5,5 +5,9 @@ public interface CloudLyricService {
 
     String fetchQqLyric(String songMid, Long songId);
 
-    String fetchBestLyric(String title, String artist);
+    default String fetchBestLyric(String title, String artist) {
+        return fetchBestLyric(title, artist, null, null);
+    }
+
+    String fetchBestLyric(String title, String artist, String album, Integer durationSeconds);
 }

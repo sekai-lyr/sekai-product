@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sekai.dataobject.mapper.SekaiDataObjectCharacterMapper">
+
+    <resultMap id="BaseResultMap" type="com.sekai.dataobject.dataobject.SekaiDataObjectCharacterDO">
+        <id property="id" column="id"/>
+        <result property="seriesId" column="series_id"/>
+        <result property="name" column="name"/>
+        <result property="originalName" column="original_name"/>
+        <result property="role" column="role"/>
+        <result property="voiceActor" column="voice_actor"/>
+        <result property="description" column="description"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, series_id, name, original_name, role, voice_actor, description, image_url, create_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_character
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_character
+        ORDER BY series_id, id
+    </select>
+
+    <select id="selectBySeriesId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_character
+        WHERE series_id = #{seriesId}
+        ORDER BY id
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sekai_dataobject_anime_character
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (name LIKE CONCAT('%', #{keyword}, '%')
+                OR original_name LIKE CONCAT('%', #{keyword}, '%')
+                OR voice_actor LIKE CONCAT('%', #{keyword}, '%')
+                OR role LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="seriesId != null">
+                AND series_id = #{seriesId}
+            </if>
+        </where>
+        ORDER BY series_id, id
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM sekai_dataobject_anime_character
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (name LIKE CONCAT('%', #{keyword}, '%')
+                OR original_name LIKE CONCAT('%', #{keyword}, '%')
+                OR voice_actor LIKE CONCAT('%', #{keyword}, '%')
+                OR role LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="seriesId != null">
+                AND series_id = #{seriesId}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM sekai_dataobject_anime_character
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="insert"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectCharacterDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO sekai_dataobject_anime_character (
+        series_id,
+        name,
+        original_name,
+        role,
+        voice_actor,
+        description,
+        image_url
+        ) VALUES (
+        #{seriesId},
+        #{name},
+        #{originalName},
+        #{role},
+        #{voiceActor},
+        #{description},
+        #{imageUrl}
+        )
+    </insert>
+
+    <insert id="insertSelective"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectCharacterDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO sekai_dataobject_anime_character
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="seriesId != null">series_id,</if>
+            <if test="name != null">name,</if>
+            <if test="originalName != null">original_name,</if>
+            <if test="role != null">role,</if>
+            <if test="voiceActor != null">voice_actor,</if>
+            <if test="description != null">description,</if>
+            <if test="imageUrl != null">image_url,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="seriesId != null">#{seriesId},</if>
+            <if test="name != null">#{name},</if>
+            <if test="originalName != null">#{originalName},</if>
+            <if test="role != null">#{role},</if>
+            <if test="voiceActor != null">#{voiceActor},</if>
+            <if test="description != null">#{description},</if>
+            <if test="imageUrl != null">#{imageUrl},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectCharacterDO">
+        UPDATE sekai_dataobject_anime_character
+        <set>
+            <if test="seriesId != null">series_id = #{seriesId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="originalName != null">original_name = #{originalName},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="voiceActor != null">voice_actor = #{voiceActor},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateByPrimaryKey"
+            parameterType="com.sekai.dataobject.dataobject.SekaiDataObjectCharacterDO">
+        UPDATE sekai_dataobject_anime_character
+        SET series_id = #{seriesId},
+        name = #{name},
+        original_name = #{originalName},
+        role = #{role},
+        voice_actor = #{voiceActor},
+        description = #{description},
+        image_url = #{imageUrl}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

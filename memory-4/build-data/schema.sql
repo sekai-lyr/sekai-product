@@ -60,39 +60,6 @@ CREATE TABLE IF NOT EXISTS sekai_Draw_lots_favorite (
     CONSTRAINT fk_draw_lots_favorite_character FOREIGN KEY (character_id) REFERENCES sekai_Draw_lots_character(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS sekai_Draw_lots_payment_order (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    order_no VARCHAR(40) NOT NULL UNIQUE,
-    user_id BIGINT NOT NULL,
-    plan_code VARCHAR(40) NOT NULL,
-    plan_name VARCHAR(80) NOT NULL,
-    amount_cent INT NOT NULL,
-    contact VARCHAR(120),
-    pay_note VARCHAR(120) NOT NULL,
-    pay_method VARCHAR(40) NOT NULL DEFAULT 'wechat_qr',
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    paid_time DATETIME,
-    INDEX idx_draw_lots_payment_user_time (user_id, create_time),
-    INDEX idx_draw_lots_payment_status_time (status, create_time),
-    CONSTRAINT fk_draw_lots_payment_user FOREIGN KEY (user_id) REFERENCES sekai_Draw_lots_user(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS sekai_Draw_lots_membership (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id BIGINT NOT NULL UNIQUE,
-    plan_code VARCHAR(40) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-    source_order_id BIGINT,
-    start_time DATETIME NOT NULL,
-    expire_time DATETIME NOT NULL,
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_draw_lots_membership_expire (status, expire_time),
-    CONSTRAINT fk_draw_lots_membership_user FOREIGN KEY (user_id) REFERENCES sekai_Draw_lots_user(id),
-    CONSTRAINT fk_draw_lots_membership_order FOREIGN KEY (source_order_id) REFERENCES sekai_Draw_lots_payment_order(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE IF NOT EXISTS sekai_Draw_lots_wheel_option (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -120,40 +87,6 @@ CREATE TABLE IF NOT EXISTS sekai_Draw_lots_wheel_spin (
     INDEX idx_draw_lots_wheel_spin_user_time (user_id, create_time),
     CONSTRAINT fk_draw_lots_wheel_spin_user FOREIGN KEY (user_id) REFERENCES sekai_Draw_lots_user(id),
     CONSTRAINT fk_draw_lots_wheel_spin_option FOREIGN KEY (option_id) REFERENCES sekai_Draw_lots_wheel_option(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS sekai_Draw_lots_task (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id BIGINT NOT NULL,
-    title VARCHAR(100) NOT NULL,
-    detail VARCHAR(300),
-    source_type VARCHAR(40) NOT NULL DEFAULT 'manual',
-    priority INT NOT NULL DEFAULT 3,
-    status VARCHAR(20) NOT NULL DEFAULT 'OPEN',
-    due_date DATE,
-    completed_time DATETIME,
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_draw_lots_task_user_status_due (user_id, status, due_date),
-    INDEX idx_draw_lots_task_user_title (user_id, title),
-    CONSTRAINT fk_draw_lots_task_user FOREIGN KEY (user_id) REFERENCES sekai_Draw_lots_user(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS sekai_Draw_lots_focus_session (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id BIGINT NOT NULL,
-    task_id BIGINT,
-    task_title VARCHAR(120) NOT NULL,
-    planned_minutes INT NOT NULL DEFAULT 25,
-    actual_minutes INT NOT NULL DEFAULT 25,
-    energy_label VARCHAR(40) NOT NULL,
-    note VARCHAR(260),
-    completed_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_draw_lots_focus_user_time (user_id, completed_time),
-    INDEX idx_draw_lots_focus_user_task (user_id, task_id),
-    CONSTRAINT fk_draw_lots_focus_user FOREIGN KEY (user_id) REFERENCES sekai_Draw_lots_user(id),
-    CONSTRAINT fk_draw_lots_focus_task FOREIGN KEY (task_id) REFERENCES sekai_Draw_lots_task(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO sekai_Draw_lots_fortune (level_name, score_min, score_max, lucky_color, lucky_item, summary, advice) VALUES

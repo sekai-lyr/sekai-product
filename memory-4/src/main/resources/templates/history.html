@@ -9,7 +9,7 @@
 <body>
 <header class="topbar">
     <a class="logo" th:href="@{/home}">灵感伙伴签</a>
-    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a class="active" th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a><a th:href="@{/insights}">分析</a><a th:href="@{/coach}">行动</a><a th:href="@{/tasks}">任务</a><a th:href="@{/focus}">专注</a><a th:href="@{/membership}">会员</a></nav>
+    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a class="active" th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a></nav>
 </header>
 <main class="dashboard">
     <section class="list-head"><div><p class="eyebrow">历史记录</p><h1>抽签历史</h1></div></section>
@@ -45,5 +45,6 @@
         <p class="muted" th:if="${#lists.isEmpty(records)}">暂无抽签历史。</p>
     </section>
 </main>
+<script th:src="@{/js/app.js(v=2026083001)}" src="/js/app.js?v=2026083001"></script>
 </body>
 </html>

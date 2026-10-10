@@ -1,4 +1,6 @@
-﻿import urllib.request, json
+import json
+import os
+import urllib.request
 
 # Get the full system prompt from Java code
 full_prompt = (
@@ -28,11 +30,15 @@ full_prompt = (
     '\u4e0d\u8981\u53ea\u8bf4\u201c\u6211\u5e2e\u4f60\u67e5\u201d\u7136\u540e\u4e0d\u8c03\u7528\u5de5\u5177\uff01\u5fc5\u987b\u771f\u6b63\u8c03\u7528\u5de5\u5177\u83b7\u53d6\u6570\u636e\u540e\u518d\u56de\u590d\uff01'
 )
 
+deepseek_key = os.environ.get('DEEPSEEK_API_KEY', '').strip()
+if not deepseek_key:
+    raise SystemExit('Set DEEPSEEK_API_KEY before running this script.')
+
 body = json.dumps({
     'id': 1,
     'modelId': 1,
     'apiUrl': 'https://api.deepseek.com/chat/completions',
-    'apiKey': 'sk-09f43f0e914746beaa63714b4c3729c5',
+    'apiKey': deepseek_key,
     'modelName': 'deepseek-chat',
     'systemPrompt': full_prompt,
     'maxTokens': 1024,
@@ -41,8 +47,12 @@ body = json.dumps({
     'enabled': True
 }).encode('utf-8')
 
-req = urllib.request.Request('http://localhost:8089/api/live2d/chat/config', 
-    data=body, headers={'Content-Type': 'application/json;charset=UTF-8'}, method='POST')
+req = urllib.request.Request(
+    'http://localhost:8089/api/live2d/chat/config',
+    data=body,
+    headers={'Content-Type': 'application/json;charset=UTF-8'},
+    method='POST'
+)
 data = json.loads(urllib.request.urlopen(req, timeout=10).read().decode('utf-8'))
 print('Config saved:', data.get('success'))
 print(f'Prompt length: {len(full_prompt)} chars')
