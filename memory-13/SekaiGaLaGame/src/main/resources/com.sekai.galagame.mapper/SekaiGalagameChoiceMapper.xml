@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sekai.galagame.mapper.SekaiGalagameChoiceMapper">
+    <resultMap id="BaseResultMap" type="com.sekai.galagame.dataobject.SekaiGalagameChoiceDO">
+        <id property="id" column="id"/>
+        <result property="nodeKey" column="node_key"/>
+        <result property="optionText" column="option_text"/>
+        <result property="nextKey" column="next_key"/>
+        <result property="orderNo" column="order_no"/>
+    </resultMap>
+    <sql id="BaseColumns">id, node_key, option_text, next_key, order_no</sql>
+
+    <select id="selectByNodeKey" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_choices
+        WHERE node_key = #{nodeKey}
+        ORDER BY order_no
+    </select>
+</mapper>

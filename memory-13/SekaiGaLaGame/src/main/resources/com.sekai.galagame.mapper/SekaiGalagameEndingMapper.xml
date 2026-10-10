@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sekai.galagame.mapper.SekaiGalagameEndingMapper">
+    <resultMap id="BaseResultMap" type="com.sekai.galagame.dataobject.SekaiGalagameEndingDO">
+        <id property="endingKey" column="ending_key"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="bgImage" column="bg_image"/>
+        <result property="sortNo" column="sort_no"/>
+    </resultMap>
+    <sql id="BaseColumns">ending_key, title, description, bg_image, sort_no</sql>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_endings ORDER BY sort_no
+    </select>
+
+    <select id="selectByKey" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_endings WHERE ending_key = #{endingKey}
+    </select>
+</mapper>

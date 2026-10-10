@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sekai.galagame.mapper.SekaiGalagameUserMapper">
+    <resultMap id="BaseResultMap" type="com.sekai.galagame.dataobject.SekaiGalagameUserDO">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatar" column="avatar"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <sql id="BaseColumns">id, username, password, nickname, avatar, create_time, update_time</sql>
+
+    <insert id="insert" parameterType="com.sekai.galagame.dataobject.SekaiGalagameUserDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sekai_GaLaGame_lies_users (username, password, nickname, avatar)
+        VALUES (#{username}, #{password}, #{nickname}, #{avatar})
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_users WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_users WHERE username = #{username}
+    </select>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.sekai.galagame.dataobject.SekaiGalagameUserDO">
+        UPDATE sekai_GaLaGame_lies_users
+        <set>
+            <if test="password != null">password = #{password},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>

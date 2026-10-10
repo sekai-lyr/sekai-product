@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sekai.galagame.mapper.SekaiGalagameSaveMapper">
+    <resultMap id="BaseResultMap" type="com.sekai.galagame.dataobject.SekaiGalagameSaveDO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="slotNo" column="slot_no"/>
+        <result property="stateJson" column="state_json"/>
+        <result property="chapterNo" column="chapter_no"/>
+        <result property="progress" column="progress"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <sql id="BaseColumns">id, user_id, slot_no, state_json, chapter_no, progress, update_time</sql>
+
+    <insert id="insert" parameterType="com.sekai.galagame.dataobject.SekaiGalagameSaveDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sekai_GaLaGame_lies_saves (user_id, slot_no, state_json, chapter_no, progress)
+        VALUES (#{userId}, #{slotNo}, #{stateJson}, #{chapterNo}, #{progress})
+    </insert>
+
+    <update id="updateBySlot" parameterType="com.sekai.galagame.dataobject.SekaiGalagameSaveDO">
+        UPDATE sekai_GaLaGame_lies_saves
+        SET state_json = #{stateJson}, chapter_no = #{chapterNo}, progress = #{progress}
+        WHERE user_id = #{userId} AND slot_no = #{slotNo}
+    </update>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_saves
+        WHERE user_id = #{userId}
+        ORDER BY slot_no
+    </select>
+
+    <select id="selectByUserAndSlot" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_saves
+        WHERE user_id = #{userId} AND slot_no = #{slotNo}
+    </select>
+
+    <delete id="deleteByUserAndSlot">
+        DELETE FROM sekai_GaLaGame_lies_saves WHERE user_id = #{userId} AND slot_no = #{slotNo}
+    </delete>
+</mapper>

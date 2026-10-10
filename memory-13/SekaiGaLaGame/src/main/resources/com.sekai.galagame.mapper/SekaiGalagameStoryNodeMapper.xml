@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sekai.galagame.mapper.SekaiGalagameStoryNodeMapper">
+    <resultMap id="BaseResultMap" type="com.sekai.galagame.dataobject.SekaiGalagameStoryNodeDO">
+        <id property="id" column="id"/>
+        <result property="nodeKey" column="node_key"/>
+        <result property="labelName" column="label_name"/>
+        <result property="chapterNo" column="chapter_no"/>
+        <result property="nodeType" column="node_type"/>
+        <result property="seqNo" column="seq_no"/>
+        <result property="speakerKey" column="speaker_key"/>
+        <result property="speakerName" column="speaker_name"/>
+        <result property="text" column="text"/>
+        <result property="bgImage" column="bg_image"/>
+        <result property="sprites" column="sprites"/>
+        <result property="setVar" column="set_var"/>
+        <result property="setValue" column="set_value"/>
+        <result property="nextKey" column="next_key"/>
+        <result property="endingKey" column="ending_key"/>
+    </resultMap>
+    <sql id="BaseColumns">id, node_key, label_name, chapter_no, node_type, seq_no, speaker_key, speaker_name, text, bg_image, sprites, set_var, set_value, next_key, ending_key</sql>
+
+    <select id="selectByNodeKey" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_story_nodes WHERE node_key = #{nodeKey}
+    </select>
+
+    <select id="selectFirstOfLabel" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sekai_GaLaGame_lies_story_nodes
+        WHERE label_name = #{labelName}
+        ORDER BY id
+        LIMIT 1
+    </select>
+
+    <select id="countByLabel" resultType="int">
+        SELECT COUNT(*) FROM sekai_GaLaGame_lies_story_nodes WHERE label_name = #{labelName}
+    </select>
+</mapper>

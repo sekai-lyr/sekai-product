@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/img/gui/window_icon.png">
+    <title>lies ten years ago · 谎言十年</title>
+    <link rel="stylesheet" href="/css/game.css">
+</head>
+<body>
+
+<!-- 登录/注册 -->
+<div id="login-overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="login-title">
+    <div class="login-box">
+        <div class="login-title" id="login-title">lies ten years ago</div>
+        <div class="login-sub">谎 言 十 年</div>
+        <div class="login-tabs">
+            <button class="login-tab active" data-tab="login">登 录</button>
+            <button class="login-tab" data-tab="register">注 册</button>
+        </div>
+        <div class="login-form">
+            <label class="sr-only" for="login-username">用户名</label>
+            <input type="text" id="login-username" placeholder="输入用户名" autocomplete="username">
+            <label class="sr-only register-nickname-label" for="register-nickname">昵称</label>
+            <input type="password" id="login-password" placeholder="输入密码" autocomplete="current-password">
+            <input type="text" id="register-nickname" placeholder="输入昵称（可选）" autocomplete="nickname" style="display:none">
+            <div class="login-error" id="login-error" aria-live="polite"></div>
+            <button class="login-btn" id="login-submit" type="button">进 入 世 界</button>
+        </div>
+        <div class="login-tip">记忆会骗人，谎言不会。</div>
+    </div>
+</div>
+
+<!-- 标题界面 -->
+<div id="title-screen" class="screen hidden">
+    <div class="title-bg" id="title-bg"></div>
+    <div class="title-content">
+        <div class="title-logo">lies ten years ago</div>
+        <div class="title-cn">谎 言 十 年</div>
+        <div class="title-menu">
+            <button class="menu-btn" data-action="start">开始游戏</button>
+            <button class="menu-btn" data-action="chapters">章节选择</button>
+            <button class="menu-btn" data-action="load">读取存档</button>
+            <button class="menu-btn" data-action="gallery">CG图鉴</button>
+            <button class="menu-btn" data-action="endings">结局记录</button>
+            <button class="menu-btn" data-action="logout">退出登录</button>
+        </div>
+        <div class="title-user" id="title-user"></div>
+        <div class="title-note">纪念那场说谎的旅行</div>
+    </div>
+</div>
+
+<!-- 游戏界面 -->
+<div id="game-screen" class="hidden">
+    <div id="stage">
+        <div id="bg-layer"></div>
+        <div id="sprite-layer"></div>
+        <div id="cg-layer"></div>
+    </div>
+    <div id="top-bar">
+        <button class="top-btn" data-action="title">标题</button>
+        <span id="chapter-label"></span>
+        <button class="top-btn" data-action="save">存档</button>
+        <button class="top-btn" data-action="load">读档</button>
+        <button class="top-btn" data-action="gallery">图鉴</button>
+    </div>
+    <div id="dialogue-area">
+        <div id="name-tag"></div>
+        <div id="dialogue-text"></div>
+        <div id="click-hint">▼</div>
+    </div>
+    <div id="choice-area" class="hidden" role="group" aria-label="剧情选择"></div>
+    <div id="story-progress"></div>
+</div>
+
+<!-- 结局界面 -->
+<div id="ending-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="ending-title">
+    <div class="ending-bg" id="ending-bg"></div>
+    <div class="ending-box">
+        <div class="ending-label">E N D</div>
+        <div class="ending-title" id="ending-title"></div>
+        <div class="ending-desc" id="ending-desc"></div>
+        <div class="ending-actions">
+            <button class="menu-btn" data-action="restart">重新开始</button>
+            <button class="menu-btn" data-action="title">回到标题</button>
+        </div>
+    </div>
+</div>
+
+<!-- 通用模态框 -->
+<div id="modal" class="overlay hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modal-title">
+    <div class="modal-box" tabindex="-1">
+        <div class="modal-head">
+            <span id="modal-title"></span>
+            <button class="modal-close" id="modal-close">✕</button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+    </div>
+</div>
+
+<!-- 图片查看器 -->
+<div id="viewer" class="overlay hidden" role="dialog" aria-modal="true" aria-label="图片预览">
+    <img id="viewer-img" alt="CG 预览">
+    <button class="modal-close viewer-close" id="viewer-close">✕</button>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="/js/game.js"></script>
+</body>
+</html>
