@@ -1,0 +1,468 @@
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/engine.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/engine.js"
+index 314c7d5..6da7c86 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/engine.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/engine.js"
+@@ -117,20 +117,25 @@ function applyStatChange(card, stat, delta, { temporary = false } = {}) {
+     }
+ }
+ 
+ function markAttackUsed(monster) {    monster.attacksMadeThisTurn = (Number(monster.attacksMadeThisTurn) || 0) + 1;
+     monster.hasAttackedThisTurn = true;
+     monster.canAttack = monster.attacksMadeThisTurn < getAttackLimit(monster)
+         && !monster.cannotAttack
+         && monster.position === MONSTER_POSITION.ATTACK;
+ }
+ 
++/** 无下限（infinity）：状态未到期时，返回该怪兽参与的战斗应给其控制者减免的伤害值。 */
++function infinityReduction(card, turn) {
++    return Number(card?.themedState?.infinityUntil) >= turn ? Number(card.themedState.infinityReduce) || 0 : 0;
++}
++
+ function destroyMonster(owner, monster, engine, cause = "effect") {
+     const idx = owner.monsterZone.indexOf(monster);
+     if (idx === -1) return false;
+     const isDestruction = cause === "battle" || cause === "effect";
+     if (isDestruction && monster.themedState?.shelterUntil >= engine?.state.turn) {
+         delete monster.themedState.shelterUntil;
+         monster.position = MONSTER_POSITION.DEFENSE;
+         monster.canAttack = false;
+         return false;
+     }
+@@ -2336,21 +2341,21 @@ export class GameEngine {
+     }
+ 
+     // ---------- 手动攻守转换 ----------
+     changePosition(player, card) {
+         if (this.state.gameOver) return { success: false, message: "游戏已结束" };
+         if (player !== this.state.currentPlayer) return { success: false, message: "只能在自己的回合改变表示形式" };
+         if (this.state.phase !== PHASE.MAIN_1 && this.state.phase !== PHASE.MAIN_2) return { success: false, message: "只能在主要阶段转换姿态" };
+         if (!card) return { success: false, message: "没有选择怪兽" };
+         if (!card.faceUp) return { success: false, message: "里侧怪兽不能手动转换姿态" };
+         if (card.setTurn === this.state.turn && !card.hasAttackedThisTurn) return { success: false, message: "本回合召唤或盖放的怪兽不能手动改变表示形式" };
+-        if (card.themedState?.frozenUntil >= this.state.turn) return { success: false, message: "冻结期间不能改变表示形式" };
++        if (card.themedState?.frozenUntil >= this.state.turn || card.themedState?.paralyzedUntil >= this.state.turn) return { success: false, message: "冻结或麻痹期间不能改变表示形式" };
+         if (card.positionChangedThisTurn) return { success: false, message: "该怪兽本回合已经转换过姿态" };
+         if (card.hasAttackedThisTurn) return { success: false, message: "已经攻击过的怪兽本回合不能转换姿态" };
+ 
+         const idx = player.monsterZone.indexOf(card);
+         if (idx === -1) return { success: false, message: "该怪兽不在场上" };
+ 
+         // 场地魔法效果：变守备表示需丢1手牌（必须先确认怪兽确实在场，否则会白白
+         // 丢掉一张手牌却什么都没发生）。
+         const isSwitchingToDefense = card.position === MONSTER_POSITION.ATTACK;
+         const opponent = player === this.state.currentPlayer ? this.state.opponentPlayer : this.state.currentPlayer;
+@@ -2682,50 +2687,54 @@ export class GameEngine {
+         }
+         if (!target) return null;
+         const atk = Math.max(0, attacker.currentAttack || 0);
+ 
+         if (target.position === MONSTER_POSITION.DEFENSE || !target.faceUp) {
+             const def = Math.max(0, this.getEffectiveDefense(target));
+             if (atk > def) {
+                 const piercing = attacker.themedState?.piercingUntil >= this.state.turn
+                     || attacker.piercingDamage
+                     || attacker.effects?.some(effect => effect.type === "piercingDamage");
+-                const damage = piercing && !target.preventsBattleDamage ? Math.max(0, atk - def) : 0;
++                let damage = piercing && !target.preventsBattleDamage ? Math.max(0, atk - def) : 0;
++                damage = Math.max(0, damage - infinityReduction(target, this.state.turn));
+                 const destroyed = !targetImmune();
+                 return shape(destroyed ? "destroy" : "none", damage, damage > 0 ? "defender" : null, destroyed, false,
+                     destroyed ? (damage > 0 ? `破坏 · 贯穿 ${damage}` : "破坏") : `${target.name} 不受战斗破坏`);
+             }
+             if (atk === def) {
+                 return shape("none", 0, null, false, false, "同值 · 无事发生");
+             }
+-            const damage = attacker.preventsBattleDamage ? 0 : Math.max(0, def - atk);
++            let damage = attacker.preventsBattleDamage ? 0 : Math.max(0, def - atk);
++            damage = Math.max(0, damage - infinityReduction(attacker, this.state.turn));
+             return shape("lose", damage, damage > 0 ? "attacker" : null, false, false,
+                 damage > 0 ? `我方受 ${damage} 点伤害` : "我方不受伤害");
+         }
+ 
+         const oppAtk = Math.max(0, target.currentAttack || 0);
+         if (atk > oppAtk) {
+-            const damage = target.preventsBattleDamage ? 0 : Math.max(0, atk - oppAtk);
++            let damage = target.preventsBattleDamage ? 0 : Math.max(0, atk - oppAtk);
++            damage = Math.max(0, damage - infinityReduction(target, this.state.turn));
+             const destroyed = !targetImmune();
+             return shape(destroyed ? "destroy" : "none", damage, damage > 0 ? "defender" : null, destroyed, false,
+                 destroyed ? `破坏 · ${damage} 伤害` : `${target.name} 不受战斗破坏`);
+         }
+         if (atk === oppAtk && atk === 0) {
+             return shape("none", 0, null, false, false, "双方 0 攻 · 均不破坏");
+         }
+         if (atk === oppAtk) {
+             const selfDestroyed = !attackerImmune();
+             const destroyed = !targetImmune();
+             return shape("mutual", 0, null, destroyed, selfDestroyed,
+                 selfDestroyed ? "同攻 · 双方破坏" : "同攻 · 我方不受破坏");
+         }
+-        const damage = attacker.preventsBattleDamage ? 0 : Math.max(0, oppAtk - atk);
++        let damage = attacker.preventsBattleDamage ? 0 : Math.max(0, oppAtk - atk);
++        damage = Math.max(0, damage - infinityReduction(attacker, this.state.turn));
+         const selfDestroyed = !attackerImmune();
+         return shape("lose", damage, damage > 0 ? "attacker" : null, false, selfDestroyed,
+             selfDestroyed ? `我方被破坏 · 受 ${damage} 点伤害` : `我方受 ${damage} 点伤害`);
+     }
+ 
+     /**
+      * 战斗结算开始前快照出血：层数与总伤害。
+      * destroyMonster 会清空离场怪兽的 themedState，战斗后再读会丢失，因此必须先快照。
+      */
+     _snapshotBleed(monster) {
+@@ -2754,21 +2763,22 @@ export class GameEngine {
+         if (this.state.gameOver) return { success: false, message: "游戏已结束" };
+         if (this.state.firstTurn && GAME_CONFIG.FIRST_TURN_NO_BATTLE) return { success: false, message: "先攻第一回合不能攻击" };
+         if (this.state.phase !== PHASE.BATTLE) return { success: false, message: "只能在战斗阶段攻击" };
+         const attackerOwner = this.state.currentPlayer;
+         if (!attackerOwner.monsterZone.includes(attacker)) return { success: false, message: "只能使用己方场上的怪兽攻击" };
+         const replaying = this.state.pendingBattleReplay?.attackerId === attacker.instanceId;
+         if (!replaying && (!attacker.canAttack || (Number(attacker.attacksMadeThisTurn) || 0) >= getAttackLimit(attacker))) {
+             return { success: false, message: "该怪兽本回合不能攻击" };
+         }
+         if (!attacker.faceUp || attacker.position === MONSTER_POSITION.DEFENSE) return { success: false, message: "守备表示怪兽不能攻击" };
+-        if (attacker.cannotAttack || attackerOwner.skipBattlePhase || attacker.themedState?.frozenUntil >= this.state.turn) return { success: false, message: "该怪兽不能攻击" };
++        if (attacker.cannotAttack || attackerOwner.skipBattlePhase || attacker.themedState?.frozenUntil >= this.state.turn
++            || attacker.themedState?.paralyzedUntil >= this.state.turn) return { success: false, message: "该怪兽不能攻击" };
+         // 放学后的茶会效果：当回合不能直接攻击玩家
+         if (target === "player" && attackerOwner.noDirectAttackThisTurn) {
+             return { success: false, message: "场地魔法效果：当回合不能直接攻击玩家" };
+         }
+ 
+         const defenderOwner = this.state.opponentPlayer;
+         if (target === "player") {
+             if (defenderOwner.monsterZone.length > 0) return { success: false, message: "对方场上有怪兽时不能直接攻击" };
+         } else if (!target || !defenderOwner.monsterZone.includes(target)) {
+             return { success: false, message: "目标怪兽不在对方场上" };
+@@ -2856,64 +2866,70 @@ export class GameEngine {
+             if (!target.faceUp) {
+                 target.faceUp = true;
+                 target.faceDown = false;
+                 msg += "，目标翻开为守备表示";
+                 const flipEvent = { sourceCard: target, sourcePlayer: defenderOwner, flippedCard: target, cause: "attack" };
+                 this.emit("onFlip", flipEvent);
+                 pendingFlip = flipEvent;
+             }
+             const defPower = this.getEffectiveDefense(target);
+             if (atkPower > defPower) {
++                const infinityGuard = infinityReduction(target, this.state.turn);
+                 const destroyed = destroyMonster(defenderOwner, target, this, "battle");
+                 if (destroyed) destroyedSomething = true;
+                 const hasPiercing = attacker.themedState?.piercingUntil >= this.state.turn || attacker.piercingDamage || attacker.effects?.some(effect => effect.type === "piercingDamage");
+                 battleDamage = hasPiercing && !target.preventsBattleDamage
+                     ? Math.max(0, atkPower - defPower - reduction)
+                     : 0;
++                battleDamage = Math.max(0, battleDamage - infinityGuard);
+                 if (battleDamage > 0) { defenderOwner.takeDamage(battleDamage); damageTo = "defender"; }
+                 msg += destroyed
+                     ? `，守备怪兽被破坏${battleDamage > 0 ? `，贯穿造成${battleDamage}点伤害` : ""}`
+                     : `，${target.name}不受战斗破坏${battleDamage > 0 ? `，贯穿造成${battleDamage}点伤害` : ""}`;
+             } else if (atkPower === defPower) {
+                 msg += "，攻击力等于守备力，均不破坏且不受伤害";
+             } else {
+                 // 守方陷阱的减伤只保护守方，不能减免攻击方自己承受的战斗伤害。
+                 battleDamage = attacker.preventsBattleDamage ? 0 : Math.max(0, defPower - atkPower);
++                battleDamage = Math.max(0, battleDamage - infinityReduction(attacker, this.state.turn));
+                 attackerOwner.takeDamage(battleDamage);
+                 if (battleDamage > 0) damageTo = "attacker";
+                 msg += `，攻击方受到${battleDamage}点战斗伤害`;
+             }
+         } else {
+             const defPower = Math.max(0, target.currentAttack || 0);
+             if (atkPower > defPower) {
+                 battleDamage = target.preventsBattleDamage ? 0 : Math.max(0, atkPower - defPower - reduction);
++                battleDamage = Math.max(0, battleDamage - infinityReduction(target, this.state.turn));
+                 defenderOwner.takeDamage(battleDamage);
+                 if (battleDamage > 0) damageTo = "defender";
+                 const destroyed = destroyMonster(defenderOwner, target, this, "battle");
+                 if (destroyed) destroyedSomething = true;
+                 msg += destroyed
+                     ? `，${target.name}被破坏，对方受到${battleDamage}点战斗伤害`
+                     : `，${target.name}不受战斗破坏，对方受到${battleDamage}点战斗伤害`;
+             } else if (atkPower === defPower && atkPower === 0) {
+                 msg += "，双方攻击力均为0，均不破坏";
+             } else if (atkPower === defPower) {
+                 const attackerDestroyed = destroyMonster(attackerOwner, attacker, this, "battle");
+                 const targetDestroyed = destroyMonster(defenderOwner, target, this, "battle");
+                 if (attackerDestroyed || targetDestroyed) destroyedSomething = true;
+                 msg += attackerDestroyed && targetDestroyed
+                     ? "，攻击力相同，双方怪兽都被破坏"
+                     : "，攻击力相同，未能破坏具有战斗抗性的怪兽";
+             } else {
++                const attackerInfinity = infinityReduction(attacker, this.state.turn);
+                 const attackerDestroyed = destroyMonster(attackerOwner, attacker, this, "battle");
+                 if (attackerDestroyed) destroyedSomething = true;
+                 // 同上：减伤不适用于攻击方自身受到的战斗伤害。
+                 battleDamage = attacker.preventsBattleDamage ? 0 : Math.max(0, defPower - atkPower);
++                battleDamage = Math.max(0, battleDamage - attackerInfinity);
+                 attackerOwner.takeDamage(battleDamage);
+                 if (battleDamage > 0) damageTo = "attacker";
+                 msg += attackerDestroyed
+                     ? `，${attacker.name}被破坏，攻击方受到${battleDamage}点战斗伤害`
+                     : `，${attacker.name}不受战斗破坏，攻击方受到${battleDamage}点战斗伤害`;
+             }
+         }
+ 
+         if (pendingFlip) {
+             const result = this.triggerEvent("onFlip", pendingFlip);
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+index 90dfe19..3d38a4d 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+@@ -18,20 +18,22 @@ export const ACTION_DEFAULTS = {
+     shelter: { amount: 0 },
+     seal: { amount: 0 },
+     sleep: { amount: 0 },
+     freeze: { amount: 0 },
+     poison: { damage: 600 },
+     bomb: { damage: 0 },
+     ignite: { stacks: 2, damage: 500 },
+     venom: { stacks: 2, damage: 450 },
+     bleed: { stacks: 2, damage: 400 },
+     curse: { stacks: 1, damage: 700 },
++    paralyze: { count: 1, amount: 0, gamble: false },
++    infinity: { reduce: 1000 },
+     charge: { amount: 200 },
+     burst: { cost: 700 },
+     twin: { cost: 600 },
+     pierce: { amount: 0 },
+     ward: { amount: 0 },
+     ambush: { count: 1 },
+     token: { attack: 0, defense: 1000 },
+     exchange: { limit: 4, draw: 0 },
+     chorus: { count: 2, draw: 1, heal: 0 },
+     sanctuary: { heal: 1000 },
+@@ -60,20 +62,26 @@ export const ACTION_TEMPLATES = {
+     shelter: p => `自己攻击力最低的表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效${p.amount ? `，其攻击力上升${p.amount}` : ""}`,
+     seal: p => `对方攻击力最高的可取对象表侧怪兽效果无效，直到本回合结束${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     sleep: p => `将对方攻击力最高的可取对象表侧怪兽变为里侧守备表示${p.amount ? `，其守备力下降${p.amount}` : ""}`,
+     freeze: p => `将对方攻击力最高的可取对象表侧怪兽变为守备表示，直到下个回合结束不能攻击或手动改变表示形式${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     poison: p => `给对方攻击力最高的可取对象表侧怪兽放置毒印；本回合结束时，其控制者受到${p.damage}伤害，并移除毒印`,
+     bomb: p => `给对方攻击力最高的可取对象表侧怪兽放置爆破标记；本回合结束时${p.damage ? `给予其控制者${p.damage}伤害并` : ""}破坏该怪兽，提前离场则标记失效`,
+     ignite: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层灼烧；其控制者每个结束阶段受到${p.damage}×层数伤害，随后层数-1（上限3层）`,
+     venom: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层剧毒（上限3层）；剧毒怪兽的控制者每个结束阶段受到${p.damage}×层数伤害，且其所有回复减半；剧毒不会自然消失`,
+     bleed: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层出血；出血怪兽每次参与战斗后，其控制者受到${p.damage}×层数伤害，随后层数-1`,
+     curse: p => `给对方攻击力最高的可取对象表侧怪兽施加诅咒：其效果无效、不能作为上级召唤的祭品；被破坏时其控制者受到${p.damage}×层数伤害`,
++    paralyze: p => p.gamble
++        ? `抛硬币：正面则麻痹对方攻击力最高的可取对象表侧怪兽（直到下个回合结束不能攻击或改变表示形式）；反面则其攻击力下降${p.amount}直到回合结束`
++        : p.count === "all"
++            ? "对方全部表侧怪兽麻痹：直到下个回合结束不能攻击或改变表示形式"
++            : "将对方攻击力最高的可取对象表侧怪兽麻痹：直到下个回合结束不能攻击或改变表示形式",
++    infinity: p => `直到下个回合结束，自身不会成为对方效果的对象，且受到的战斗伤害减少${p.reduce}`,
+     charge: p => `自身获得1个蓄力指示物（最多3个），攻击力上升${p.amount}；移除指示物时失去对应的提升`,
+     burst: p => `支付${p.cost}LP；将对方攻击力最高的可取对象表侧怪兽除外`,
+     twin: p => `支付${p.cost}LP；自身本回合可以攻击2次`,
+     pierce: p => `自身本回合获得贯穿守备的战斗伤害${p.amount ? `，其攻击力上升${p.amount}` : ""}`,
+     ward: p => `自身直到下个回合结束不能成为效果对象${p.amount ? `，其守备力上升${p.amount}` : ""}`,
+     ambush: p => `将自己墓地最后${p.count}张陷阱盖放到后场，本回合不能发动`,
+     token: p => `特殊召唤1只${p.attack}攻${p.defense}守、1星的守备衍生物，不能作为上级召唤的祭品`,
+     exchange: p => `将自己攻击力最低的表侧怪兽返回手牌，再将手牌第一只${p.limit}星以下怪兽特殊召唤为守备表示${drawClause(p)}`,
+     chorus: p => `自己场上有至少${p.count}种属性的表侧怪兽时，抽${p.draw}张卡${healClause(p)}`,
+     sanctuary: p => `将自己墓地最后1张卡除外；恢复${p.heal}LP`,
+@@ -179,20 +187,22 @@ export function canResolveThemedEffect(ctx) {
+         case "scout": case "study": case "prepare": return p.deck.length > 0;
+         case "recover": return p.graveyard.some(x => x !== c && lowMonster(x, par.limit));
+         case "recycle": return p.graveyard.filter(x => x !== c).length >= par.count;
+         case "deploy": return space && p.hand.some(x => lowMonster(x, par.limit));
+         case "revive": return space && p.graveyard.some(x => x !== c && lowMonster(x, par.limit));
+         case "recall": return p.banished.length >= par.count;
+         case "shelter": return !!ally(ctx);
+         case "seal": case "sleep": case "freeze": case "poison": case "bomb": return !!enemy(ctx);
+         case "ignite": case "venom": return !!enemy(ctx);
+         case "bleed": case "curse": return !!enemy(ctx);
++        case "paralyze": return !!enemy(ctx);
++        case "infinity": return p.monsterZone.includes(c);
+         case "burst": return p.lp > par.cost && !!enemy(ctx);
+         case "charge": return p.monsterZone.includes(c) && (c.themedState?.charges || 0) < 3;
+         case "twin": return p.monsterZone.includes(c) && p.lp > par.cost;
+         case "pierce": case "ward": return p.monsterZone.includes(c);
+         case "ambush": return p.spellTrapZone.length < GAME_CONFIG.MAX_SPELL_TRAP_ZONE && !!last(p.graveyard, x => x.type === "trap" && x !== c);
+         case "token": return space;
+         case "exchange": return !p.cannotSpecialSummonThisTurn && !!ally(ctx) && p.hand.some(x => lowMonster(x, par.limit));
+         case "chorus": return new Set(p.monsterZone.filter(x => x.faceUp).map(x => x.attribute)).size >= par.count && p.deck.length >= Math.max(1, par.draw || 0);
+         case "sanctuary": return p.graveyard.some(x => x !== c);
+         case "purify": return ctx.opponent.graveyard.length > 0;
+@@ -287,20 +297,31 @@ export const themedEffectHandlers = {
+                 c.doubleAttackThisTurn = true;
+                 // 攻击次数上限翻倍后必须同步刷新 canAttack，否则"已经攻击过一次"的
+                 // 怪兽第二次攻击仍然会被 attack() 拒绝，等于白付 600LP。
+                 c.canAttack = (Number(c.attacksMadeThisTurn) || 0) < 2
+                     && !c.cannotAttack
+                     && c.position === MONSTER_POSITION.ATTACK
+                     && !(c.themedState?.frozenUntil >= game.turn);
+                 break;
+             case "pierce": state(c).piercingUntil = game.turn; applyTempStat(p, c, "attack", par.amount); break;
+             case "ward": state(c).wardUntil = game.turn + 1; c.cannotBeTargeted = true; applyTempStat(p, c, "defense", par.amount); break;
++            case "paralyze": {
++                // 赌运（gamble）路径在任务 8 接入共享硬币结果，本任务只实现非赌运分支。
++                const targets = par.count === "all" ? o.monsterZone.filter(x => x.faceUp) : [target].filter(Boolean);
++                for (const x of targets) { state(x).paralyzedUntil = game.turn + 1; x.canAttack = false; }
++                break;
++            }
++            case "infinity":
++                state(c).infinityUntil = game.turn + 1;
++                state(c).infinityReduce = par.reduce;
++                c.cannotBeTargeted = true;
++                break;
+             case "ambush": {
+                 for (const trap of lastN(p.graveyard, par.count, x => x.type === "trap" && x !== c)) {
+                     if (p.spellTrapZone.length >= GAME_CONFIG.MAX_SPELL_TRAP_ZONE) break;
+                     ctx.engine.resetFieldCard(trap);
+                     trap.faceDown = true; trap.faceUp = false; trap.canActivate = false; trap.setTurn = game.turn;
+                     move(trap, p.graveyard, p.spellTrapZone);
+                 }
+                 break;
+             }
+             case "token": {
+@@ -391,16 +412,16 @@ export function resolveThemedTurnEnd(engine, endingPlayer) {
+     for (const p of engine.state.players) {
+         for (const c of [...p.monsterZone]) {
+             const s = c.themedState || {};
+             if (s.poisonTurn === turn) { delete s.poisonTurn; const damage = Number(s.poisonDamage) || 600; delete s.poisonDamage; p.takeDamage(damage); engine.emit("onPoisonDamage", { card: c, damage }); }
+             if (s.bombTurn === turn) {
+                 delete s.bombTurn;
+                 const damage = Number(s.bombDamage) || 0; delete s.bombDamage;
+                 if (damage) { p.takeDamage(damage); engine.emit("onPoisonDamage", { card: c, damage }); }
+                 engine.destroyFieldMonster(p, c);
+             }
+-            for (const key of ["sealedUntil", "frozenUntil", "shelterUntil", "piercingUntil", "wardUntil"]) {
+-                if (s[key] != null && s[key] <= turn) { delete s[key]; if (key === "wardUntil") c.cannotBeTargeted = false; }
++            for (const key of ["sealedUntil", "frozenUntil", "paralyzedUntil", "shelterUntil", "piercingUntil", "wardUntil", "infinityUntil"]) {
++                if (s[key] != null && s[key] <= turn) { delete s[key]; if (key === "wardUntil" || key === "infinityUntil") c.cannotBeTargeted = false; }
+             }
+         }
+     }
+ }
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/bugfix-regression.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/bugfix-regression.test.js"
+index 8c2f47a..1f71975 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/bugfix-regression.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/bugfix-regression.test.js"
+@@ -613,20 +613,25 @@ describe("战斗预览与实际结算一致", () => {
+         { name: "攻击表示：我弱", atk: 1500, targetAtk: 2000 },
+         { name: "攻击表示：同攻", atk: 1800, targetAtk: 1800 },
+         { name: "攻击表示：双 0 攻", atk: 0, targetAtk: 0 },
+         { name: "守备表示：破防", atk: 2000, targetDef: 1200, targetPosition: MONSTER_POSITION.DEFENSE },
+         { name: "守备表示：撞墙", atk: 1200, targetDef: 2000, targetPosition: MONSTER_POSITION.DEFENSE },
+         { name: "守备表示：同值", atk: 1500, targetDef: 1500, targetPosition: MONSTER_POSITION.DEFENSE },
+         { name: "贯穿破防", atk: 2000, targetDef: 1200, targetPosition: MONSTER_POSITION.DEFENSE, piercing: true },
+         { name: "目标免疫战斗伤害", atk: 2000, targetDef: 1200, targetPosition: MONSTER_POSITION.DEFENSE, piercing: true, targetFlags: { preventsBattleDamage: true } },
+         { name: "目标不被战斗破坏", atk: 2000, targetAtk: 1000, targetFlags: { cannotBeDestroyedByBattle: true } },
+         { name: "我方不受战斗伤害", atk: 1200, targetDef: 2000, targetPosition: MONSTER_POSITION.DEFENSE, attackerFlags: { preventsBattleDamage: true } },
++        { name: "无下限减伤：攻击表示被破防", atk: 2000, targetAtk: 1500, targetFlags: { themedState: { infinityUntil: 10, infinityReduce: 300 } } },
++        { name: "无下限减伤：攻击方战败", atk: 1500, targetAtk: 2000, attackerFlags: { themedState: { infinityUntil: 10, infinityReduce: 300 } } },
++        { name: "无下限减伤：贯穿破防", atk: 2000, targetDef: 1200, targetPosition: MONSTER_POSITION.DEFENSE, piercing: true, targetFlags: { themedState: { infinityUntil: 10, infinityReduce: 300 } } },
++        { name: "无下限减伤：攻击方撞墙", atk: 1200, targetDef: 2000, targetPosition: MONSTER_POSITION.DEFENSE, attackerFlags: { themedState: { infinityUntil: 10, infinityReduce: 300 } } },
++        { name: "无下限减伤：不低于0", atk: 2000, targetAtk: 1500, targetFlags: { themedState: { infinityUntil: 10, infinityReduce: 1000 } } },
+         { name: "直接攻击", direct: true, atk: 2300 },
+     ];
+ 
+     for (const scenario of scenarios) {
+         it(`预览与结算一致：${scenario.name}`, () => {
+             const preview = battleSetup(scenario);
+             const predicted = preview.engine.predictBattle(preview.attacker, preview.target);
+ 
+             // 用同一套初始条件真实结算一次，比较结论
+             const actual = battleSetup(scenario);
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+index 32c9c88..e3038ea 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+@@ -108,21 +108,23 @@ test("剧毒不衰减且中毒方回复减半", () => {
+     o.heal(1000);
+     // 规格（设计文档 §4.2）：中毒方回复量减半。8000 起手 → 实际 +500。
+     // 简报原文 7000+500 与规格/指定实现矛盾（8000 不会先变成 7000），故按规格修正预期值。
+     assert.equal(o.lp, 8000 + 500);
+     s.currentPlayerIndex = 1; e.endTurn();
+     assert.equal(o.lp, 8000 + 500 - 450 * 2);
+     assert.equal(target.themedState.statuses.venom, 2);
+ });
+ 
+ test("新动作都有卡面文字", () => {
+-    for (const action of ["ignite", "venom", "bleed", "curse"]) assert.ok(ACTION_TEXT[action]?.length > 0);
++    for (const action of ["ignite", "venom", "bleed", "curse", "paralyze", "infinity"]) assert.ok(ACTION_TEXT[action]?.length > 0);
++    assert.ok(ACTION_TEXT.infinity.includes("直到下个回合结束"));
++    assert.ok(ACTION_TEXT.paralyze.includes("麻痹"));
+ });
+ 
+ test("出血在战斗后结算并衰减", () => {
+     const { s, p, o, e } = board();
+     const attacker = createCardInstance({ id: "a1", name: "我", type: "monster", level: 4, attack: 2000, defense: 1000, effects: [] });
+     const defender = enemyMonster(1500);
+     // 简报原文直接用 1500 攻守备者承接 2000 攻攻击者：按引擎规则守备者会被战斗破坏，
+     // 离场时 themedState 清空且不再位于怪兽区，两个断言（出血结算、层数-1）都无法成立。
+     // 为保留"出血结算+衰减"的测试意图，给守备者加上战斗破坏免疫。
+     defender.cannotBeDestroyedByBattle = true;
+@@ -206,10 +208,73 @@ test("被取消的攻击不结算出血", () => {
+     p.monsterZone.push(attacker);
+     applyAilment(attacker, "bleed", 2, 400);
+     const trap = createCardInstance({ id: "tr_cancel", name: "拦截", type: "trap", effects: [{ type: "themedAction", action: "intercept", trigger: "onAttacked", skillName: "t" }] });
+     trap.faceDown = true; trap.canActivate = true; trap.setTurn = 0;
+     o.spellTrapZone.push(trap);
+     attacker.canAttack = true; s.phase = "battle";
+     assert.equal(e.attack(attacker, "player").attackCanceled, true);
+     assert.equal(o.lp, 8000);
+     assert.equal(attacker.themedState.statuses.bleed, 2);
+ });
++
++test("麻痹阻止攻击与改变表示", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "paralyze", params: { count: 1 }, skillName: "t" }, gameState: s });
++    target.canAttack = true; s.phase = "battle"; s.currentPlayerIndex = 1;
++    assert.equal(e.attack(target, "player").success, false);
++    s.phase = "main_1";
++    assert.equal(e.changePosition(o, target).success, false);
++});
++
++test("无下限减伤且不可取对象", () => {
++    const { s, p, o, e } = board();
++    const guard = createCardInstance({ id: "g1", name: "无下限", type: "monster", level: 4, attack: 1000, defense: 2000, effects: [] });
++    guard.position = "defense";
++    p.monsterZone.push(guard);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: guard, effect: { action: "infinity", params: { reduce: 1000 }, skillName: "t" }, gameState: s });
++    assert.equal(guard.cannotBeTargeted, true);
++    const attacker = createCardInstance({ id: "a2", name: "敌", type: "monster", level: 4, attack: 2500, defense: 1000, effects: [] });
++    attacker.canAttack = true; o.monsterZone.push(attacker); s.currentPlayerIndex = 1; s.phase = "battle";
++    e.attack(attacker, guard);
++    assert.equal(p.lp, 8000); // 2500-1000 减伤后低于守备 2000，无战伤
++});
++
++test("无下限作为守备方承受战斗伤害时按数值减伤", () => {
++    const { s, p, o, e } = board();
++    const guard = createCardInstance({ id: "g2", name: "无下限", type: "monster", level: 4, attack: 1000, defense: 1000, effects: [] });
++    p.monsterZone.push(guard);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: guard, effect: { action: "infinity", params: { reduce: 1000 }, skillName: "t" }, gameState: s });
++    const attacker = createCardInstance({ id: "a3", name: "敌", type: "monster", level: 4, attack: 2500, defense: 1000, effects: [] });
++    attacker.canAttack = true; o.monsterZone.push(attacker); s.currentPlayerIndex = 1; s.phase = "battle";
++    e.attack(attacker, guard);
++    assert.equal(p.lp, 7500); // 战斗伤害 2500-1000=1500，无下限减免 1000
++    assert.ok(p.graveyard.includes(guard));
++});
++
++test("无下限作为攻击方承受战斗伤害时按数值减伤", () => {
++    const { s, p, o, e } = board();
++    const attacker = createCardInstance({ id: "a4", name: "我", type: "monster", level: 4, attack: 1000, defense: 1000, effects: [] });
++    p.monsterZone.push(attacker);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: attacker, effect: { action: "infinity", params: { reduce: 1000 }, skillName: "t" }, gameState: s });
++    const defender = enemyMonster(2500);
++    o.monsterZone.push(defender);
++    attacker.canAttack = true; s.phase = "battle";
++    e.attack(attacker, defender);
++    assert.equal(p.lp, 7500); // 战斗伤害 2500-1000=1500，无下限减免 1000
++});
++
++test("麻痹与无下限到期后清理状态", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    const guard = createCardInstance({ id: "g3", name: "无下限", type: "monster", level: 4, attack: 1000, defense: 1000, effects: [] });
++    p.monsterZone.push(guard);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "paralyze", params: { count: 1 }, skillName: "t" }, gameState: s });
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: guard, effect: { action: "infinity", params: { reduce: 1000 }, skillName: "t" }, gameState: s });
++    // 让"对方"（乙）结束自己的回合触发到期清理；不经过控制者的 startTurn，
++    // 避免 resetTurnState 提前清掉 cannotBeTargeted 而让断言失去鉴别力。
++    s.turn = 4; s.currentPlayerIndex = 1;
++    e.endTurn();
++    assert.equal(target.themedState.paralyzedUntil, undefined);
++    assert.equal(guard.themedState.infinityUntil, undefined);
++    assert.equal(guard.cannotBeTargeted, false);
++});

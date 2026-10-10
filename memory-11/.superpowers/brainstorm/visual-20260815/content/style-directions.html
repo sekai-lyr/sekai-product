@@ -1,0 +1,122 @@
+<style>
+  :root { --ink:#eef2ff; --muted:#97a2c0; --line:rgba(184,197,255,.18); }
+  .direction-intro { margin-bottom: 20px; }
+  .direction-intro p { max-width: 860px; }
+  .direction-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; align-items:start; }
+  .direction { cursor:pointer; min-width:0; transition:transform .2s ease, border-color .2s ease; }
+  .direction:hover { transform:translateY(-3px); }
+  .direction.selected { border-color:#7f8cff; box-shadow:0 0 0 2px rgba(127,140,255,.22), 0 22px 60px rgba(0,0,0,.28); }
+  .direction h3 { margin:0; font-size:20px; }
+  .direction .tagline { margin:6px 0 14px; color:#aeb9d7; font-size:12px; line-height:1.5; }
+  .direction-meta { display:flex; gap:7px; flex-wrap:wrap; margin-top:14px; }
+  .direction-meta span { padding:5px 8px; border:1px solid var(--line); color:#aeb9d7; font-size:10px; border-radius:999px; }
+  .mock-window { overflow:hidden; border:1px solid rgba(188,198,255,.2); border-radius:12px; background:#080b18; box-shadow:0 16px 40px rgba(0,0,0,.22); }
+  .mock-top { height:27px; display:flex; align-items:center; gap:5px; padding:0 9px; background:#10152a; border-bottom:1px solid var(--line); }
+  .mock-dot { width:6px; height:6px; border-radius:50%; background:#7580a7; }
+  .mock-url { margin-left:5px; height:11px; flex:1; border-radius:99px; background:rgba(188,198,255,.09); }
+  .mock-body { display:grid; grid-template-columns:54px 1fr; min-height:302px; }
+  .mock-side { display:flex; flex-direction:column; gap:8px; padding:12px 7px; background:#0c1020; border-right:1px solid var(--line); }
+  .mock-side .mini-brand { width:26px; height:26px; display:grid; place-items:center; margin:0 auto 12px; color:#fff; border:1px solid #6f79ff; background:linear-gradient(135deg,#252966,#10152c); font-size:11px; }
+  .mock-nav { display:grid; justify-items:center; gap:4px; padding:7px 2px; color:#727c9f; font-size:9px; border-radius:6px; }
+  .mock-nav.active { color:#f1f3ff; background:rgba(116,125,255,.18); box-shadow:inset 2px 0 #8b90ff; }
+  .mock-nav b { font-size:14px; line-height:1; font-weight:500; }
+  .mock-side .grow { flex:1; }
+  .mock-main { padding:16px; min-width:0; background:radial-gradient(circle at 90% 8%,rgba(82,104,255,.18),transparent 38%),#0b0f20; }
+  .mock-main .micro-label { color:#60dae8; letter-spacing:.17em; font-size:7px; font-weight:800; }
+  .mock-main h4 { margin:5px 0 4px; color:#f5f6ff; font-size:23px; line-height:1; letter-spacing:-.05em; }
+  .mock-main .micro-copy { margin:0; color:#a6b0ce; font-size:9px; line-height:1.5; }
+  .hero-a { display:grid; grid-template-columns:1.05fr .95fr; min-height:260px; border:1px solid rgba(172,184,255,.16); background:#10152a; }
+  .hero-a-copy { display:flex; flex-direction:column; justify-content:center; padding:18px; }
+  .hero-a h4 { font-size:27px; max-width:180px; }
+  .hero-a-art { position:relative; overflow:hidden; background:radial-gradient(circle at 62% 37%,#f3bd9a 0 7%,transparent 7.5%),radial-gradient(ellipse at 58% 74%,#c34374 0 20%,transparent 20.5%),linear-gradient(135deg,#101426 0 28%,#67355f 28% 42%,#56b9d5 42% 68%,#1b2742 68%); }
+  .hero-a-art:before { content:""; position:absolute; width:138px; height:210px; right:-28px; top:28px; border-radius:50% 50% 18% 22%; transform:rotate(18deg); background:linear-gradient(135deg,#f4d2b0 0 15%,#e9b15c 15% 27%,#a13b5f 27% 62%,#242544 62%); box-shadow:-36px -28px 0 -7px rgba(25,26,49,.9); }
+  .hero-a-art:after { content:"SAMPLE ART"; position:absolute; bottom:10px; right:10px; color:rgba(255,255,255,.66); font-size:7px; letter-spacing:.16em; }
+  .mock-button { display:inline-flex; justify-content:center; align-items:center; min-height:25px; margin-top:12px; padding:0 12px; border:0; background:linear-gradient(135deg,#8582ff,#4f75e8); color:white; font-size:9px; font-weight:800; }
+  .hero-a .mock-button { align-self:flex-start; }
+  .stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:10px; }
+  .stat { padding:9px; border:1px solid var(--line); background:rgba(18,23,45,.8); }
+  .stat small { display:block; color:#7f8aab; font-size:7px; }
+  .stat strong { display:block; margin-top:4px; font-size:14px; }
+  .b-panels { display:grid; grid-template-columns:1.15fr .85fr; gap:8px; margin-top:10px; }
+  .b-panel { padding:10px; border:1px solid var(--line); background:#11162a; }
+  .b-panel h5 { margin:0 0 8px; font-size:10px; }
+  .progress { height:6px; overflow:hidden; background:#242a45; }
+  .progress i { display:block; width:68%; height:100%; background:#65d9c4; }
+  .mini-list { display:grid; gap:5px; }
+  .mini-list div { display:flex; justify-content:space-between; gap:4px; color:#a8b1cc; font-size:8px; }
+  .mini-list b { color:#f3f4ff; font-weight:600; }
+  .c-shell { position:relative; min-height:260px; overflow:hidden; background:linear-gradient(130deg,#05060d,#0a1630 54%,#131b45); }
+  .c-shell:before { content:""; position:absolute; width:240px; height:240px; right:-80px; top:-70px; border:1px solid rgba(75,223,235,.45); border-radius:50%; box-shadow:0 0 0 18px rgba(75,223,235,.05),0 0 0 42px rgba(124,102,255,.08); }
+  .c-shell:after { content:"RANKED / LIVE"; position:absolute; right:13px; top:13px; color:#64deea; font-size:7px; letter-spacing:.18em; }
+  .c-content { position:relative; z-index:1; padding:18px; width:72%; }
+  .c-content h4 { font-size:25px; text-transform:uppercase; max-width:190px; }
+  .c-content .accent-line { width:72px; height:3px; margin:13px 0; background:#6ce0ea; box-shadow:0 0 13px #6ce0ea; }
+  .c-metric { display:flex; align-items:center; gap:8px; margin-top:18px; color:#c5ccef; font-size:8px; }
+  .c-metric i { width:8px; height:8px; transform:rotate(45deg); border:1px solid #ffc969; }
+  .c-queue { position:absolute; bottom:13px; right:13px; padding:9px 11px; border:1px solid rgba(104,224,234,.45); color:#eafaff; background:rgba(38,68,102,.45); font-size:8px; }
+  .auth-preview { margin-top:16px; padding:12px; border:1px solid var(--line); background:#0b0f20; }
+  .auth-preview-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; color:#9ba8c8; font-size:8px; letter-spacing:.12em; }
+  .auth-card { width:82%; margin:0 auto; padding:14px; border:1px solid rgba(175,188,255,.2); background:#13182d; }
+  .auth-card .auth-mark { width:23px; height:23px; display:grid; place-items:center; margin:0 auto 7px; border:1px solid #7d82ff; color:#fff; font-size:10px; }
+  .auth-card strong { display:block; text-align:center; font-size:13px; }
+  .auth-card small { display:block; margin:3px 0 10px; text-align:center; color:#7d88a8; font-size:7px; letter-spacing:.2em; }
+  .auth-tabs-mini { display:grid; grid-template-columns:1fr 1fr; margin-bottom:8px; border:1px solid var(--line); color:#939ebf; font-size:8px; text-align:center; }
+  .auth-tabs-mini b { padding:5px; background:rgba(119,115,255,.2); color:#fff; }
+  .auth-tabs-mini span { padding:5px; }
+  .auth-input { height:22px; margin-top:6px; border:1px solid var(--line); background:#0d1223; }
+  .auth-submit-mini { height:23px; margin-top:10px; background:linear-gradient(135deg,#7e78ff,#4e76e9); color:#fff; text-align:center; line-height:23px; font-size:8px; font-weight:800; }
+  .option-note { margin-top:13px; color:#97a5c5; font-size:11px; line-height:1.6; }
+  @media (max-width: 1100px) { .direction-grid { grid-template-columns:1fr; } .direction { max-width:720px; } .mock-body { min-height:270px; } }
+</style>
+
+<div class="direction-intro">
+  <h2>先选整体视觉方向</h2>
+  <p class="subtitle">点击你最接近的方案。三套都覆盖：首页主视觉、左侧功能导航、登录/注册页；正式实施时会把你选中的方向同步到网页端与 Godot 本地端。</p>
+</div>
+
+<div class="direction-grid">
+  <div class="card direction" data-choice="A-星轨大厅" onclick="toggleSelect(this)">
+    <h3>A · 星轨大厅</h3>
+    <p class="tagline">保留现有角色大图，但把页面改成“视觉小说式主舞台”，重点突出角色与入口按钮。</p>
+    <div class="mock-window">
+      <div class="mock-top"><i class="mock-dot"></i><i class="mock-dot"></i><i class="mock-dot"></i><i class="mock-url"></i></div>
+      <div class="mock-body">
+        <nav class="mock-side"><div class="mini-brand">✦</div><div class="mock-nav active"><b>⌂</b>首页</div><div class="mock-nav"><b>✦</b>卡包</div><div class="mock-nav"><b>▦</b>收藏</div><div class="mock-nav"><b>▤</b>卡组</div><div class="grow"></div><div class="mock-nav"><b>?</b>规则</div><div class="mock-nav"><b>⚙</b>设置</div></nav>
+        <main class="mock-main"><div class="hero-a"><div class="hero-a-copy"><span class="micro-label">NIGHTCORD DUEL NETWORK</span><h4>让收藏，真正进入决斗。</h4><p class="micro-copy">首页只保留一个主任务：选择关卡、进入决斗。</p><button class="mock-button">挑战关卡</button></div><div class="hero-a-art"></div></div><div class="stat-row"><div class="stat"><small>主卡组</small><strong>40 / 60</strong></div><div class="stat"><small>收藏进度</small><strong>128 / 368</strong></div><div class="stat"><small>连胜</small><strong>07</strong></div></div></main>
+      </div>
+    </div>
+    <div class="auth-preview"><div class="auth-preview-title"><span>登录 / 注册</span><span>分屏表单</span></div><div class="auth-card"><div class="auth-mark">✦</div><strong>Sekai Game</strong><small>NETWORK</small><div class="auth-tabs-mini"><b>登录</b><span>注册</span></div><div class="auth-input"></div><div class="auth-input"></div><div class="auth-submit-mini">进入大厅</div></div></div>
+    <div class="direction-meta"><span>角色大图</span><span>改动小</span><span>沉浸感高</span></div>
+    <p class="option-note">适合：希望保留当前插画资产、尽快改善“丑”和空旷感。</p>
+  </div>
+
+  <div class="card direction" data-choice="B-卡牌工作台" onclick="toggleSelect(this)">
+    <h3>B · 卡牌工作台</h3>
+    <p class="tagline">把首页变成可操作的游戏仪表盘，登录后立刻看到卡组、收藏和最近对局。</p>
+    <div class="mock-window">
+      <div class="mock-top"><i class="mock-dot"></i><i class="mock-dot"></i><i class="mock-dot"></i><i class="mock-url"></i></div>
+      <div class="mock-body">
+        <nav class="mock-side"><div class="mini-brand">SG</div><div class="mock-nav active"><b>⌂</b>首页</div><div class="mock-nav"><b>▣</b>卡包</div><div class="mock-nav"><b>▦</b>收藏</div><div class="mock-nav"><b>♢</b>卡组</div><div class="grow"></div><div class="mock-nav"><b>?</b>规则</div><div class="mock-nav"><b>⚙</b>设置</div></nav>
+        <main class="mock-main"><span class="micro-label">COMMAND CENTER</span><h4>欢迎回来，sekai</h4><p class="micro-copy">今天先完成一场决斗，还是优化你的主卡组？</p><div class="b-panels"><div class="b-panel"><h5>当前主卡组</h5><p class="micro-copy">Nightcord / 控制型</p><div class="progress"><i></i></div><p class="micro-copy" style="margin-top:6px">40 / 60 张 · 可出战</p><button class="mock-button">继续编辑</button></div><div class="b-panel"><h5>快捷入口</h5><div class="mini-list"><div><span>收藏进度</span><b>35%</b></div><div><span>决斗币</span><b>73,198</b></div><div><span>最近战绩</span><b>7W / 2L</b></div></div></div></div></main>
+      </div>
+    </div>
+    <div class="auth-preview"><div class="auth-preview-title"><span>登录 / 注册</span><span>居中卡片</span></div><div class="auth-card" style="background:rgba(20,25,47,.75);backdrop-filter:blur(8px)"><div class="auth-mark">✦</div><strong>Sekai Game</strong><small>NETWORK</small><div class="auth-tabs-mini"><b>登录</b><span>注册</span></div><div class="auth-input"></div><div class="auth-input"></div><div class="auth-submit-mini">确认登录</div></div></div>
+    <div class="direction-meta"><span>信息清晰</span><span>功能导向</span><span>最易维护</span></div>
+    <p class="option-note">适合：希望游戏更像成熟卡牌产品，减少空洞大图，提升“每天都能用”的效率。</p>
+  </div>
+
+  <div class="card direction" data-choice="C-夜巡竞技" onclick="toggleSelect(this)">
+    <h3>C · 夜巡竞技</h3>
+    <p class="tagline">强化“网络对战”和竞技场气质，用窄侧栏、霓虹状态和排行榜制造速度感。</p>
+    <div class="mock-window">
+      <div class="mock-top"><i class="mock-dot"></i><i class="mock-dot"></i><i class="mock-dot"></i><i class="mock-url"></i></div>
+      <div class="mock-body">
+        <nav class="mock-side" style="background:#070b16"><div class="mini-brand" style="border-color:#5fe0ea">N</div><div class="mock-nav active"><b>◈</b>大厅</div><div class="mock-nav"><b>◉</b>卡包</div><div class="mock-nav"><b>◇</b>牌库</div><div class="mock-nav"><b>⚔</b>决斗</div><div class="grow"></div><div class="mock-nav"><b>?</b>规则</div><div class="mock-nav"><b>⚙</b>系统</div></nav>
+        <main class="mock-main" style="padding:0"><div class="c-shell"><div class="c-content"><span class="micro-label">NIGHTCORD / ARENA 01</span><h4>现在，轮到你出牌。</h4><div class="accent-line"></div><p class="micro-copy">匹配玩家 · 训练 AI · 挑战关卡</p><div class="c-metric"><i></i><span>在线玩家 128 · 延迟 42ms</span></div></div><div class="c-queue">进入匹配 →</div></div></main>
+      </div>
+    </div>
+    <div class="auth-preview"><div class="auth-preview-title"><span>登录 / 注册</span><span>竞技场入口</span></div><div class="auth-card" style="background:linear-gradient(145deg,#0a1730,#13163a);border-color:rgba(93,224,234,.35)"><div class="auth-mark" style="border-color:#5fe0ea">N</div><strong style="letter-spacing:.06em">NIGHTCORD</strong><small>DUEL NETWORK</small><div class="auth-tabs-mini"><b style="background:rgba(91,225,235,.18)">登录</b><span>注册</span></div><div class="auth-input"></div><div class="auth-input"></div><div class="auth-submit-mini" style="background:linear-gradient(135deg,#4bdce8,#536bf1)">连接竞技场</div></div></div>
+    <div class="direction-meta"><span>竞技感强</span><span>识别度高</span><span>改动较大</span></div>
+    <p class="option-note">适合：把 PvP、房间和对战作为核心，接受更强的霓虹风格与更多动效。</p>
+  </div>
+</div>

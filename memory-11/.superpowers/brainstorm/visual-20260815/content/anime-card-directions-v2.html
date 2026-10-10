@@ -1,0 +1,125 @@
+<style>
+  :root { --ink:#0b0c11; --ink-2:#14151c; --paper:#e8d9b5; --gold:#caa15a; --gold-hi:#f0cf82; --wine:#762b42; --lapis:#2b4a82; --cyan:#6fc5c4; --mist:#a99e87; --white:#f5f0e2; }
+  .v2-intro { margin-bottom:18px; }
+  .v2-intro h2 { font-family: Georgia, 'Noto Serif SC', serif; letter-spacing:.01em; }
+  .v2-intro p { max-width:920px; line-height:1.65; }
+  .anti-ai { display:flex; flex-wrap:wrap; gap:8px; margin:15px 0 22px; padding:10px 12px; border:1px solid rgba(202,161,90,.32); background:rgba(202,161,90,.06); color:#c9bea4; font-size:11px; }
+  .anti-ai b { color:#ecd18e; font-weight:600; }
+  .v2-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; align-items:start; }
+  .v2-option { cursor:pointer; min-width:0; overflow:hidden; border:1px solid rgba(202,161,90,.25)!important; border-radius:3px!important; background:#0c0d12!important; transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease; }
+  .v2-option:hover { transform:translateY(-4px); border-color:rgba(240,207,130,.7)!important; box-shadow:0 18px 40px rgba(0,0,0,.35); }
+  .v2-option.selected { border-color:#f0cf82!important; box-shadow:0 0 0 2px rgba(240,207,130,.25),0 20px 54px rgba(0,0,0,.4); }
+  .v2-option .v2-copy { padding:15px 15px 0; }
+  .v2-option h3 { margin:0; color:var(--paper); font-family:Georgia,'Noto Serif SC',serif; font-size:21px; font-weight:600; }
+  .v2-option .tagline { min-height:38px; margin:6px 0 13px; color:#9e957f; font-size:11px; line-height:1.55; }
+  .v2-tags { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+  .v2-tags span { padding:4px 7px; border:1px solid rgba(202,161,90,.3); color:#cbbd9e; font-size:9px; letter-spacing:.02em; }
+  .mini-game { position:relative; overflow:hidden; margin:0 12px; border:1px solid rgba(202,161,90,.38); background:var(--ink); color:var(--paper); font-family:'Noto Serif SC','Microsoft YaHei',serif; }
+  .mini-top { display:flex; align-items:center; height:28px; padding:0 9px; gap:8px; border-bottom:1px solid rgba(202,161,90,.26); background:#11131a; }
+  .mini-sigil { display:grid; place-items:center; width:17px; height:17px; border:1px solid var(--gold); color:var(--gold-hi); font-size:9px; transform:rotate(45deg); }
+  .mini-sigil span { transform:rotate(-45deg); }
+  .mini-top strong { color:#e9d9ad; font-family:Georgia,serif; font-size:10px; letter-spacing:.04em; }
+  .mini-top .mini-status { margin-left:auto; color:#8ca8a1; font-family:Arial,sans-serif; font-size:7px; letter-spacing:.14em; }
+  .mini-layout { display:grid; grid-template-columns:46px 1fr; min-height:300px; }
+  .mini-rail { display:flex; flex-direction:column; gap:5px; padding:9px 5px; border-right:1px solid rgba(202,161,90,.2); background:#101117; }
+  .mini-rail .rail-mark { width:26px; height:26px; display:grid; place-items:center; margin:0 auto 8px; border:1px solid rgba(202,161,90,.58); color:var(--gold-hi); font-size:9px; }
+  .rail-link { display:grid; justify-items:center; gap:2px; padding:7px 1px; color:#766e60; font-size:7px; line-height:1; }
+  .rail-link b { color:inherit; font-family:Georgia,serif; font-size:13px; font-weight:400; }
+  .rail-link.active { color:var(--gold-hi); background:rgba(202,161,90,.11); box-shadow:inset 2px 0 var(--gold); }
+  .rail-spacer { flex:1; }
+  .mini-stage { position:relative; min-width:0; padding:12px; background:radial-gradient(circle at 48% 42%,rgba(118,43,66,.22),transparent 24%),linear-gradient(135deg,#0b0c12,#171721); }
+  .mini-eyebrow { color:var(--gold); font-family:Arial,sans-serif; font-size:7px; letter-spacing:.17em; }
+  .mini-stage h4 { margin:5px 0 4px; color:#f2e7c8; font-family:Georgia,'Noto Serif SC',serif; font-size:20px; font-weight:600; line-height:1.05; }
+  .mini-desc { margin:0; color:#9b927e; font-family:Arial,'Microsoft YaHei',sans-serif; font-size:8px; line-height:1.5; }
+  .duel-button { display:inline-flex; align-items:center; justify-content:center; min-height:24px; margin-top:11px; padding:0 13px; border:1px solid var(--gold); background:linear-gradient(180deg,#8a3c51,#5a2134); color:#f4e4bd; font-family:'Noto Serif SC',serif; font-size:9px; }
+  .duel-button.alt { border-color:rgba(202,161,90,.45); background:transparent; color:#c6b58e; }
+  .card-board { position:relative; height:203px; margin-top:12px; border:1px solid rgba(202,161,90,.22); background:radial-gradient(circle at center,rgba(62,87,126,.28),transparent 40%),repeating-linear-gradient(0deg,rgba(202,161,90,.035) 0 1px,transparent 1px 4px),#111721; }
+  .card-board:before { content:""; position:absolute; inset:19px; border:1px solid rgba(202,161,90,.13); border-radius:50%; transform:scaleX(1.25); }
+  .deck-pile { position:absolute; left:12px; bottom:17px; width:37px; height:54px; border:2px solid #b89351; background:repeating-linear-gradient(45deg,#282138 0 3px,#6f293f 3px 5px); box-shadow:3px 3px 0 #07080b; }
+  .deck-pile:after { content:"DECK"; position:absolute; left:3px; bottom:4px; color:#e5cf9a; font:6px Arial; letter-spacing:.1em; }
+  .board-seal { position:absolute; left:50%; top:53%; width:73px; height:73px; border:1px solid rgba(202,161,90,.45); border-radius:50%; transform:translate(-50%,-50%) rotate(45deg); }
+  .board-seal:after { content:"✦"; position:absolute; inset:18px; display:grid; place-items:center; border:1px solid rgba(202,161,90,.28); color:rgba(240,207,130,.78); transform:rotate(-45deg); }
+  .board-card { position:absolute; left:50%; top:50%; width:59px; height:86px; padding:4px; transform:translate(-50%,-50%) rotate(-6deg); border:2px solid #d3aa5b; background:#291f2b; box-shadow:0 8px 18px rgba(0,0,0,.5); }
+  .board-card .portrait { height:53px; background:radial-gradient(circle at 52% 31%,#e4b88b 0 12%,transparent 12.5%),linear-gradient(135deg,#b65765,#22395c 58%,#d8a95d); }
+  .board-card strong { display:block; margin-top:4px; color:#ecdba8; font:7px 'Noto Serif SC',serif; text-align:center; }
+  .board-card small { display:block; color:#918467; font:5px Arial; text-align:center; }
+  .hand-fan { position:absolute; right:12px; bottom:13px; display:flex; }
+  .hand-fan i { display:block; width:24px; height:35px; margin-left:-9px; border:1px solid #a67d44; background:linear-gradient(135deg,#1d2d51,#762b42); transform:rotate(var(--r)); box-shadow:1px 2px 3px #07080b; }
+  .hand-fan i:nth-child(1){--r:-18deg}.hand-fan i:nth-child(2){--r:-8deg}.hand-fan i:nth-child(3){--r:2deg}.hand-fan i:nth-child(4){--r:12deg}.hand-fan i:nth-child(5){--r:22deg}
+  .mini-side-panel { position:absolute; top:12px; right:12px; width:73px; padding:7px; border-left:1px solid rgba(202,161,90,.2); color:#b8aa8a; font:7px Arial; }
+  .mini-side-panel b { display:block; margin-bottom:5px; color:#ead7a8; font:10px 'Noto Serif SC',serif; }
+  .mini-side-panel div { display:flex; justify-content:space-between; margin-top:5px; }
+  .mini-side-panel div span:last-child { color:#e0bd6b; }
+  .auth-mini { margin:12px; padding:12px 0 14px; border-top:1px solid rgba(202,161,90,.2); }
+  .auth-mini-label { display:flex; justify-content:space-between; color:#867e6b; font:8px Arial; letter-spacing:.12em; }
+  .seal-auth { width:120px; margin:9px auto; padding:11px 10px; border:1px solid rgba(202,161,90,.55); background:radial-gradient(circle at 50% 0,rgba(202,161,90,.12),transparent 45%),#11131a; }
+  .seal-auth .auth-seal { width:30px; height:30px; display:grid; place-items:center; margin:0 auto 6px; border:1px solid var(--gold); color:var(--gold-hi); transform:rotate(45deg); }
+  .seal-auth .auth-seal span { transform:rotate(-45deg); }
+  .seal-auth strong { display:block; color:#f0e2bd; font:11px Georgia,serif; text-align:center; }
+  .seal-auth small { display:block; margin:3px 0 9px; color:#8c816c; font:6px Arial; letter-spacing:.17em; text-align:center; }
+  .auth-line { height:18px; margin-top:5px; border:1px solid rgba(202,161,90,.2); background:#0a0b10; }
+  .auth-action { height:20px; margin-top:8px; color:#f0deb0; background:#702b42; font:8px 'Noto Serif SC',serif; text-align:center; line-height:20px; }
+  .relic .mini-stage { background:radial-gradient(circle at 50% 38%,rgba(202,161,90,.12),transparent 30%),linear-gradient(145deg,#0e1118,#19131a); }
+  .atelier .mini-stage { background:linear-gradient(135deg,#17151b,#251b2a 53%,#101722); }
+  .atelier .mini-stage:before { content:"CARD ARCHIVE"; position:absolute; top:12px; right:12px; color:rgba(232,217,181,.32); font:7px Arial; letter-spacing:.14em; }
+  .catalog-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+  .anime-card { position:relative; min-height:146px; padding:5px; border:2px solid var(--gold); background:#211927; box-shadow:0 6px 16px rgba(0,0,0,.35); }
+  .anime-card:before { content:"SSR"; position:absolute; right:5px; top:4px; z-index:2; color:#f5d37f; font:7px Arial; font-weight:bold; }
+  .anime-card .art { height:87px; background:radial-gradient(circle at 46% 33%,#f0c098 0 13%,transparent 13.5%),linear-gradient(155deg,#a13f5a 0 28%,#e5ae61 28% 40%,#2a477e 40% 69%,#171724 69%); }
+  .anime-card strong { display:block; margin-top:5px; color:#f0dba6; font:8px 'Noto Serif SC',serif; }
+  .anime-card small { display:block; margin-top:3px; color:#9b8d74; font:6px Arial; line-height:1.25; }
+  .pack-ticket { display:flex; align-items:center; justify-content:space-between; min-height:56px; padding:8px; border:1px solid rgba(202,161,90,.35); background:linear-gradient(90deg,rgba(118,43,66,.55),rgba(43,74,130,.35)); }
+  .pack-ticket b { display:block; color:#f0dba6; font:10px Georgia,serif; }
+  .pack-ticket small { color:#a99d84; font:7px Arial; }
+  .pack-ticket em { color:#e9c46d; font:9px Arial; font-style:normal; }
+  .academy .mini-stage { background:linear-gradient(155deg,#152033,#1d1b2a 52%,#341d2e); }
+  .academy .mini-stage:after { content:"CHAPTER 01"; position:absolute; right:12px; top:12px; color:#c9bea3; font:7px Arial; letter-spacing:.15em; }
+  .chapter-layout { display:grid; grid-template-columns:1fr 1.05fr; gap:8px; margin-top:14px; }
+  .portrait-plate { position:relative; min-height:145px; border:1px solid rgba(202,161,90,.42); background:linear-gradient(155deg,#8c435d,#d4a45d 47%,#2d456f 48% 72%,#171726); }
+  .portrait-plate:before { content:""; position:absolute; left:50%; top:23px; width:45px; height:49px; border-radius:50% 48% 43% 43%; transform:translateX(-50%); background:radial-gradient(circle at 50% 30%,#e4b38d 0 24%,transparent 25%),linear-gradient(125deg,#2a1c2f 0 42%,#dfa75b 42% 52%,#422743 52%); }
+  .portrait-plate:after { content:"ORIGINAL HERO"; position:absolute; bottom:7px; left:0; right:0; color:#f2ddad; font:6px Arial; letter-spacing:.13em; text-align:center; }
+  .quest-list { display:grid; gap:6px; }
+  .quest { padding:8px; border-left:2px solid var(--gold); background:rgba(8,10,15,.52); }
+  .quest b { display:block; color:#ebd6a5; font:9px 'Noto Serif SC',serif; }
+  .quest span { display:block; margin-top:3px; color:#a39882; font:7px Arial; line-height:1.25; }
+  .v2-note { padding:0 15px 15px; color:#938973; font-size:10px; line-height:1.6; }
+  @media (max-width:1100px) { .v2-grid { grid-template-columns:1fr; } .v2-option { max-width:700px; } }
+</style>
+
+<div class="v2-intro">
+  <h2>二次元卡牌游戏方向 · V2</h2>
+  <p class="subtitle">上一版的问题是“像后台管理系统的游戏皮肤”：渐变、玻璃卡片、英文标签很多，但没有卡牌本身的重量。这一版改用原创二次元卡牌作品常见的视觉语法：卡框、牌背、决斗盘、稀有度、封印、章节和召唤仪式。氛围可接近日式决斗卡牌作品，但不直接复刻官方 Logo、卡面或角色。</p>
+</div>
+<div class="anti-ai"><b>共同删掉：</b>大段营销标语 · 紫蓝 SaaS 渐变 · 圆角玻璃面板 · 无意义的 NETWORK 文案 · 纯图标侧栏　 <b>共同加入：</b>实体卡边框 · 金属线条 · 牌库/手牌/墓地 · 角色卡面 · 召唤与翻牌动效</div>
+
+<div class="v2-grid">
+  <div class="card v2-option relic" data-choice="V2-A-暗金决斗盘" onclick="toggleSelect(this)">
+    <div class="v2-copy"><h3>A · 暗金决斗盘</h3><p class="tagline">把首页做成“决斗前的牌桌”：主卡组、手牌、决斗币和挑战入口都像摆在决斗盘上。</p></div>
+    <div class="mini-game">
+      <div class="mini-top"><div class="mini-sigil"><span>✦</span></div><strong>SEKAI DUEL</strong><span class="mini-status">READY TO DUEL</span></div>
+      <div class="mini-layout"><nav class="mini-rail"><div class="rail-mark">SD</div><div class="rail-link active"><b>◇</b>决斗盘</div><div class="rail-link"><b>✦</b>卡包</div><div class="rail-link"><b>▱</b>牌库</div><div class="rail-link"><b>♢</b>卡组</div><div class="rail-spacer"></div><div class="rail-link"><b>?</b>规则</div><div class="rail-link"><b>⚙</b>设置</div></nav><main class="mini-stage"><span class="mini-eyebrow">DUEL PREPARATION</span><h4>准备你的牌组</h4><p class="mini-desc">一张卡，一次选择，决定下一场决斗的节奏。</p><button class="duel-button">选择对手</button><button class="duel-button alt">编辑卡组</button><div class="card-board"><div class="deck-pile"></div><div class="board-seal"></div><div class="board-card"><div class="portrait"></div><strong>星弦·奏响者</strong><small>原创角色卡</small></div><div class="hand-fan"><i></i><i></i><i></i><i></i><i></i></div><div class="mini-side-panel"><b>DUELIST</b><div><span>LP</span><span>8000</span></div><div><span>DECK</span><span>40</span></div><div><span>WIN</span><span>07</span></div></div></div></main></div>
+    </div>
+    <div class="auth-mini"><div class="auth-mini-label"><span>登录 / 注册 · 决斗者认证</span><span>01</span></div><div class="seal-auth"><div class="auth-seal"><span>✦</span></div><strong>进入决斗网络</strong><small>DUELIST ACCESS</small><div class="auth-line"></div><div class="auth-line"></div><div class="auth-action">开始连接</div></div></div>
+    <div class="v2-tags"><span>卡牌重量感</span><span>牌桌首页</span><span>适合保留插画</span></div><p class="v2-note">最推荐作为网页端主方向。首页、卡包、收藏、卡组都能共用同一套“实体卡 + 决斗盘”语言。</p>
+  </div>
+
+  <div class="card v2-option atelier" data-choice="V2-B-星图卡典" onclick="toggleSelect(this)">
+    <div class="v2-copy"><h3>B · 星图卡典</h3><p class="tagline">以“卡牌图鉴 + 抽卡仪式”为核心，首页直接展示一张主推角色卡和本期卡包。</p></div>
+    <div class="mini-game">
+      <div class="mini-top"><div class="mini-sigil"><span>✦</span></div><strong>SEKAI CARD ARCHIVE</strong><span class="mini-status">COLLECTION 35%</span></div>
+      <div class="mini-layout"><nav class="mini-rail"><div class="rail-mark">CA</div><div class="rail-link active"><b>▱</b>图鉴</div><div class="rail-link"><b>✦</b>抽卡</div><div class="rail-link"><b>♢</b>卡组</div><div class="rail-link"><b>◈</b>对局</div><div class="rail-spacer"></div><div class="rail-link"><b>?</b>规则</div><div class="rail-link"><b>⚙</b>设置</div></nav><main class="mini-stage"><span class="mini-eyebrow">FEATURED CARD / SSR</span><h4>本期共鸣卡典</h4><p class="mini-desc">收集角色、魔法与陷阱，拼出属于你的战术。</p><div class="catalog-grid"><div class="anime-card"><div class="art"></div><strong>月蚀回廊·奏</strong><small>召唤成功：抽1张卡。</small></div><div><div class="pack-ticket"><div><b>夜色共鸣</b><small>SSR 卡包 · 剩余 03 天</small></div><em>✦ 10</em></div><button class="duel-button">打开卡包</button><div style="margin-top:12px;color:#998d74;font:7px Arial;line-height:1.5">本期保底：SSR / 10 抽<br>已收集：12 / 40</div></div></div></main></div>
+    </div>
+    <div class="auth-mini"><div class="auth-mini-label"><span>登录 / 注册 · 卡典入口</span><span>02</span></div><div class="seal-auth" style="background:linear-gradient(145deg,#211a28,#121823)"><div class="auth-seal" style="border-color:#d1a55e"><span>CA</span></div><strong>保存你的卡典</strong><small>CARD ARCHIVE</small><div class="auth-line"></div><div class="auth-line"></div><div class="auth-action" style="background:#2d497c">登录并继续</div></div></div>
+    <div class="v2-tags"><span>收藏驱动</span><span>抽卡仪式感</span><span>适合卡面丰富</span></div><p class="v2-note">最适合把卡牌收集做成核心卖点。左侧不再是“功能菜单”，而是“图鉴、抽卡、卡组、对局”的卡典索引。</p>
+  </div>
+
+  <div class="card v2-option academy" data-choice="V2-C-学院决斗" onclick="toggleSelect(this)">
+    <div class="v2-copy"><h3>C · 学院决斗</h3><p class="tagline">以角色和章节为入口，登录像进入学院，首页像一张二次元剧情关卡地图。</p></div>
+    <div class="mini-game">
+      <div class="mini-top"><div class="mini-sigil"><span>✦</span></div><strong>SEKAI DUEL ACADEMY</strong><span class="mini-status">CHAPTER 01</span></div>
+      <div class="mini-layout"><nav class="mini-rail"><div class="rail-mark">DA</div><div class="rail-link active"><b>◈</b>章节</div><div class="rail-link"><b>♙</b>角色</div><div class="rail-link"><b>▱</b>卡典</div><div class="rail-link"><b>⚔</b>决斗</div><div class="rail-spacer"></div><div class="rail-link"><b>?</b>规则</div><div class="rail-link"><b>⚙</b>设置</div></nav><main class="mini-stage"><span class="mini-eyebrow">NIGHTCORD DUEL ACADEMY</span><h4>第一章：月下的宣战</h4><p class="mini-desc">在学院钟声响起前，完成你的第一场决斗。</p><div class="chapter-layout"><div class="portrait-plate"></div><div class="quest-list"><div class="quest"><b>01 · 入学试炼</b><span>使用入门卡组完成一场 AI 决斗</span></div><div class="quest"><b>02 · 交换卡典</b><span>打开一次卡包，获得新的伙伴</span></div><div class="quest"><b>03 · 夜间决斗</b><span>编辑主卡组并挑战隐藏关卡</span></div></div></div><button class="duel-button">继续章节</button></main></div>
+    </div>
+    <div class="auth-mini"><div class="auth-mini-label"><span>登录 / 注册 · 学院入学</span><span>03</span></div><div class="seal-auth" style="background:linear-gradient(155deg,#1b263f,#321d30)"><div class="auth-seal" style="border-color:#8ca8c5"><span>DA</span></div><strong>登记成为决斗者</strong><small>ACADEMY ENTRANCE</small><div class="auth-line"></div><div class="auth-line"></div><div class="auth-action" style="background:#324d72">进入学院</div></div></div>
+    <div class="v2-tags"><span>角色叙事</span><span>关卡成长</span><span>最二次元</span></div><p class="v2-note">最有二次元游戏感，但需要补齐角色立绘、章节文案和关卡结构；适合作为长期版本方向。</p>
+  </div>
+</div>

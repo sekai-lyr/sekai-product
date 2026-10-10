@@ -1,0 +1,11 @@
+{
+  "turn": 29,
+  "gameOver": false,
+  "actions": 24,
+  "main2": 1,
+  "phase": "main_1",
+  "locks": false,
+  "integrity": [],
+  "aiError": false,
+  "note": "Browser fixture: 100000 LP; accelerated waiting timers, production AI scheduler/decisions/engine/UI; normal-speed game covered by strategy-flow.mjs."
+}

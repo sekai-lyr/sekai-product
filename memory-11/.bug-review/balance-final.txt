@@ -1,0 +1,33 @@
+﻿战斗规则：连锁上限 2 张／每回合无效化 0 次／每次支付 0 LP／陷阱上限 不限
+=== 各构筑取向的卡组构成 ===
+取向        低星/高星  怪兽  陷阱  平均ATK
+curve       29/ 1       30     0    1978
+big          2/33       35     1    2951
+hybrid      14/15       29     0    2572
+spell       17/ 2       19     0    2080
+trap        17/ 1       18    20    2066
+
+=== 两两对战（每对 150 局，先手交替）===
+取向        胜率      场次
+curve        54.2%   600
+big           0.0%   600
+hybrid       65.0%   600
+spell        60.2%   600
+trap         69.8%   600
+
+平均回合数：11.5（最短 4，最长 44）
+先手胜率：49.5%（已决出 1495 局）
+
+提示：先手胜率显著高于 50% 说明先后手不平衡；某个取向胜率压倒性领先说明卡池曲线偏斜。
+
+=== 陷阱结算统计 ===
+攻击 13658 次｜陷阱响应 2306 次（16.9% 的攻击被响应）｜其中直接取消攻击 275 次
+  study+recycle+recall   229
+  bomb+recover+purify    135
+  purify+recycle+study   123
+  scout+study+ambush     120
+  recover+recall+sanctuary 115
+  intercept+sleep        115
+  sanctuary+recover+recycle 115
+  purify+sanctuary+chorus 113
+  「取消攻击」占响应比例过高，说明陷阱是零代价的免费防守。

@@ -1,0 +1,60 @@
+﻿卡池总数 368；陷阱 45；其中"无效化攻击"类 12（26.7%）
+
+=== 陷阱来源分布 ===
+source_trap          共  28 无效化   7 | themed:purify×9 themed:recover×8 themed:study×8 themed:seal×6 themed:recycle×6 themed:sanctuary×5 | e.g. 翡翠峰嶺の雲霧結界 / 富士桜花の結界 / 花燈橋の夜桜結界
+ygo_n                共  12 无效化   5 | destroyAttacker×3 reduceDamage×3 buffSelfAttack×1 buffSelfDefense×1 healPlayer×1 directDamage×1 | e.g. 落穴 / 神圣防护罩－反射镜力－ / 和睦的使者
+nc_tr                共   5 无效化   0 | themed:study×3 themed:purify×3 themed:recover×2 themed:sanctuary×2 themed:recall×2 themed:recycle×1 | e.g. 暮雨长街的独行 / 寒岭汤泉的憩息 / 澄湖栈桥的余晖
+
+=== 陷阱效果类型分布（按卡计数） ===
+themed:purify                12
+themed:study                 11
+themed:recover               10
+themed:sanctuary             7
+themed:recycle               7
+themed:seal                  6
+themed:scout                 5
+themed:shelter               5
+themed:recall                4
+destroyAttacker              3
+reduceDamage                 3
+themed:ambush                3
+themed:mirror                2
+themed:poison                2
+themed:bomb                  2
+buffSelfAttack               1
+buffSelfDefense              1
+healPlayer                   1
+directDamage                 1
+cannotAttack                 1
+reflectDamage                1
+themed:intercept             1
+themed:sleep                 1
+themed:rescue                1
+themed:reversal              1
+themed:retreat               1
+themed:freeze                1
+themed:reprisal              1
+themed:chorus                1
+
+=== 陷阱取向会优先抓取的 20 张（按实验室打分） ===
+  其他 | UR | 暮雨长街的独行 | themed:study+themed:recover+themed:sanctuary
+  其他 | UR | 寒岭汤泉的憩息 | themed:purify+themed:recall+themed:study
+  其他 | UR | 澄湖栈桥的余晖 | themed:recover+themed:recall+themed:recycle
+  其他 | UR | 夏空校舍的流云 | themed:scout+themed:study+themed:purify
+  其他 | UR | 星降神篱的祈愿 | themed:purify+themed:shelter+themed:sanctuary
+  其他 | SSR | 百体地蔵的净罪之光 | themed:purify+themed:seal+themed:study
+  其他 | SSR | 本町通尽头的灵峰 | themed:seal+themed:shelter+themed:recover
+  其他 | SSR | 翠林水车的清流结界 | themed:study+themed:recycle+themed:recall
+  其他 | SSR | 稻荷神域的千本鸟居 | themed:seal+themed:purify+themed:sanctuary
+  其他 | SSR | 富士灵峰的湖畔守望 | themed:shelter+themed:sanctuary+themed:recover
+  其他 | SSR | 古都暗影的五重封印 | themed:seal+themed:purify+themed:recycle
+  其他 | SSR | 古都塔影的黄昏小路 | themed:sanctuary+themed:recover+themed:recycle
+  其他 | SSR | 古寺五重的黄昏钟声 | themed:purify+themed:recycle+themed:study
+  其他 | SSR | 海中鸟居的神域结界 | themed:recover+themed:recall+themed:sanctuary
+  其他 | SSR | 水田镜天的云映结界 | themed:scout+themed:study+themed:ambush
+  其他 | SSR | 雪灵峰下的驿站 | themed:shelter+themed:recover+themed:study
+  其他 | SSR | 岩间清瀑的结界之水 | themed:purify+themed:sanctuary+themed:chorus
+  其他 | SSR | 夜樱灯笼的幽冥引路 | themed:bomb+themed:recover+themed:purify
+无效化 | SR | 翡翠峰嶺の雲霧結界 | themed:intercept+themed:sleep
+无效化 | SR | 富士桜花の結界 | themed:rescue+themed:shelter
+→ 前 20 张里无效化类 2 张

@@ -1,0 +1,253 @@
+ .../engine.js"                                               |  2 +-
+ .../model.js"                                                |  3 ++-
+ .../themed-effects.js"                                       | 12 +++++++++++-
+ 3 files changed, 14 insertions(+), 3 deletions(-)
+ .../status-effects.test.js"                        | 44 ++++++++++++++++++++++
+ 1 file changed, 44 insertions(+)
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js\\js/engine.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/engine.js"
+index 1f7724d..c7690e9 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js\\js/engine.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/engine.js"
+@@ -1914,21 +1914,21 @@ export class GameEngine {
+             if (this.state.phase === PHASE.END) this.endTurn();
+         }
+     }
+ 
+     endTurn() {
+         if (this.state.gameOver) return;
+         this.state.phase = PHASE.END;
+         const player = this.state.currentPlayer;
+         this.emit("onTurnEnd", { player });
+         this.triggerEvent("onTurnEnd", { player });
+-        resolveThemedTurnEnd(this);
++        resolveThemedTurnEnd(this, player);
+         for (const owner of this.state.players) {
+             for (const card of owner.monsterZone) {
+                 card.tempEffects = (card.tempEffects || []).filter(effect => effect.duration !== DURATION.UNTIL_END_TURN);
+                 owner._recalcCardStats(card);
+                 card.doubleAttackThisTurn = false;
+                 // 回合级攻击记账必须一起清零：只清 doubleAttackThisTurn 会留下
+                 // attacksMadeThisTurn=2 / limit=1 的不一致状态。
+                 card.attacksMadeThisTurn = 0;
+                 card.hasAttackedThisTurn = false;
+             }
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js\\js/model.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/model.js"
+index 8f19a36..15e3eae 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js\\js/model.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/model.js"
+@@ -144,21 +144,22 @@ export class Player {
+         return discarded;
+     }
+ 
+     takeDamage(amount) {
+         const dmg = Math.max(0, Math.floor(Number(amount) || 0));
+         this.lp = Math.max(0, this.lp - dmg);
+         return this.lp <= 0;
+     }
+ 
+     heal(amount) {
+-        const heal = Math.max(0, Math.floor(Number(amount) || 0));
++        const poisoned = this.monsterZone.some(card => Number(card?.themedState?.statuses?.venom) > 0);
++        const heal = Math.max(0, Math.floor((Number(amount) || 0) / (poisoned ? 2 : 1)));
+         this.lp = Math.min(this.maxLp, this.lp + heal);
+     }
+ 
+     resetTurnState() {
+         this.normalSummonUsed = false;
+         this.additionalNormalSummon = 0;
+         this.skipBattlePhase = false;
+         this.noDirectAttackThisTurn = false;
+         this.cannotSpecialSummonThisTurn = false;
+         this.noHandMonsterEffectThisTurn = false;
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js\\js/themed-effects.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+index 5d5efb4..e411f78 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js\\js/themed-effects.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+@@ -1,32 +1,35 @@
+ import { createCardInstance } from "./model.js";
+ import { GAME_CONFIG, MONSTER_POSITION } from "./constants.js";
++import { AILMENTS, DOMAIN_DEFS, applyAilment, ailmentStacks, ailmentValue, removeAilment, cleanseAilments, tickAilments, activeDomain } from "./status-effects.js";
+ 
+ // The same action definitions generate card text and resolve its actual rules.
+ // Targets are deterministic and described explicitly; no hidden random skill rolls.
+ // 每个动作都可携带 effect.params（count/limit/draw/heal/damage/amount/cost/attack/defense 中的部分字段），
+ // 卡面文字与引擎结算共用同一份参数，保证“写的”与“结算的”永远一致。
+ export const ACTION_DEFAULTS = {
+     scout: { count: 3 },
+     study: { count: 3 },
+     prepare: { count: 2 },
+     recover: { count: 1, limit: 4, draw: 0 },
+     recycle: { count: 3, draw: 1 },
+     deploy: { count: 1, limit: 4, heal: 0 },
+     revive: { count: 1, limit: 4, heal: 0 },
+     recall: { count: 1, draw: 0, heal: 0 },
+     shelter: { amount: 0 },
+     seal: { amount: 0 },
+     sleep: { amount: 0 },
+     freeze: { amount: 0 },
+     poison: { damage: 600 },
+     bomb: { damage: 0 },
++    ignite: { stacks: 2, damage: 500 },
++    venom: { stacks: 2, damage: 450 },
+     charge: { amount: 200 },
+     burst: { cost: 700 },
+     twin: { cost: 600 },
+     pierce: { amount: 0 },
+     ward: { amount: 0 },
+     ambush: { count: 1 },
+     token: { attack: 0, defense: 1000 },
+     exchange: { limit: 4, draw: 0 },
+     chorus: { count: 2, draw: 1, heal: 0 },
+     sanctuary: { heal: 1000 },
+@@ -51,20 +54,22 @@ export const ACTION_TEMPLATES = {
+     recycle: p => `将自己墓地最后${p.count}张卡按原顺序放回卡组底，抽${p.draw}张卡`,
+     deploy: p => `将手牌中第一只${p.limit}星以下怪兽特殊召唤为守备表示，其效果直到回合结束无效${healClause(p)}`,
+     revive: p => `将自己墓地最后${p.count}只${p.limit}星以下怪兽特殊召唤为守备表示，其效果直到回合结束无效${healClause(p)}`,
+     recall: p => `将自己除外区最后${p.count}张卡加入手牌${drawClause(p)}${healClause(p)}`,
+     shelter: p => `自己攻击力最低的表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效${p.amount ? `，其攻击力上升${p.amount}` : ""}`,
+     seal: p => `对方攻击力最高的可取对象表侧怪兽效果无效，直到本回合结束${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     sleep: p => `将对方攻击力最高的可取对象表侧怪兽变为里侧守备表示${p.amount ? `，其守备力下降${p.amount}` : ""}`,
+     freeze: p => `将对方攻击力最高的可取对象表侧怪兽变为守备表示，直到下个回合结束不能攻击或手动改变表示形式${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     poison: p => `给对方攻击力最高的可取对象表侧怪兽放置毒印；本回合结束时，其控制者受到${p.damage}伤害，并移除毒印`,
+     bomb: p => `给对方攻击力最高的可取对象表侧怪兽放置爆破标记；本回合结束时${p.damage ? `给予其控制者${p.damage}伤害并` : ""}破坏该怪兽，提前离场则标记失效`,
++    ignite: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层灼烧；其控制者每个结束阶段受到${p.damage}×层数伤害，随后层数-1（上限3层）`,
++    venom: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层剧毒（上限3层）；剧毒怪兽的控制者每个结束阶段受到${p.damage}×层数伤害，且其所有回复减半；剧毒不会自然消失`,
+     charge: p => `自身获得1个蓄力指示物（最多3个），攻击力上升${p.amount}；移除指示物时失去对应的提升`,
+     burst: p => `支付${p.cost}LP；将对方攻击力最高的可取对象表侧怪兽除外`,
+     twin: p => `支付${p.cost}LP；自身本回合可以攻击2次`,
+     pierce: p => `自身本回合获得贯穿守备的战斗伤害${p.amount ? `，其攻击力上升${p.amount}` : ""}`,
+     ward: p => `自身直到下个回合结束不能成为效果对象${p.amount ? `，其守备力上升${p.amount}` : ""}`,
+     ambush: p => `将自己墓地最后${p.count}张陷阱盖放到后场，本回合不能发动`,
+     token: p => `特殊召唤1只${p.attack}攻${p.defense}守、1星的守备衍生物，不能作为上级召唤的祭品`,
+     exchange: p => `将自己攻击力最低的表侧怪兽返回手牌，再将手牌第一只${p.limit}星以下怪兽特殊召唤为守备表示${drawClause(p)}`,
+     chorus: p => `自己场上有至少${p.count}种属性的表侧怪兽时，抽${p.draw}张卡${healClause(p)}`,
+     sanctuary: p => `将自己墓地最后1张卡除外；恢复${p.heal}LP`,
+@@ -168,20 +173,21 @@ export function canResolveThemedEffect(ctx) {
+     const space = p.monsterZone.length < GAME_CONFIG.MAX_MONSTER_ZONE && !p.cannotSpecialSummonThisTurn;
+     switch (e.action) {
+         case "scout": case "study": case "prepare": return p.deck.length > 0;
+         case "recover": return p.graveyard.some(x => x !== c && lowMonster(x, par.limit));
+         case "recycle": return p.graveyard.filter(x => x !== c).length >= par.count;
+         case "deploy": return space && p.hand.some(x => lowMonster(x, par.limit));
+         case "revive": return space && p.graveyard.some(x => x !== c && lowMonster(x, par.limit));
+         case "recall": return p.banished.length >= par.count;
+         case "shelter": return !!ally(ctx);
+         case "seal": case "sleep": case "freeze": case "poison": case "bomb": return !!enemy(ctx);
++        case "ignite": case "venom": return !!enemy(ctx);
+         case "burst": return p.lp > par.cost && !!enemy(ctx);
+         case "charge": return p.monsterZone.includes(c) && (c.themedState?.charges || 0) < 3;
+         case "twin": return p.monsterZone.includes(c) && p.lp > par.cost;
+         case "pierce": case "ward": return p.monsterZone.includes(c);
+         case "ambush": return p.spellTrapZone.length < GAME_CONFIG.MAX_SPELL_TRAP_ZONE && !!last(p.graveyard, x => x.type === "trap" && x !== c);
+         case "token": return space;
+         case "exchange": return !p.cannotSpecialSummonThisTurn && !!ally(ctx) && p.hand.some(x => lowMonster(x, par.limit));
+         case "chorus": return new Set(p.monsterZone.filter(x => x.faceUp).map(x => x.attribute)).size >= par.count && p.deck.length >= Math.max(1, par.draw || 0);
+         case "sanctuary": return p.graveyard.some(x => x !== c);
+         case "purify": return ctx.opponent.graveyard.length > 0;
+@@ -252,20 +258,22 @@ export const themedEffectHandlers = {
+                 target.faceUp = false; target.faceDown = true;
+                 applyTempStat(o, target, "defense", -par.amount);
+                 target.setTurn = game.turn; break;
+             case "freeze":
+                 target.position = MONSTER_POSITION.DEFENSE; target.canAttack = false;
+                 state(target).frozenUntil = game.turn + 1;
+                 applyTempStat(o, target, "attack", -par.amount);
+                 break;
+             case "poison": state(target).poisonTurn = game.turn; state(target).poisonDamage = par.damage; break;
+             case "bomb": state(target).bombTurn = game.turn; state(target).bombDamage = par.damage; break;
++            case "ignite": applyAilment(target, "burn", par.stacks, par.damage); break;
++            case "venom": applyAilment(target, "venom", par.stacks, par.damage); break;
+             case "charge":
+                 state(c).charges = (state(c).charges || 0) + 1;
+                 applyPermanentStat(p, c, "attack", par.amount);
+                 break;
+             case "burst":
+                 p.takeDamage(par.cost);
+                 ctx.engine.resetFieldCard(target);
+                 move(target, o.monsterZone, o.banished); break;
+             case "twin":
+                 p.takeDamage(par.cost);
+@@ -362,21 +370,23 @@ export const themedEffectHandlers = {
+                     [attacker.currentAttack, attacker.currentDefense] = [attacker.currentDefense, attacker.currentAttack];
+                 }
+                 break;
+             }
+             default: return null;
+         }
+         return `${e.skillName}：${describeThemedAction(e)}`;
+     },
+ };
+ 
+-export function resolveThemedTurnEnd(engine) {
++export function resolveThemedTurnEnd(engine, endingPlayer) {
++    // 结束阶段先结算结束方场上的灼烧/剧毒，再做既有的毒印/爆破/时限标记清理。
++    if (endingPlayer) tickAilments(engine, endingPlayer);
+     const turn = engine.state.turn;
+     for (const p of engine.state.players) {
+         for (const c of [...p.monsterZone]) {
+             const s = c.themedState || {};
+             if (s.poisonTurn === turn) { delete s.poisonTurn; const damage = Number(s.poisonDamage) || 600; delete s.poisonDamage; p.takeDamage(damage); engine.emit("onPoisonDamage", { card: c, damage }); }
+             if (s.bombTurn === turn) {
+                 delete s.bombTurn;
+                 const damage = Number(s.bombDamage) || 0; delete s.bombDamage;
+                 if (damage) { p.takeDamage(damage); engine.emit("onPoisonDamage", { card: c, damage }); }
+                 engine.destroyFieldMonster(p, c);
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test\\test/status-effects.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+index dfe28eb..d33f25e 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test\\test/status-effects.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+@@ -66,10 +66,54 @@ test("activeDomain 按 until 与 key 过滤", () => {
+     p.monsterZone.push(c);
+     const hit = activeDomain(engine, p);
+     assert.equal(hit.card, c);
+     assert.equal(hit.def, DOMAIN_DEFS.wuji);
+     assert.equal(activeDomain(engine, p, "wuji").card, c);
+     assert.equal(activeDomain(engine, p, "rojin"), null);
+     c.themedState.domain.until = 4;
+     assert.equal(activeDomain(engine, p), null);
+     assert.equal(activeDomain(engine, p, "wuji"), null);
+ });
++
++import { GameState, Player } from "../js/model.js";
++import { GameEngine } from "../js/engine.js";
++import { ACTION_TEXT, themedEffectHandlers, canResolveThemedEffect } from "../js/themed-effects.js";
++
++function board() {
++    const s = new GameState();
++    s.players = [new Player("甲", []), new Player("乙", [])];
++    s.turn = 3; s.firstTurn = false; s.phase = "main_1";
++    const [p, o] = s.players;
++    p.deck = []; o.deck = [];
++    return { s, p, o, e: new GameEngine(s, () => 0.3) };
++}
++const enemyMonster = (attack = 1800) => createCardInstance({ id: `em_${attack}`, name: "敌怪", type: "monster", level: 4, attack, defense: 1200, effects: [] });
++
++test("灼烧在控制者结束阶段按层数结算并衰减", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    const ctx = { engine: e, player: p, opponent: o, card: p, effect: { action: "ignite", params: { stacks: 2, damage: 500 }, skillName: "t" }, gameState: s };
++    themedEffectHandlers.themedAction(ctx);
++    assert.equal(o.lp, 8000);
++    e.endTurn();                    // 对甲的结束阶段：只结算甲，不结算乙
++    assert.equal(o.lp, 8000);
++    s.currentPlayerIndex = 1; e.endTurn();  // 乙的结束阶段
++    assert.equal(o.lp, 7000);
++    assert.equal(target.themedState.statuses.burn, 1);
++});
++
++test("剧毒不衰减且中毒方回复减半", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "venom", params: { stacks: 2, damage: 450 }, skillName: "t" }, gameState: s });
++    o.heal(1000);
++    // 规格（设计文档 §4.2）：中毒方回复量减半。8000 起手 → 实际 +500。
++    // 简报原文 7000+500 与规格/指定实现矛盾（8000 不会先变成 7000），故按规格修正预期值。
++    assert.equal(o.lp, 8000 + 500);
++    s.currentPlayerIndex = 1; e.endTurn();
++    assert.equal(o.lp, 8000 + 500 - 450 * 2);
++    assert.equal(target.themedState.statuses.venom, 2);
++});
++
++test("新动作都有卡面文字", () => {
++    for (const action of ["ignite", "venom"]) assert.ok(ACTION_TEXT[action]?.length > 0);
++});

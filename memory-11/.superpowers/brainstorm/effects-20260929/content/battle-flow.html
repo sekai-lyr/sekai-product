@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>对局流程演出演示 · Sekai Duel</title>
+<style>
+  :root {
+    --bg: #05070d;
+    --panel: #0c1220;
+    --edge: #1d2742;
+    --text: #e9edf8;
+    --dim: #8e99b8;
+    --accent: #f0c96b;
+    --gold: #ffd36b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 20px 18px 44px;
+    background: radial-gradient(1200px 520px at 50% -10%, #131a2c 0%, var(--bg) 64%);
+    color: var(--text);
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  }
+  header { max-width: 1360px; margin: 0 auto 14px; }
+  header h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: .04em; }
+  header p { margin: 0 0 4px; color: var(--dim); font-size: 13px; line-height: 1.75; }
+  header .hl { color: var(--accent); }
+  .toolbar { display: flex; gap: 12px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--dim); }
+  .toolbar button {
+    background: #16203a; color: #d5e2ff; border: 1px solid #2b3a63; border-radius: 8px;
+    padding: 6px 14px; cursor: pointer; font-family: inherit; font-size: 13px;
+  }
+  .toolbar button:hover { background: #1d2a4c; }
+  .toolbar label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; user-select: none; }
+
+  .board {
+    position: relative; max-width: 1360px; height: 860px; margin: 0 auto;
+    border-radius: 14px; overflow: hidden; border: 1px solid #232c48;
+    background:
+      radial-gradient(900px 420px at 50% 42%, rgba(64, 30, 78, .5) 0%, rgba(20, 10, 30, .2) 55%, transparent 75%),
+      radial-gradient(500px 260px at 50% 46%, rgba(40, 120, 160, .18) 0%, transparent 70%),
+      linear-gradient(180deg, #170d18 0%, #0c0812 46%, #0a0916 100%);
+  }
+  .hall { position: absolute; inset: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(90deg, rgba(150, 60, 90, .05) 0 1px, transparent 1px 120px),
+      repeating-linear-gradient(0deg, rgba(150, 60, 90, .04) 0 1px, transparent 1px 90px);
+  }
+  .hall::after { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(1200px 700px at 50% 40%, transparent 40%, rgba(0, 0, 0, .55) 100%);
+  }
+  .floor-glow {
+    position: absolute; left: 50%; top: 44%; width: 620px; height: 620px; transform: translate(-50%, -50%);
+    border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(80, 190, 205, .16) 0%, rgba(80, 190, 205, .05) 42%, transparent 68%);
+  }
+  .floor-glow::before { content: ""; position: absolute; inset: 14%; border-radius: 50%; border: 1px solid rgba(110, 220, 230, .22); }
+  .floor-glow::after { content: ""; position: absolute; inset: 34%; border-radius: 50%; border: 1px solid rgba(110, 220, 230, .14); }
+
+  .info-panel {
+    position: absolute; width: 208px; padding: 10px 12px; border-radius: 12px;
+    background: linear-gradient(180deg, rgba(20, 28, 48, .95), rgba(10, 14, 26, .95));
+    border: 1px solid #26324f; z-index: 12;
+  }
+  .opp-info { top: 12px; left: 12px; }
+  .pl-info { bottom: 12px; left: 12px; }
+  .info-panel .who { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #cfdaf6; }
+  .badge {
+    display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px;
+    background: linear-gradient(150deg, #8f5bd8, #4a2a85); font-size: 11px; font-weight: 800; color: #fff;
+  }
+  .badge.p { background: linear-gradient(150deg, #3a75e0, #1c3a80); }
+  .info-panel .lp { font-size: 26px; font-weight: 900; letter-spacing: .04em; color: #fff; margin: 6px 0 8px; }
+  .info-panel .lp small { font-size: 11px; color: var(--dim); font-weight: 500; margin-left: 4px; }
+  .info-panel .lp.flash { animation: lpFlash .5s ease-out; }
+  @keyframes lpFlash { 0% { color: #ff6b6b; transform: scale(1.16); } 100% { color: #fff; transform: scale(1); } }
+  .info-panel .counters { display: flex; gap: 12px; font-size: 10.5px; color: #8e99b8; letter-spacing: .06em; }
+  .info-panel .counters b { color: #dfe8ff; }
+
+  .log-panel {
+    position: absolute; top: 12px; right: 12px; width: 238px; padding: 8px 10px 6px; z-index: 12;
+    background: linear-gradient(180deg, rgba(14, 20, 36, .94), rgba(8, 11, 22, .94));
+    border: 1px solid #232e4c; border-radius: 10px;
+  }
+  .log-title { font-size: 10px; letter-spacing: .22em; color: #7d8ab0; margin-bottom: 6px; }
+  .log-body { height: 196px; overflow: hidden; font-size: 11px; line-height: 1.7; color: #aebada; }
+  .log-body .l { padding: 1px 0; }
+  .log-body .l.sys { color: #f0c96b; }
+  .log-body .l.dmg { color: #ff8a8a; }
+  .log-body .l.new { animation: logIn .28s ease-out; }
+  @keyframes logIn { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: none; } }
+
+  .phase-bar { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 12; }
+  .phase-bar span {
+    font-size: 11px; padding: 3px 9px; border-radius: 999px; color: #768299;
+    border: 1px solid transparent; transition: all .25s;
+  }
+  .phase-bar span.on { color: #14100a; background: linear-gradient(150deg, #ffdf90, #d9a84e); font-weight: 700; box-shadow: 0 0 14px rgba(240, 200, 100, .35); }
+
+  .row { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 16px; z-index: 6; }
+  .opp-st-row { top: 58px; }
+  .opp-row { top: 142px; }
+  .pl-st-row { top: 470px; }
+  .pl-row { top: 560px; }
+
+  .slot, .st-slot {
+    border: 1px dashed rgba(120, 90, 140, .5); border-radius: 9px;
+    background: rgba(255, 255, 255, .015);
+  }
+  .slot { width: 108px; height: 152px; }
+  .st-slot { width: 88px; height: 104px; }
+  .slot.arriving, .st-slot.arriving { border-color: rgba(255, 214, 120, .9); box-shadow: 0 0 22px rgba(255, 200, 90, .35), inset 0 0 18px rgba(255, 200, 90, .18); }
+
+  .duel-card {
+    position: relative; width: 108px; height: 152px; border-radius: 9px; padding: 5px 6px 4px;
+    background: linear-gradient(180deg, #151e36, #0a101f);
+    border: 1px solid #2c3c66; box-shadow: 0 8px 18px rgba(0, 0, 0, .55);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .duel-card.elem-fire { border-color: #7c3a26; }
+  .duel-card.elem-water { border-color: #2b5a86; }
+  .duel-card.elem-wind { border-color: #2f6b4f; }
+  .duel-card.elem-dark { border-color: #4b3070; }
+  .duel-card.elem-light { border-color: #86713a; }
+  .duel-card .art { height: 92px; border-radius: 6px; background-size: cover; background-position: center 18%;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09); }
+  .duel-card .nm { font-size: 10px; line-height: 1.35; margin-top: 5px; color: #dfe8ff; height: 27px; overflow: hidden; }
+  .duel-card .st { margin-top: auto; display: flex; justify-content: space-between; font-size: 9px; color: #93a2c6; letter-spacing: .04em; }
+  .duel-card .st b { color: #fff; font-size: 9.5px; }
+  .duel-card .back {
+    position: absolute; inset: 4px; border-radius: 7px; display: none;
+    background: radial-gradient(70px 90px at 50% 42%, #3d6fd6 0%, #1c3070 55%, #0c1530 100%);
+    box-shadow: inset 0 0 0 1px #5b8ff0, inset 0 0 20px rgba(90, 150, 255, .35);
+  }
+  .duel-card .back::after { content: ""; position: absolute; inset: 28%; border: 2px solid rgba(165, 205, 255, .85); transform: rotate(45deg); border-radius: 4px; }
+  .duel-card.facedown .back { display: block; }
+  .duel-card.facedown .art, .duel-card.facedown .nm, .duel-card.facedown .st { visibility: hidden; }
+
+  .hand-tray { position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); z-index: 14; pointer-events: none; }
+  .hand { position: relative; height: 168px; display: flex; justify-content: center; align-items: flex-end; }
+  .hand .duel-card { width: 98px; height: 140px; margin: 0 -9px; transform-origin: 50% 128%; box-shadow: 0 10px 18px rgba(0, 0, 0, .6); }
+  .hand .duel-card .art { height: 80px; }
+  .hand .duel-card .nm { font-size: 9.5px; height: 25px; }
+
+  .pile { position: absolute; width: 66px; height: 92px; z-index: 8; }
+  .pile .pc {
+    position: absolute; inset: 0; border-radius: 8px;
+    background: radial-gradient(50px 66px at 50% 42%, #3d6fd6 0%, #1c3070 55%, #0c1530 100%);
+    box-shadow: inset 0 0 0 1px #527fe0, 0 6px 14px rgba(0, 0, 0, .5);
+  }
+  .pile .pc::after { content: ""; position: absolute; inset: 28%; border: 2px solid rgba(165, 205, 255, .8); transform: rotate(45deg); border-radius: 3px; }
+  .pile .cnt { position: absolute; right: -8px; bottom: -8px; background: #101a32; border: 1px solid #33507e; color: #d7e4ff; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
+  .pile.opp-deck { left: 26px; top: 250px; }
+  .pile.opp-gy { left: 26px; top: 372px; opacity: .92; }
+  .pile.pl-deck { right: 26px; top: 250px; }
+  .pile.pl-gy { right: 26px; top: 372px; opacity: .92; }
+  .pile .lbl { position: absolute; left: 0; right: 0; bottom: -22px; text-align: center; font-size: 9px; letter-spacing: .14em; color: #6d7896; }
+
+  .turn-badge {
+    position: absolute; right: 14px; bottom: 14px; z-index: 14;
+    font-size: 12.5px; letter-spacing: .06em; color: #efe4c8;
+    background: linear-gradient(180deg, rgba(36, 30, 20, .95), rgba(18, 14, 10, .95));
+    border: 1px solid #6b5731; border-radius: 9px; padding: 7px 14px; font-weight: 700;
+  }
+  .turn-badge.ai { border-color: #5a4b8a; color: #ded1ff; background: linear-gradient(180deg, rgba(30, 24, 52, .95), rgba(16, 12, 30, .95)); }
+  .turn-badge.flash { animation: turnFlash .6s ease-out; }
+  @keyframes turnFlash { 0% { transform: scale(1.12); box-shadow: 0 0 24px rgba(240, 210, 130, .5); } 100% { transform: scale(1); box-shadow: none; } }
+
+  .clip { position: absolute; z-index: 30; }
+
+  .mini-banner {
+    position: absolute; left: 50%; transform: translateX(-50%); z-index: 32; white-space: nowrap;
+    font-size: 13px; font-weight: 700; letter-spacing: .12em; color: #fff;
+    text-shadow: 0 0 12px rgba(255, 190, 90, .9), 0 2px 8px rgba(0, 0, 0, .9);
+  }
+  .declare {
+    position: absolute; left: 50%; bottom: 100%; z-index: 34; white-space: nowrap; pointer-events: none;
+    font-size: 12.5px; font-weight: 800; letter-spacing: .1em; color: #fff;
+    background: linear-gradient(180deg, rgba(60, 40, 20, .95), rgba(30, 18, 8, .95));
+    border: 1px solid rgba(255, 200, 110, .75); border-radius: 8px; padding: 3px 10px;
+    box-shadow: 0 0 18px rgba(255, 180, 80, .45);
+  }
+  .declare.violet { background: linear-gradient(180deg, rgba(44, 26, 70, .95), rgba(22, 12, 38, .95)); border-color: rgba(200, 140, 255, .8); box-shadow: 0 0 18px rgba(170, 90, 255, .5); }
+  .declare.trap { background: linear-gradient(180deg, rgba(58, 24, 40, .95), rgba(28, 10, 20, .95)); border-color: rgba(255, 120, 160, .8); box-shadow: 0 0 18px rgba(255, 90, 140, .5); }
+
+  .ring-fx { position: absolute; border-radius: 50%; border: 2px solid; pointer-events: none; z-index: 31; }
+  .p-fx { position: absolute; border-radius: 50%; pointer-events: none; z-index: 31; }
+  .dmg {
+    position: absolute; z-index: 40; font-size: 34px; font-weight: 900; letter-spacing: .02em; pointer-events: none;
+    color: #ff5d5d; text-shadow: 0 0 14px rgba(255, 60, 60, .8), 0 3px 0 rgba(0, 0, 0, .8), 0 0 40px rgba(255, 90, 60, .5);
+  }
+  .dmg.lp { color: #ffb14d; text-shadow: 0 0 16px rgba(255, 160, 60, .9), 0 3px 0 rgba(0, 0, 0, .8); font-size: 30px; }
+  .dmg.heal { color: #7dffb0; }
+
+  .reticle { position: absolute; z-index: 33; pointer-events: none; }
+  .reticle i {
+    position: absolute; width: 14px; height: 14px; border: 2.5px solid #ff5d6b; box-shadow: 0 0 10px rgba(255, 90, 110, .8);
+  }
+  .reticle i:nth-child(1) { left: -4px; top: -4px; border-right: none; border-bottom: none; }
+  .reticle i:nth-child(2) { right: -4px; top: -4px; border-left: none; border-bottom: none; }
+  .reticle i:nth-child(3) { left: -4px; bottom: -4px; border-right: none; border-top: none; }
+  .reticle i:nth-child(4) { right: -4px; bottom: -4px; border-left: none; border-top: none; }
+
+  .fly { position: absolute; z-index: 36; pointer-events: none; }
+  .dash { position: absolute; z-index: 35; pointer-events: none; }
+
+  .cutin { position: absolute; inset: 0; z-index: 60; overflow: hidden; pointer-events: none; }
+  .cutin-artwrap { position: absolute; inset: 0; }
+  .cutin-art, .cutin-invert, .cutin-mono { position: absolute; inset: 0; background-size: cover; background-position: center 20%; opacity: 0; }
+  .cutin-invert { filter: invert(1) contrast(1.7) saturate(1.2); opacity: 0; }
+  .cutin-mono { filter: grayscale(1) contrast(2.3) brightness(1.1); opacity: 0; }
+  .cutin-speed {
+    position: absolute; inset: -22%; opacity: 0;
+    background: repeating-conic-gradient(from 0deg at 50% 48%, rgba(255, 255, 255, 0) 0deg 3.4deg, rgba(255, 255, 255, .5) 3.4deg 4deg);
+    -webkit-mask: radial-gradient(circle at 50% 48%, transparent 0 20%, #000 52%);
+    mask: radial-gradient(circle at 50% 48%, transparent 0 20%, #000 52%);
+  }
+  .cutin-dim { position: absolute; inset: 0; background: #000; opacity: 0; }
+  .cutin-letter { position: absolute; left: 0; right: 0; height: 0; background: #000; z-index: 4; transition: height .16s ease-out; }
+  .cutin-letter.top { top: 0; }
+  .cutin-letter.bottom { bottom: 0; }
+  .cutin-white { position: absolute; inset: 0; background: #fff; opacity: 0; }
+  .cutin-white.violet { background: radial-gradient(circle at 45% 42%, #fff 0%, #f0e4ff 18%, #a85cff 48%, #3c1178 80%, #12042b 100%); }
+  .cutin-fx { position: absolute; inset: 0; }
+  .cutin-slash {
+    position: absolute; left: -8%; top: 42%; width: 116%; height: 5px; opacity: 0;
+    transform-origin: 0 50%; transform: rotate(-13deg) scaleX(0);
+    background: linear-gradient(90deg, transparent, #fff 12%, #ffd9a0 45%, #fff 72%, transparent);
+    filter: blur(.5px);
+    box-shadow: 0 0 22px rgba(255, 220, 160, .95), 0 0 64px rgba(255, 140, 40, .65);
+  }
+  .cutin-title {
+    position: absolute; left: 50%; bottom: 96px; z-index: 5; white-space: nowrap;
+    transform: translateX(-50%) scale(1.7); opacity: 0;
+    font-size: 40px; font-weight: 900; letter-spacing: .16em; color: #fff;
+    text-shadow: 0 0 16px rgba(255, 140, 50, .95), 0 0 44px rgba(255, 70, 20, .6), 0 4px 12px rgba(0, 0, 0, .95);
+  }
+  .cutin-title.violet { text-shadow: 0 0 16px rgba(190, 110, 255, .95), 0 0 48px rgba(110, 60, 255, .65), 0 4px 12px rgba(0, 0, 0, .95); }
+  @keyframes boardShake {
+    0% { transform: translate(0, 0); } 25% { transform: translate(var(--shx), calc(var(--shy) * -1)); }
+    50% { transform: translate(calc(var(--shx) * -1), var(--shy)); } 75% { transform: translate(calc(var(--shx) * .6), calc(var(--shy) * -.5)); }
+    100% { transform: translate(0, 0); }
+  }
+  .board.shake { animation: boardShake .26s ease-out; }
+</style>
+</head>
+<body>
+<header>
+  <h1>对局流程演示 · 战斗演出放回真实流程里（参考你现在的战场布局）</h1>
+  <p>这是一段自动播放的完整流程：<span class="hl">抽卡 → 通常召唤 → 魔法发动 → 盖放陷阱 → 攻击（招式切入）→ 对手回合 → 陷阱发动 → 大招清场</span>。
+  招式演出参考七圣召唤的节奏：短、准、每个角色有自己的辨识动作，并且总是与伤害数字、卡牌位移、LP 变化同帧结算。</p>
+  <div class="toolbar">
+    <button id="replay">重播全程</button>
+    <button id="pause">暂停</button>
+    <label><input type="checkbox" id="slowmo"> 慢放 0.5×</label>
+    <span id="status">播放中…</span>
+  </div>
+</header>
+
+<main>
+  <div class="board" id="board">
+    <div class="hall"></div>
+    <div class="floor-glow"></div>
+
+    <div class="info-panel opp-info">
+      <div class="who"><span class="badge">AI</span><b>练习 AI</b></div>
+      <div class="lp" id="ai-lp">8000 <small>LP</small></div>
+      <div class="counters"><span>DECK <b id="ai-deck">34</b></span><span>HAND <b id="ai-hand">4</b></span><span>GY <b id="ai-gy">0</b></span></div>
+    </div>
+
+    <div class="log-panel">
+      <div class="log-title">DUEL LOG</div>
+      <div class="log-body" id="log"></div>
+    </div>
+
+    <div class="phase-bar" id="phase-bar">
+      <span>抽卡阶段</span><span>准备阶段</span><span>主要阶段1</span><span>战斗阶段</span><span>主要阶段2</span><span>结束阶段</span>
+    </div>
+
+    <div class="row opp-st-row">
+      <div class="st-slot" id="opp-st-0"></div>
+      <div class="st-slot" id="opp-st-1"></div>
+      <div class="st-slot" id="opp-st-2"></div>
+    </div>
+    <div class="row opp-row" id="opp-row">
+      <div class="slot" id="opp-slot-0"></div>
+      <div class="slot" id="opp-slot-1"></div>
+      <div class="slot" id="opp-slot-2"></div>
+    </div>
+    <div class="row pl-st-row" id="pl-st-row">
+      <div class="st-slot" id="pl-st-0"></div>
+      <div class="st-slot" id="pl-st-1"></div>
+      <div class="st-slot" id="pl-st-2"></div>
+    </div>
+    <div class="row pl-row" id="pl-row">
+      <div class="slot" id="pl-slot-0"></div>
+      <div class="slot" id="pl-slot-1"></div>
+      <div class="slot" id="pl-slot-2"></div>
+    </div>
+
+    <div class="pile opp-deck"><div class="pc"></div><div class="cnt" id="pile-ai-deck">34</div><div class="lbl">DECK</div></div>
+    <div class="pile opp-gy"><div class="pc" style="filter:saturate(.5) brightness(.7)"></div><div class="cnt" id="pile-ai-gy">0</div><div class="lbl">GY</div></div>
+    <div class="pile pl-deck"><div class="pc"></div><div class="cnt" id="pile-pl-deck">35</div><div class="lbl">DECK</div></div>
+    <div class="pile pl-gy"><div class="pc" style="filter:saturate(.5) brightness(.7)"></div><div class="cnt" id="pile-pl-gy">0</div><div class="lbl">GY</div></div>
+
+    <div class="info-panel pl-info">
+      <div class="who"><span class="badge p">决</span><b>决斗者</b></div>
+      <div class="lp" id="pl-lp">8000 <small>LP</small></div>
+      <div class="counters"><span>DECK <b id="pl-deck">35</b></span><span>HAND <b id="pl-hand">5</b></span><span>GY <b id="pl-gy">0</b></span></div>
+    </div>
+
+    <div class="hand-tray"><div class="hand" id="hand"></div></div>
+
+    <div class="turn-badge" id="turn-badge">TURN 1 · 你的回合</div>
+  </div>
+</main>
+
+<script>
+(function () {
+  // ---------------- speed / pause engine ----------------
+  let SPEED = 1;
+  let paused = false;
+  let token = 0;
+  class Abort extends Error {}
+  const T = (ms) => ms * SPEED;
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function wait(ms) {
+    const my = token;
+    const end = performance.now() + T(ms);
+    while (performance.now() < end) {
+      if (my !== token) throw new Abort();
+      if (paused) await sleep(60);
+      else await new Promise(r => requestAnimationFrame(r));
+    }
+    if (my !== token) throw new Abort();
+  }
+
+  function anim(el, frames, opts) {
+    const o = Object.assign({ fill: "forwards", easing: "ease-out" }, opts || {});
+    o.duration = T(o.duration || 300);
+    if (o.delay) o.delay = T(o.delay);
+    return el.animate(frames, o);
+  }
+
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+
+  const board = $("#board");
+  const logEl = $("#log");
+  const statusEl = $("#status");
+  const handEl = $("#hand");
+
+  function rectIn(el) {
+    const b = board.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    return { x: r.left - b.left, y: r.top - b.top, w: r.width, h: r.height, cx: r.left - b.left + r.width / 2, cy: r.top - b.top + r.height / 2 };
+  }
+
+  // ---------------- card data ----------------
+  const DATA = {
+    tanjiro: { name: "灶门炭治郎·火之神神乐", type: "monster", atk: 1910, def: 1705, art: "/files/tanjiro.png", elem: "fire", palette: ["#ffd36b", "#ff8a3c", "#ff4d2e"] },
+    gojo: { name: "五条悟·虚式茈", type: "monster", atk: 3030, def: 2860, art: "/files/gojo.png", elem: "dark", palette: ["#e9d2ff", "#b44bff", "#6fd6ff"] },
+    hakue: { name: "白羽静梦", type: "monster", atk: 1430, def: 1550, art: "/files/hakue.png", elem: "wind", palette: ["#c9ffe4", "#7fe0b0", "#ffffff"] },
+    resse: { name: "蕾塞·雨夜引魂", type: "monster", atk: 2520, def: 2080, art: "/files/resse.png", elem: "dark", palette: ["#d9c2ff", "#8a3cff", "#ffffff"] },
+    mafuyu: { name: "真冬", type: "monster", atk: 1280, def: 1380, art: "/files/mafuyu.png", elem: "water", palette: ["#bfe3ff", "#5aa8ff", "#ffffff"] },
+    fire: { name: "火刑", type: "spell", atk: 0, def: 0, art: "/files/spell-fire.png", elem: "fire", palette: ["#ffb14d", "#ff5a1f", "#fff1c9"] },
+    hole: { name: "落穴", type: "trap", atk: 0, def: 0, art: "/files/trap-hole.png", elem: "earth", palette: ["#d8a35b", "#7a4a1f", "#3a2410"] },
+  };
+
+  function cardEl(key, opts) {
+    opts = opts || {};
+    const d = DATA[key];
+    const el = document.createElement("div");
+    el.className = "duel-card type-" + d.type + " elem-" + (d.elem || "none");
+    if (opts.facedown) el.classList.add("facedown");
+    const stats = d.type === "monster"
+      ? `<span>ATK <b>${d.atk}</b></span><span>DEF <b>${d.def}</b></span>`
+      : `<span>${d.type === "spell" ? "SPELL" : "TRAP"}</span><span>CARD</span>`;
+    el.innerHTML = `
+      <div class="art" style="background-image:url('${d.art}')"></div>
+      <div class="nm">${d.name}</div>
+      <div class="st">${stats}</div>
+      <div class="back"></div>`;
+    return el;
+  }
+
+  function cardInner(key, facedown) {
+    const d = DATA[key];
+    return `<div class="duel-card type-${d.type} elem-${d.elem || "none"}${facedown ? " facedown" : ""}" style="width:100%;height:100%">
+      <div class="art" style="background-image:url('${d.art}')"></div>
+      <div class="nm">${d.name}</div>
+      <div class="st"></div>
+      <div class="back"></div>
+    </div>`;
+  }
+
+  // ---------------- ui helpers ----------------
+  let handKeys = [];
+  let handEls = [];
+
+  function renderHand() {
+    handEl.innerHTML = "";
+    handEls = [];
+    const n = handKeys.length;
+    handKeys.forEach((k, i) => {
+      const el = cardEl(k);
+      const rot = (i - (n - 1) / 2) * 7;
+      el.style.transform = `rotate(${rot}deg) translateY(${Math.abs(rot) * 1.1}px)`;
+      handEl.appendChild(el);
+      handEls.push(el);
+    });
+    $("#pl-hand").textContent = String(n);
+  }
+
+  function log(text, cls) {
+    const d = document.createElement("div");
+    d.className = "l" + (cls ? " " + cls : "") + " new";
+    d.textContent = text;
+    logEl.appendChild(d);
+    while (logEl.children.length > 60) logEl.removeChild(logEl.firstChild);
+    logEl.scrollTop = logEl.scrollHeight;
+    setTimeout(() => d.classList.remove("new"), 300);
+  }
+
+  function setPhase(index) {
+    $$("#phase-bar span").forEach((s, i) => s.classList.toggle("on", i === index));
+  }
+
+  function setTurn(text, isAi) {
+    const el = $("#turn-badge");
+    el.textContent = text;
+    el.classList.toggle("ai", !!isAi);
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+  }
+
+  function setLP(side, value) {
+    const el = $(side === "ai" ? "#ai-lp" : "#pl-lp");
+    const from = Number(String(el.textContent).match(/\d+/)[0]);
+    const start = performance.now();
+    const dur = T(520);
+    function tick(t) {
+      const p = Math.min(1, (t - start) / dur);
+      const v = Math.round(from + (value - from) * p);
+      el.innerHTML = v + " <small>LP</small>";
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+  }
+
+  function count(id, value) { const el = $id(id); if (el) el.textContent = String(value); }
+  function $id(id) { return document.getElementById(id); }
+
+  function ringAt(x, y, color, size, delay) {
+    const d = document.createElement("div");
+    d.className = "ring-fx";
+    d.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;margin:${-size / 2}px 0 0 ${-size / 2}px;border-color:${color};box-shadow:0 0 24px ${color}, inset 0 0 18px ${color};`;
+    board.appendChild(d);
+    const a = anim(d, [{ transform: "scale(.15)", opacity: .95 }, { transform: "scale(1.3)", opacity: 0 }], { duration: 460, delay: delay || 0 });
+    a.onfinish = () => d.remove();
+  }
+
+  function burstAt(x, y, colors, count, spread, dur) {
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement("div");
+      d.className = "p-fx";
+      const size = 2 + Math.random() * 5;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      d.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};box-shadow:0 0 ${size * 2}px ${color};`;
+      board.appendChild(d);
+      const ang = Math.random() * Math.PI * 2;
+      const dist = spread * (.4 + Math.random() * .8);
+      const a = anim(d, [
+        { transform: "translate(0,0) scale(1)", opacity: 1 },
+        { transform: `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist + spread * .3}px) scale(.3)`, opacity: 0 },
+      ], { duration: dur * (.7 + Math.random() * .6), easing: "cubic-bezier(.15,.7,.4,1)" });
+      a.onfinish = () => d.remove();
+    }
+  }
+
+  function shakeBoard(power) {
+    board.style.setProperty("--shx", (power || 6) + "px");
+    board.style.setProperty("--shy", ((power || 6) * .7) + "px");
+    board.classList.remove("shake");
+    void board.offsetWidth;
+    board.classList.add("shake");
+    setTimeout(() => board.classList.remove("shake"), T(280));
+  }
+
+  function bannerAbove(el, text, color) {
+    const r = rectIn(el);
+    const d = document.createElement("div");
+    d.className = "mini-banner";
+    d.textContent = text;
+    d.style.color = color || "#fff";
+    d.style.left = r.cx + "px";
+    d.style.top = (r.y - 22) + "px";
+    board.appendChild(d);
+    const a = anim(d, [
+      { transform: "translateX(-50%) translateY(10px) scale(.7)", opacity: 0 },
+      { transform: "translateX(-50%) translateY(0) scale(1)", opacity: 1, offset: .3 },
+      { transform: "translateX(-50%) translateY(0) scale(1)", opacity: 1, offset: .75 },
+      { transform: "translateX(-50%) translateY(-10px) scale(1.02)", opacity: 0 },
+    ], { duration: 1500 });
+    a.onfinish = () => d.remove();
+  }
+
+  function declareOn(card, text, kind) {
+    const d = document.createElement("div");
+    d.className = "declare" + (kind ? " " + kind : "");
+    d.textContent = text;
+    card.appendChild(d);
+    const a = anim(d, [
+      { opacity: 0, transform: "translate(-50%, 10px) scale(.8)" },
+      { opacity: 1, transform: "translate(-50%, -6px) scale(1)", offset: .35 },
+      { opacity: 1, transform: "translate(-50%, -12px) scale(1)", offset: .8 },
+      { opacity: 0, transform: "translate(-50%, -22px) scale(1)" },
+    ], { duration: 1350 });
+    a.onfinish = () => d.remove();
+  }
+
+  function damageNumberAt(el, text, cls) {
+    const r = rectIn(el);
+    const d = document.createElement("div");
+    d.className = "dmg" + (cls ? " " + cls : "");
+    d.textContent = text;
+    d.style.left = r.cx + "px";
+    d.style.top = r.cy + "px";
+    board.appendChild(d);
+    const dx = (Math.random() - .5) * 26;
+    const a = anim(d, [
+      { transform: `translate(-50%,-50%) translate(${dx}px, 10px) scale(.6)`, opacity: 0 },
+      { transform: `translate(-50%,-50%) translate(${dx}px, -12px) scale(1.25)`, opacity: 1, offset: .22 },
+      { transform: `translate(-50%,-50%) translate(${dx}px, -40px) scale(1)`, opacity: 1, offset: .7 },
+      { transform: `translate(-50%,-50%) translate(${dx}px, -64px) scale(.96)`, opacity: 0 },
+    ], { duration: 1150, easing: "cubic-bezier(.2,.7,.3,1)" });
+    a.onfinish = () => d.remove();
+  }
+
+  function reticleOn(el, ms) {
+    const r = rectIn(el);
+    const d = document.createElement("div");
+    d.className = "reticle";
+    d.style.cssText = `left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;`;
+    d.innerHTML = "<i></i><i></i><i></i><i></i>";
+    board.appendChild(d);
+    const a = anim(d, [{ opacity: 0, transform: "scale(1.18)" }, { opacity: 1, transform: "scale(1)", offset: .2 }], { duration: ms || 900 });
+    a.onfinish = () => d.remove();
+  }
+
+  function flyTo(fromEl, toEl, inner, opts) {
+    opts = opts || {};
+    const b = board.getBoundingClientRect();
+    const f = fromEl.getBoundingClientRect();
+    const t = toEl.getBoundingClientRect();
+    const el = document.createElement("div");
+    el.className = "fly";
+    el.innerHTML = inner;
+    el.style.cssText = `left:${f.left - b.left}px;top:${f.top - b.top}px;width:${f.width}px;height:${f.height}px;`;
+    board.appendChild(el);
+    const dx = (t.left - f.left) + (t.width - f.width) / 2;
+    const dy = (t.top - f.top) + (t.height - f.height) / 2;
+    const a = anim(el, [
+      { transform: "translate(0,0) scale(1)", opacity: 0 },
+      { transform: `translate(${dx * .55}px, ${dy * .55 - (opts.arc || 24)}px) scale(1.12)`, opacity: 1, offset: .5 },
+      { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 1 },
+    ], { duration: opts.duration || 640, easing: "cubic-bezier(.3,.6,.3,1)" });
+    return new Promise(resolve => { a.onfinish = () => { el.remove(); resolve(); }; });
+  }
+
+  function placeCard(slotEl, key, facedown) {
+    const el = cardEl(key, { facedown });
+    slotEl.appendChild(el);
+    el.style.opacity = "0";
+    anim(el, [{ opacity: 0, transform: "scale(.72)" }, { opacity: 1, transform: "scale(1)" }], { duration: 240 });
+    return el;
+  }
+
+  async function performSummon(slotEl, key, title, color) {
+    slotEl.classList.add("arriving");
+    const r = rectIn(slotEl);
+    ringAt(r.cx, r.cy, color || "#ffd36b", 150);
+    bannerAbove(slotEl, title || "通常召唤", color);
+    burstAt(r.cx, r.cy + 30, color === "#c9a6ff" ? ["#d9c2ff", "#8a3cff", "#fff"] : ["#ffd36b", "#ff9a4c", "#fff1c9"], 14, 90, 620);
+    await wait(660);
+    slotEl.classList.remove("arriving");
+  }
+
+  async function destroyCard(cardEl, palette) {
+    const r = rectIn(cardEl);
+    const flash = document.createElement("div");
+    flash.style.cssText = `position:absolute;left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;z-index:37;background:#fff;border-radius:9px;`;
+    board.appendChild(flash);
+    anim(flash, [{ opacity: 0 }, { opacity: .95, offset: .18 }, { opacity: 0 }], { duration: 300 }).onfinish = () => flash.remove();
+    for (let i = 0; i < 14; i++) {
+      const p = document.createElement("div");
+      p.className = "p-fx";
+      const color = (palette || ["#ffd36b", "#c77dff", "#ffffff"])[i % (palette || ["#ffd36b", "#c77dff", "#ffffff"]).length];
+      const size = 4 + Math.random() * 7;
+      p.style.cssText = `left:${r.cx}px;top:${r.cy}px;width:${size}px;height:${size}px;background:${color};box-shadow:0 0 ${size * 2}px ${color};`;
+      board.appendChild(p);
+      const ang = (i / 14) * Math.PI * 2 + Math.random() * .5;
+      const dist = 50 + Math.random() * 70;
+      const a = anim(p, [
+        { transform: "translate(0,0) rotate(0deg) scale(1)", opacity: 1 },
+        { transform: `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist - 20}px) rotate(${Math.random() * 320 - 160}deg) scale(.2)`, opacity: 0 },
+      ], { duration: 560 + Math.random() * 180, easing: "cubic-bezier(.2,.7,.4,1)" });
+      a.onfinish = () => p.remove();
+    }
+    const a = anim(cardEl, [
+      { transform: "scale(1) rotate(0deg)", opacity: 1 },
+      { transform: "scale(.18) rotate(14deg)", opacity: 0 },
+    ], { duration: 420, easing: "cubic-bezier(.4,.1,.5,1)" });
+    await new Promise(res => { a.onfinish = res; });
+    cardEl.remove();
+  }
+
+  async function hitCard(cardEl, damage, opts) {
+    opts = opts || {};
+    shakeBoard(opts.heavy ? 7 : 4);
+    const frames = opts.heavy
+      ? [{ transform: "translate(0,0)" }, { transform: "translate(-8px,4px)" }, { transform: "translate(5px,-3px)" }, { transform: "translate(0,0)" }]
+      : [{ transform: "translate(0,0)" }, { transform: "translate(5px,-3px)" }, { transform: "translate(0,0)" }];
+    anim(cardEl, frames, { duration: opts.heavy ? 320 : 220 });
+    const r = rectIn(cardEl);
+    burstAt(r.cx, r.cy, opts.palette || ["#ffd36b", "#ff8a3c", "#fff"], opts.heavy ? 20 : 10, opts.heavy ? 120 : 70, 520);
+    if (damage) damageNumberAt(cardEl, "-" + damage, opts.lp ? "lp" : "");
+    if (opts.destroy) {
+      await wait(240);
+      await destroyCard(cardEl, opts.palette);
+    } else {
+      await wait(320);
+    }
+  }
+
+  // ---------------- cut-ins ----------------
+  function cutinRoot(artUrl, origin, violet) {
+    const root = document.createElement("div");
+    root.className = "cutin";
+    root.innerHTML = `
+      <div class="cutin-artwrap"><div class="cutin-art"></div><div class="cutin-invert"></div><div class="cutin-mono"></div><div class="cutin-slash"></div></div>
+      <div class="cutin-speed"></div>
+      <div class="cutin-dim"></div>
+      <div class="cutin-letter top"></div><div class="cutin-letter bottom"></div>
+      <div class="cutin-white${violet ? " violet" : ""}"></div>
+      <div class="cutin-fx"></div>
+      <div class="cutin-title${violet ? " violet" : ""}"></div>`;
+    board.appendChild(root);
+    $$(".cutin-art, .cutin-invert, .cutin-mono", root).forEach(el => { el.style.backgroundImage = `url('${artUrl}')`; });
+    $(".cutin-artwrap", root).style.transformOrigin = origin;
+    return root;
+  }
+
+  function cutinBurst(root, x, y, colors, count, spread, dur) {
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement("div");
+      d.className = "p-fx";
+      const size = 2 + Math.random() * 6;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      d.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};box-shadow:0 0 ${size * 2}px ${color};`;
+      $(".cutin-fx", root).appendChild(d);
+      const ang = Math.random() * Math.PI * 2;
+      const dist = spread * (.4 + Math.random() * .9);
+      const a = anim(d, [
+        { transform: "translate(0,0) scale(1)", opacity: 1 },
+        { transform: `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist}px) scale(.25)`, opacity: 0 },
+      ], { duration: dur * (.7 + Math.random() * .6), easing: "cubic-bezier(.15,.7,.4,1)" });
+      a.onfinish = () => d.remove();
+    }
+  }
+
+  async function cutInMelee() {
+    const root = cutinRoot("/files/tanjiro.png", "30% 27%", false);
+    const art = $(".cutin-art", root);
+    const wrap = $(".cutin-artwrap", root);
+    const speed = $(".cutin-speed", root);
+    const white = $(".cutin-white", root);
+    const title = $(".cutin-title", root);
+    const slash = $(".cutin-slash", root);
+
+    anim(art, [{ opacity: 0 }, { opacity: 1 }], { duration: 180 });
+    anim(wrap, [
+      { transform: "scale(1.05) translate(1%, .5%)" },
+      { transform: "scale(1.15) translate(1.6%, 1%)" },
+    ], { duration: 300 });
+    await wait(240);
+    anim(speed, [{ opacity: 0 }, { opacity: .8 }, { opacity: 0 }], { duration: 900, easing: "linear" });
+    anim(wrap, [
+      { transform: "scale(1.15) translate(1.6%, 1%)" },
+      { transform: "scale(1.68) translate(4%, 3%)" },
+    ], { duration: 540, easing: "cubic-bezier(.45,.05,.55,.95)" });
+    await wait(560);
+    $(".cutin-invert", root).style.opacity = "1";
+    setTimeout(() => { $(".cutin-invert", root).style.opacity = "0"; }, T(60));
+    setTimeout(() => { $(".cutin-mono", root).style.opacity = "1"; }, T(95));
+    setTimeout(() => { $(".cutin-mono", root).style.opacity = "0"; }, T(160));
+    anim(white, [{ opacity: 0 }, { opacity: .96 }, { opacity: 0 }], { duration: 150 });
+    shakeBoard(8);
+    const cx = board.clientWidth * .32, cy = board.clientHeight * .32;
+    cutinBurst(root, cx, cy, ["#ffd36b", "#ff8a3c", "#ff4d2e", "#fff1c9"], 30, 160, 620);
+    anim(slash, [
+      { transform: "rotate(-13deg) scaleX(0)", opacity: 0 },
+      { transform: "rotate(-13deg) scaleX(1)", opacity: 1, offset: .5 },
+      { transform: "rotate(-13deg) scaleX(1)", opacity: 0 },
+    ], { duration: 340, easing: "cubic-bezier(.2,.7,.3,1)" });
+    await wait(200);
+    cutinBurst(root, cx + 40, cy + 40, ["#ffb14d", "#ff7a28", "#ffd36b"], 20, 220, 760);
+    title.textContent = "火之神神乐";
+    anim(title, [
+      { transform: "translateX(-50%) scale(1.8)", opacity: 0, filter: "blur(6px)" },
+      { transform: "translateX(-50%) scale(1)", opacity: 1, filter: "blur(0px)", offset: .32 },
+      { transform: "translateX(-50%) scale(1)", opacity: 1, offset: .8 },
+      { transform: "translateX(-50%) scale(1.03)", opacity: 0 },
+    ], { duration: 1500, easing: "cubic-bezier(.2,.8,.3,1)" });
+    anim(wrap, [
+      { transform: "scale(1.68) translate(4%, 3%)" },
+      { transform: "scale(1.74) translate(3%, 2%)" },
+    ], { duration: 1300 });
+    await wait(1350);
+    anim(root, [{ opacity: 1 }, { opacity: 0 }], { duration: 320 });
+    await wait(340);
+    root.remove();
+  }
+
+  async function cutInBurst() {
+    const root = cutinRoot("/files/gojo.png", "30% 22%", true);
+    const art = $(".cutin-art", root);
+    const wrap = $(".cutin-artwrap", root);
+    const speed = $(".cutin-speed", root);
+    const white = $(".cutin-white", root);
+    const dim = $(".cutin-dim", root);
+    const title = $(".cutin-title", root);
+    const letters = $$(".cutin-letter", root);
+
+    anim(art, [{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
+    anim(wrap, [{ transform: "scale(1.03)" }, { transform: "scale(1.24)" }], { duration: 1050, easing: "cubic-bezier(.35,.15,.4,1)" });
+    for (let i = 0; i < 14; i++) {
+      setTimeout(() => {
+        const d = document.createElement("div");
+        d.className = "p-fx";
+        const size = 3 + Math.random() * 5;
+        const color = ["#c77dff", "#8a3cff", "#6fd6ff", "#e9d2ff"][i % 4];
+        d.style.cssText = `left:${180 + Math.random() * 420}px;top:${100 + Math.random() * 320}px;width:${size}px;height:${size}px;background:${color};box-shadow:0 0 ${size * 2}px ${color};opacity:0;`;
+        $(".cutin-fx", root).appendChild(d);
+        const a = anim(d, [
+          { transform: "translate(0,0) scale(.6)", opacity: 0 },
+          { transform: `translate(${(Math.random() - .5) * 30}px, -50px) scale(1)`, opacity: .9, offset: .35 },
+          { transform: `translate(${(Math.random() - .5) * 60}px, -120px) scale(.2)`, opacity: 0 },
+        ], { duration: 900, easing: "linear" });
+        a.onfinish = () => d.remove();
+      }, T(140 + i * 55));
+    }
+    await wait(980);
+    anim(dim, [{ opacity: 0 }, { opacity: .5 }], { duration: 300 });
+    anim(art, [
+      { filter: "none" },
+      { filter: "drop-shadow(5px 0 0 rgba(255,60,140,.55)) drop-shadow(-5px 0 0 rgba(80,190,255,.55))" },
+      { filter: "none" },
+    ], { duration: 380, easing: "ease-in-out" });
+    const cx0 = board.clientWidth * .3, cy0 = board.clientHeight * .24;
+    ringAt2(root, cx0, cy0, 3.2, "#b44bff", 90, 600);
+    ringAt2(root, cx0, cy0, 4, "#6fd6ff", 90, 640, 100);
+    ringAt2(root, cx0, cy0, 2.4, "#e9d2ff", 90, 500, 200);
+    await wait(560);
+    anim(white, [{ opacity: 0 }, { opacity: 1 }], { duration: 170 });
+    letters.forEach((b, i) => { b.style.height = "78px"; });
+    shakeBoard(10);
+    cutinBurst(root, board.clientWidth * .42, board.clientHeight * .42, ["#e9d2ff", "#b44bff", "#6fd6ff", "#fff"], 34, 260, 800);
+    title.textContent = "虚式 · 茈";
+    anim(title, [
+      { transform: "translateX(-50%) scale(2.1)", opacity: 0, filter: "blur(8px)" },
+      { transform: "translateX(-50%) scale(1)", opacity: 1, filter: "blur(0px)", offset: .3 },
+      { transform: "translateX(-50%) scale(1)", opacity: 1, offset: .82 },
+      { transform: "translateX(-50%) scale(1.03)", opacity: 0 },
+    ], { duration: 1700, easing: "cubic-bezier(.2,.8,.3,1)" });
+    anim(wrap, [{ transform: "scale(1.24)" }, { transform: "scale(1.42)" }], { duration: 900, easing: "cubic-bezier(.2,.7,.3,1)" });
+    anim(speed, [{ opacity: 0 }, { opacity: .5 }, { opacity: 0 }], { duration: 700, easing: "linear" });
+    await wait(500);
+    anim(white, [{ opacity: 1 }, { opacity: 0 }], { duration: 520 });
+    await wait(620);
+    letters.forEach(b => { b.style.height = "0px"; });
+    anim(dim, [{ opacity: .5 }, { opacity: 0 }], { duration: 400 });
+    anim(root, [{ opacity: 1 }, { opacity: 0 }], { duration: 320 });
+    await wait(340);
+    root.remove();
+  }
+
+  function ringAt2(root, x, y, fromScale, color, size, dur, delay) {
+    const d = document.createElement("div");
+    d.className = "ring-fx";
+    d.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;margin:${-size / 2}px 0 0 ${-size / 2}px;border-color:${color};box-shadow:0 0 18px ${color};`;
+    $(".cutin-fx", root).appendChild(d);
+    const a = anim(d, [
+      { transform: `scale(${fromScale})`, opacity: .95 },
+      { transform: "scale(.6)", opacity: .6, offset: .7 },
+      { transform: "scale(.15)", opacity: 0 },
+    ], { duration: dur, delay: delay || 0, easing: "cubic-bezier(.3,.6,.4,1)" });
+    a.onfinish = () => d.remove();
+  }
+
+  // ---------------- demo steps ----------------
+  const plSlot = (i) => $id("pl-slot-" + i);
+  const oppSlot = (i) => $id("opp-slot-" + i);
+  const plSt = (i) => $id("pl-st-" + i);
+  const oppSt = (i) => $id("opp-st-" + i);
+
+  async function drawCard(key) {
+    const deckPile = $(".pl-deck .pc");
+    const target = handEls.length ? handEls[Math.floor(handEls.length / 2)] : handEl;
+    $("#pl-deck").textContent = String(Number($("#pl-deck").textContent) - 1);
+    $("#pile-pl-deck").textContent = $("#pl-deck").textContent;
+    await flyTo(deckPile, target || deckPile, cardInner(key, true), { duration: 560, arc: 30 });
+    handKeys.push(key);
+    renderHand();
+    await wait(300);
+  }
+
+  async function stepTurn1Opening() {
+    setTurn("TURN 1 · 你的回合", false);
+    log("=== 第 1 回合 · 决斗者的回合 ===", "sys");
+    setPhase(0);
+    await wait(420);
+    setPhase(1);
+    await wait(360);
+    log("决斗者抽到了蕾塞·雨夜引魂");
+    await drawCard("resse");
+    setPhase(2);
+    await wait(320);
+  }
+
+  async function stepSummonTanjiro() {
+    log("决斗者通常召唤了灶门炭治郎·火之神神乐");
+    const idx = handKeys.indexOf("tanjiro");
+    const src = handEls[idx];
+    await flyTo(src, plSlot(0), cardInner("tanjiro"), { duration: 620 });
+    handKeys.splice(idx, 1);
+    renderHand();
+    const card = placeCard(plSlot(0), "tanjiro");
+    await performSummon(plSlot(0), "tanjiro", "通常召唤 · 火之神神乐", "#ffd36b");
+    await wait(260);
+    return card;
+  }
+
+  async function stepSpellFire() {
+    log("决斗者发动了魔法卡「火刑」");
+    const idx = handKeys.indexOf("fire");
+    const src = handEls[idx];
+    const center = document.createElement("div");
+    center.style.cssText = "position:absolute;left:50%;top:44%;width:130px;height:180px;transform:translate(-50%,-50%);";
+    board.appendChild(center);
+    await flyTo(src, center, cardInner("fire"), { duration: 560 });
+    handKeys.splice(idx, 1);
+    renderHand();
+    const ghost = document.createElement("div");
+    ghost.style.cssText = "position:absolute;left:50%;top:44%;width:130px;height:180px;transform:translate(-50%,-50%);z-index:32;";
+    ghost.innerHTML = cardInner("fire");
+    board.appendChild(ghost);
+    center.remove();
+    const r = rectIn(ghost);
+    ringAt(r.cx, r.cy, "#ff9a3c", 190);
+    burstAt(r.cx, r.cy, ["#ffb14d", "#ff5a1f", "#fff1c9"], 26, 140, 720);
+    shRingOnBoard();
+    await wait(420);
+    // 火焰特效向对方 LP 席卷
+    const aiPanel = $(".opp-info");
+    const t = rectIn(aiPanel);
+    for (let i = 0; i < 7; i++) {
+      const dx = Math.random() * 60 - 30;
+      const el = document.createElement("div");
+      el.className = "p-fx";
+      el.style.cssText = `left:${r.cx + dx}px;top:${r.cy}px;width:6px;height:14px;border-radius:3px;background:linear-gradient(to top, rgba(255,100,30,.9), rgba(255,200,60,.35), transparent);`;
+      board.appendChild(el);
+      const a = anim(el, [
+        { transform: "translate(0,0) scale(.6)", opacity: 0 },
+        { transform: `translate(${t.cx - r.cx}px, ${t.cy - r.cy}px) scale(1.05)`, opacity: 1, offset: .75 },
+        { transform: `translate(${t.cx - r.cx}px, ${t.cy - r.cy - 16}px) scale(.5)`, opacity: 0 },
+      ], { duration: 640, delay: i * 60, easing: "cubic-bezier(.3,.5,.3,1)" });
+      a.onfinish = () => el.remove();
+    }
+    await wait(760);
+    setLP("ai", 7200);
+    damageNumberAt(aiPanel, "-800", "lp");
+    shakeBoard(5);
+    anim(ghost, [{ opacity: 1 }, { opacity: 0, transform: "translate(-50%,-50%) scale(.7)" }], { duration: 300 });
+    await wait(360);
+    ghost.remove();
+    $("#pl-gy").textContent = String(Number($("#pl-gy").textContent) + 1);
+    $("#pile-pl-gy").textContent = $("#pl-gy").textContent;
+    log("火刑效果：给予对方 800 点伤害", "dmg");
+  }
+
+  function shRingOnBoard() {
+    const d = document.createElement("div");
+    d.className = "ring-fx";
+    d.style.cssText = `left:50%;top:44%;width:260px;height:260px;margin:-130px 0 0 -130px;border-color:#ffb14d;box-shadow:0 0 30px #ff9a3c66, inset 0 0 26px #ff9a3c55;`;
+    board.appendChild(d);
+    anim(d, [{ transform: "scale(.2)", opacity: .95 }, { transform: "scale(1.25)", opacity: 0 }], { duration: 520 }).onfinish = () => d.remove();
+  }
+
+  async function stepSetTrap() {
+    log("决斗者盖放了一张卡");
+    const idx = handKeys.indexOf("hole");
+    const src = handEls[idx];
+    await flyTo(src, plSt(0), cardInner("hole", true), { duration: 560 });
+    handKeys.splice(idx, 1);
+    renderHand();
+    const card = placeCard(plSt(0), "hole", true);
+    card.style.transform = "rotateY(180deg)";
+    anim(card, [{ transform: "rotateY(180deg)" }, { transform: "rotateY(0deg)" }], { duration: 260 });
+    const r = rectIn(plSt(0));
+    ringAt(r.cx, r.cy, "#d8a35b", 110);
+    await wait(420);
+    return card;
+  }
+
+  async function stepTanjiroAttack(tanjiro, hakue) {
+    setPhase(3);
+    log("战斗阶段：灶门炭治郎·火之神神乐 攻击宣言");
+    declareOn(tanjiro, "攻击宣言！");
+    reticleOn(hakue, 900);
+    await wait(760);
+    await cutInMelee();
+    // 结算
+    anim(tanjiro, [{ transform: "scale(1)" }, { transform: "translate(22px,-8px) scale(1.05)", offset: .45 }, { transform: "scale(1)" }], { duration: 620, easing: "cubic-bezier(.2,.7,.3,1)" });
+    await wait(300);
+    log("白羽静梦 被战斗破坏", "dmg");
+    await hitCard(hakue, 0, { destroy: true, heavy: true, palette: ["#c9ffe4", "#7fe0b0", "#ffffff"] });
+    $("#ai-gy").textContent = String(Number($("#ai-gy").textContent) + 1);
+    $("#pile-ai-gy").textContent = $("#ai-gy").textContent;
+    setLP("ai", 6840);
+    damageNumberAt($(".opp-info"), "-360", "lp");
+    await wait(300);
+    setPhase(4);
+    log("决斗者进入主要阶段2");
+    await wait(400);
+    setPhase(5);
+    log("决斗者结束了回合");
+    await wait(300);
+  }
+
+  async function stepAiTurn() {
+    setTurn("TURN 2 · 练习 AI 的回合", true);
+    setPhase(0);
+    log("=== 第 2 回合 · 练习 AI 的回合 ===", "sys");
+    await wait(500);
+    $("#ai-deck").textContent = String(Number($("#ai-deck").textContent) - 1);
+    $("#pile-ai-deck").textContent = $("#ai-deck").textContent;
+    log("练习 AI 抽了 1 张卡");
+    setPhase(2);
+    await wait(400);
+    log("练习 AI 通常召唤了蕾塞·雨夜引魂");
+    const ghost = document.createElement("div");
+    ghost.style.cssText = "position:absolute;left:50%;top:6%;width:100px;height:140px;z-index:30;opacity:0;";
+    ghost.innerHTML = cardInner("resse", true);
+    ghost.style.left = "calc(50% + 20px)";
+    board.appendChild(ghost);
+    const dest = oppSlot(1);
+    const dr = rectIn(dest);
+    const gr = rectIn(ghost);
+    anim(ghost, [
+      { transform: "translate(0,0) scale(1)", opacity: 0 },
+      { transform: `translate(${dr.cx - gr.cx}px, ${dr.cy - gr.cy}px) scale(1.05)`, opacity: 1 },
+    ], { duration: 600, easing: "cubic-bezier(.3,.6,.3,1)" });
+    await wait(620);
+    ghost.remove();
+    const resse = placeCard(dest, "resse");
+    await performSummon(dest, "resse", "AI 通常召唤", "#c9a6ff");
+    await wait(300);
+
+    log("蕾塞·雨夜引魂 攻击 灶门炭治郎·火之神神乐");
+    declareOn(resse, "攻击宣言！", "violet");
+    reticleOn(plSlot(0), 800);
+    await wait(540);
+    // 冲刺攻击
+    const dash = document.createElement("div");
+    dash.className = "dash";
+    const sr = rectIn(resse);
+    const tr = rectIn(plSlot(0));
+    dash.style.cssText = `left:${sr.x}px;top:${sr.y}px;width:${sr.w}px;height:${sr.h}px;`;
+    dash.innerHTML = cardInner("resse");
+    board.appendChild(dash);
+    anim(dash, [
+      { transform: "translate(0,0) scale(1)", opacity: 1 },
+      { transform: `translate(${tr.cx - sr.cx}px, ${tr.cy - sr.cy}px) scale(.94)`, opacity: 1 },
+    ], { duration: 320, easing: "cubic-bezier(.3,.7,.3,1)" });
+    await wait(340);
+    // 陷阱发动！
+    const trapCard = plSt(0).firstElementChild;
+    log("决斗者发动了陷阱卡「落穴」！", "sys");
+    bannerAbove(plSt(0), "陷阱发动 · 落穴", "#ff8ab0");
+    const back = $(".back", trapCard);
+    anim(back, [{ transform: "rotateY(0deg)" }, { transform: "rotateY(90deg)" }], { duration: 200 });
+    await wait(220);
+    trapCard.classList.remove("facedown");
+    anim(trapCard, [
+      { transform: "scale(1.0)", filter: "brightness(1)" },
+      { transform: "scale(1.14)", filter: "brightness(1.7)", offset: .4 },
+      { transform: "scale(1)", filter: "brightness(1)" },
+    ], { duration: 460 });
+    const trr = rectIn(trapCard);
+    ringAt(trr.cx, trr.cy, "#ff8ab0", 150);
+    await wait(260);
+    // 落穴吞掉落点：在攻击者下方生成黑洞
+    const hole = document.createElement("div");
+    hole.style.cssText = `position:absolute;left:${sr.cx}px;top:${sr.cy + 10}px;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;z-index:38;background:radial-gradient(circle, #0a0612 0%, #2a1140 38%, #6a2a9a 60%, transparent 72%);box-shadow:0 0 30px rgba(140,60,255,.7), 0 0 70px rgba(80,30,160,.5);`;
+    board.appendChild(hole);
+    anim(hole, [{ transform: "scale(1)", opacity: 0 }, { transform: "scale(24)", opacity: 1, offset: .55 }, { transform: "scale(30)", opacity: 0 }], { duration: 780, easing: "cubic-bezier(.4,.1,.5,1)" });
+    for (let i = 0; i < 12; i++) {
+      const p = document.createElement("div");
+      p.className = "p-fx";
+      const size = 3 + Math.random() * 4;
+      p.style.cssText = `left:${sr.cx + (Math.random() - .5) * 80}px;top:${sr.cy + (Math.random() - .5) * 90}px;width:${size}px;height:${size}px;background:#c9a6ff;box-shadow:0 0 10px #c9a6ff;`;
+      board.appendChild(p);
+      const a = anim(p, [
+        { transform: "translate(0,0) scale(1)", opacity: 1 },
+        { transform: `translate(${(Math.random() - .5) * 40}px, 90px) scale(.2)`, opacity: 0 },
+      ], { duration: 560 + i * 30, easing: "cubic-bezier(.4,.2,.6,1)" });
+      a.onfinish = () => p.remove();
+    }
+    await wait(420);
+    // 攻击者被吞
+    const resseCard = oppSlot(1).firstElementChild;
+    anim(resseCard, [
+      { transform: "translate(0,0) rotate(0deg)", opacity: 1 },
+      { transform: "translate(0, 120px) rotate(18deg) scale(.25)", opacity: 0 },
+    ], { duration: 620, easing: "cubic-bezier(.5,.1,.6,1)" });
+    await wait(560);
+    resseCard.remove();
+    dash.remove();
+    hole.remove();
+    shakeBoard(8);
+    $("#ai-gy").textContent = String(Number($("#ai-gy").textContent) + 1);
+    $("#pile-ai-gy").textContent = $("#ai-gy").textContent;
+    log("落穴效果：蕾塞·雨夜引魂 被破坏，攻击被无效", "dmg");
+    // 陷阱送墓
+    await flyTo(trapCard, $(".pl-gy"), cardInner("hole"), { duration: 520, arc: 40 });
+    trapCard.remove();
+    $("#pl-gy").textContent = String(Number($("#pl-gy").textContent) + 1);
+    $("#pile-pl-gy").textContent = $("#pl-gy").textContent;
+    await wait(420);
+    log("练习 AI 结束了回合");
+    setPhase(5);
+    await wait(300);
+  }
+
+  async function stepPlayerTurn2() {
+    setTurn("TURN 3 · 你的回合", false);
+    setPhase(0);
+    log("=== 第 3 回合 · 决斗者的回合 ===", "sys");
+    await wait(420);
+    log("决斗者抽到了白羽静梦");
+    await drawCard("hakue");
+    setPhase(2);
+    await wait(300);
+
+    log("决斗者通常召唤了五条悟·虚式茈");
+    const idx = handKeys.indexOf("gojo");
+    const src = handEls[idx];
+    await flyTo(src, plSlot(1), cardInner("gojo"), { duration: 640 });
+    handKeys.splice(idx, 1);
+    renderHand();
+    const gojo = placeCard(plSlot(1), "gojo");
+    await performSummon(plSlot(1), "gojo", "通常召唤 · 最强", "#c9a6ff");
+    await wait(320);
+
+    log("五条悟·虚式茈 发动效果：虚式·茈");
+    declareOn(gojo, "发动：虚式·茈", "violet");
+    anim(gojo, [
+      { filter: "brightness(1)" },
+      { filter: "brightness(1.9) drop-shadow(0 0 14px rgba(170,90,255,.9))", offset: .5 },
+      { filter: "brightness(1)" },
+    ], { duration: 900 });
+    const gr = rectIn(gojo);
+    ringAt(gr.cx, gr.cy, "#b44bff", 130, 0);
+    ringAt(gr.cx, gr.cy, "#6fd6ff", 130, 180);
+    await wait(700);
+    await cutInBurst();
+    // AoE 结算：命中对方全体
+    const targets = [$id("opp-slot-0").firstElementChild, oppSlot(1).firstElementChild].filter(Boolean);
+    const aoe = document.createElement("div");
+    aoe.style.cssText = `position:absolute;left:50%;top:210px;width:520px;height:300px;transform:translate(-50%,-50%);z-index:39;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(200,140,255,.75) 18%, rgba(130,60,230,.4) 45%, transparent 72%);`;
+    board.appendChild(aoe);
+    anim(aoe, [{ transform: "translate(-50%,-50%) scale(.2)", opacity: 0 }, { transform: "translate(-50%,-50%) scale(1.15)", opacity: 1, offset: .35 }, { transform: "translate(-50%,-50%) scale(1.5)", opacity: 0 }], { duration: 900, easing: "cubic-bezier(.2,.6,.4,1)" }).onfinish = () => aoe.remove();
+    shakeBoard(9);
+    await wait(420);
+    for (const t of targets) {
+      const rr = rectIn(t);
+      burstAt(rr.cx, rr.cy, ["#e9d2ff", "#b44bff", "#6fd6ff", "#fff"], 16, 110, 700);
+    }
+    await hitCard(targets[0], 0, { destroy: true, heavy: true, palette: ["#c9ffe4", "#7fe0b0", "#fff"] });
+    $("#ai-gy").textContent = String(Number($("#ai-gy").textContent) + 1);
+    $("#pile-ai-gy").textContent = $("#ai-gy").textContent;
+    setLP("ai", 5640);
+    damageNumberAt($(".opp-info"), "-1200", "lp");
+    log("虚式·茈：破坏对方场上全部怪兽，并造成 1200 点伤害", "dmg");
+    await wait(400);
+    setPhase(4);
+    await wait(400);
+    setPhase(5);
+    log("决斗者结束了回合");
+    await wait(400);
+    log("演示结束 · 点击「重播全程」再看一遍", "sys");
+  }
+
+  // ---------------- run ----------------
+  function clearBoard() {
+    logEl.innerHTML = "";
+    handEl.innerHTML = "";
+    handKeys = ["tanjiro", "gojo", "fire", "hole", "mafuyu"];
+    ["pl-slot-0", "pl-slot-1", "pl-slot-2", "opp-slot-0", "opp-slot-1", "opp-slot-2", "pl-st-0", "pl-st-1", "pl-st-2", "opp-st-0", "opp-st-1", "opp-st-2"].forEach(id => { const el = $id(id); if (el) el.innerHTML = ""; });
+    $$(".fly, .dash, .cutin, .ring-fx, .p-fx, .dmg, .reticle, .mini-banner").forEach(el => el.remove());
+    renderHand();
+    $("#ai-lp").innerHTML = "8000 <small>LP</small>";
+    $("#pl-lp").innerHTML = "8000 <small>LP</small>";
+    $("#ai-deck").textContent = "34";
+    $("#pl-deck").textContent = "35";
+    $("#ai-hand").textContent = "4";
+    $("#pl-hand").textContent = "5";
+    $("#ai-gy").textContent = "0";
+    $("#pl-gy").textContent = "0";
+    $("#pile-ai-deck").textContent = "34";
+    $("#pile-pl-deck").textContent = "35";
+    $("#pile-ai-gy").textContent = "0";
+    $("#pile-pl-gy").textContent = "0";
+    setPhase(-1);
+  }
+
+  async function runShow() {
+    const my = ++token;
+    paused = false;
+    $("#pause").textContent = "暂停";
+    statusEl.textContent = "播放中…";
+    clearBoard();
+    try {
+      // 对手初始场面
+      const hakue = placeCard(oppSlot(0), "hakue");
+      hakue.style.opacity = "0";
+      anim(hakue, [{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+      const oppTrap = placeCard(oppSt(0), "fire", true);
+      oppTrap.style.opacity = "0";
+      anim(oppTrap, [{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+      await wait(600);
+
+      await stepTurn1Opening();
+      if (my !== token) throw new Abort();
+      const tanjiro = await stepSummonTanjiro();
+      if (my !== token) throw new Abort();
+      await stepSpellFire();
+      if (my !== token) throw new Abort();
+      await stepSetTrap();
+      if (my !== token) throw new Abort();
+      await stepTanjiroAttack(tanjiro, hakue);
+      if (my !== token) throw new Abort();
+      await stepAiTurn();
+      if (my !== token) throw new Abort();
+      await stepPlayerTurn2();
+      statusEl.textContent = "演示完成";
+    } catch (e) {
+      if (!(e instanceof Abort)) throw e;
+    }
+  }
+
+  $("#replay").addEventListener("click", () => { runShow(); });
+  $("#pause").addEventListener("click", () => {
+    paused = !paused;
+    $("#pause").textContent = paused ? "继续" : "暂停";
+    statusEl.textContent = paused ? "已暂停" : "播放中…";
+  });
+  $("#slowmo").addEventListener("change", (e) => { SPEED = e.target.checked ? 2 : 1; });
+
+  runShow();
+})();
+</script>
+</body>
+</html>

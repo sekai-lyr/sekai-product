@@ -1,0 +1,4 @@
+const origin='https://scrutiny-fringe-parsley.ngrok-free.dev';
+const seen=new Set(), bad=[]; let queue=[origin+'/js/main.js'];
+while(queue.length){ const batch=queue.splice(0,16).filter(x=>!seen.has(x)); batch.forEach(x=>seen.add(x)); const rows=await Promise.all(batch.map(async url=>{try{const res=await fetch(url,{headers:{'user-agent':'SekaiGameAndroid/1.0','ngrok-skip-browser-warning':'1'}});const text=await res.text();if(!res.ok){bad.push([url,res.status,text.slice(0,120)]);return []}const out=[];const re=/(?:import|export)\s+(?:[^'";]*?\s+from\s*)?["']([^"']+)["']/g;let m;while((m=re.exec(text))){const s=m[1];if(s.startsWith('.')||s.startsWith('/'))out.push(new URL(s,url).href)}return out}catch(e){bad.push([url,'FETCH',e.message]);return []}})); queue.push(...rows.flat().filter(x=>!seen.has(x))); }
+console.log(JSON.stringify({count:seen.size,bad},null,2));

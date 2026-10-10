@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>素材驱动演出 · 真实卡图演示</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #0d1220;
+    --edge: #1c2540;
+    --text: #e9edf8;
+    --dim: #8e99b8;
+    --accent: #f0c96b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 22px 20px 40px;
+    background: radial-gradient(1100px 500px at 50% -10%, #131b30 0%, var(--bg) 62%);
+    color: var(--text);
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  }
+  header { max-width: 1240px; margin: 0 auto 16px; }
+  header h1 { font-size: 21px; margin: 0 0 6px; letter-spacing: .04em; }
+  header p { margin: 0 0 4px; color: var(--dim); font-size: 13.5px; line-height: 1.75; }
+  header .hl { color: var(--accent); }
+  .toolbar { display: flex; gap: 14px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--dim); }
+  .toolbar button {
+    background: #16203a; color: #d5e2ff; border: 1px solid #2b3a63;
+    border-radius: 8px; padding: 6px 14px; cursor: pointer; font-family: inherit; font-size: 13px;
+  }
+  .toolbar button:hover { background: #1d2a4c; }
+  .toolbar label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; user-select: none; }
+  .grid { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: linear-gradient(180deg, var(--panel), #090d17); border: 1px solid var(--edge); border-radius: 14px; padding: 14px; }
+  .panel h2 { font-size: 15.5px; margin: 0 0 3px; }
+  .panel h2 small { color: var(--dim); font-weight: 400; font-size: 12px; margin-left: 8px; }
+  .cine {
+    position: relative; height: 400px; margin-top: 10px; border-radius: 10px; overflow: hidden;
+    background: #04060b; border: 1px solid #1b2440; isolation: isolate;
+  }
+  .artwrap { position: absolute; inset: 0; will-change: transform; }
+  .art, .frame-invert, .frame-mono {
+    position: absolute; inset: 0; background-size: cover; background-position: center 20%;
+  }
+  .art { opacity: 0; }
+  .frame-invert { filter: invert(1) contrast(1.7) saturate(1.2); opacity: 0; }
+  .frame-mono { filter: grayscale(1) contrast(2.4) brightness(1.15); opacity: 0; }
+  .speedlines {
+    position: absolute; inset: -22%; opacity: 0; pointer-events: none;
+    background: repeating-conic-gradient(from 0deg at 50% 48%,
+      rgba(255,255,255,0) 0deg 3.4deg, rgba(255,255,255,.55) 3.4deg 4deg);
+    -webkit-mask: radial-gradient(circle at 50% 48%, transparent 0 20%, #000 52%);
+    mask: radial-gradient(circle at 50% 48%, transparent 0 20%, #000 52%);
+  }
+  .whiteout { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  .violetout { background: radial-gradient(circle at 45% 42%, #ffffff 0%, #f0e4ff 18%, #a85cff 48%, #3c1178 80%, #12042b 100%); }
+  .dim { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+  .letterbox { position: absolute; left: 0; right: 0; height: 0; background: #000; z-index: 6; pointer-events: none; }
+  .letterbox.top { top: 0; }
+  .letterbox.bottom { bottom: 0; }
+  .slashline {
+    position: absolute; left: -8%; top: 42%; width: 116%; height: 5px; opacity: 0;
+    transform-origin: 0 50%; transform: rotate(-14deg) scaleX(0);
+    background: linear-gradient(90deg, transparent, #fff 12%, #ffd9a0 45%, #fff 72%, transparent);
+    filter: blur(.5px);
+    box-shadow: 0 0 22px rgba(255,220,160,.95), 0 0 64px rgba(255,140,40,.65);
+    pointer-events: none;
+  }
+  .fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .movetitle {
+    position: absolute; left: 50%; bottom: 74px; z-index: 7; white-space: nowrap;
+    transform: translateX(-50%) scale(1.7); opacity: 0;
+    font-size: 38px; font-weight: 900; letter-spacing: .16em; color: #fff;
+    text-shadow: 0 0 16px rgba(255,140,50,.95), 0 0 44px rgba(255,70,20,.6), 0 4px 12px rgba(0,0,0,.95);
+  }
+  .movetitle.violet { text-shadow: 0 0 16px rgba(190,110,255,.95), 0 0 48px rgba(110,60,255,.65), 0 4px 12px rgba(0,0,0,.95); }
+  .caption {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; font-size: 12.5px; color: var(--dim);
+  }
+  .caption b { color: #cdd8f5; font-weight: 600; }
+  .mote { position: absolute; border-radius: 50%; filter: blur(1.5px); pointer-events: none; }
+  .spark { position: absolute; border-radius: 50%; pointer-events: none; }
+  .ring { position: absolute; border-radius: 50%; pointer-events: none; }
+  .choices { max-width: 1240px; margin: 20px auto 0; }
+  .choices h3 { font-size: 14px; color: #cdd8f5; margin: 0 0 10px; }
+  .choices .options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 980px) { .choices .options { grid-template-columns: 1fr; } }
+  .choice {
+    border: 1px solid var(--edge); border-radius: 12px; padding: 14px 16px; cursor: pointer;
+    background: #0c1120; transition: border-color .15s, box-shadow .15s; position: relative;
+  }
+  .choice:hover { border-color: #3c4d7d; }
+  .choice.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 22px rgba(240,201,107,.12); }
+  .choice.selected::after {
+    content: "已选择"; position: absolute; top: 10px; right: 12px; font-size: 11px;
+    color: #14100a; background: var(--accent); border-radius: 999px; padding: 2px 8px; font-weight: 700;
+  }
+  .choice b { display: block; font-size: 14px; margin-bottom: 4px; }
+  .choice p { margin: 0; font-size: 12.5px; color: var(--dim); line-height: 1.7; }
+</style>
+</head>
+<body>
+<header>
+  <h1>素材驱动演出 · 用你现在的卡面原图做的真实演示</h1>
+  <p>两支演示都<strong>只用卡面原图 + 动漫剪辑语言</strong>（原画推近、冲击帧、斩线、速度线、letterbox、粒子、招式名），没有用代码画替代形状。
+  <span class="hl">这就是“卡图活起来”的方向</span>；实现阶段还会离线做抠像分层与逐帧处理，让角色、火焰、粒子独立运动。</p>
+  <div class="toolbar">
+    <button id="replayT">重播：炭治郎</button>
+    <button id="replayG">重播：五条悟</button>
+    <label><input type="checkbox" id="slowmo"> 慢放 0.5×</label>
+  </div>
+</header>
+
+<main class="grid">
+  <section class="panel">
+    <h2>灶门炭治郎 · 火之神神乐 <small>近战 · 原画切入斩击</small></h2>
+    <div class="cine" id="cineT">
+      <div class="artwrap">
+        <div class="art" style="background-image:url('/files/tanjiro.png')"></div>
+        <div class="frame-invert" style="background-image:url('/files/tanjiro.png')"></div>
+        <div class="frame-mono" style="background-image:url('/files/tanjiro.png')"></div>
+        <div class="slashline"></div>
+      </div>
+      <div class="speedlines"></div>
+      <div class="dim"></div>
+      <div class="letterbox top"></div>
+      <div class="letterbox bottom"></div>
+      <div class="whiteout"></div>
+      <div class="fx"></div>
+      <div class="movetitle">火之神神乐</div>
+    </div>
+    <div class="caption"><span>原画推近 → 冲击帧 → 斩线 → 余烬</span><b>点击上排按钮重播</b></div>
+  </section>
+
+  <section class="panel">
+    <h2>五条悟 · 虚式茈 <small>远程 · 原画充能释放</small></h2>
+    <div class="cine" id="cineG">
+      <div class="artwrap">
+        <div class="art" style="background-image:url('/files/gojo.png')"></div>
+        <div class="frame-invert" style="background-image:url('/files/gojo.png')"></div>
+        <div class="frame-mono" style="background-image:url('/files/gojo.png')"></div>
+      </div>
+      <div class="speedlines"></div>
+      <div class="dim"></div>
+      <div class="letterbox top"></div>
+      <div class="letterbox bottom"></div>
+      <div class="whiteout violetout"></div>
+      <div class="fx"></div>
+      <div class="movetitle violet">虚式 · 茈</div>
+    </div>
+    <div class="caption"><span>咒力聚能 → 收束环 → 紫闪 → 招式名</span><b>点击上排按钮重播</b></div>
+  </section>
+</main>
+
+<section class="choices">
+  <h3>看完后请选择下一步方向（也可以直接在终端告诉我）：</h3>
+  <div class="options">
+    <div class="choice" data-choice="art-driven-deep" onclick="toggleSelect(this)">
+      <b>方向对：用现有卡面原图继续深化</b>
+      <p>为每张卡离线提取抠像分层 / 火焰与特效层 / 关键帧素材，运行时做多层运动与剪辑语言。无需新素材、无版权新增。</p>
+    </div>
+    <div class="choice" data-choice="stronger-assets" onclick="toggleSelect(this)">
+      <b>方向对，但素材还要更强</b>
+      <p>我可以提供动漫片段（个人使用）或配置图像生成 API，让知名角色的招式直接用番剧级素材，程序负责接入与节奏同步。</p>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  let SPEED = 1;
+  const D = (ms) => ms * SPEED;
+
+  function q(sel, root) { return (root || document).querySelector(sel); }
+  function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+
+  function anim(el, frames, opts) {
+    if (!el) return null;
+    const o = Object.assign({ fill: 'forwards', easing: 'ease-out' }, opts || {});
+    o.duration = D(o.duration || 300);
+    if (o.delay) o.delay = D(o.delay);
+    return el.animate(frames, o);
+  }
+  function later(ms, fn) { return setTimeout(fn, D(ms)); }
+
+  function reset(stage) {
+    qa('*', stage).forEach(el => {
+      el.getAnimations({ subtree: false }).forEach(a => a.cancel());
+    });
+    stage.getAnimations({ subtree: true }).forEach(a => a.cancel());
+    q('.art', stage).style.opacity = '0';
+    q('.whiteout', stage).style.opacity = '0';
+    q('.dim', stage).style.opacity = '0';
+    q('.speedlines', stage).style.opacity = '0';
+    q('.movetitle', stage).style.opacity = '0';
+    q('.slashline', stage) && (q('.slashline', stage).style.opacity = '0');
+    qa('.letterbox', stage).forEach(b => b.style.height = '0px');
+    q('.fx', stage).innerHTML = '';
+  }
+
+  function shake(stage, power) {
+    anim(stage, [
+      { transform: 'translate(0,0)' },
+      { transform: `translate(${power}px, ${-power * .6}px)` },
+      { transform: `translate(${-power * .7}px, ${power * .45}px)` },
+      { transform: 'translate(0,0)' },
+    ], { duration: 250, easing: 'ease-out' });
+  }
+
+  function spawnSpark(stage, x, y, color, size, dx, dy, dur, delay) {
+    const s = document.createElement('div');
+    s.className = 'spark';
+    s.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};box-shadow:0 0 ${size * 2}px ${color};`;
+    q('.fx', stage).appendChild(s);
+    anim(s, [
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px,${dy}px) scale(.3)`, opacity: 0 },
+    ], { duration: dur, delay: delay || 0, easing: 'cubic-bezier(.15,.7,.4,1)' }).onfinish = () => s.remove();
+  }
+
+  function burst(stage, x, y, colors, count, spread, dur) {
+    for (let i = 0; i < count; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const dist = spread * (.35 + Math.random() * .85);
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      const size = 2 + Math.random() * 5;
+      spawnSpark(stage, x, y, c, size, Math.cos(ang) * dist, Math.sin(ang) * dist + spread * .25, dur * (.7 + Math.random() * .6), Math.random() * 80);
+    }
+  }
+
+  function mote(stage, x, y, color, size, driftX, driftY, dur) {
+    const m = document.createElement('div');
+    m.className = 'mote';
+    m.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};box-shadow:0 0 ${size * 2}px ${color};opacity:0;`;
+    q('.fx', stage).appendChild(m);
+    anim(m, [
+      { transform: 'translate(0,0) scale(.6)', opacity: 0 },
+      { transform: `translate(${driftX * .4}px, ${driftY * .4}px) scale(1)`, opacity: .9, offset: .3 },
+      { transform: `translate(${driftX}px, ${driftY}px) scale(.2)`, opacity: 0 },
+    ], { duration: dur, easing: 'linear' }).onfinish = () => m.remove();
+  }
+
+  function ring(stage, x, y, fromScale, color, size, dur, delay) {
+    const r = document.createElement('div');
+    r.className = 'ring';
+    r.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;margin:${-size / 2}px 0 0 ${-size / 2}px;border:2px solid ${color};box-shadow:0 0 18px ${color};`;
+    q('.fx', stage).appendChild(r);
+    anim(r, [
+      { transform: `scale(${fromScale})`, opacity: .95 },
+      { transform: 'scale(.55)', opacity: .55 },
+      { transform: 'scale(.15)', opacity: 0 },
+    ], { duration: dur, delay: delay || 0, easing: 'cubic-bezier(.3,.6,.4,1)' }).onfinish = () => r.remove();
+  }
+
+  function impactFrames(stage, invertEl, monoEl) {
+    invertEl.style.opacity = '1';
+    later(60, () => { invertEl.style.opacity = '0'; });
+    later(90, () => { monoEl.style.opacity = '1'; });
+    later(150, () => { monoEl.style.opacity = '0'; });
+  }
+
+  function letterbox(stage, on) {
+    qa('.letterbox', stage).forEach(b => {
+      b.style.height = on ? '56px' : '0px';
+    });
+  }
+
+  function focusPoint(stage, fx, fy) {
+    const r = stage.getBoundingClientRect();
+    return { x: r.width * fx, y: r.height * fy };
+  }
+
+  // ---------------- Tanjiro ----------------
+  function playTanjiro() {
+    const stage = q('#cineT');
+    reset(stage);
+    const wrap = q('.artwrap', stage);
+    const art = q('.art', stage);
+    const speed = q('.speedlines', stage);
+    const white = q('.whiteout', stage);
+    const title = q('.movetitle', stage);
+    const slash = q('.slashline', stage);
+    wrap.style.transformOrigin = '28% 26%';
+
+    anim(art, [{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
+    anim(wrap, [
+      { transform: 'scale(1.04) translate(1%, .5%)' },
+      { transform: 'scale(1.14) translate(1.5%, 1%)' },
+    ], { duration: 320, easing: 'cubic-bezier(.3,.2,.4,1)' });
+
+    later(260, () => {
+      anim(speed, [{ opacity: 0 }, { opacity: .8 }, { opacity: 0 }], { duration: 900, easing: 'linear' });
+      anim(wrap, [
+        { transform: 'scale(1.14) translate(1.5%, 1%)' },
+        { transform: 'scale(1.66) translate(4%, 3.2%)' },
+      ], { duration: 560, easing: 'cubic-bezier(.45,.05,.55,.95)' });
+    });
+
+    later(820, () => {
+      impactFrames(stage, q('.frame-invert', stage), q('.frame-mono', stage));
+      white.style.background = '#fff';
+      anim(white, [{ opacity: 0 }, { opacity: .96 }, { opacity: 0 }], { duration: 140 });
+      shake(stage, 7);
+      const fp = focusPoint(stage, .30, .30);
+      burst(stage, fp.x, fp.y, ['#ffd36b', '#ff8a3c', '#ff4d2e', '#fff1c9'], 26, 150, 620);
+      anim(slash, [
+        { transform: 'rotate(-14deg) scaleX(0)', opacity: 0 },
+        { transform: 'rotate(-14deg) scaleX(1)', opacity: 1, offset: .5 },
+        { transform: 'rotate(-14deg) scaleX(1)', opacity: 0 },
+      ], { duration: 340, easing: 'cubic-bezier(.2,.7,.3,1)' });
+    });
+
+    later(980, () => {
+      const fp = focusPoint(stage, .34, .34);
+      burst(stage, fp.x, fp.y, ['#ffb14d', '#ff7a28', '#ffd36b'], 18, 210, 780);
+      anim(title, [
+        { transform: 'translateX(-50%) scale(1.8)', opacity: 0, filter: 'blur(6px)' },
+        { transform: 'translateX(-50%) scale(1)', opacity: 1, filter: 'blur(0px)', offset: .35 },
+        { transform: 'translateX(-50%) scale(1)', opacity: 1 },
+        { transform: 'translateX(-50%) scale(1.02)', opacity: 0 },
+      ], { duration: 1400, easing: 'cubic-bezier(.2,.8,.3,1)' });
+      for (let i = 0; i < 6; i++) {
+        spawnSpark(stage, 20 + Math.random() * 80, 320 + Math.random() * 40, '#ff8a3c', 3 + Math.random() * 4, 90 + Math.random() * 120, -30 - Math.random() * 50, 900, i * 70);
+      }
+      anim(wrap, [
+        { transform: 'scale(1.66) translate(4%, 3.2%)' },
+        { transform: 'scale(1.74) translate(3%, 2%)' },
+      ], { duration: 1500, easing: 'ease-out' });
+    });
+
+    later(2150, () => {
+      anim(art, [{ opacity: 1 }, { opacity: 0 }], { duration: 320 });
+    });
+  }
+
+  // ---------------- Gojo ----------------
+  function playGojo() {
+    const stage = q('#cineG');
+    reset(stage);
+    const wrap = q('.artwrap', stage);
+    const art = q('.art', stage);
+    const speed = q('.speedlines', stage);
+    const white = q('.whiteout', stage);
+    const dim = q('.dim', stage);
+    const title = q('.movetitle', stage);
+    wrap.style.transformOrigin = '30% 22%';
+
+    anim(art, [{ opacity: 0 }, { opacity: 1 }], { duration: 240 });
+    anim(wrap, [
+      { transform: 'scale(1.03)' },
+      { transform: 'scale(1.22)' },
+    ], { duration: 1100, easing: 'cubic-bezier(.35,.15,.4,1)' });
+
+    for (let i = 0; i < 14; i++) {
+      later(160 + i * 60, () => {
+        const px = 180 + Math.random() * 380;
+        const py = 60 + Math.random() * 320;
+        mote(stage, px, py, ['#c77dff', '#8a3cff', '#6fd6ff', '#e9d2ff'][i % 4], 3 + Math.random() * 5, (Math.random() - .5) * 40, -80 - Math.random() * 90, 900 + Math.random() * 500);
+      });
+    }
+
+    later(1050, () => {
+      anim(dim, [{ opacity: 0 }, { opacity: .5 }], { duration: 320 });
+      anim(art, [
+        { filter: 'none' },
+        { filter: 'drop-shadow(5px 0 0 rgba(255,60,140,.55)) drop-shadow(-5px 0 0 rgba(80,190,255,.55))' },
+        { filter: 'none' },
+      ], { duration: 380, easing: 'ease-in-out' });
+      const fp = focusPoint(stage, .30, .22);
+      ring(stage, fp.x, fp.y, 3.4, '#b44bff', 90, 620);
+      ring(stage, fp.x, fp.y, 4.2, '#6fd6ff', 90, 660, 110);
+      ring(stage, fp.x, fp.y, 2.6, '#e9d2ff', 90, 520, 220);
+    });
+
+    later(1640, () => {
+      anim(white, [{ opacity: 0 }, { opacity: 1 }], { duration: 170 });
+      letterbox(stage, true);
+      shake(stage, 9);
+      const fp = focusPoint(stage, .38, .38);
+      burst(stage, fp.x, fp.y, ['#e9d2ff', '#b44bff', '#6fd6ff', '#fff'], 30, 240, 780);
+      anim(title, [
+        { transform: 'translateX(-50%) scale(2.1)', opacity: 0, filter: 'blur(8px)' },
+        { transform: 'translateX(-50%) scale(1)', opacity: 1, filter: 'blur(0px)', offset: .3 },
+        { transform: 'translateX(-50%) scale(1)', opacity: 1 },
+        { transform: 'translateX(-50%) scale(1.03)', opacity: 0 },
+      ], { duration: 1600, easing: 'cubic-bezier(.2,.8,.3,1)' });
+      anim(wrap, [
+        { transform: 'scale(1.22)' },
+        { transform: 'scale(1.4)' },
+      ], { duration: 900, easing: 'cubic-bezier(.2,.7,.3,1)' });
+      anim(speed, [{ opacity: 0 }, { opacity: .5 }, { opacity: 0 }], { duration: 700, easing: 'linear' });
+    });
+
+    later(2160, () => {
+      impactFrames(stage, q('.frame-invert', stage), q('.frame-mono', stage));
+    });
+
+    later(2100, () => {
+      anim(white, [{ opacity: 1 }, { opacity: 0 }], { duration: 520 });
+      anim(art, [{ opacity: 1 }, { opacity: .35 }], { duration: 820 });
+    });
+
+    later(2600, () => {
+      letterbox(stage, false);
+      anim(dim, [{ opacity: .5 }, { opacity: 0 }], { duration: 400 });
+    });
+  }
+
+  q('#replayT').addEventListener('click', playTanjiro);
+  q('#replayG').addEventListener('click', playGojo);
+  q('#slowmo').addEventListener('change', (e) => { SPEED = e.target.checked ? 2 : 1; });
+
+  later(500, playTanjiro);
+  later(3200, playGojo);
+})();
+</script>
+</body>
+</html>

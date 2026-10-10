@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#16243b">
+    <title>次元决斗 · 元素召唤</title>
+    <link rel="stylesheet" href="css/style.css?v=2.3.1-mobile-duel">
+    <link rel="stylesheet" href="css/game-shell.css?v=3.0.0">
+    <link rel="stylesheet" href="css/anime-theme.css?v=1.2.4-clean-duel-center">
+    <link rel="stylesheet" href="css/mobile-perf.css?v=1.0.0">
+</head>
+<body id="sekai-game" data-visual-route="bca">
+<div id="auth-screen" class="auth-screen">
+    <div class="auth-ignition" data-auth-ignition>
+        <div class="auth-ignition-copy">
+            <span class="eyebrow">SEKAI · ELEMENTAL DUEL</span>
+            <strong>在此刻，与你相遇。</strong>
+            <p>收集跨越世界的伙伴，奏响属于你的决斗。</p>
+            <span class="auth-ignition-code">次元决斗 · 元素召唤</span>
+        </div>
+        <div class="auth-card-orbit" aria-hidden="true">
+            <!-- 登录页装饰卡用 WebP 缩略图：这三张原来是 551KB + 363KB + 143KB = 约 1.0 MB，
+                 比首屏全部 JS+CSS 还大；换成 thumb 档后合计约 91 KB。 -->
+            <div class="auth-ignition-card" data-auth-rotate="-14"><img src="assets/cards/webp/thumb/picture-extension/picture_070.webp" alt="" decoding="async"></div>
+            <div class="auth-ignition-card" data-auth-rotate="9"><img src="assets/cards/webp/thumb/complete/source_spell_021.webp" alt="" decoding="async"></div>
+            <div class="auth-ignition-card" data-auth-rotate="-5"><img src="assets/cards/webp/thumb/picture-extension/picture_071.webp" alt="" decoding="async"></div>
+        </div>
+        <div class="auth-panel">
+            <div class="auth-brand"><span class="brand-mark">SG</span><strong>次元决斗</strong><small>元素召唤</small></div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-auth-mode="login" type="button">登录</button>
+                <button class="auth-tab" data-auth-mode="register" type="button">注册</button>
+            </div>
+            <div class="auth-panel-kicker">欢迎回来 <span>WELCOME</span></div>
+            <div class="auth-panel-title">开启新的篇章</div>
+            <p class="auth-panel-copy">同步你的收藏、卡组和决斗记录。</p>
+            <div class="auth-form-frame">
+            <form id="auth-form" autocomplete="on">
+                <label class="auth-field"><span>用户名</span><input id="auth-username" name="username" autocomplete="username" required></label>
+                <label class="auth-field"><span>密码</span><input id="auth-password" type="password" name="password" autocomplete="current-password" required></label>
+                <label class="auth-field auth-nick-field hidden"><span>昵称</span><input id="auth-nickname" name="nickname"></label>
+                <p id="auth-error" class="validation-line"></p>
+                <button type="submit" class="primary-action auth-submit"><span>确认</span><small>进入大厅</small></button>
+            </form>
+            </div>
+            <div class="auth-panel-footer"><span>你的旅程，由此开始</span><span>SEKAI</span></div>
+        </div>
+    </div>
+</div>
+
+<div id="app-shell" class="app-shell game-shell is-hidden" data-page="home">
+    <header class="topbar">
+        <button id="game-back" class="game-back" type="button" aria-label="返回主界面" hidden>‹</button>
+        <div class="rank-chip" aria-label="决斗者等级与收集进度">
+            <span class="rank-badge">RANK</span>
+            <div class="rank-body">
+                <strong id="profile-level-big">LV.1</strong>
+                <div class="rank-track"><span id="collection-progress-fill"></span></div>
+                <small id="collection-progress-label">收集 0%</small>
+            </div>
+        </div>
+        <span id="game-page-name" class="game-page-name">主界面</span>
+        <div class="topbar-spacer"></div>
+        <div class="currency-chip"><span class="currency-icon coin"></span><strong id="coin-count">0</strong><small>次元币</small></div>
+        <div class="currency-chip"><span class="currency-icon shard"></span><strong id="shard-count">0</strong><small>碎片</small></div>
+        <button class="profile-chip" data-route="settings" type="button"><span class="profile-avatar">♪</span><span><strong id="profile-name">决斗者</strong><small id="profile-level">LV.1</small></span></button>
+    </header>
+
+    <aside class="hud-rail" aria-label="快捷功能">
+        <button id="rail-daily" type="button" title="每日首胜" aria-label="每日首胜"><span class="rail-dot" id="rail-daily-dot"></span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M4.2 4.2l2.1 2.1m11.4 11.4 2.1 2.1M2 12h3m14 0h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button>
+        <button id="home-pv" type="button" title="游戏影像" aria-label="游戏影像"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10.5 9 5 3-5 3Z"/></svg></button>
+        <button id="home-tutorial" type="button" title="新手教学" aria-label="新手教学"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v16M12 5C8 2 4 3 2 4v15c4-1 7 0 10 2 3-2 6-3 10-2V4c-4-1-7-1-10 1Z"/></svg></button>
+        <button data-route="rules" type="button" title="决斗手册" aria-label="决斗手册"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7v16H4Zm9 0h7v16h-7Z"/></svg></button>
+        <button data-route="settings" type="button" title="游戏设置" aria-label="游戏设置"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M4.9 4.9 7 7m10 10 2.1 2.1M2 12h3m14 0h3M4.9 19.1 7 17m10-10 2.1-2.1"/></svg></button>
+    </aside>
+
+    <aside class="sidebar" aria-label="主要导航">
+        <button data-route="home" class="nav-item active" type="button"><span>首页</span></button>
+        <button data-route="shop" class="nav-item" type="button"><span>招募</span></button>
+        <button data-route="collection" class="nav-item" type="button"><span>图鉴</span></button>
+        <button data-route="decks" class="nav-item" type="button"><span>编成</span></button>
+    </aside>
+
+    <main id="screen-root" class="screen-root" aria-live="polite"></main>
+</div>
+
+<section id="app-loading" class="app-loading is-hidden" aria-live="polite" aria-busy="true">
+    <div class="app-loading-card">
+        <span class="app-loading-mark">SG</span>
+        <strong>正在准备大厅</strong>
+        <small>正在同步牌组，请稍候…</small>
+    </div>
+</section>
+
+<section class="battle-screen" id="battle-screen">
+    <div class="duel-backdrop"></div>
+    <div class="battlefield-center-glow"></div>
+    <div class="duel-particles" id="duel-particles"></div>
+    <header class="duel-header">
+        <button id="btn-battle-exit" class="duel-header-btn" type="button">退出决斗</button>
+        <div class="duel-title"><span>RANKED SIMULATION</span><strong>Sekai Game</strong></div>
+        <button id="log-toggle" class="duel-header-btn" type="button">战斗日志</button>
+    </header>
+    <section id="opponent-area" class="opponent-area"></section>
+    <section id="opponent-hand" class="opponent-hand" aria-label="对手手牌"></section>
+    <div class="phase-bar" id="phase-bar" style="display:none"></div>
+    <div class="deck-pile deck-pile-opponent" id="opponent-deck-pile" aria-label="对手牌库">
+        <div class="deck-card-back"><span>NC</span></div><strong id="opponent-deck-count">0</strong><small>DECK</small>
+    </div>
+    <div class="graveyard-pile graveyard-pile-opponent" id="opponent-graveyard-pile" aria-label="对手墓地">
+        <div class="graveyard-card-back"><span>GY</span></div><strong id="opponent-graveyard-count">0</strong><small>GY</small>
+    </div>
+    <section id="battlefield" class="battlefield"></section>
+    <div class="deck-pile deck-pile-player" id="player-deck-pile" aria-label="玩家牌库">
+        <div class="deck-card-back"><span>NC</span></div><strong id="player-deck-count">0</strong><small>DECK</small>
+    </div>
+    <div class="graveyard-pile graveyard-pile-player" id="player-graveyard-pile" aria-label="玩家墓地">
+        <div class="graveyard-card-back"><span>GY</span></div><strong id="player-graveyard-count">0</strong><small>GY</small>
+    </div>
+    <div class="draw-banner" id="draw-banner" aria-live="polite"><span id="draw-banner-label">DRAW</span><strong id="draw-banner-name"></strong></div>
+    <div class="center-controls">
+        <div class="turn-badge" id="turn-badge">等待开始</div>
+        <button id="btn-cancel-target" class="ctrl-btn danger" style="display:none" type="button">取消选择</button>
+        <button id="end-turn-button" class="ctrl-btn btn-end" disabled type="button">结束回合</button>
+    </div>
+    <section id="player-area" class="player-area"></section>
+    <div class="hand-tray" id="hand-tray">
+        <div class="hand-tray-label"><span>YOUR HAND</span><strong id="visible-hand-count">0</strong></div>
+        <section id="hand" class="hand"></section>
+    </div>
+    <div class="drag-help" id="drag-help">拖动或单击手牌出牌 · 点击可攻击怪兽后选择目标 · 阶段自动推进 · 右键查看详情</div>
+    <aside class="log-panel"><div class="log-header"><span>DUEL LOG</span><button id="log-collapse-inline" type="button" aria-label="收起日志">×</button></div><div class="log-body" id="log-body"></div></aside>
+</section>
+
+<div class="overlay" id="detail-overlay">
+    <div class="detail-panel duel-detail-panel">
+        <div id="detail-card-display"></div>
+        <div class="detail-info"><span class="eyebrow">CARD INFORMATION</span><div class="detail-name" id="detail-name"></div><div class="detail-type" id="detail-type"></div><div class="detail-desc" id="detail-desc"></div><button class="secondary-action detail-footer-close" data-detail-close type="button">关闭详情</button></div>
+        <button class="modal-close" id="detail-close" data-detail-close type="button" aria-label="关闭">×</button>
+    </div>
+</div>
+
+<div class="overlay" id="gameover-overlay">
+    <div class="gameover-panel">
+        <div class="gameover-icon" id="gameover-icon">VICTORY</div>
+        <h2 class="gameover-title" id="gameover-title"></h2>
+        <div class="gameover-text" id="gameover-text"></div>
+        <div class="gameover-reward" id="gameover-reward"></div>
+        <div class="modal-actions"><button class="secondary-action" id="btn-back-menu" type="button">返回大厅</button><button class="primary-action" id="btn-rematch" type="button">再次决斗</button></div>
+    </div>
+</div>
+
+<div id="modal-root" class="modal-root"></div>
+<div id="toast-root" class="toast-root" aria-live="polite"></div>
+<script>
+(function () {
+    if (location.protocol === "file:") {
+        document.body.innerHTML = `
+            <main style="min-height:100vh;display:grid;place-items:center;padding:32px;background:#070914;color:#f4f6ff;font-family:Bahnschrift,'Arial Narrow','Microsoft YaHei',sans-serif">
+                <section style="max-width:620px;border:1px solid #303858;background:#0d1020;padding:32px">
+                    <h1 style="margin:0 0 14px">不能直接双击 index.html</h1>
+                <p style="color:#aeb7d2;line-height:1.7">完整游戏请在项目根目录启动 Spring Boot，然后打开 <strong>http://127.0.0.1:8091</strong>。仅调试前端时，才在此目录运行 <strong>npm start</strong> 并访问端口 8080。</p>
+                </section>
+            </main>`;
+        return;
+    }
+
+    // 主模块需要加载完整卡库和决斗 UI，认证页不能因此先显示、后可用。
+    const authTabs = [...document.querySelectorAll("[data-auth-mode]")];
+    const authError = document.getElementById("auth-error");
+    const nickField = document.querySelector(".auth-nick-field");
+    const authForm = document.getElementById("auth-form");
+    const syncAuthMode = mode => {
+        window.__nightcordAuthMode = mode;
+        authTabs.forEach(tab => tab.classList.toggle("active", tab.dataset.authMode === mode));
+        nickField?.classList.toggle("hidden", mode === "login");
+    };
+    const path = location.pathname.replace(/\/+$/, "");
+    const forcedAuthRoute = path === "/login" || path === "/register";
+    let hasStoredAuth = false;
+    if (!forcedAuthRoute && !new URLSearchParams(location.search).has("reset")) {
+        try { hasStoredAuth = localStorage.getItem("nightcord_auth") !== null; } catch { /* 浏览器禁用存储时保持默认认证页 */ }
+    }
+    if (hasStoredAuth) {
+        document.getElementById("auth-screen")?.classList.add("hidden");
+        document.getElementById("app-shell")?.classList.add("is-hidden");
+        document.getElementById("app-loading")?.classList.remove("is-hidden");
+    }
+    const initialMode = path === "/register" ? "register" : "login";
+    syncAuthMode(initialMode);
+    authTabs.forEach(tab => tab.addEventListener("click", () => {
+        window.__nightcordAuthModeTouched = true;
+        syncAuthMode(tab.dataset.authMode);
+        if (authError) authError.textContent = "";
+    }));
+    authForm?.addEventListener("submit", event => {
+        if (window.__nightcordAuthReady) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (authError) authError.textContent = "页面还在加载，请稍候再试";
+    }, true);
+
+    const entry = document.createElement("script");
+    entry.type = "module";
+    entry.src = "./js/main.js?v=3.15.0-trap-atlas";
+    entry.addEventListener("error", () => {
+        document.getElementById("app-loading")?.classList.add("is-hidden");
+        document.getElementById("auth-screen")?.classList.remove("hidden");
+        const error = document.getElementById("auth-error");
+        if (error) error.textContent = "页面脚本加载失败，请刷新后重试";
+    }, { once: true });
+    document.body.appendChild(entry);
+})();
+</script>
+</body>
+</html>
+
+

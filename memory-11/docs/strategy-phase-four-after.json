@@ -1,0 +1,2956 @@
+{
+  "startSeed": 201,
+  "seedsPerSeat": 40,
+  "maxTurns": 40,
+  "policy": "Production engine and AI effect/target/value helpers; bounded headless action scheduler; traps auto-respond.",
+  "matches": [
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 201,
+      "turns": 7,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        7840,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 201,
+      "turns": 10,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        9150
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 202,
+      "turns": 20,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        2090
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 202,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6900,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 203,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5310
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 203,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        8400,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 204,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        7600
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 204,
+      "turns": 5,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 205,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        4800
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 205,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7500,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 206,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6100
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 206,
+      "turns": 5,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 207,
+      "turns": 23,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        2380,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 207,
+      "turns": 19,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        2750,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 208,
+      "turns": 9,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        10050,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 208,
+      "turns": 12,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        850
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 209,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6100
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 209,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8000
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 210,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5700
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 210,
+      "turns": 22,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        12100
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 211,
+      "turns": 21,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        9870,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 211,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8000
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 212,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6100
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 212,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 213,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6700
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 213,
+      "turns": 10,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8370
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 214,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5300
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 214,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8100
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 215,
+      "turns": 6,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6800
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 215,
+      "turns": 31,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        1990,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 216,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6460
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 216,
+      "turns": 18,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        6900
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 217,
+      "turns": 7,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        8000,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 217,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        7720
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 218,
+      "turns": 7,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        8300,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 218,
+      "turns": 17,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        670,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 219,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        7600
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 219,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6630,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 220,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        8000
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 220,
+      "turns": 13,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7300,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 221,
+      "turns": 6,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6800
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 221,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7510,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 222,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5660
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 222,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6600,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 223,
+      "turns": 18,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5780
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 223,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8300
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 224,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        3400
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 224,
+      "turns": 13,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        4470,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 225,
+      "turns": 13,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        6650,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 225,
+      "turns": 13,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        5060,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 226,
+      "turns": 11,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        8400,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 226,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        5700,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 227,
+      "turns": 19,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        4340,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 227,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7300,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 228,
+      "turns": 9,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        7200,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 228,
+      "turns": 17,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        2520,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 229,
+      "turns": 7,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        9400,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 229,
+      "turns": 5,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7200,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 230,
+      "turns": 12,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        8610
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 230,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        4730,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 231,
+      "turns": 7,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        7480,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 231,
+      "turns": 5,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        5800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 232,
+      "turns": 15,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        2360,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 232,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        7500
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 233,
+      "turns": 12,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5000
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 233,
+      "turns": 6,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8500
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 234,
+      "turns": 9,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        9400,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 234,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        3860,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 235,
+      "turns": 9,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        8190,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 235,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        4300,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 236,
+      "turns": 12,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        7300
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 236,
+      "turns": 15,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        5860,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 237,
+      "turns": 11,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        8420,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 237,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6300,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 238,
+      "turns": 6,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        9400
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 238,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6400,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 239,
+      "turns": 14,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        7000
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 239,
+      "turns": 11,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        8200,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "charge",
+      "seed": 240,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        7560
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "ensemble",
+      "seed": 240,
+      "turns": 17,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        5720,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 201,
+      "turns": 7,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        7090,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 201,
+      "turns": 14,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        2740
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 202,
+      "turns": 7,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        6300,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 202,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        4800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 203,
+      "turns": 10,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7100
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 203,
+      "turns": 9,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        9600,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 204,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6800
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 204,
+      "turns": 9,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        8800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 205,
+      "turns": 25,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        4970,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 205,
+      "turns": 27,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        60,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 206,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6760
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 206,
+      "turns": 9,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6400,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 207,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6800
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 207,
+      "turns": 9,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6400,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 208,
+      "turns": 13,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        6200,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 208,
+      "turns": 10,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        7180
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 209,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6000
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 209,
+      "turns": 5,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 210,
+      "turns": 10,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        5810
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 210,
+      "turns": 12,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        10210
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 211,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        5650
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 211,
+      "turns": 9,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7450,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 212,
+      "turns": 21,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        2370,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 212,
+      "turns": 14,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        6340
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 213,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7100
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 213,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8300
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 214,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6300
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 214,
+      "turns": 12,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        4190
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 215,
+      "turns": 12,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        2810
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 215,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7600,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 216,
+      "turns": 10,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6000
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 216,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6200,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 217,
+      "turns": 15,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        4860,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 217,
+      "turns": 15,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        2370,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 218,
+      "turns": 12,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        5410
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 218,
+      "turns": 9,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7500,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 219,
+      "turns": 15,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        7730,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 219,
+      "turns": 13,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        8350,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 220,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7600
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 220,
+      "turns": 22,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        2150
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 221,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6760
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 221,
+      "turns": 5,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 222,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7200
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 222,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7150,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 223,
+      "turns": 12,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        4800
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 223,
+      "turns": 5,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6800,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 224,
+      "turns": 24,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        3700
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 224,
+      "turns": 16,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        3220
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 225,
+      "turns": 20,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        160
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 225,
+      "turns": 10,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8800
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 226,
+      "turns": 9,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        6880,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 226,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6400,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 227,
+      "turns": 19,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        1330,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 227,
+      "turns": 5,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7200,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 228,
+      "turns": 17,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        3940,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 228,
+      "turns": 13,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        5960,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 229,
+      "turns": 7,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        7600,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 229,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        8000,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 230,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7510
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 230,
+      "turns": 32,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        5620
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 231,
+      "turns": 9,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        7810,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 231,
+      "turns": 11,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6260,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 232,
+      "turns": 12,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6410
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 232,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        8000
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 233,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6700
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 233,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        9900
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 234,
+      "turns": 26,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        4890
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 234,
+      "turns": 5,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7600,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 235,
+      "turns": 14,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        3510
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 235,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        7900
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 236,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6800
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 236,
+      "turns": 11,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        5380,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 237,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7600
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 237,
+      "turns": 5,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        5900,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 238,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7600
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 238,
+      "turns": 15,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7500,
+        0
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 239,
+      "turns": 19,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        5260,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 239,
+      "turns": 8,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        9300
+      ]
+    },
+    {
+      "left": "ensemble",
+      "right": "burn",
+      "seed": 240,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        8400
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "ensemble",
+      "seed": 240,
+      "turns": 16,
+      "winner": "ensemble",
+      "timeout": false,
+      "lp": [
+        0,
+        920
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 201,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6400
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 201,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6500
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 202,
+      "turns": 5,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7300,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 202,
+      "turns": 5,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6300,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 203,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7300,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 203,
+      "turns": 12,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        3880
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 204,
+      "turns": 13,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7420,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 204,
+      "turns": 16,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        2180
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 205,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7400,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 205,
+      "turns": 6,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5500
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 206,
+      "turns": 11,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7200,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 206,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5000
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 207,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        5600
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 207,
+      "turns": 11,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        5290,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 208,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        5900
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 208,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5290
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 209,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7200
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 209,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        1480
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 210,
+      "turns": 19,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        4610,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 210,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        5700
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 211,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        8000
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 211,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        3790
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 212,
+      "turns": 13,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        4490,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 212,
+      "turns": 12,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        1580
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 213,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7100
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 213,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6700
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 214,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        5900
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 214,
+      "turns": 9,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        8400,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 215,
+      "turns": 12,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6690
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 215,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        2700
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 216,
+      "turns": 13,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6300,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 216,
+      "turns": 14,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        690
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 217,
+      "turns": 11,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        3410,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 217,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6000,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 218,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6800
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 218,
+      "turns": 9,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        5800,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 219,
+      "turns": 11,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7620,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 219,
+      "turns": 6,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        7200
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 220,
+      "turns": 11,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7700,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 220,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        7300
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 221,
+      "turns": 16,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        5490
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 221,
+      "turns": 14,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        100
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 222,
+      "turns": 11,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        4810,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 222,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        5070,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 223,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7100
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 223,
+      "turns": 16,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        4360
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 224,
+      "turns": 13,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6690,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 224,
+      "turns": 5,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7100,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 225,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6930
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 225,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        7500
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 226,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        5300,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 226,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        8500
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 227,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        7300,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 227,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7200,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 228,
+      "turns": 10,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7890
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 228,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7200,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 229,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6400,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 229,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7600,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 230,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        5600,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 230,
+      "turns": 12,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        9310
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 231,
+      "turns": 9,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        4810,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 231,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        4620,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 232,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6800
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 232,
+      "turns": 12,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6100
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 233,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6700
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 233,
+      "turns": 14,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        4900
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 234,
+      "turns": 10,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        6290
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 234,
+      "turns": 11,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        6000,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 235,
+      "turns": 6,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        7200
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 235,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6400
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 236,
+      "turns": 13,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6490,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 236,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        7000,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 237,
+      "turns": 19,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        5890,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 237,
+      "turns": 7,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        5900,
+        0
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 238,
+      "turns": 7,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6310,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 238,
+      "turns": 8,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        9400
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 239,
+      "turns": 8,
+      "winner": "burn",
+      "timeout": false,
+      "lp": [
+        0,
+        8500
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 239,
+      "turns": 10,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        6900
+      ]
+    },
+    {
+      "left": "charge",
+      "right": "burn",
+      "seed": 240,
+      "turns": 21,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        6200,
+        0
+      ]
+    },
+    {
+      "left": "burn",
+      "right": "charge",
+      "seed": 240,
+      "turns": 16,
+      "winner": "charge",
+      "timeout": false,
+      "lp": [
+        0,
+        1090
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "decks": [
+        "ensemble",
+        "charge"
+      ],
+      "games": 80,
+      "wins": {
+        "ensemble": 28,
+        "charge": 52
+      },
+      "draws": 0,
+      "timeouts": 0,
+      "averageTurns": 10.6
+    },
+    {
+      "decks": [
+        "ensemble",
+        "burn"
+      ],
+      "games": 80,
+      "wins": {
+        "ensemble": 28,
+        "burn": 52
+      },
+      "draws": 0,
+      "timeouts": 0,
+      "averageTurns": 11.1
+    },
+    {
+      "decks": [
+        "charge",
+        "burn"
+      ],
+      "games": 80,
+      "wins": {
+        "charge": 48,
+        "burn": 32
+      },
+      "draws": 0,
+      "timeouts": 0,
+      "averageTurns": 9.9
+    }
+  ],
+  "actions": {
+    "shelter": 201,
+    "charge": 582,
+    "tempoStrike": 157,
+    "purify": 424,
+    "study": 210,
+    "freeze": 288,
+    "ward": 252,
+    "ensemble": 65,
+    "scout": 98,
+    "chorus": 38,
+    "recycle": 40,
+    "twin": 603,
+    "deploy": 40,
+    "sanctuary": 72,
+    "railgun": 38,
+    "recover": 7,
+    "ignite": 225,
+    "combust": 41,
+    "venom": 87,
+    "token": 78
+  },
+  "integrityChecks": 12550,
+  "firstSeatWins": 118
+}

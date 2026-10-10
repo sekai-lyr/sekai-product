@@ -1,0 +1,75 @@
+[
+  {
+    "label": "before",
+    "results": [
+      {
+        "name": "draw",
+        "speed": 1,
+        "elapsedMs": 3730,
+        "peakNodes": 27,
+        "locked": false
+      },
+      {
+        "name": "play",
+        "speed": 1,
+        "elapsedMs": 1105,
+        "peakNodes": 27,
+        "locked": false
+      },
+      {
+        "name": "destroy",
+        "speed": 1,
+        "elapsedMs": 2115,
+        "peakNodes": 64,
+        "locked": false
+      }
+    ]
+  },
+  {
+    "label": "after",
+    "results": [
+      {
+        "name": "draw",
+        "speed": 1,
+        "elapsedMs": 729,
+        "peakNodes": 28,
+        "locked": false
+      },
+      {
+        "name": "play",
+        "speed": 1,
+        "elapsedMs": 609,
+        "peakNodes": 28,
+        "locked": false
+      },
+      {
+        "name": "destroy",
+        "speed": 1,
+        "elapsedMs": 1778,
+        "peakNodes": 28,
+        "locked": false
+      },
+      {
+        "name": "draw",
+        "speed": 2,
+        "elapsedMs": 362,
+        "peakNodes": 28,
+        "locked": false
+      },
+      {
+        "name": "play",
+        "speed": 2,
+        "elapsedMs": 313,
+        "peakNodes": 28,
+        "locked": false
+      },
+      {
+        "name": "destroy",
+        "speed": 2,
+        "elapsedMs": 908,
+        "peakNodes": 28,
+        "locked": false
+      }
+    ]
+  }
+]

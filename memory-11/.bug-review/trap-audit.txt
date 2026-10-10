@@ -1,0 +1,58 @@
+﻿卡池总数 368；陷阱 45；其中"无效化攻击"类 38（84.4%）
+
+=== 陷阱来源分布 ===
+source_trap          共  28 无效化  28 | themed:intercept×8 themed:mirror×7 themed:recover×6 themed:purify×6 themed:rescue×5 themed:sleep×4 | e.g. 翡翠峰嶺の雲霧結界 / 富士桜花の結界 / 花燈橋の夜桜結界
+ygo_n                共  12 无效化   5 | destroyAttacker×3 reduceDamage×3 buffSelfAttack×1 buffSelfDefense×1 healPlayer×1 directDamage×1 | e.g. 落穴 / 神圣防护罩－反射镜力－ / 和睦的使者
+nc_tr                共   5 无效化   5 | themed:recover×2 themed:shelter×2 themed:retreat×1 themed:sleep×1 themed:intercept×1 themed:sanctuary×1 | e.g. 暮雨长街的独行 / 寒岭汤泉的憩息 / 澄湖栈桥的余晖
+
+=== 陷阱效果类型分布（按卡计数） ===
+themed:intercept             9
+themed:recover               8
+themed:mirror                8
+themed:purify                7
+themed:shelter               6
+themed:rescue                6
+themed:retreat               5
+themed:sleep                 5
+themed:recall                5
+themed:study                 5
+themed:sanctuary             4
+themed:reversal              4
+destroyAttacker              3
+reduceDamage                 3
+themed:deploy                3
+themed:recycle               3
+themed:freeze                2
+themed:seal                  2
+buffSelfAttack               1
+buffSelfDefense              1
+healPlayer                   1
+directDamage                 1
+cannotAttack                 1
+reflectDamage                1
+themed:scout                 1
+themed:ambush                1
+themed:reprisal              1
+
+=== 陷阱取向会优先抓取的 20 张（按实验室打分） ===
+无效化 | UR | 暮雨长街的独行 | themed:retreat+themed:sleep+themed:recover
+无效化 | UR | 寒岭汤泉的憩息 | themed:intercept+themed:sanctuary+themed:shelter
+无效化 | UR | 澄湖栈桥的余晖 | themed:mirror+themed:recall+themed:recover
+无效化 | UR | 夏空校舍的流云 | themed:reversal+themed:study+themed:deploy
+无效化 | UR | 星降神篱的祈愿 | themed:rescue+themed:purify+themed:shelter
+无效化 | SSR | 百体地蔵的净罪之光 | themed:intercept+themed:purify+themed:sanctuary
+无效化 | SSR | 本町通尽头的灵峰 | themed:mirror+themed:shelter+themed:recover
+无效化 | SSR | 翠林水车的清流结界 | themed:rescue+themed:recycle+themed:recall
+无效化 | SSR | 稻荷神域的千本鸟居 | themed:intercept+themed:seal+themed:purify
+无效化 | SSR | 富士灵峰的湖畔守望 | themed:mirror+themed:recover+themed:shelter
+无效化 | SSR | 古都暗影的五重封印 | themed:intercept+themed:seal+themed:sleep
+无效化 | SSR | 古都塔影的黄昏小路 | themed:retreat+themed:recall+themed:recover
+无效化 | SSR | 古寺五重的黄昏钟声 | themed:mirror+themed:purify+themed:recycle
+无效化 | SSR | 海中鸟居的神域结界 | themed:reversal+themed:freeze+themed:recall
+无效化 | SSR | 水田镜天的云映结界 | themed:intercept+themed:study+themed:recycle
+无效化 | SSR | 雪灵峰下的驿站 | themed:rescue+themed:deploy+themed:shelter
+无效化 | SSR | 岩间清瀑的结界之水 | themed:mirror+themed:purify+themed:sanctuary
+无效化 | SSR | 夜樱灯笼的幽冥引路 | themed:reprisal+themed:recover+themed:recall
+无效化 | SSR | 樱花光隙的幻惑结界 | themed:retreat+themed:sleep+themed:study
+无效化 | SR | 翡翠峰嶺の雲霧結界 | themed:intercept+themed:sleep
+→ 前 20 张里无效化类 20 张

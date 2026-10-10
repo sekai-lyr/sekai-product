@@ -1,0 +1,280 @@
+ .../themed-effects.js"                             | 30 ++++++++++++++++++++--
+ 1 file changed, 28 insertions(+), 2 deletions(-)
+ .../status-effects.test.js"                        | 74 ++++++++++++++++++++++
+ 1 file changed, 74 insertions(+)
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+index b42eda7..239ef81 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+@@ -18,20 +18,21 @@ export const ACTION_DEFAULTS = {
+     shelter: { amount: 0 },
+     seal: { amount: 0 },
+     sleep: { amount: 0 },
+     freeze: { amount: 0 },
+     poison: { damage: 600 },
+     bomb: { damage: 0 },
+     ignite: { stacks: 2, damage: 500 },
+     venom: { stacks: 2, damage: 450 },
+     bleed: { stacks: 2, damage: 400 },
+     curse: { stacks: 1, damage: 700 },
++    detonate: { stacks: 2, damage: 600 },
+     paralyze: { count: 1, amount: 0, gamble: false },
+     infinity: { reduce: 1000 },
+     charge: { amount: 200 },
+     burst: { cost: 700 },
+     twin: { cost: 600 },
+     pierce: { amount: 0 },
+     ward: { amount: 0 },
+     ambush: { count: 1 },
+     token: { attack: 0, defense: 1000 },
+     exchange: { limit: 4, draw: 0 },
+@@ -63,37 +64,38 @@ export const ACTION_TEMPLATES = {
+     shelter: p => `自己攻击力最低的表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效${p.amount ? `，其攻击力上升${p.amount}` : ""}`,
+     seal: p => `对方攻击力最高的可取对象表侧怪兽效果无效，直到本回合结束${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     sleep: p => `将对方攻击力最高的可取对象表侧怪兽变为里侧守备表示${p.amount ? `，其守备力下降${p.amount}` : ""}`,
+     freeze: p => `将对方攻击力最高的可取对象表侧怪兽变为守备表示，直到下个回合结束不能攻击或手动改变表示形式${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     poison: p => `给对方攻击力最高的可取对象表侧怪兽放置毒印；本回合结束时，其控制者受到${p.damage}伤害，并移除毒印`,
+     bomb: p => `给对方攻击力最高的可取对象表侧怪兽放置爆破标记；本回合结束时${p.damage ? `给予其控制者${p.damage}伤害并` : ""}破坏该怪兽，提前离场则标记失效`,
+     ignite: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层灼烧；其控制者每个结束阶段受到${p.damage}×层数伤害，随后层数-1（上限3层）`,
+     venom: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层剧毒（上限3层）；剧毒怪兽的控制者每个结束阶段受到${p.damage}×层数伤害，且其所有回复减半；剧毒不会自然消失`,
+     bleed: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层出血；出血怪兽每次参与战斗后，其控制者受到${p.damage}×层数伤害，随后层数-1`,
+     curse: p => `给对方攻击力最高的可取对象表侧怪兽施加诅咒：其效果无效、不能作为上级召唤的祭品；被破坏时其控制者受到${p.damage}×层数伤害`,
++    detonate: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层灼烧，然后立即引爆其身上全部灼烧层数：每层使其控制者受到${p.damage}点伤害；若其带有剧毒，同时引爆剧毒：每层给对方全体怪兽造成300点伤害`,
+     paralyze: p => p.gamble
+         ? `抛硬币：正面则麻痹对方攻击力最高的可取对象表侧怪兽（直到下个回合结束不能攻击或改变表示形式）；反面则其攻击力下降${p.amount}直到回合结束`
+         : p.count === "all"
+             ? "对方全部表侧怪兽麻痹：直到下个回合结束不能攻击或改变表示形式"
+             : "将对方攻击力最高的可取对象表侧怪兽麻痹：直到下个回合结束不能攻击或改变表示形式",
+     infinity: p => `直到下个回合结束，自身不会成为对方效果的对象，且受到的战斗伤害减少${p.reduce}`,
+     charge: p => `自身获得1个蓄力指示物（最多3个），攻击力上升${p.amount}；移除指示物时失去对应的提升`,
+     burst: p => `支付${p.cost}LP；将对方攻击力最高的可取对象表侧怪兽除外`,
+     twin: p => `支付${p.cost}LP；自身本回合可以攻击2次`,
+     pierce: p => `自身本回合获得贯穿守备的战斗伤害${p.amount ? `，其攻击力上升${p.amount}` : ""}`,
+     ward: p => `自身直到下个回合结束不能成为效果对象${p.amount ? `，其守备力上升${p.amount}` : ""}`,
+     ambush: p => `将自己墓地最后${p.count}张陷阱盖放到后场，本回合不能发动`,
+     token: p => `特殊召唤1只${p.attack}攻${p.defense}守、1星的守备衍生物，不能作为上级召唤的祭品`,
+     exchange: p => `将自己攻击力最低的表侧怪兽返回手牌，再将手牌第一只${p.limit}星以下怪兽特殊召唤为守备表示${drawClause(p)}`,
+     chorus: p => `自己场上有至少${p.count}种属性的表侧怪兽时，抽${p.draw}张卡${healClause(p)}`,
+     sanctuary: p => `将自己墓地最后1张卡除外；恢复${p.heal}LP`,
+-    purify: p => `将对方墓地最后${p.count}张卡除外`,
++    purify: p => `将对方墓地最后${p.count}张卡除外，并清除己方场上怪兽的全部异常状态`,
+     disarm: p => `破坏对方后场最后${p.count}张盖放的魔法或陷阱${healClause(p)}`,
+     intercept: () => "这次攻击无效",
+     mirror: p => `这次攻击无效；将攻击怪兽变为守备表示${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     rescue: () => "这次攻击无效；将自己墓地最后一只4星以下怪兽加入手牌",
+     reversal: () => "这次攻击无效；将攻击怪兽的攻击力与守备力交换，直到回合结束",
+     retreat: () => "这次攻击无效；将自己攻击力最低的表侧怪兽返回手牌",
+     reprisal: () => "这次攻击无效；给攻击怪兽放置毒印，本回合结束时其控制者受到600伤害",
+     returnSelf: () => "自己被破坏送入墓地后，支付800LP，将自身加入手牌；同名效果每回合只能使用1次",
+     exile: p => p.self
+         ? `自己被破坏送入墓地时，支付800LP，改为进入异界区；下一个自己的结束阶段以守备表示回到场上（攻击力下降${p.penalty}，可累计）、效果封印1回合`
+@@ -120,20 +122,22 @@ export const ACTION_TEXT = Object.fromEntries(
+ // 引擎用它判断一张盖放陷阱是否属于无效化陷阱，实现则在下面对应的 switch case 里。
+ // 两者必须同源——分开维护时，新增行动会被引擎算作无效化陷阱、却按普通效果结算。
+ export const ATTACK_NEGATING_ACTIONS = new Set(["intercept", "mirror", "rescue", "reversal", "retreat", "reprisal"]);
+ // 卡面没有写"无效"，但在攻击响应窗口里会让这次攻击直接消失的行动：
+ // 攻击怪兽被翻成里侧守备（sleep）或被固定为守备且不能攻击（freeze）之后，
+ // 引擎会在结算前判定"攻击者已不能攻击"并按攻击取消处理（见 engine.attack 的取消判定）。
+ // 平衡统计与无效化上限必须把它们算进来，否则"没写无效但实际无效"的卡会绕过所有限制。
+ export const ATTACK_FIZZLING_ACTIONS = new Set([...ATTACK_NEGATING_ACTIONS, "sleep", "freeze"]);
+ 
+ const lowMonster = (c, limit = 4) => c.type === "monster" && Number(c.level) <= limit;
++/** 净化类门槛用：卡上是否挂着任意一种异常状态。 */
++const hasAilments = card => Object.keys(AILMENTS).some(id => ailmentStacks(card, id) > 0);
+ const last = (zone, predicate = () => true) => [...zone].reverse().find(predicate);
+ function lastN(zone, count, predicate = () => true) {
+     return [...zone].reverse().filter(predicate).slice(0, Math.max(1, count)).reverse();
+ }
+ function enemy(ctx) {
+     return ctx.opponent.monsterZone.filter(c => c.faceUp && !c.cannotBeTargeted)
+         .sort((a, b) => b.currentAttack - a.currentAttack)[0];
+ }
+ function ally(ctx) {
+     return ctx.player.monsterZone.filter(c => c.faceUp)
+@@ -191,32 +195,33 @@ export function canResolveThemedEffect(ctx) {
+         case "scout": case "study": case "prepare": return p.deck.length > 0;
+         case "recover": return p.graveyard.some(x => x !== c && lowMonster(x, par.limit));
+         case "recycle": return p.graveyard.filter(x => x !== c).length >= par.count;
+         case "deploy": return space && p.hand.some(x => lowMonster(x, par.limit));
+         case "revive": return space && p.graveyard.some(x => x !== c && lowMonster(x, par.limit));
+         case "recall": return p.banished.length >= par.count;
+         case "shelter": return !!ally(ctx);
+         case "seal": case "sleep": case "freeze": case "poison": case "bomb": return !!enemy(ctx);
+         case "ignite": case "venom": return !!enemy(ctx);
+         case "bleed": case "curse": return !!enemy(ctx);
++        case "detonate": return !!enemy(ctx);
+         case "paralyze": return !!enemy(ctx);
+         case "infinity": return p.monsterZone.includes(c);
+         case "burst": return p.lp > par.cost && !!enemy(ctx);
+         case "charge": return p.monsterZone.includes(c) && (c.themedState?.charges || 0) < 3;
+         case "twin": return p.monsterZone.includes(c) && p.lp > par.cost;
+         case "pierce": case "ward": return p.monsterZone.includes(c);
+         case "ambush": return p.spellTrapZone.length < GAME_CONFIG.MAX_SPELL_TRAP_ZONE && !!last(p.graveyard, x => x.type === "trap" && x !== c);
+         case "token": return space;
+         case "exchange": return !p.cannotSpecialSummonThisTurn && !!ally(ctx) && p.hand.some(x => lowMonster(x, par.limit));
+         case "chorus": return new Set(p.monsterZone.filter(x => x.faceUp).map(x => x.attribute)).size >= par.count && p.deck.length >= Math.max(1, par.draw || 0);
+         case "sanctuary": return p.graveyard.some(x => x !== c);
+-        case "purify": return ctx.opponent.graveyard.length > 0;
++        case "purify": return ctx.opponent.graveyard.length > 0 || p.monsterZone.some(hasAilments);
+         case "disarm": return ctx.opponent.spellTrapZone.some(x => x.faceDown);
+         case "returnSelf": return p.graveyard.includes(c) && p.lp > 800;
+         // 自身异界在 onDestroyed 触发时卡已在墓地；直接以场上形态结算时从怪兽区取卡。
+         case "exile": return par.self
+             ? (p.monsterZone.includes(c) || p.graveyard.includes(c)) && p.lp > 800
+             : !!enemy(ctx);
+         case "inherit": return p.graveyard.includes(c) && p.deck.some(x => lowMonster(x, par.limit) && x.attribute === c.attribute);
+         case "devour": return p.lp > par.cost && p.deck.length >= 2;
+         case "timeStop": return p.lp > par.cost && ctx.opponent.monsterZone.some(x => x.faceUp);
+         case "intercept": case "mirror": case "rescue": case "reversal": case "retreat": case "reprisal": return !!ctx.battle;
+@@ -286,20 +291,39 @@ export const themedEffectHandlers = {
+                 target.position = MONSTER_POSITION.DEFENSE; target.canAttack = false;
+                 state(target).frozenUntil = game.turn + 1;
+                 applyTempStat(o, target, "attack", -par.amount);
+                 break;
+             case "poison": state(target).poisonTurn = game.turn; state(target).poisonDamage = par.damage; break;
+             case "bomb": state(target).bombTurn = game.turn; state(target).bombDamage = par.damage; break;
+             case "ignite": applyAilment(target, "burn", par.stacks, par.damage); break;
+             case "venom": applyAilment(target, "venom", par.stacks, par.damage); break;
+             case "bleed": applyAilment(target, "bleed", par.stacks, par.damage); break;
+             case "curse": applyAilment(target, "curse", par.stacks, par.damage); break;
++            case "detonate": {
++                // 先施加灼烧（至少1层）再引爆全部灼烧层数；剧毒同时扩散到对方全体表侧怪兽的守备。
++                applyAilment(target, "burn", Math.max(1, par.stacks), par.damage);
++                const burnStacks = ailmentStacks(target, "burn");
++                if (burnStacks > 0) {
++                    o.takeDamage(par.damage * burnStacks);
++                    removeAilment(target, "burn");
++                }
++                const venomStacks = ailmentStacks(target, "venom");
++                if (venomStacks > 0) {
++                    const splash = 300 * venomStacks;
++                    for (const x of o.monsterZone.filter(x => x.faceUp)) {
++                        x.currentDefense = Math.max(0, (x.currentDefense || 0) - splash);
++                        if (x.currentDefense <= 0) ctx.engine.destroyFieldMonster(o, x);
++                    }
++                    removeAilment(target, "venom");
++                }
++                break;
++            }
+             case "charge":
+                 state(c).charges = (state(c).charges || 0) + 1;
+                 applyPermanentStat(p, c, "attack", par.amount);
+                 break;
+             case "burst":
+                 p.takeDamage(par.cost);
+                 ctx.engine.resetFieldCard(target);
+                 move(target, o.monsterZone, o.banished); break;
+             case "twin":
+                 p.takeDamage(par.cost);
+@@ -351,20 +375,22 @@ export const themedEffectHandlers = {
+                 break;
+             }
+             case "chorus": {
+                 for (let i = 0; i < Math.max(1, par.draw); i++) p.drawCard();
+                 if (par.heal) p.heal(par.heal);
+                 break;
+             }
+             case "sanctuary": moveReset(ctx, last(p.graveyard, x => x !== c), p.graveyard, p.banished); p.heal(par.heal); break;
+             case "purify": {
+                 for (const card of lastN(o.graveyard, par.count)) moveReset(ctx, card, o.graveyard, o.banished);
++                // 增强：除外对方墓地的原有行为之外，同时净化己方场上怪兽的全部异常状态。
++                for (const card of p.monsterZone) cleanseAilments(card);
+                 break;
+             }
+             // 只拆盖放的卡：已经翻开的魔法/陷阱不在"盖牌"范围内，避免把对手正在
+             // 生效的永久魔法也一并算进来（本作没有永久魔法，但规则要写清楚）。
+             case "disarm": {
+                 const sets = lastN(o.spellTrapZone, par.count, x => x.faceDown);
+                 for (const set of sets) {
+                     move(set, o.spellTrapZone, o.graveyard);
+                     set.faceDown = false; set.canActivate = false;
+                 }
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+index 17de651..5fc3ef2 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+@@ -347,10 +347,84 @@ test("异界二次回归累计攻减", () => {
+     const target = enemyMonster(); o.monsterZone.push(target);
+     const exile = () => themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "exile", params: { turns: 1, penalty: 500 }, skillName: "t" }, gameState: s });
+     exile();
+     s.currentPlayerIndex = 1; e.endTurn();
+     assert.equal(target.currentAttack, 1800 - 500);
+     exile();
+     s.currentPlayerIndex = 1; e.endTurn();
+     assert.equal(target.currentAttack, 1800 - 1000);
+     assert.ok(!o.banished.includes(target));
+ });
++
++test("引爆消耗灼烧层数造成单体爆发", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "detonate", params: { stacks: 2, damage: 650 }, skillName: "t" }, gameState: s });
++    assert.equal(o.lp, 8000 - 1300);
++    assert.equal(target.themedState.statuses?.burn || 0, 0);
++});
++
++test("引爆剧毒扩散为对方全体怪兽伤害", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); const other = enemyMonster(900);
++    o.monsterZone.push(target, other);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "venom", params: { stacks: 2, damage: 450 }, skillName: "t" }, gameState: s });
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "detonate", params: { stacks: 0, damage: 600 }, skillName: "t" }, gameState: s });
++    // 简报预期 8000 与简报自身实现冲突：detonate 必须先施加至少 1 层灼烧
++    // （Math.max(1, par.stacks)），1 层×600 的单体爆发必然扣 LP；扩散部分只打守备。
++    assert.equal(o.lp, 8000 - 600);
++    assert.equal(target.currentDefense, 600);
++    assert.equal(other.currentDefense, 600);
++    assert.equal(target.themedState?.statuses?.venom || 0, 0);
++});
++
++test("净化清除己方全部异常状态", () => {
++    const { s, p, o, e } = board();
++    const ally = createCardInstance({ id: "ally", name: "我", type: "monster", level: 4, attack: 1000, defense: 1000, effects: [] });
++    p.monsterZone.push(ally);
++    applyAilment(ally, "burn", 2, 500);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "purify", params: { count: 1 }, skillName: "t" }, gameState: s });
++    assert.equal(ailmentStacks(ally, "burn"), 0);
++});
++
++test("净化保留除外对方墓地并同时净化己方", () => {
++    const { s, p, o, e } = board();
++    const ally = createCardInstance({ id: "ally_pure", name: "我", type: "monster", level: 4, attack: 1000, defense: 1000, effects: [] });
++    p.monsterZone.push(ally);
++    applyAilment(ally, "venom", 2, 450);
++    const grave1 = createCardInstance({ id: "gv1", name: "墓1", type: "monster", level: 4, attack: 1000, defense: 1000, effects: [] });
++    const grave2 = createCardInstance({ id: "gv2", name: "墓2", type: "monster", level: 4, attack: 1000, defense: 1000, effects: [] });
++    o.graveyard.push(grave1, grave2);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "purify", params: { count: 1 }, skillName: "t" }, gameState: s });
++    assert.ok(o.banished.includes(grave2));
++    assert.deepEqual(o.graveyard, [grave1]);
++    assert.equal(ailmentStacks(ally, "venom"), 0);
++});
++
++test("引爆扩散击破守备归零的对方怪兽", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster();
++    const fragile = createCardInstance({ id: "fragile", name: "脆", type: "monster", level: 4, attack: 500, defense: 500, effects: [] });
++    o.monsterZone.push(target, fragile);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "venom", params: { stacks: 2, damage: 450 }, skillName: "t" }, gameState: s });
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "detonate", params: { stacks: 0, damage: 600 }, skillName: "t" }, gameState: s });
++    assert.ok(o.graveyard.includes(fragile));
++    assert.ok(o.monsterZone.includes(target));
++    assert.equal(target.currentDefense, 600);
++});
++
++test("净化在对方墓地为空时因己方异常状态仍可发动", () => {
++    const { s, p, o, e } = board();
++    const ally = createCardInstance({ id: "ally_gate", name: "我", type: "monster", level: 4, attack: 1000, defense: 1000, effects: [] });
++    p.monsterZone.push(ally);
++    applyAilment(ally, "curse", 1, 600);
++    const effect = { type: "themedAction", action: "purify", params: { count: 1 }, skillName: "t" };
++    assert.equal(canResolveThemedEffect({ engine: e, player: p, opponent: o, card: p, effect, gameState: s }), true);
++    assert.ok(themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect, gameState: s }));
++    assert.equal(ailmentStacks(ally, "curse"), 0);
++});
++
++test("对方与己方都无目标时净化不可发动", () => {
++    const { s, p, o, e } = board();
++    const effect = { type: "themedAction", action: "purify", params: { count: 1 }, skillName: "t" };
++    assert.equal(canResolveThemedEffect({ engine: e, player: p, opponent: o, card: p, effect, gameState: s }), false);
++});

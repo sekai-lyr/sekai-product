@@ -1,0 +1,138 @@
+<style>
+  :root { --v3-bg:#080a12; --v3-panel:#111522; --v3-panel-2:#161a2b; --v3-text:#f3f0ff; --v3-muted:#9ba1bd; --v3-lilac:#b79be8; --v3-cyan:#82d9e2; --v3-pink:#df82ad; --v3-gold:#f0c878; --v3-line:rgba(190,190,235,.2); }
+  .v3-intro { margin-bottom:14px; }
+  .v3-intro h2 { margin-bottom:7px; letter-spacing:-.03em; }
+  .v3-intro p { max-width:960px; line-height:1.65; }
+  .asset-read { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:16px 0 22px; }
+  .asset-swatch { position:relative; height:88px; overflow:hidden; border:1px solid var(--v3-line); background:#111522; }
+  .asset-swatch img { width:100%; height:100%; display:block; object-fit:cover; }
+  .asset-swatch span { position:absolute; left:7px; bottom:6px; padding:3px 5px; color:#fff; background:rgba(5,7,13,.7); font-size:9px; }
+  .v3-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; align-items:start; }
+  .v3-option { min-width:0; overflow:hidden; cursor:pointer; border:1px solid var(--v3-line)!important; border-radius:10px!important; background:linear-gradient(180deg,#111421,#0c0e18)!important; transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease; }
+  .v3-option:hover { transform:translateY(-4px); border-color:rgba(183,155,232,.75)!important; box-shadow:0 18px 40px rgba(0,0,0,.32); }
+  .v3-option.selected { border-color:var(--v3-lilac)!important; box-shadow:0 0 0 2px rgba(183,155,232,.23),0 22px 52px rgba(0,0,0,.4); }
+  .v3-copy { padding:15px 15px 0; }
+  .v3-copy h3 { margin:0; color:var(--v3-text); font-size:20px; letter-spacing:-.03em; }
+  .v3-copy p { min-height:39px; margin:6px 0 12px; color:var(--v3-muted); font-size:11px; line-height:1.55; }
+  .v3-tags { display:flex; flex-wrap:wrap; gap:6px; margin:12px 15px; }
+  .v3-tags span { padding:4px 7px; border:1px solid var(--v3-line); color:#b4b8d1; font-size:9px; }
+  .v3-note { margin:0; padding:0 15px 15px; color:#9298b1; font-size:10px; line-height:1.6; }
+  .mini-ui { margin:0 12px; overflow:hidden; border:1px solid rgba(183,155,232,.32); background:#080a12; color:var(--v3-text); }
+  .mini-top { display:flex; align-items:center; gap:7px; height:27px; padding:0 9px; border-bottom:1px solid var(--v3-line); background:#15182a; }
+  .mini-logo { width:18px; height:18px; display:grid; place-items:center; border:1px solid var(--v3-lilac); color:#fff; font-size:9px; }
+  .mini-top strong { color:#f0edff; font-size:9px; letter-spacing:.04em; }
+  .mini-top small { margin-left:auto; color:#8289ab; font-size:7px; letter-spacing:.1em; }
+  .mini-layout { display:grid; grid-template-columns:55px 1fr; min-height:310px; }
+  .mini-rail { display:flex; flex-direction:column; gap:4px; padding:9px 6px; border-right:1px solid var(--v3-line); background:#0d101b; }
+  .rail-title { margin:0 0 8px; color:#7f86a6; font-size:7px; text-align:center; letter-spacing:.12em; }
+  .rail-item { display:grid; justify-items:center; gap:3px; padding:7px 2px; color:#787f9d; font-size:8px; }
+  .rail-item b { width:12px; height:12px; display:block; border:1px solid currentColor; border-radius:50%; }
+  .rail-item.active { color:#fff; background:linear-gradient(90deg,rgba(183,155,232,.28),transparent); box-shadow:inset 2px 0 var(--v3-pink); }
+  .rail-spacer { flex:1; }
+  .mini-main { position:relative; min-width:0; padding:12px; background:radial-gradient(circle at 86% 8%,rgba(183,155,232,.18),transparent 28%),#0d101b; }
+  .mini-kicker { color:var(--v3-cyan); font-size:7px; letter-spacing:.16em; }
+  .mini-main h4 { margin:5px 0 4px; color:#f4f1ff; font-size:20px; letter-spacing:-.06em; }
+  .mini-desc { margin:0; color:#a1a6be; font-size:8px; line-height:1.5; }
+  .mini-cta { display:inline-flex; align-items:center; min-height:24px; margin-top:10px; padding:0 11px; border:1px solid var(--v3-lilac); background:linear-gradient(135deg,#8f6fc2,#424e98); color:#fff; font-size:9px; }
+  .mini-cta.alt { margin-left:5px; border-color:var(--v3-line); background:transparent; color:#b9bed4; }
+  .art-cover { position:relative; height:194px; overflow:hidden; margin-top:12px; border:1px solid rgba(183,155,232,.35); background:#121525; }
+  .art-cover img { width:100%; height:100%; display:block; object-fit:cover; object-position:center; }
+  .art-cover:after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(7,9,17,.9),transparent 47%,rgba(7,9,17,.08)),linear-gradient(0deg,rgba(7,9,17,.78),transparent 58%); }
+  .cover-label { position:absolute; left:11px; bottom:11px; z-index:1; }
+  .cover-label span { display:block; color:var(--v3-cyan); font-size:7px; letter-spacing:.18em; }
+  .cover-label strong { display:block; margin-top:4px; color:#fff; font-size:18px; letter-spacing:-.04em; }
+  .cover-label small { display:block; margin-top:3px; color:#c3bfd7; font-size:8px; }
+  .cover-art-strip { display:flex; gap:6px; margin-top:8px; }
+  .cover-art-strip img { width:38px; height:48px; object-fit:cover; border:1px solid rgba(183,155,232,.35); }
+  .cover-art-strip img:nth-child(2) { border-color:var(--v3-pink); }
+  .cover-art-strip img:nth-child(3) { border-color:var(--v3-gold); }
+  .catalog-shell { display:grid; grid-template-columns:1.25fr .75fr; gap:8px; margin-top:12px; }
+  .catalog-left { min-width:0; }
+  .filter-line { display:flex; gap:4px; margin-bottom:6px; }
+  .filter-line span { padding:4px 6px; border:1px solid var(--v3-line); color:#aab0ca; font-size:7px; }
+  .filter-line span.active { border-color:var(--v3-cyan); color:var(--v3-cyan); background:rgba(130,217,226,.08); }
+  .art-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+  .art-tile { position:relative; height:93px; overflow:hidden; border:1px solid var(--v3-line); background:#161a2b; }
+  .art-tile img { width:100%; height:100%; object-fit:cover; display:block; }
+  .art-tile:after { content:""; position:absolute; inset:0; border:1px solid transparent; }
+  .art-tile:first-child:after { border-color:var(--v3-gold); }
+  .art-tile:nth-child(2):after { border-color:var(--v3-lilac); }
+  .art-tile:nth-child(3):after { border-color:var(--v3-cyan); }
+  .art-tile small { position:absolute; right:4px; bottom:4px; z-index:1; padding:2px 3px; color:#fff; background:rgba(7,9,15,.72); font-size:6px; }
+  .card-detail { padding:7px; border-left:1px solid var(--v3-line); background:#15192a; }
+  .card-detail img { width:100%; height:115px; object-fit:cover; display:block; border:1px solid var(--v3-lilac); }
+  .card-detail b { display:block; margin-top:7px; color:#f3efff; font-size:9px; }
+  .card-detail small { display:block; margin-top:4px; color:#9da3bd; font-size:7px; line-height:1.4; }
+  .card-stat { display:flex; justify-content:space-between; margin-top:8px; color:#d3c9ec; font-size:7px; }
+  .card-stat strong { color:var(--v3-gold); }
+  .stage-shell { position:relative; min-height:260px; overflow:hidden; margin-top:12px; border:1px solid rgba(130,217,226,.35); background:#111827; }
+  .stage-shell > img { width:100%; height:100%; position:absolute; inset:0; object-fit:cover; opacity:.68; }
+  .stage-shell:after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,#090b15 5%,rgba(9,11,21,.78) 43%,rgba(9,11,21,.14)),linear-gradient(0deg,rgba(9,11,21,.9),transparent 60%); }
+  .stage-copy { position:relative; z-index:1; padding:16px; width:67%; }
+  .stage-copy h4 { margin:6px 0 6px; max-width:160px; color:#fff; font-size:23px; line-height:1.05; letter-spacing:-.07em; }
+  .stage-copy p { margin:0; color:#b8c0d2; font-size:8px; line-height:1.5; }
+  .stage-card { position:absolute; right:15px; bottom:14px; z-index:1; width:61px; height:91px; padding:3px; border:2px solid var(--v3-gold); transform:rotate(8deg); background:#181727; box-shadow:0 10px 22px rgba(0,0,0,.45); }
+  .stage-card img { width:100%; height:72px; object-fit:cover; }
+  .stage-card small { display:block; margin-top:3px; color:#ffe5a6; font-size:6px; text-align:center; }
+  .stage-nav { position:absolute; left:16px; right:16px; bottom:13px; z-index:2; display:flex; gap:5px; }
+  .stage-nav span { padding:4px 6px; border-bottom:1px solid rgba(255,255,255,.35); color:#d3d5e2; font-size:7px; }
+  .stage-nav span.active { border-color:var(--v3-pink); color:#fff; }
+  .auth-strip { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; padding-top:11px; border-top:1px solid var(--v3-line); }
+  .auth-art { height:86px; overflow:hidden; border:1px solid var(--v3-line); }
+  .auth-art img { width:100%; height:100%; display:block; object-fit:cover; }
+  .auth-form { padding:9px; border:1px solid var(--v3-line); background:#15192a; }
+  .auth-form strong { display:block; color:#f5f1ff; font-size:11px; }
+  .auth-form small { display:block; margin-top:3px; color:#9097b5; font-size:7px; }
+  .auth-tabs { display:flex; gap:9px; margin-top:11px; color:#858ca9; font-size:8px; }
+  .auth-tabs b { padding-bottom:4px; border-bottom:1px solid var(--v3-pink); color:#fff; }
+  .auth-input { height:17px; margin-top:6px; border:1px solid var(--v3-line); background:#0a0c15; }
+  .auth-btn { height:20px; margin-top:8px; background:linear-gradient(90deg,#7662b8,#4e75a6); color:#fff; font-size:8px; line-height:20px; text-align:center; }
+  @media (max-width:1100px) { .asset-read,.v3-grid { grid-template-columns:1fr; } .asset-read { grid-template-columns:repeat(5,1fr); } .v3-option { max-width:760px; } }
+  @media (max-width:580px) { .asset-read { grid-template-columns:repeat(2,1fr); } }
+</style>
+
+<div class="v3-intro">
+  <h2>V3 · 以真实卡牌图片为母体</h2>
+  <p class="subtitle">我查看了项目里的角色、魔法、陷阱、场景和透明素材。它们共同的特色不是“古典金属卡牌”，而是：全幅二次元插画、人物脸部/动作是视觉焦点、紫黑星空与白紫梦幻并存、金色爆发用于高稀有度、风景卡负责呼吸感、还有少量可爱的透明小怪兽。因此这次不再给图片套厚重古典边框，而是做成“二次元卡典 + 专辑封面 + 决斗游戏入口”。
+  </p>
+</div>
+
+<div class="asset-read">
+  <div class="asset-swatch"><img src="/files/portrait-lilac.jpg"><span>角色：竖构图、脸部焦点</span></div>
+  <div class="asset-swatch"><img src="/files/duo-feather.jpg"><span>魔法：叙事场景、双角色</span></div>
+  <div class="asset-swatch"><img src="/files/gold-impact.jpg"><span>演出：金色能量爆发</span></div>
+  <div class="asset-swatch"><img src="/files/mountain-lake.jpg"><span>陷阱：风景、留白、呼吸</span></div>
+  <div class="asset-swatch"><img src="/files/mascot.webp"><span>特殊：透明可爱素材</span></div>
+</div>
+
+<div class="v3-grid">
+  <div class="card v3-option" data-choice="V3-A-二次元封面大厅" onclick="toggleSelect(this)">
+    <div class="v3-copy"><h3>A · 二次元封面大厅</h3><p>首页像一张会动的游戏主视觉海报：一张主推卡占据舞台，其他卡片像唱片/画册封面叠在旁边。</p></div>
+    <div class="mini-ui">
+      <div class="mini-top"><div class="mini-logo">S</div><strong>SEKAI / NIGHTCORD</strong><small>COLLECTION 025</small></div>
+      <div class="mini-layout"><nav class="mini-rail"><div class="rail-title">INDEX</div><div class="rail-item active"><b></b>大厅</div><div class="rail-item"><b></b>卡典</div><div class="rail-item"><b></b>卡包</div><div class="rail-item"><b></b>卡组</div><div class="rail-spacer"></div><div class="rail-item"><b></b>规则</div><div class="rail-item"><b></b>设置</div></nav><main class="mini-main"><span class="mini-kicker">FEATURED CARD / NIGHTCORD</span><h4>夜色里，卡牌开始发光。</h4><p class="mini-desc">让角色卡像动画海报一样登场，再进入一场真正的回合制决斗。</p><span class="mini-cta">开始决斗</span><span class="mini-cta alt">查看卡典</span><div class="art-cover"><img src="/files/duo-feather.jpg"><div class="cover-label"><span>SSR · SPELL</span><strong>星夜的双重奏</strong><small>两种祈愿，照亮同一场决斗。</small></div></div><div class="cover-art-strip"><img src="/files/portrait-lilac.jpg"><img src="/files/gold-impact.jpg"><img src="/files/lavender-crown.jpg"><img src="/files/mascot.webp"></div></main></div>
+    </div>
+    <div class="auth-strip"><div class="auth-art"><img src="/files/soft-flower.jpg"></div><div class="auth-form"><strong>进入你的卡典</strong><small>保留卡组与抽卡记录</small><div class="auth-tabs"><b>登录</b><span>注册</span></div><div class="auth-input"></div><div class="auth-input"></div><div class="auth-btn">进入大厅</div></div></div>
+    <div class="v3-tags"><span>主视觉最强</span><span>适配现有插画</span><span>入口清楚</span></div><p class="v3-note">推荐作为首页方向：它不会把素材强行做成“假古董卡牌”，而是把你已有的高完成度插画变成真正的游戏资产。</p>
+  </div>
+
+  <div class="card v3-option" data-choice="V3-B-卡典陈列馆" onclick="toggleSelect(this)">
+    <div class="v3-copy"><h3>B · 卡典陈列馆</h3><p>把收藏页变成核心体验：大图、稀有度、艺术选择和效果阅读同时成立，像游戏内的角色图鉴。</p></div>
+    <div class="mini-ui">
+      <div class="mini-top"><div class="mini-logo">C</div><strong>CARD ARCHIVE / 368</strong><small>OWNED 128</small></div>
+      <div class="mini-layout"><nav class="mini-rail"><div class="rail-title">ARCHIVE</div><div class="rail-item"><b></b>大厅</div><div class="rail-item active"><b></b>卡典</div><div class="rail-item"><b></b>卡包</div><div class="rail-item"><b></b>卡组</div><div class="rail-spacer"></div><div class="rail-item"><b></b>规则</div><div class="rail-item"><b></b>设置</div></nav><main class="mini-main"><span class="mini-kicker">CARD LIBRARY / ART SELECT</span><h4>每一张卡，都是一张插画。</h4><p class="mini-desc">按角色、魔法、陷阱、稀有度浏览；点击卡牌打开完整艺术图与效果。</p><div class="catalog-shell"><div class="catalog-left"><div class="filter-line"><span class="active">全部</span><span>角色</span><span>魔法</span><span>陷阱</span></div><div class="filter-line"><span class="active">已拥有</span><span>SSR</span><span>UR</span></div><div class="art-grid"><div class="art-tile"><img src="/files/gold-impact.jpg"><small>SSR</small></div><div class="art-tile"><img src="/files/portrait-lilac.jpg"><small>R</small></div><div class="art-tile"><img src="/files/soft-flower.jpg"><small>R</small></div><div class="art-tile"><img src="/files/lavender-crown.jpg"><small>UR</small></div><div class="art-tile"><img src="/files/duo-feather.jpg"><small>SSR</small></div><div class="art-tile"><img src="/files/mascot.webp"><small>N</small></div></div></div><aside class="card-detail"><img src="/files/blue-portrait.jpg"><b>蓝色夜行者</b><small>角色 · SSR<br>召唤成功：根据场上角色数量获得额外强度。</small><div class="card-stat"><span>拥有</span><strong>×3</strong></div><div class="card-stat"><span>ATK / DEF</span><strong>2100 / 1800</strong></div></aside></div></main></div>
+    </div>
+    <div class="auth-strip"><div class="auth-art"><img src="/files/lavender-crown.jpg"></div><div class="auth-form"><strong>同步你的卡典</strong><small>登录后恢复收藏与卡组</small><div class="auth-tabs"><b>登录</b><span>注册</span></div><div class="auth-input"></div><div class="auth-input"></div><div class="auth-btn">同步并进入</div></div></div>
+    <div class="v3-tags"><span>最像成熟卡牌产品</span><span>信息密度高</span><span>收藏驱动</span></div><p class="v3-note">推荐作为收藏/卡组页方向：让现有图片直接承担“稀有度和收集价值”，而不是藏在统一黑色卡框里。</p>
+  </div>
+
+  <div class="card v3-option" data-choice="V3-C-Nightcord演出场" onclick="toggleSelect(this)">
+    <div class="v3-copy"><h3>C · Nightcord 演出场</h3><p>以紫黑夜景、舞台灯光和卡面动效为核心，把每次抽卡/召唤做成一次短动画演出。</p></div>
+    <div class="mini-ui">
+      <div class="mini-top"><div class="mini-logo">N</div><strong>NIGHTCORD / LIVE DUEL</strong><small>ONLINE 128</small></div>
+      <div class="mini-layout"><nav class="mini-rail"><div class="rail-title">STAGE</div><div class="rail-item active"><b></b>演出</div><div class="rail-item"><b></b>卡典</div><div class="rail-item"><b></b>卡包</div><div class="rail-item"><b></b>决斗</div><div class="rail-spacer"></div><div class="rail-item"><b></b>规则</div><div class="rail-item"><b></b>设置</div></nav><main class="mini-main"><span class="mini-kicker">LIVE EVENT / NIGHT SKY</span><div class="stage-shell"><img src="/files/mountain-lake.jpg"><div class="stage-copy"><span class="mini-kicker">SEASON 01</span><h4>月下的卡牌演出</h4><p>抽卡不是弹窗，而是舞台上一次完整的翻牌、闪光与稀有度揭示。</p><span class="mini-cta">进入演出</span></div><div class="stage-card"><img src="/files/gold-impact.jpg"><small>SSR / NEW</small></div><div class="stage-nav"><span class="active">主舞台</span><span>卡包</span><span>对局</span></div></div></main></div>
+    </div>
+    <div class="auth-strip"><div class="auth-art"><img src="/files/portrait-lilac.jpg"></div><div class="auth-form"><strong>连接 Nightcord</strong><small>加入在线决斗网络</small><div class="auth-tabs"><b>登录</b><span>注册</span></div><div class="auth-input"></div><div class="auth-input"></div><div class="auth-btn">连接舞台</div></div></div>
+    <div class="v3-tags"><span>动效表现最强</span><span>PvP氛围强</span><span>需要更好演出</span></div><p class="v3-note">推荐作为首页轻量动效层或抽卡页，不建议让所有页面都变成舞台，否则会削弱收藏和卡组编辑的可读性。</p>
+  </div>
+</div>

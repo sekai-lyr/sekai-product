@@ -1,0 +1,324 @@
+{
+  "count": 45,
+  "mapped": 45,
+  "uniqueSheets": 45,
+  "reused": [],
+  "missing": [],
+  "rows": [
+    {
+      "id": "ygo_n_4206964",
+      "name": "落穴",
+      "rarity": "N",
+      "sheet": "trap-pitfall-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_44095762",
+      "name": "神圣防护罩－反射镜力－",
+      "rarity": "N",
+      "sheet": "trap-mirror-force-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_12607053",
+      "name": "和睦的使者",
+      "rarity": "N",
+      "sheet": "trap-waboku-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_17814387",
+      "name": "援军",
+      "rarity": "N",
+      "sheet": "trap-reinforcements-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_44209392",
+      "name": "城壁",
+      "rarity": "N",
+      "sheet": "trap-castle-walls-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_83887306",
+      "name": "夹击",
+      "rarity": "N",
+      "sheet": "trap-pincer-attack-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_80604091",
+      "name": "血之代偿",
+      "rarity": "N",
+      "sheet": "trap-blood-compensation-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_24068492",
+      "name": "停战协定",
+      "rarity": "N",
+      "sheet": "trap-ceasefire-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_77622396",
+      "name": "反转陷阱",
+      "rarity": "N",
+      "sheet": "trap-reverse-trap-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_50045299",
+      "name": "龙族封印之壶",
+      "rarity": "N",
+      "sheet": "trap-dragon-capture-jar-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_96355986",
+      "name": "魔法筒枪",
+      "rarity": "N",
+      "sheet": "trap-magic-cylinder-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "ygo_n_77414722",
+      "name": "魔法干扰阵",
+      "rarity": "N",
+      "sheet": "trap-magic-jammer-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "nc_tr_001",
+      "name": "暮雨长街的独行",
+      "rarity": "UR",
+      "sheet": "trap-dusk-rain-street-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "nc_tr_002",
+      "name": "寒岭汤泉的憩息",
+      "rarity": "UR",
+      "sheet": "trap-hot-spring-rest-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "nc_tr_003",
+      "name": "澄湖栈桥的余晖",
+      "rarity": "UR",
+      "sheet": "trap-lake-pier-glow-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "nc_tr_004",
+      "name": "夏空校舍的流云",
+      "rarity": "UR",
+      "sheet": "trap-summer-school-cloud-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "nc_tr_005",
+      "name": "星降神篱的祈愿",
+      "rarity": "UR",
+      "sheet": "trap-star-shrine-vow-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_023",
+      "name": "翡翠峰嶺の雲霧結界",
+      "rarity": "SR",
+      "sheet": "trap-jade-mist-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_024",
+      "name": "富士桜花の結界",
+      "rarity": "SR",
+      "sheet": "trap-fuji-sakura-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_025",
+      "name": "花燈橋の夜桜結界",
+      "rarity": "SR",
+      "sheet": "trap-lantern-bridge-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_026",
+      "name": "花園涼亭の星夜結界",
+      "rarity": "SR",
+      "sheet": "trap-garden-pavilion-star-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_027",
+      "name": "神社参道の花灯結界",
+      "rarity": "SR",
+      "sheet": "trap-shrine-approach-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_028",
+      "name": "水鏡湖畔の桜花結界",
+      "rarity": "SR",
+      "sheet": "trap-mirror-lake-sakura-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_029",
+      "name": "索道黄昏の都市結界",
+      "rarity": "SR",
+      "sheet": "trap-ropeway-dusk-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_030",
+      "name": "夕映雪嶺の紅葉結界",
+      "rarity": "SR",
+      "sheet": "trap-snow-ridge-maple-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_031",
+      "name": "雪林曙光の結界",
+      "rarity": "SR",
+      "sheet": "trap-snow-cedar-dawn-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_032",
+      "name": "雪嶺白嶽の凍結結界",
+      "rarity": "SR",
+      "sheet": "trap-white-peak-freeze-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_033",
+      "name": "夜桜涼亭の花吹雪結界",
+      "rarity": "SR",
+      "sheet": "trap-night-sakura-snow-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_034",
+      "name": "夜桜神籠の灯火結界",
+      "rarity": "SR",
+      "sheet": "trap-night-sakura-lamp-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_035",
+      "name": "桜花結界の春霞神殿",
+      "rarity": "SR",
+      "sheet": "trap-spring-haze-temple-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_036",
+      "name": "月光水鏡の幽玄結界",
+      "rarity": "SR",
+      "sheet": "trap-moonlight-water-ward-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_037",
+      "name": "百体地蔵的净罪之光",
+      "rarity": "SSR",
+      "sheet": "trap-jizo-purge-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_038",
+      "name": "本町通尽头的灵峰",
+      "rarity": "SSR",
+      "sheet": "trap-street-peak-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_039",
+      "name": "翠林水车的清流结界",
+      "rarity": "SSR",
+      "sheet": "trap-waterwheel-stream-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_040",
+      "name": "稻荷神域的千本鸟居",
+      "rarity": "SSR",
+      "sheet": "trap-senbon-torii-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_041",
+      "name": "富士灵峰的湖畔守望",
+      "rarity": "SSR",
+      "sheet": "trap-fuji-lakeside-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_042",
+      "name": "古都暗影的五重封印",
+      "rarity": "SSR",
+      "sheet": "trap-five-pagoda-seal-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_043",
+      "name": "古都塔影的黄昏小路",
+      "rarity": "SSR",
+      "sheet": "trap-pagoda-dusk-lane-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_044",
+      "name": "古寺五重的黄昏钟声",
+      "rarity": "SSR",
+      "sheet": "trap-temple-bell-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_045",
+      "name": "海中鸟居的神域结界",
+      "rarity": "SSR",
+      "sheet": "trap-sea-torii-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_046",
+      "name": "水田镜天的云映结界",
+      "rarity": "SSR",
+      "sheet": "trap-paddy-mirror-sky-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_047",
+      "name": "雪灵峰下的驿站",
+      "rarity": "SSR",
+      "sheet": "trap-snow-post-station-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_048",
+      "name": "岩间清瀑的结界之水",
+      "rarity": "SSR",
+      "sheet": "trap-rockfall-basin-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_049",
+      "name": "夜樱灯笼的幽冥引路",
+      "rarity": "SSR",
+      "sheet": "trap-night-sakura-lantern-sheet-v2.png",
+      "authored": true
+    },
+    {
+      "id": "source_trap_050",
+      "name": "樱花光隙的幻惑结界",
+      "rarity": "SSR",
+      "sheet": "trap-sakura-light-gap-sheet-v2.png",
+      "authored": true
+    }
+  ]
+}

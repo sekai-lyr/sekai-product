@@ -1,0 +1,140 @@
+{
+  "browser": "145.0.7632.6",
+  "kind": "Headless Chromium; mobile viewport with 4x CPU throttling is not a physical phone",
+  "samples": [
+    {
+      "width": 1440,
+      "cpuSlowdown": 1,
+      "cores": 32,
+      "runs": [
+        {
+          "card": "ygo_n_89631139",
+          "phase": "summon",
+          "elapsedMs": 1018,
+          "peakNodes": 16,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "picture_ex_021",
+          "phase": "attack",
+          "elapsedMs": 1109,
+          "peakNodes": 17,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "picture_ex_027",
+          "phase": "destroy",
+          "elapsedMs": 1155,
+          "peakNodes": 15,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "ygo_n_53129443",
+          "phase": "spell",
+          "elapsedMs": 953,
+          "peakNodes": 24,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "ygo_n_4206964",
+          "phase": "trap",
+          "elapsedMs": 1025,
+          "peakNodes": 13,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "picture_ssr7_010",
+          "phase": "tribute",
+          "elapsedMs": 1187,
+          "peakNodes": 17,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "cpuSlowdown": 4,
+      "cores": 32,
+      "runs": [
+        {
+          "card": "ygo_n_89631139",
+          "phase": "summon",
+          "elapsedMs": 1071,
+          "peakNodes": 16,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "picture_ex_021",
+          "phase": "attack",
+          "elapsedMs": 1097,
+          "peakNodes": 13,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "picture_ex_027",
+          "phase": "destroy",
+          "elapsedMs": 1014,
+          "peakNodes": 7,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "ygo_n_53129443",
+          "phase": "spell",
+          "elapsedMs": 966,
+          "peakNodes": 24,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "ygo_n_4206964",
+          "phase": "trap",
+          "elapsedMs": 1038,
+          "peakNodes": 13,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        },
+        {
+          "card": "picture_ssr7_010",
+          "phase": "tribute",
+          "elapsedMs": 1007,
+          "peakNodes": 7,
+          "p95FrameMs": 4.3,
+          "longTasks": 0,
+          "longTaskMaxMs": 0,
+          "residualLayers": 0
+        }
+      ]
+    }
+  ]
+}

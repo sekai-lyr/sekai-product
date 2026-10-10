@@ -1,0 +1,285 @@
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+index 3d38a4d..b42eda7 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+@@ -37,20 +37,21 @@ export const ACTION_DEFAULTS = {
+     exchange: { limit: 4, draw: 0 },
+     chorus: { count: 2, draw: 1, heal: 0 },
+     sanctuary: { heal: 1000 },
+     purify: { count: 1 },
+     disarm: { count: 1, heal: 0 },
+     mirror: { amount: 0 },
+     timeStop: { cost: 1200 },
+     devour: { cost: 800 },
+     inherit: { limit: 4 },
+     intercept: {}, rescue: {}, reversal: {}, retreat: {}, reprisal: {}, returnSelf: {},
++    exile: { turns: 2, penalty: 500, self: false },
+ };
+ 
+ const healClause = p => p.heal ? `，并恢复${p.heal}LP` : "";
+ const drawClause = p => p.draw ? `，然后抽${p.draw}张卡` : "";
+ 
+ // 模板即卡面：不带参数时渲染成各动作原本的文字。
+ export const ACTION_TEMPLATES = {
+     scout: p => `展示卡组顶${p.count}张卡，将其中第一张怪兽加入手牌，其余按原顺序放回卡组底`,
+     study: p => `展示卡组顶${p.count}张卡，将其中第一张魔法加入手牌，其余按原顺序放回卡组底`,
+     prepare: p => `将卡组顶${p.count}张卡送入墓地`,
+@@ -87,20 +88,23 @@ export const ACTION_TEMPLATES = {
+     sanctuary: p => `将自己墓地最后1张卡除外；恢复${p.heal}LP`,
+     purify: p => `将对方墓地最后${p.count}张卡除外`,
+     disarm: p => `破坏对方后场最后${p.count}张盖放的魔法或陷阱${healClause(p)}`,
+     intercept: () => "这次攻击无效",
+     mirror: p => `这次攻击无效；将攻击怪兽变为守备表示${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     rescue: () => "这次攻击无效；将自己墓地最后一只4星以下怪兽加入手牌",
+     reversal: () => "这次攻击无效；将攻击怪兽的攻击力与守备力交换，直到回合结束",
+     retreat: () => "这次攻击无效；将自己攻击力最低的表侧怪兽返回手牌",
+     reprisal: () => "这次攻击无效；给攻击怪兽放置毒印，本回合结束时其控制者受到600伤害",
+     returnSelf: () => "自己被破坏送入墓地后，支付800LP，将自身加入手牌；同名效果每回合只能使用1次",
++    exile: p => p.self
++        ? `自己被破坏送入墓地时，支付800LP，改为进入异界区；下一个自己的结束阶段以守备表示回到场上（攻击力下降${p.penalty}，可累计）、效果封印1回合`
++        : `将对方攻击力最高的可取对象表侧怪兽送入异界区；${p.turns}个结束阶段后回到场上（守备表示、攻击力下降${p.penalty}、效果封印1回合）`,
+     inherit: p => `自己被破坏送入墓地后，将卡组第一只与自身同属性的${p.limit}星以下怪兽加入手牌`,
+     devour: p => `支付${p.cost}LP；抽2张卡`,
+     timeStop: p => `支付${p.cost}LP；对方全部表侧怪兽直到下个回合结束不能攻击或手动改变表示形式`,
+ };
+ 
+ export function themedActionParams(effect) {
+     return { ...(ACTION_DEFAULTS[effect?.action] || {}), ...(effect?.params || {}) };
+ }
+ 
+ /** 把动作与参数渲染成卡面文字；引擎结算与卡面共用同一份参数。 */
+@@ -201,20 +205,24 @@ export function canResolveThemedEffect(ctx) {
+         case "twin": return p.monsterZone.includes(c) && p.lp > par.cost;
+         case "pierce": case "ward": return p.monsterZone.includes(c);
+         case "ambush": return p.spellTrapZone.length < GAME_CONFIG.MAX_SPELL_TRAP_ZONE && !!last(p.graveyard, x => x.type === "trap" && x !== c);
+         case "token": return space;
+         case "exchange": return !p.cannotSpecialSummonThisTurn && !!ally(ctx) && p.hand.some(x => lowMonster(x, par.limit));
+         case "chorus": return new Set(p.monsterZone.filter(x => x.faceUp).map(x => x.attribute)).size >= par.count && p.deck.length >= Math.max(1, par.draw || 0);
+         case "sanctuary": return p.graveyard.some(x => x !== c);
+         case "purify": return ctx.opponent.graveyard.length > 0;
+         case "disarm": return ctx.opponent.spellTrapZone.some(x => x.faceDown);
+         case "returnSelf": return p.graveyard.includes(c) && p.lp > 800;
++        // 自身异界在 onDestroyed 触发时卡已在墓地；直接以场上形态结算时从怪兽区取卡。
++        case "exile": return par.self
++            ? (p.monsterZone.includes(c) || p.graveyard.includes(c)) && p.lp > 800
++            : !!enemy(ctx);
+         case "inherit": return p.graveyard.includes(c) && p.deck.some(x => lowMonster(x, par.limit) && x.attribute === c.attribute);
+         case "devour": return p.lp > par.cost && p.deck.length >= 2;
+         case "timeStop": return p.lp > par.cost && ctx.opponent.monsterZone.some(x => x.faceUp);
+         case "intercept": case "mirror": case "rescue": case "reversal": case "retreat": case "reprisal": return !!ctx.battle;
+         default: return false;
+     }
+ }
+ 
+ function state(card) { return card.themedState ||= {}; }
+ // 衍生物实例 id 必须全局唯一：之前用 (回合, 事件数, 怪兽区数量) 组合，
+@@ -248,21 +256,22 @@ export const themedEffectHandlers = {
+                 for (let i = 0; i < Math.max(1, par.draw); i++) p.drawCard(); break;
+             }
+             case "deploy": summon(ctx, p.hand.find(x => lowMonster(x, par.limit)), p.hand); if (par.heal) p.heal(par.heal); break;
+             case "revive": {
+                 const revived = lastN(p.graveyard, par.count, x => x !== c && lowMonster(x, par.limit));
+                 for (const card of revived) if (p.monsterZone.length < GAME_CONFIG.MAX_MONSTER_ZONE) summon(ctx, card, p.graveyard);
+                 if (par.heal) p.heal(par.heal);
+                 break;
+             }
+             case "recall": {
+-                for (const card of lastN(p.banished, par.count)) moveReset(ctx, card, p.banished, p.hand);
++                // 异界区的卡必须等回归倒计时，回收类效果一律跳过。
++                for (const card of lastN(p.banished, par.count, x => !x.themedState?.exile)) moveReset(ctx, card, p.banished, p.hand);
+                 if (par.draw) for (let i = 0; i < par.draw; i++) p.drawCard();
+                 if (par.heal) p.heal(par.heal);
+                 break;
+             }
+             case "shelter": {
+                 const shielded = ally(ctx);
+                 state(shielded).shelterUntil = game.turn + 1;
+                 applyPermanentStat(p, shielded, "attack", par.amount);
+                 break;
+             }
+@@ -356,20 +365,36 @@ export const themedEffectHandlers = {
+             case "disarm": {
+                 const sets = lastN(o.spellTrapZone, par.count, x => x.faceDown);
+                 for (const set of sets) {
+                     move(set, o.spellTrapZone, o.graveyard);
+                     set.faceDown = false; set.canActivate = false;
+                 }
+                 if (par.heal) p.heal(par.heal);
+                 break;
+             }
+             case "returnSelf": p.takeDamage(800); ctx.engine.resetFieldCard(c); move(c, p.graveyard, p.hand); break;
++            case "exile": {
++                if (par.self) {
++                    p.takeDamage(800);
++                    // 死亡回归：被破坏后卡已在墓地；直接以场上形态触发时从怪兽区送入异界区。
++                    if (!move(c, p.monsterZone, p.banished)) move(c, p.graveyard, p.banished);
++                    state(c).exile = { pendingEndPhases: Math.max(1, par.turns), penalty: par.penalty };
++                } else {
++                    // 入异界前清掉旧 statuses/domain，避免脏状态进除外区快照；累计的回归攻减保留。
++                    const carried = (target.permanentBuffs || []).filter(buff => buff.source === "exileReturn");
++                    ctx.engine.resetFieldCard(target);
++                    move(target, o.monsterZone, o.banished);
++                    target.permanentBuffs = carried;
++                    state(target).exile = { pendingEndPhases: Math.max(1, par.turns), penalty: par.penalty };
++                }
++                break;
++            }
+             case "inherit": {
+                 const found = p.deck.find(x => lowMonster(x, par.limit) && x.attribute === c.attribute);
+                 move(found, p.deck, p.hand); break;
+             }
+             case "devour": {
+                 p.takeDamage(par.cost);
+                 p.drawCard(); p.drawCard(); break;
+             }
+             case "timeStop": {
+                 p.takeDamage(par.cost);
+@@ -398,30 +423,57 @@ export const themedEffectHandlers = {
+                     [attacker.currentAttack, attacker.currentDefense] = [attacker.currentDefense, attacker.currentAttack];
+                 }
+                 break;
+             }
+             default: return null;
+         }
+         return `${e.skillName}：${describeThemedAction(e)}`;
+     },
+ };
+ 
++/**
++ * 异界回归：只结算"结束回合的一方"的除外区，用剩余结束阶段数而不是回合数，
++ * 避免依赖 turn 计数器的增减时机。怪兽区满时顺延（保留 1 个结束阶段余额）。
++ */
++export function resolveExileReturns(engine, player) {
++    for (const card of [...player.banished]) {
++        const exile = card.themedState?.exile;
++        if (!exile) continue;
++        exile.pendingEndPhases = (Number(exile.pendingEndPhases) || 0) - 1;
++        if (exile.pendingEndPhases > 0) continue;
++        if (player.monsterZone.length >= GAME_CONFIG.MAX_MONSTER_ZONE) { exile.pendingEndPhases = 1; continue; }
++        // resetFieldCard 会清空 themedState（含 exile 标记），先取出标记，回来后再写封印与新攻减。
++        const carried = (card.permanentBuffs || []).filter(buff => buff.source === "exileReturn");
++        engine.resetFieldCard(card);
++        card.position = MONSTER_POSITION.DEFENSE;
++        card.setTurn = engine.state.turn;
++        card.permanentBuffs = [...carried, { type: "attack", value: -exile.penalty, source: "exileReturn" }];
++        card.themedState = { sealedUntil: engine.state.turn + 1 };
++        player._recalcCardStats?.(card);
++        // 同一实例必须从除外区移除后入怪兽区，否则 checkStateIntegrity/PvP 快照会出现跨区域重复。
++        move(card, player.banished, player.monsterZone);
++        engine._emitSpecialSummon?.(player, card);
++    }
++}
++
+ export function resolveThemedTurnEnd(engine, endingPlayer) {
+     // 结束阶段先结算结束方场上的灼烧/剧毒，再做既有的毒印/爆破/时限标记清理。
+     if (endingPlayer) tickAilments(engine, endingPlayer);
+     const turn = engine.state.turn;
+     for (const p of engine.state.players) {
+         for (const c of [...p.monsterZone]) {
+             const s = c.themedState || {};
+             if (s.poisonTurn === turn) { delete s.poisonTurn; const damage = Number(s.poisonDamage) || 600; delete s.poisonDamage; p.takeDamage(damage); engine.emit("onPoisonDamage", { card: c, damage }); }
+             if (s.bombTurn === turn) {
+                 delete s.bombTurn;
+                 const damage = Number(s.bombDamage) || 0; delete s.bombDamage;
+                 if (damage) { p.takeDamage(damage); engine.emit("onPoisonDamage", { card: c, damage }); }
+                 engine.destroyFieldMonster(p, c);
+             }
+             for (const key of ["sealedUntil", "frozenUntil", "paralyzedUntil", "shelterUntil", "piercingUntil", "wardUntil", "infinityUntil"]) {
+                 if (s[key] != null && s[key] <= turn) { delete s[key]; if (key === "wardUntil" || key === "infinityUntil") c.cannotBeTargeted = false; }
+             }
+         }
+     }
++    // 回归放在时限清理之后：刚回归写入的 sealedUntil 不能被同一轮清理误删。
++    if (endingPlayer) resolveExileReturns(engine, endingPlayer);
+ }
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+index e3038ea..17de651 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+@@ -271,10 +271,86 @@ test("麻痹与无下限到期后清理状态", () => {
+     themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "paralyze", params: { count: 1 }, skillName: "t" }, gameState: s });
+     themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: guard, effect: { action: "infinity", params: { reduce: 1000 }, skillName: "t" }, gameState: s });
+     // 让"对方"（乙）结束自己的回合触发到期清理；不经过控制者的 startTurn，
+     // 避免 resetTurnState 提前清掉 cannotBeTargeted 而让断言失去鉴别力。
+     s.turn = 4; s.currentPlayerIndex = 1;
+     e.endTurn();
+     assert.equal(target.themedState.paralyzedUntil, undefined);
+     assert.equal(guard.themedState.infinityUntil, undefined);
+     assert.equal(guard.cannotBeTargeted, false);
+ });
++
++test("敌方异界流放：N 个结束阶段后守备回归、攻降、封效", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "exile", params: { turns: 1, penalty: 500 }, skillName: "t" }, gameState: s });
++    assert.equal(o.monsterZone.length, 0);
++    assert.ok(o.banished.includes(target));
++    s.currentPlayerIndex = 1; e.endTurn();               // 乙的结束阶段 → 回归
++    assert.ok(o.monsterZone.includes(target));
++    assert.equal(target.position, "defense");
++    assert.equal(target.currentAttack, Math.max(0, 1800 - 500));
++});
++
++test("自身异界归来（死亡回归式）与回收跳过异界卡", () => {
++    const { s, p, o, e } = board();
++    const subaru = createCardInstance({ id: "subaru", name: "昴", type: "monster", level: 4, attack: 1200, defense: 1000, effects: [] });
++    p.monsterZone.push(subaru);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: subaru, effect: { action: "exile", params: { self: true, turns: 1, penalty: 500 }, skillName: "t" }, gameState: s });
++    assert.ok(p.banished.includes(subaru));
++    assert.equal(p.lp, 7200);
++    // 回收类效果不会把异界卡拿回
++    const recalled = themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "recall", params: { count: 1, draw: 0 } }, gameState: s });
++    assert.equal(p.hand.length, 0);
++    e.endTurn();                                          // 甲的结束阶段 → 回归
++    assert.ok(p.monsterZone.includes(subaru));
++});
++
++test("敌方异界回归后离开除外区并封印到下一回合", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "exile", params: { turns: 1, penalty: 500 }, skillName: "t" }, gameState: s });
++    assert.ok(o.banished.includes(target));
++    s.currentPlayerIndex = 1; e.endTurn();
++    assert.ok(o.monsterZone.includes(target));
++    assert.ok(!o.banished.includes(target));                    // 回归必须离开除外区，防止跨区域重复
++    assert.equal(target.themedState.sealedUntil, s.turn + 1);   // 封印覆盖下一个回合
++});
++
++test("自身异界在 LP≤800 时不发动", () => {
++    const { s, p, o, e } = board();
++    const subaru = createCardInstance({ id: "subaru_poor", name: "昴", type: "monster", level: 4, attack: 1200, defense: 1000, effects: [] });
++    p.graveyard.push(subaru); p.lp = 800;
++    const result = themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: subaru, effect: { type: "themedAction", action: "exile", params: { self: true, turns: 1, penalty: 500 }, skillName: "t" }, gameState: s });
++    assert.equal(result, null);
++    assert.ok(p.graveyard.includes(subaru));
++    assert.ok(!p.banished.includes(subaru));
++    assert.equal(p.lp, 800);
++});
++
++test("异界回归遇满场顺延到下一个结束阶段", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "exile", params: { turns: 1, penalty: 500 }, skillName: "t" }, gameState: s });
++    while (o.monsterZone.length < 5) o.monsterZone.push(enemyMonster(100 + o.monsterZone.length));
++    s.currentPlayerIndex = 1; e.endTurn();
++    assert.ok(o.banished.includes(target));
++    assert.ok(!o.monsterZone.includes(target));
++    assert.equal(target.themedState.exile.pendingEndPhases, 1); // 无空位：保留 1 个结束阶段余额
++    o.monsterZone.splice(0, 1);                                 // 腾出空位
++    s.currentPlayerIndex = 1; e.endTurn();
++    assert.ok(o.monsterZone.includes(target));
++    assert.ok(!o.banished.includes(target));
++});
++
++test("异界二次回归累计攻减", () => {
++    const { s, p, o, e } = board();
++    const target = enemyMonster(); o.monsterZone.push(target);
++    const exile = () => themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "exile", params: { turns: 1, penalty: 500 }, skillName: "t" }, gameState: s });
++    exile();
++    s.currentPlayerIndex = 1; e.endTurn();
++    assert.equal(target.currentAttack, 1800 - 500);
++    exile();
++    s.currentPlayerIndex = 1; e.endTurn();
++    assert.equal(target.currentAttack, 1800 - 1000);
++    assert.ok(!o.banished.includes(target));
++});

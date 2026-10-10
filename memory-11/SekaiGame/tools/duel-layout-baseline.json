@@ -1,0 +1,414 @@
+{
+  "geometry": [
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".battlefield",
+      "declarations": {
+        "position": "absolute",
+        "z-index": "4",
+        "left": "50%",
+        "top": "62px",
+        "bottom": "195px",
+        "width": "min(1200px,90vw)",
+        "transform": "translateX(-50%)",
+        "display": "grid",
+        "grid-template-rows": "1fr auto 1fr",
+        "gap": "12px",
+        "align-items": "center"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 1280px)",
+      "selector": ".battlefield",
+      "declarations": {
+        "width": "min(900px,75vw)",
+        "bottom": "195px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".battlefield",
+      "declarations": {
+        "top": "62px",
+        "bottom": "195px",
+        "width": "min(1200px,90vw)",
+        "gap": "12px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 1366px)",
+      "selector": ".battlefield",
+      "declarations": {
+        "width": "min(1000px,75vw)",
+        "bottom": "210px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".battlefield",
+      "declarations": {
+        "perspective": "900px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 720px)",
+      "selector": ".battlefield",
+      "declarations": {
+        "top": "112px",
+        "bottom": "245px",
+        "width": "calc(100% - 68px)",
+        "max-width": "none",
+        "gap": "3px",
+        "grid-template-rows": "minmax(0,1fr) auto minmax(0,1fr)"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (min-width:721px) and (max-width:900px) and (orientation:landscape)",
+      "selector": ".battlefield",
+      "declarations": {
+        "top": "86px",
+        "bottom": "124px",
+        "width": "calc(100% - 80px)",
+        "max-width": "none",
+        "gap": "3px",
+        "grid-template-rows": "minmax(0,1fr) auto minmax(0,1fr)"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".hand",
+      "declarations": {
+        "position": "absolute",
+        "z-index": "9",
+        "left": "50%",
+        "bottom": "-48px",
+        "width": "min(1000px,78vw)",
+        "height": "225px",
+        "transform": "translateX(-50%)",
+        "display": "flex",
+        "justify-content": "center",
+        "align-items": "flex-start",
+        "padding-top": "18px",
+        "pointer-events": "none"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".hand",
+      "declarations": {
+        "position": "absolute",
+        "z-index": "3",
+        "left": "50%",
+        "bottom": "14px",
+        "width": "100%",
+        "height": "218px",
+        "transform": "translateX(-50%)",
+        "display": "flex",
+        "justify-content": "center",
+        "align-items": "flex-start",
+        "padding": "8px 22px 0",
+        "pointer-events": "auto"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 1366px)",
+      "selector": ".hand",
+      "declarations": {
+        "height": "202px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".hand",
+      "declarations": {
+        "perspective": "800px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 720px)",
+      "selector": ".hand",
+      "declarations": {
+        "left": "0",
+        "bottom": "20px",
+        "width": "100%",
+        "height": "136px",
+        "transform": "none",
+        "justify-content": "flex-start",
+        "align-items": "flex-start",
+        "gap": "7px",
+        "padding": "24px 12px 0"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (min-width:721px) and (max-width:900px) and (orientation:landscape)",
+      "selector": ".hand",
+      "declarations": {
+        "left": "0",
+        "bottom": "8px",
+        "width": "100%",
+        "height": "91px",
+        "transform": "none",
+        "justify-content": "flex-start",
+        "gap": "5px",
+        "padding": "16px 12px 0"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".player-area",
+      "declarations": {
+        "bottom": "24px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".player-area",
+      "declarations": {
+        "bottom": "18px",
+        "z-index": "32"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 720px)",
+      "selector": ".player-area",
+      "declarations": {
+        "left": "8px",
+        "right": "8px",
+        "bottom": "168px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (min-width:721px) and (max-width:900px) and (orientation:landscape)",
+      "selector": ".player-area",
+      "declarations": {
+        "left": "8px",
+        "bottom": "114px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".log-panel",
+      "declarations": {
+        "position": "fixed",
+        "z-index": "300",
+        "right": "18px",
+        "top": "72px",
+        "width": "320px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 1280px)",
+      "selector": ".log-panel",
+      "declarations": {
+        "width": "280px"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 720px)",
+      "selector": ".log-panel",
+      "declarations": {
+        "left": "8px",
+        "right": "8px",
+        "top": "58px",
+        "width": "auto"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (min-width:721px) and (max-width:900px) and (orientation:landscape)",
+      "selector": ".log-panel",
+      "declarations": {
+        "left": "8px",
+        "right": "8px",
+        "top": "58px",
+        "width": "auto"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": null,
+      "selector": ".battle-screen",
+      "declarations": {
+        "display": "none",
+        "position": "fixed",
+        "z-index": "50"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (max-width: 720px)",
+      "selector": ".battle-screen",
+      "declarations": {
+        "width": "100vw",
+        "height": "100dvh"
+      }
+    },
+    {
+      "file": "style.css",
+      "at": "@media (min-width:721px) and (max-width:900px) and (orientation:landscape)",
+      "selector": ".battle-screen",
+      "declarations": {
+        "width": "100vw",
+        "height": "100dvh"
+      }
+    },
+    {
+      "file": "anime-theme.css",
+      "at": "@media (min-width:901px)",
+      "selector": ".battle-screen .monster-row",
+      "declarations": {
+        "gap": "clamp(16px,1.7vw,28px)"
+      }
+    },
+    {
+      "file": "anime-theme.css",
+      "at": "@media (min-width:901px) and (min-height:601px)",
+      "selector": ".battle-screen .monster-row",
+      "declarations": {
+        "gap": "clamp(15px,1.5vw,26px)"
+      }
+    },
+    {
+      "file": "anime-theme.css",
+      "at": "@media (min-width:901px)",
+      "selector": ".battle-screen .spell-trap-row",
+      "declarations": {
+        "gap": "clamp(12px,1.35vw,22px)"
+      }
+    },
+    {
+      "file": "anime-theme.css",
+      "at": "@media (min-width:901px) and (min-height:601px)",
+      "selector": ".battle-screen .spell-trap-row",
+      "declarations": {
+        "gap": "clamp(11px,1.15vw,20px)"
+      }
+    },
+    {
+      "file": "anime-theme.css",
+      "at": "@media (min-width:901px)",
+      "selector": ".battle-screen .field-slot",
+      "declarations": {
+        "width": "clamp(120px,8.5vw,146px)",
+        "height": "clamp(160px,11.25vw,194px)"
+      }
+    },
+    {
+      "file": "anime-theme.css",
+      "at": "@media (min-width:901px) and (min-height:601px)",
+      "selector": ".battle-screen .field-slot",
+      "declarations": {
+        "width": "clamp(92px,5.5vw,112px)",
+        "height": "clamp(124px,7.35vw,150px)"
+      }
+    },
+    {
+      "file": "anime-theme.css",
+      "at": "@media (min-width:901px)",
+      "selector": ".battle-screen .spell-trap-row .field-slot",
+      "declarations": {
+        "width": "clamp(108px,7.65vw,132px)",
+        "height": "clamp(144px,10.2vw,176px)"
+      }
+    },
+    {
+      "file": "anime-theme.css",
+      "at": "@media (min-width:901px) and (min-height:601px)",
+      "selector": ".battle-screen .spell-trap-row .field-slot",
+      "declarations": {
+        "width": "clamp(84px,4.9vw,100px)",
+        "height": "clamp(112px,6.55vw,134px)"
+      }
+    },
+    {
+      "file": "controller-2d.css",
+      "at": null,
+      "selector": ".duel-controller-2d",
+      "declarations": {
+        "position": "absolute",
+        "z-index": "3",
+        "left": "clamp(-92px,-4.5vw,-46px)",
+        "bottom": "92px",
+        "width": "clamp(250px,22vw,360px)",
+        "height": "min(72vh,680px)",
+        "pointer-events": "none",
+        "perspective": "900px"
+      }
+    },
+    {
+      "file": "controller-2d.css",
+      "at": "@media (max-height:800px) and (min-width:901px)",
+      "selector": ".duel-controller-2d",
+      "declarations": {
+        "bottom": "84px",
+        "height": "min(66vh,560px)",
+        "width": "clamp(215px,19vw,300px)"
+      }
+    },
+    {
+      "file": "controller-2d.css",
+      "at": "@media (max-width:1180px)",
+      "selector": ".duel-controller-2d",
+      "declarations": {
+        "width": "230px",
+        "left": "-76px"
+      }
+    },
+    {
+      "file": "controller-2d.css",
+      "at": "@media (max-width:900px)",
+      "selector": ".duel-controller-2d",
+      "declarations": {
+        "display": "none"
+      }
+    },
+    {
+      "file": "controller-2d.css",
+      "at": null,
+      "selector": ".duel-controller-name",
+      "declarations": {
+        "position": "absolute",
+        "z-index": "3",
+        "left": "clamp(76px,7vw,116px)",
+        "bottom": "18px",
+        "display": "grid",
+        "gap": "2px",
+        "padding": "7px 13px 7px 20px"
+      }
+    }
+  ],
+  "sheets": {
+    "style.css": "81af78643da10b65",
+    "game-shell.css": "4478664d17518b68"
+  },
+  "atlas": {
+    "count": 297,
+    "bytes": 680958093
+  },
+  "stylesheets": [
+    "css/style.css",
+    "css/game-shell.css",
+    "css/anime-theme.css",
+    "css/controller-2d.css"
+  ]
+}

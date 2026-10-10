@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 自适应图标的底色，与 v2.3.0 已发布版本保持一致（aapt2 dump resources: #ffd7cebe）。 -->
+    <color name="ic_launcher_background">#ffd7cebe</color>
+</resources>

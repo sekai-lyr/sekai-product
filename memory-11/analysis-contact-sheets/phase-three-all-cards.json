@@ -1,0 +1,26 @@
+[
+  {
+    "width": 390,
+    "reduced": false,
+    "scenes": 1240,
+    "peakNodes": 27
+  },
+  {
+    "width": 390,
+    "reduced": true,
+    "scenes": 1240,
+    "peakNodes": 3
+  },
+  {
+    "width": 1440,
+    "reduced": false,
+    "scenes": 1240,
+    "peakNodes": 31
+  },
+  {
+    "width": 1440,
+    "reduced": true,
+    "scenes": 1240,
+    "peakNodes": 3
+  }
+]

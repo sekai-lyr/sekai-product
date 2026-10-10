@@ -1,0 +1,207 @@
+ .../themed-effects.js"                             | 29 +++++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
+ .../status-effects.test.js"                        | 46 ++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+index d44b7ca..c7cdddc 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+@@ -28,20 +28,21 @@ export const ACTION_DEFAULTS = {
+     sleep: { amount: 0 },
+     freeze: { amount: 0 },
+     poison: { damage: 600 },
+     bomb: { damage: 0 },
+     ignite: { stacks: 2, damage: 500 },
+     venom: { stacks: 2, damage: 450 },
+     bleed: { stacks: 2, damage: 400 },
+     curse: { stacks: 1, damage: 700 },
+     detonate: { stacks: 2, damage: 600 },
+     paralyze: { count: 1, amount: 0, gamble: false },
++    gamble: { draw: 2, heal: 800 },
+     infinity: { reduce: 1000 },
+     charge: { amount: 200 },
+     burst: { cost: 700 },
+     twin: { cost: 600 },
+     pierce: { amount: 0 },
+     ward: { amount: 0 },
+     ambush: { count: 1 },
+     token: { attack: 0, defense: 1000 },
+     exchange: { limit: 4, draw: 0 },
+     chorus: { count: 2, draw: 1, heal: 0 },
+@@ -79,20 +80,21 @@ export const ACTION_TEMPLATES = {
+     ignite: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层灼烧；其控制者每个结束阶段受到${p.damage}×层数伤害，随后层数-1（上限3层）`,
+     venom: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层剧毒（上限3层）；剧毒怪兽的控制者每个结束阶段受到${p.damage}×层数伤害，且其所有回复减半；剧毒不会自然消失`,
+     bleed: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层出血；出血怪兽每次参与战斗后，其控制者受到${p.damage}×层数伤害，随后层数-1`,
+     curse: p => `给对方攻击力最高的可取对象表侧怪兽施加诅咒：其效果无效、不能作为上级召唤的祭品；被破坏时其控制者受到${p.damage}×层数伤害`,
+     detonate: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层灼烧，然后立即引爆其身上全部灼烧层数：每层使其控制者受到${p.damage}点伤害；若其带有剧毒，同时引爆剧毒：每层给对方全体怪兽造成300点伤害`,
+     paralyze: p => p.gamble
+         ? `抛硬币：正面则麻痹对方攻击力最高的可取对象表侧怪兽（直到下个回合结束不能攻击或改变表示形式）；反面则其攻击力下降${p.amount}直到回合结束`
+         : p.count === "all"
+             ? "对方全部表侧怪兽麻痹：直到下个回合结束不能攻击或改变表示形式"
+             : "将对方攻击力最高的可取对象表侧怪兽麻痹：直到下个回合结束不能攻击或改变表示形式",
++    gamble: p => `抛硬币：正面则抽${p.draw}张卡；反面则回复${p.heal}LP`,
+     infinity: p => `直到下个回合结束，自身不会成为对方效果的对象，且受到的战斗伤害减少${p.reduce}`,
+     charge: p => `自身获得1个蓄力指示物（最多3个），攻击力上升${p.amount}；移除指示物时失去对应的提升`,
+     burst: p => `支付${p.cost}LP；将对方攻击力最高的可取对象表侧怪兽除外`,
+     twin: p => `支付${p.cost}LP；自身本回合可以攻击2次`,
+     pierce: p => `自身本回合获得贯穿守备的战斗伤害${p.amount ? `，其攻击力上升${p.amount}` : ""}`,
+     ward: p => `自身直到下个回合结束不能成为效果对象${p.amount ? `，其守备力上升${p.amount}` : ""}`,
+     ambush: p => `将自己墓地最后${p.count}张陷阱盖放到后场，本回合不能发动`,
+     token: p => `特殊召唤1只${p.attack}攻${p.defense}守、1星的守备衍生物，不能作为上级召唤的祭品`,
+     exchange: p => `将自己攻击力最低的表侧怪兽返回手牌，再将手牌第一只${p.limit}星以下怪兽特殊召唤为守备表示${drawClause(p)}`,
+     chorus: p => `自己场上有至少${p.count}种属性的表侧怪兽时，抽${p.draw}张卡${healClause(p)}`,
+@@ -210,20 +212,21 @@ export function canResolveThemedEffect(ctx) {
+         case "recycle": return p.graveyard.filter(x => x !== c).length >= par.count;
+         case "deploy": return space && p.hand.some(x => lowMonster(x, par.limit));
+         case "revive": return space && p.graveyard.some(x => x !== c && lowMonster(x, par.limit));
+         case "recall": return p.banished.length >= par.count;
+         case "shelter": return !!ally(ctx);
+         case "seal": case "sleep": case "freeze": case "poison": case "bomb": return !!enemy(ctx);
+         case "ignite": case "venom": return !!enemy(ctx);
+         case "bleed": case "curse": return !!enemy(ctx);
+         case "detonate": return !!enemy(ctx);
+         case "paralyze": return !!enemy(ctx);
++        case "gamble": return true;
+         case "infinity": return p.monsterZone.includes(c);
+         case "burst": return p.lp > par.cost && !!enemy(ctx);
+         case "charge": return p.monsterZone.includes(c) && (c.themedState?.charges || 0) < 3;
+         case "twin": return p.monsterZone.includes(c) && p.lp > par.cost;
+         case "pierce": case "ward": return p.monsterZone.includes(c);
+         case "ambush": return p.spellTrapZone.length < GAME_CONFIG.MAX_SPELL_TRAP_ZONE && !!last(p.graveyard, x => x.type === "trap" && x !== c);
+         case "token": return space;
+         case "exchange": return !p.cannotSpecialSummonThisTurn && !!ally(ctx) && p.hand.some(x => lowMonster(x, par.limit));
+         case "chorus": return new Set(p.monsterZone.filter(x => x.faceUp).map(x => x.attribute)).size >= par.count && p.deck.length >= Math.max(1, par.draw || 0);
+         case "sanctuary": return p.graveyard.some(x => x !== c);
+@@ -247,20 +250,22 @@ function state(card) { return card.themedState ||= {}; }
+ // 衍生物实例 id 必须全局唯一：之前用 (回合, 事件数, 怪兽区数量) 组合，
+ // 而"吞食"/"撤回"等效果移除衍生物时不会产生事件，同一回合内可以再次满足
+ // 完全相同的组合，从而生成两个 instanceId 相同的衍生物（跨区域重复）。
+ let tokenSequence = 0;
+ export const themedEffectHandlers = {
+     themedAction(ctx) {
+         if (!canResolveThemedEffect(ctx)) return null;
+         const { player: p, opponent: o, card: c, effect: e, gameState: game } = ctx;
+         const par = themedActionParams(e);
+         const target = enemy(ctx);
++        // 硬币结果只在同一结算的连续硬币动作之间共享：其他动作开始结算时清掉，避免复用旧硬币。
++        if (e.action !== "gamble" && !(e.action === "paralyze" && par.gamble)) game.lastCoinResult = null;
+         switch (e.action) {
+             case "scout": case "study": {
+                 const top = p.deck.splice(0, Math.max(1, par.count));
+                 const chosen = top.find(x => x.type === (e.action === "scout" ? "monster" : "spell"));
+                 if (chosen) p.hand.push(top.splice(top.indexOf(chosen), 1)[0]);
+                 p.deck.push(...top);
+                 return `${e.skillName}：${chosen ? `${chosen.name}加入手牌` : "没有符合类型的卡"}，其余放回卡组底`;
+             }
+             case "prepare": p.graveyard.push(...p.deck.splice(0, Math.max(1, par.count))); break;
+             case "recover": {
+@@ -345,25 +350,47 @@ export const themedEffectHandlers = {
+                 // 攻击次数上限翻倍后必须同步刷新 canAttack，否则"已经攻击过一次"的
+                 // 怪兽第二次攻击仍然会被 attack() 拒绝，等于白付 600LP。
+                 c.canAttack = (Number(c.attacksMadeThisTurn) || 0) < 2
+                     && !c.cannotAttack
+                     && c.position === MONSTER_POSITION.ATTACK
+                     && !(c.themedState?.frozenUntil >= game.turn);
+                 break;
+             case "pierce": state(c).piercingUntil = game.turn; applyTempStat(p, c, "attack", par.amount); break;
+             case "ward": state(c).wardUntil = game.turn + 1; c.cannotBeTargeted = true; applyTempStat(p, c, "defense", par.amount); break;
+             case "paralyze": {
+-                // 赌运（gamble）路径在任务 8 接入共享硬币结果，本任务只实现非赌运分支。
+                 const targets = par.count === "all" ? o.monsterZone.filter(x => x.faceUp) : [target].filter(Boolean);
++                if (par.gamble) {
++                    // 赌运：与同一结算内的 gamble 共用硬币结果（game.lastCoinResult），
++                    // 已有结果时不二次随机；读取后消费，避免后续结算复用同一枚旧硬币。
++                    // 正面=麻痹、反面=降攻，与卡面两种走向一一对应。
++                    const result = game.lastCoinResult || (ctx.engine._random() < 0.5 ? "heads" : "tails");
++                    game.lastCoinResult = null;
++                    ctx.engine.emit("onCoinFlip", { card: c, result });
++                    if (result === "heads") {
++                        for (const x of targets) { state(x).paralyzedUntil = game.turn + 1; x.canAttack = false; }
++                    } else {
++                        for (const x of targets) applyTempStat(o, x, "attack", -par.amount);
++                    }
++                    break;
++                }
+                 for (const x of targets) { state(x).paralyzedUntil = game.turn + 1; x.canAttack = false; }
+                 break;
+             }
++            case "gamble": {
++                // 先抛硬币：结果写入共享字段并广播 onCoinFlip，供 paralyze 赌运分支与演出层共用。
++                const result = ctx.engine._random() < 0.5 ? "heads" : "tails";
++                game.lastCoinResult = result;
++                ctx.engine.emit("onCoinFlip", { card: c, result });
++                if (result === "heads") { for (let i = 0; i < Math.max(1, par.draw); i++) p.drawCard(); }
++                else p.heal(par.heal);
++                break;
++            }
+             case "infinity":
+                 state(c).infinityUntil = game.turn + 1;
+                 state(c).infinityReduce = par.reduce;
+                 c.cannotBeTargeted = true;
+                 break;
+             case "ambush": {
+                 for (const trap of lastN(p.graveyard, par.count, x => x.type === "trap" && x !== c)) {
+                     if (p.spellTrapZone.length >= GAME_CONFIG.MAX_SPELL_TRAP_ZONE) break;
+                     ctx.engine.resetFieldCard(trap);
+                     trap.faceDown = true; trap.faceUp = false; trap.canActivate = false; trap.setTurn = game.turn;
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+index 1a3cb95..57287b1 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+@@ -585,10 +585,56 @@ test("无量空处只封锁怪兽效果，不封锁对方魔法发动", () => {
+     const enemy = enemyMonster();
+     enemy.effects = [{ type: "themedAction", action: "charge", trigger: "manual", oncePerTurn: true, hardOncePerTurn: true, skillName: "c" }];
+     o.monsterZone.push(enemy);
+     assert.equal(e.triggerAllEffects(o, enemy, "manual"), null);   // 怪兽效果被锁
+     const spell = createCardInstance({ id: "sp_token", name: "替身魔法", type: "spell", effects: [{ type: "themedAction", action: "token", trigger: "manual", params: { attack: 0, defense: 1000 }, skillName: "s" }] });
+     o.hand.push(spell);
+     const result = e.activateSpell(o, 0);
+     assert.equal(result.success, true);                            // 魔法照常发动
+     assert.equal(o.monsterZone.length, 2);                         // 原有的敌怪 + 衍生物
+ });
++
++test("赌运使用共享随机源且结果写入事件", () => {
++    const { s, p, o, e } = board();
++    const events = [];
++    e.eventBus.on("onCoinFlip", data => events.push(data.result));
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "gamble", params: { draw: 2, heal: 800 }, skillName: "t" }, gameState: s });
++    assert.equal(events.length, 1);
++    assert.ok(["heads", "tails"].includes(events[0]));
++    // 简报固定引擎两名玩家的卡组为空，drawCard 无牌可抽时不入手牌，
++    // "RNG<0.5 → 正面抽卡"无法被证明；给甲补 2 张卡组以保留该断言的鉴别力（RNG 仍注入 0.1）。
++    const fixed = new GameEngine((() => {
++        const st = new GameState();
++        st.players = [new Player("a", []), new Player("b", [])];
++        st.players[0].deck = [fixture(), fixture()];
++        st.turn = 3;
++        return st;
++    })(), () => 0.1);
++    themedEffectHandlers.themedAction({ engine: fixed, player: fixed.state.players[0], opponent: fixed.state.players[1], card: p, effect: { action: "gamble", params: { draw: 2, heal: 800 }, skillName: "t" }, gameState: fixed.state });
++    assert.equal(fixed.state.players[0].hand.length, 2); // RNG<0.5 → 正面抽卡
++    assert.equal(fixed.state.lastCoinResult, "heads");   // 结果写入共享字段，供 paralyze 赌运分支复用
++});
++
++test("麻痹赌运两走向与卡面一致且复用同一硬币结果", () => {
++    const { s, p, o } = board();
++    const target = enemyMonster(1800); o.monsterZone.push(target);
++    let rolls = 0;
++    const e = new GameEngine(s, () => { rolls++; return 0.9; });
++    const coins = [];
++    e.eventBus.on("onCoinFlip", data => coins.push(data.result));
++    s.lastCoinResult = "heads";   // 同一结算内 gamble 已抛出的硬币
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "paralyze", params: { gamble: true, amount: 600 }, skillName: "t" }, gameState: s });
++    assert.deepEqual(coins, ["heads"]);          // 事件结果 = 复用结果
++    assert.equal(rolls, 0);                      // 复用不消耗随机源
++    assert.equal(s.lastCoinResult, null);        // 读取后消费，避免跨结算复用旧硬币
++    assert.equal(target.currentAttack, 1800);    // 正面：不降攻
++    assert.equal(target.canAttack, false);       // 正面：麻痹
++    assert.equal(target.themedState.paralyzedUntil, s.turn + 1);
++    const target2 = enemyMonster(2000); target2.canAttack = true; o.monsterZone.push(target2);
++    s.lastCoinResult = "tails";
++    themedEffectHandlers.themedAction({ engine: e, player: p, opponent: o, card: p, effect: { action: "paralyze", params: { gamble: true, amount: 600 }, skillName: "t" }, gameState: s });
++    assert.deepEqual(coins, ["heads", "tails"]);
++    assert.equal(rolls, 0);
++    assert.equal(target2.currentAttack, 1400);   // 反面：降攻 600
++    assert.equal(target2.canAttack, true);       // 反面：不麻痹
++    assert.equal(target2.themedState?.paralyzedUntil, undefined);
++});

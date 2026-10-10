@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SekaiGame/src/main/resources/static
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 语法检查（全部前端模块）
+        run: |
+          fail=0
+          for f in js/*.js scripts/*.mjs test/*.js; do
+            node --check "$f" || { echo "语法错误: $f"; fail=1; }
+          done
+          exit $fail
+
+      - name: 规则与流程测试
+        run: node --test test/*.test.js
+
+      - name: 随机不变量压测（120 局）
+        run: node scripts/fuzz-invariants.mjs 120
+
+      - name: AI 自战冒烟（20 局）
+        run: node scripts/self-play.mjs
+
+      - name: 平衡统计冒烟
+        run: node scripts/self-play-balance.mjs 10

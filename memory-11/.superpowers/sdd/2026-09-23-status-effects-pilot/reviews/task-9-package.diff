@@ -1,0 +1,405 @@
+ .../authored-card-rules.js"                        | 86 +++++++++++++++++++++-
+ .../signature-tuning.js"                           | 60 +++++++++++++++
+ .../themed-effects.js"                             |  4 +-
+ 3 files changed, 145 insertions(+), 5 deletions(-)
+ .../rarity-rules.test.js"                                     |  5 ++++-
+ .../themed-gameplay.test.js"                                  | 11 +++++++----
+ 2 files changed, 11 insertions(+), 5 deletions(-)
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/authored-card-rules.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/authored-card-rules.js"
+index 8b17b26..9283d4d 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/authored-card-rules.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/authored-card-rules.js"
+@@ -406,72 +406,152 @@ Object.assign(RECIPES, {
+     // 后场对策只放在 SR（rank 2）上：SSR 以上的魔法发动时要付 600/1000 LP，
+     // 用它去 1 换 1 拆一张盖牌是亏的——把拆除放在高稀有度卡上等于让这张卡变成废卡。
+     picture_ex_003: "M:disarm M:recover",
+     picture_ex_006: "M:disarm M:study",
+     picture_ex_010: "M:disarm M:purify",
+     picture_ex_108: "M:disarm M:deploy",
+     picture_ex_113: "M:disarm M:shelter",
+     picture_ex_115: "M:disarm M:recycle",
+ });
+ 
++// 试点改造前的基础配方快照。试点卡换成新动作后不再占用旧的 trigger|action 分组，
++// 若不补偿，同组后面既有卡的候选序号会整体前移、卡面数值被动变化；
++// 计算既有卡参数时用这份快照保留试点卡的“旧占位”，保证其余 278 张卡零改动。
++const BASE_RECIPES = { ...RECIPES };
++
++// 30 张试点卡（状态异常/领域/赌运）改为单动作配方，触发沿用各自角色设定；
++// 具体数值由 signature-tuning.js 的候选池按目录顺序发放（见 §7 变更表）。
++Object.assign(RECIPES, {
++    picture_ex_030: "S:ignite", picture_ex_037: "M:venom", picture_ex_020: "M:bleed",
++    picture_ex_048: "M:paralyze", picture_ex_027: "S:detonate", picture_ex_056: "M:domain",
++    picture_ex_011: "M:domain", picture_ex_012: "M:detonate", picture_ex_013: "M:paralyze",
++    picture_ex_014: "M:bleed", picture_ex_018: "M:exile",
++    source_monster_015: "M:domain", source_monster_010: "S:infinity", source_monster_012: "M:bleed",
++    source_monster_014: "M:ignite", source_monster_013: "M:detonate", source_monster_008: "M:curse",
++    picture_ex_072: "D:exile",
++    picture_ssr7_032: "S:curse", picture_ssr7_036: "S:gamble", picture_ssr7_043: "S:paralyze",
++    picture_ssr7_026: "S:ignite", picture_ssr7_049: "M:bleed", picture_ex_107: "M:domain",
++    picture_ssr7_007: "M:ignite", picture_ssr7_016: "M:detonate", picture_ssr7_003: "M:exile",
++    picture_ssr7_013: "M:bleed", picture_ssr7_014: "M:curse", picture_ssr7_015: "M:bleed",
++});
++
+ const TRIGGERS = { S: "onSummon", M: "manual", D: "onDestroyed", E: "onTurnEnd" };
+ const TIMING = { onSummon: "通常召唤成功时", manual: "主要阶段", onDestroyed: "被破坏送入墓地时", onTurnEnd: "自己的结束阶段", onAttacked: "对方攻击宣言时" };
+ const LABELS = {
+     scout: "寻找伙伴", study: "构思", prepare: "积累记忆", recover: "重逢", recycle: "往复", deploy: "登台", revive: "再演", recall: "越界归来",
+     shelter: "庇护", seal: "封印", sleep: "幻梦", freeze: "静止", poison: "毒蝶", bomb: "引爆", charge: "蓄势", burst: "解放",
+     twin: "连击", pierce: "贯穿", ward: "界限", ambush: "伏线", token: "替身", exchange: "交替", chorus: "合奏", sanctuary: "献祭祈愿",
+     purify: "净化", intercept: "阻断", mirror: "映照", rescue: "救援", reversal: "反转", retreat: "撤离", reprisal: "追偿", returnSelf: "死亡回归", inherit: "传承", devour: "吞噬", timeStop: "时间停止",
+     disarm: "拆解",
+ };
+ const CHARACTER_SKILLS = {
+     picture_ex_017: { token: "恐龙化", devour: "群猎本能", inherit: "兽群传承" },
+     picture_ex_011: { charge: "白金蓄势", timeStop: "白金之星·世界", twin: "欧拉连打" },
+     picture_ex_012: { ambush: "无声布置", bomb: "第一炸弹", prepare: "败者伏线" },
+     picture_ex_072: { returnSelf: "死亡回归", study: "记忆推演" },
+     source_monster_010: { ward: "无下限", seal: "术式干涉", inherit: "术式传承" },
+     source_monster_013: { charge: "苍与赫", burst: "虚式茈", study: "六眼推演" },
+ };
++// 30 张试点卡的技能名固定在这里，动作变化时不会漂移到通用模板名。
++Object.assign(CHARACTER_SKILLS, {
++    picture_ex_030: { ignite: "炎之呼吸·不知火" },
++    picture_ex_037: { venom: "虫之呼吸·毒刃·紫藤毒" },
++    picture_ex_020: { bleed: "蛇之呼吸·委蛇斩" },
++    picture_ex_048: { paralyze: "霹雳一闪·火雷神" },
++    picture_ex_027: { detonate: "血鬼术·爆血" },
++    picture_ex_056: { domain: "破坏杀·罗针" },
++    picture_ex_011: { domain: "白金之星·世界" },
++    picture_ex_012: { detonate: "第一炸弹" },
++    picture_ex_013: { paralyze: "世界·时停突袭·THE WORLD" },
++    picture_ex_014: { bleed: "性感手枪·弹道折射" },
++    picture_ex_018: { exile: "D4C·爱之列车" },
++    source_monster_015: { domain: "领域展开·无量空处" },
++    source_monster_010: { infinity: "无下限" },
++    source_monster_012: { bleed: "伏魔御厨子·解" },
++    source_monster_014: { ignite: "开·炎矢" },
++    source_monster_013: { detonate: "虚式茈" },
++    source_monster_008: { curse: "解·空间斩·狱纹" },
++    picture_ex_072: { exile: "死亡回归" },
++    picture_ssr7_032: { curse: "沉默琴弦·沉默枷锁" },
++    picture_ssr7_036: { gamble: "自由即兴·即兴曲" },
++    picture_ssr7_043: { paralyze: "人偶键盘·雪夜独奏" },
++    picture_ssr7_026: { ignite: "粉色和弦·点燃全场" },
++    picture_ssr7_049: { bleed: "暗潮低音" },
++    picture_ex_107: { domain: "未来音浪·苍穹音浪" },
++    picture_ssr7_007: { ignite: "莱万汀·熔核烈歌" },
++    picture_ssr7_016: { detonate: "D12·赤痕爆破" },
++    picture_ssr7_003: { exile: "深海潮歌·深海夜宴" },
++    picture_ssr7_013: { bleed: "过载模式·红莲铳火" },
++    picture_ssr7_014: { curse: "奇美拉·星屑天幕" },
++    picture_ssr7_015: { bleed: "沸腾爆裂·炎锯镇岳" },
++});
+ export function hasAuthoredRules(id) { return Object.hasOwn(RECIPES, id); }
+ 
+ const SIGNATURE_PARAMS = new Map();
+ 
++// 10 个试点动作（状态异常/领域/赌运）每张卡只有一项招牌技，
++// 候选参数按"该动作全部卡在目录中的出现顺序"发放，保证 §7 表的目标数值逐张落位。
++// 其余动作仍按 trigger|action 分组，278 张既有自制卡已领取的参数保持不变。
++const PILOT_ACTIONS = new Set(["ignite", "venom", "bleed", "curse", "paralyze", "detonate", "exile", "infinity", "domain", "gamble"]);
++
+ /** 同一动作的每张卡按顺序领取不同的参数，保证全卡池的卡面文字与结算数值各不相同。 */
+ export function prepareSignatureParams(cards) {
+     SIGNATURE_PARAMS.clear();
++    // 第一步：按改造前配方给全部卡发旧参数（含试点卡占位），既有 278 张卡因此保持原序号。
+     const groups = new Map();
+     for (const card of cards) {
+         if (!card || card.series === "starter_ygo" || !hasAuthoredRules(card.id)) continue;
+-        const { action, trigger } = signatureTarget(card);
++        const { action, trigger } = signatureTargetIn(BASE_RECIPES, card);
+         if (!action) continue;
+         const key = `${trigger}|${action}`;
+         if (!groups.has(key)) groups.set(key, []);
+         groups.get(key).push(card.id);
+     }
+     for (const [key, ids] of groups) {
+         const candidates = paramCandidatesFor(key.split("|")[1]);
+         ids.forEach((id, index) => {
+             if (index >= candidates.length) console.warn(`[signature] 参数候选不足：${key}（${ids.length} 张）`);
+             SIGNATURE_PARAMS.set(id, candidates[index % candidates.length]);
+         });
+     }
++    // 第二步：试点动作按动作整组在目录中的出现顺序领取候选，覆盖试点卡的旧槽位值。
++    const pilotGroups = new Map();
++    for (const card of cards) {
++        if (!card || card.series === "starter_ygo") continue;
++        const { action } = signatureTarget(card);
++        if (!action || !PILOT_ACTIONS.has(action)) continue;
++        if (!pilotGroups.has(action)) pilotGroups.set(action, []);
++        pilotGroups.get(action).push(card.id);
++    }
++    for (const [action, ids] of pilotGroups) {
++        const candidates = paramCandidatesFor(action);
++        ids.forEach((id, index) => {
++            if (index >= candidates.length) console.warn(`[signature] 参数候选不足：${action}（${ids.length} 张）`);
++            SIGNATURE_PARAMS.set(id, candidates[index % candidates.length]);
++        });
++    }
+ }
+ 
+-export function signatureTarget(card) {
+-    const recipe = RECIPES[card.id];
++function signatureTargetIn(recipes, card) {
++    const recipe = recipes[card.id];
+     if (!recipe) return { action: null, trigger: null };
+     const parts = recipe.split(" ");
+     const actions = parts.map(part => part.split(":")[1]);
+     const action = pickSignatureAction(card.id, actions);
+     const [timing] = parts.find(part => part.endsWith(`:${action}`)).split(":");
+     return { action, trigger: card.type === "trap" ? "onAttacked" : TRIGGERS[timing] };
+ }
+ 
++export function signatureTarget(card) {
++    return signatureTargetIn(RECIPES, card);
++}
++
+ function signatureSkillName(card, action, motif) {
+     if (card.type === "monster") {
+         const profile = getMonsterCinematicProfile(card);
+         if (profile?.characterSpecific) {
+             const move = profile.signatureMove;
+             return move.includes(motif) ? move : `${move}·${motif}`;
+         }
+     }
+     return `${motif}·${LABELS[action]}`;
+ }
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/signature-tuning.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/signature-tuning.js"
+index e07e966..9abb3bc 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/signature-tuning.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/signature-tuning.js"
+@@ -49,15 +49,75 @@ export const PARAM_CANDIDATES = {
+     ],
+     exchange: combos(["limit", [4, 3, 5]], ["draw", [0, 1]]),
+     chorus: combos(["count", [2, 3, 4]], ["draw", [1, 2]], ["heal", [0, 300, 600]]),
+     sanctuary: [1000, 800, 1200, 1400, 1600].map(heal => ({ heal })),
+     purify: range(1, 4).map(count => ({ count })),
+     disarm: combos(["count", [1, 2, 3]], ["heal", [0, 300]]),
+     mirror: [{ amount: 0 }, { amount: 300 }, { amount: 500 }],
+     timeStop: [1200, 1000, 1400].map(cost => ({ cost })),
+     devour: [800, 700, 900].map(cost => ({ cost })),
+     inherit: range(4, 2, -1).map(limit => ({ limit })),
++    // 30 张试点卡（状态异常/领域/赌运）：候选按“同动作卡在 catalog 中的出现顺序”排列，
++    // 前 N 项即 §7 表的目标数值（N=该动作试点卡数），其余为后续扩展保留。
++    // 顺序由 src/test/js/pilot-roster.test.js 的唯一性断言锁定。
++    ignite: [
++        { stacks: 3, damage: 400 }, // picture_ssr7_007
++        { stacks: 1, damage: 700 }, // picture_ssr7_026
++        { stacks: 2, damage: 500 }, // picture_ex_030
++        { stacks: 1, damage: 800 }, // source_monster_014
++        { stacks: 2, damage: 600 }, { stacks: 2, damage: 450 }, { stacks: 3, damage: 500 }, { stacks: 1, damage: 900 },
++    ],
++    venom: [
++        { stacks: 2, damage: 450 }, // picture_ex_037
++        { stacks: 1, damage: 600 }, { stacks: 3, damage: 400 },
++    ],
++    bleed: [
++        { stacks: 2, damage: 500 }, // picture_ssr7_013
++        { stacks: 1, damage: 700 }, // picture_ssr7_015
++        { stacks: 1, damage: 650 }, // picture_ssr7_049
++        { stacks: 3, damage: 300 }, // picture_ex_014
++        { stacks: 2, damage: 400 }, // picture_ex_020
++        { stacks: 2, damage: 600 }, // source_monster_012
++        { stacks: 3, damage: 450 },
++    ],
++    curse: [
++        { stacks: 2, damage: 500 }, // picture_ssr7_014
++        { stacks: 1, damage: 600 }, // picture_ssr7_032
++        { stacks: 1, damage: 800 }, // source_monster_008
++        { stacks: 1, damage: 700 },
++    ],
++    paralyze: [
++        { count: 1, amount: 0, gamble: false }, // picture_ssr7_043
++        { count: "all", amount: 0, gamble: false }, // picture_ex_013
++        { gamble: true, amount: 600 }, // picture_ex_048
++        { count: 1, amount: 400, gamble: false },
++    ],
++    domain: [
++        { field: "za_warudo", cost: 1000 }, // picture_ex_011
++        { field: "rojin", cost: 800 }, // picture_ex_056
++        { field: "ongaku", cost: 600 }, // picture_ex_107
++        { field: "wuji", cost: 1200 }, // source_monster_015
++    ],
++    detonate: [
++        { stacks: 1, damage: 750 }, // picture_ssr7_016
++        { stacks: 1, damage: 800 }, // picture_ex_012
++        { stacks: 2, damage: 650 }, // picture_ex_027
++        { stacks: 3, damage: 500 }, // source_monster_013
++    ],
++    exile: [
++        { turns: 1, penalty: 300, self: false }, // picture_ssr7_003
++        { turns: 2, penalty: 500, self: false }, // picture_ex_018
++        { turns: 1, penalty: 500, self: true }, // picture_ex_072
++    ],
++    infinity: [
++        { reduce: 1000 }, // source_monster_010
++        { reduce: 1200 }, { reduce: 800 },
++    ],
++    gamble: [
++        { draw: 2, heal: 800 }, // picture_ssr7_036
++        { draw: 3, heal: 1000 }, { draw: 1, heal: 600 },
++    ],
+ };
+ 
+ export function paramCandidatesFor(action) {
+     return PARAM_CANDIDATES[action] || [{}];
+ }
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+index c8fd578..c627155 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/themed-effects.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/themed-effects.js"
+@@ -74,21 +74,21 @@ export const ACTION_TEMPLATES = {
+     shelter: p => `自己攻击力最低的表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效${p.amount ? `，其攻击力上升${p.amount}` : ""}`,
+     seal: p => `对方攻击力最高的可取对象表侧怪兽效果无效，直到本回合结束${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     sleep: p => `将对方攻击力最高的可取对象表侧怪兽变为里侧守备表示${p.amount ? `，其守备力下降${p.amount}` : ""}`,
+     freeze: p => `将对方攻击力最高的可取对象表侧怪兽变为守备表示，直到下个回合结束不能攻击或手动改变表示形式${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     poison: p => `给对方攻击力最高的可取对象表侧怪兽放置毒印；本回合结束时，其控制者受到${p.damage}伤害，并移除毒印`,
+     bomb: p => `给对方攻击力最高的可取对象表侧怪兽放置爆破标记；本回合结束时${p.damage ? `给予其控制者${p.damage}伤害并` : ""}破坏该怪兽，提前离场则标记失效`,
+     ignite: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层灼烧；其控制者每个结束阶段受到${p.damage}×层数伤害，随后层数-1（上限3层）`,
+     venom: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层剧毒（上限3层）；剧毒怪兽的控制者每个结束阶段受到${p.damage}×层数伤害，且其所有回复减半；剧毒不会自然消失`,
+     bleed: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层出血；出血怪兽每次参与战斗后，其控制者受到${p.damage}×层数伤害，随后层数-1`,
+     curse: p => `给对方攻击力最高的可取对象表侧怪兽施加诅咒：其效果无效、不能作为上级召唤的祭品；被破坏时其控制者受到${p.damage}×层数伤害`,
+-    detonate: p => `给对方攻击力最高的可取对象表侧怪兽放置${p.stacks}层灼烧，然后立即引爆其身上全部灼烧层数：每层使其控制者受到${p.damage}点伤害；若其带有剧毒，同时引爆剧毒：每层给对方全体怪兽造成300点伤害`,
++    detonate: p => `给对方攻击力最高的可取对象表侧怪兽放置${Math.max(1, p.stacks)}层灼烧，然后立即引爆其身上全部灼烧层数：每层使其控制者受到${p.damage}点伤害；若其带有剧毒，同时引爆剧毒：每层给对方全体表侧怪兽的守备力下降300，守备力变为0的破坏`,
+     paralyze: p => p.gamble
+         ? `抛硬币：正面则麻痹对方攻击力最高的可取对象表侧怪兽（直到下个回合结束不能攻击或改变表示形式）；反面则其攻击力下降${p.amount}直到回合结束`
+         : p.count === "all"
+             ? "对方全部表侧怪兽麻痹：直到下个回合结束不能攻击或改变表示形式"
+             : "将对方攻击力最高的可取对象表侧怪兽麻痹：直到下个回合结束不能攻击或改变表示形式",
+     gamble: p => `抛硬币：正面则抽${p.draw}张卡；反面则回复${p.heal}LP`,
+     infinity: p => `直到下个回合结束，自身不会成为对方效果的对象，且受到的战斗伤害减少${p.reduce}`,
+     charge: p => `自身获得1个蓄力指示物（最多3个），攻击力上升${p.amount}；移除指示物时失去对应的提升`,
+     burst: p => `支付${p.cost}LP；将对方攻击力最高的可取对象表侧怪兽除外`,
+     twin: p => `支付${p.cost}LP；自身本回合可以攻击2次`,
+@@ -102,21 +102,21 @@ export const ACTION_TEMPLATES = {
+     purify: p => `将对方墓地最后${p.count}张卡除外，并清除己方场上怪兽的全部异常状态`,
+     disarm: p => `破坏对方后场最后${p.count}张盖放的魔法或陷阱${healClause(p)}`,
+     intercept: () => "这次攻击无效",
+     mirror: p => `这次攻击无效；将攻击怪兽变为守备表示${p.amount ? `，其攻击力下降${p.amount}` : ""}`,
+     rescue: () => "这次攻击无效；将自己墓地最后一只4星以下怪兽加入手牌",
+     reversal: () => "这次攻击无效；将攻击怪兽的攻击力与守备力交换，直到回合结束",
+     retreat: () => "这次攻击无效；将自己攻击力最低的表侧怪兽返回手牌",
+     reprisal: () => "这次攻击无效；给攻击怪兽放置毒印，本回合结束时其控制者受到600伤害",
+     returnSelf: () => "自己被破坏送入墓地后，支付800LP，将自身加入手牌；同名效果每回合只能使用1次",
+     exile: p => p.self
+-        ? `自己被破坏送入墓地时，支付800LP，改为进入异界区；下一个自己的结束阶段以守备表示回到场上（攻击力下降${p.penalty}，可累计）、效果封印1回合`
++        ? `支付800LP，改为进入异界区；下一个自己的结束阶段以守备表示回到场上（攻击力下降${p.penalty}，可累计）、效果封印1回合`
+         : `将对方攻击力最高的可取对象表侧怪兽送入异界区；${p.turns}个结束阶段后回到场上（守备表示、攻击力下降${p.penalty}、效果封印1回合）`,
+     inherit: p => `自己被破坏送入墓地后，将卡组第一只与自身同属性的${p.limit}星以下怪兽加入手牌`,
+     devour: p => `支付${p.cost}LP；抽2张卡`,
+     timeStop: p => `支付${p.cost}LP；对方全部表侧怪兽直到下个回合结束不能攻击或手动改变表示形式`,
+     domain: p => {
+         const def = DOMAIN_DEFS[p.field] || DOMAIN_DEFS.wuji;
+         return `支付${p.cost}LP，展开领域「${def.name}」：${DOMAIN_RULES_TEXT[p.field] || ""}`;
+     },
+ };
+ 
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/rarity-rules.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/rarity-rules.test.js"
+index 06be4c0..a6f3359 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/rarity-rules.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/rarity-rules.test.js"
+@@ -1,19 +1,22 @@
+ import { describe, it } from "node:test";
+ import assert from "node:assert/strict";
+ import { ALL_CARDS } from "../js/catalog.js";
+ 
+ const customCards = ALL_CARDS.filter(card => ["picture", "source_archive"].includes(card.series));
+ 
+ describe("自制卡稀有度规则分层", () => {
+     it("每张自制卡都有唯一规则签名", () => {
+-        assert.equal(new Set(customCards.map(card => `${card.type}:${card.ruleSignature}`)).size, customCards.length);
++        // 30 张试点卡刻意共用同一动作（如 M:bleed），规则差异转移到候选参数上；
++        // 参数唯一性由 src/test/js/effect-diversity.test.js 全局锁定，这里把参数并入签名。
++        const signatureOf = card => `${card.type}:${card.ruleSignature}:${JSON.stringify(card.effects[0]?.params || {})}`;
++        assert.equal(new Set(customCards.map(signatureOf)).size, customCards.length);
+     });
+ 
+     it("每张自制卡只保留一项角色专属效果", () => {
+         customCards
+             .forEach(card => assert.equal(card.effects.length, 1, `${card.id} 应只有一项效果`));
+     });
+ 
+     it("所有自制卡效果都有描述和执行类型", () => {
+         customCards.forEach(card => card.effects.forEach(cardEffect => {
+             assert.ok(cardEffect.type);
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/themed-gameplay.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/themed-gameplay.test.js"
+index 3e2aa44..ad3c849 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/themed-gameplay.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/themed-gameplay.test.js"
+@@ -104,25 +104,28 @@ test("陷阱本回合不能发动，下回合才能拦截", () => {
+     e.attack(a, "player"); assert.equal(o.spellTrapZone.length, 1); assert.equal(o.lp, 6200);
+     a.canAttack = true; a.attacksMadeThisTurn = 0; s.turn++;
+     assert.equal(e.attack(a, "player").attackCanceled, true); assert.equal(o.lp, 6200);
+ });
+ test("衍生物不能作祭品，被破坏不进入墓地", () => {
+     const { e, p } = setup(); const c = source(p, ["token"]); e.triggerAllEffects(p, c, "manual");
+     const token = p.monsterZone.at(-1); assert.equal(token.cannotUseAsMaterial, true);
+     p.resetTurnState(); assert.equal(token.cannotUseAsMaterial, true);
+     e.destroyFieldMonster(p, token); assert.ok(!p.graveyard.includes(token));
+ });
+-test("死亡回归支付LP且同名每回合只能一次", () => {
++test("死亡回归：破坏时支付800LP进入异界区并在结束阶段归来", () => {
+     const { e, p } = setup(); const c = createCardInstance(getCardById("picture_ex_072"));
+-    p.monsterZone.push(c); e.destroyFieldMonster(p, c); assert.ok(p.hand.includes(c)); assert.equal(p.lp, 7200);
+-    p.hand.splice(p.hand.indexOf(c), 1); p.monsterZone.push(c); e.destroyFieldMonster(p, c);
+-    assert.ok(p.graveyard.includes(c)); assert.equal(p.lp, 7200);
++    p.monsterZone.push(c); e.destroyFieldMonster(p, c);
++    assert.equal(p.lp, 7200);
++    assert.ok(p.banished.includes(c));
++    e.endTurn();
++    assert.ok(p.monsterZone.includes(c));
++    assert.equal(c.position, "defense");
+ });
+ test("封印阻止主动发动，冻结持续到对方结束阶段", () => {
+     const { e, p, o, s } = setup(); const c = source(p, ["seal", "freeze"]); const target = source(o, ["charge"]);
+     e.triggerAllEffects(p, c, "manual"); s.currentPlayerIndex = 1; assert.equal(e.triggerAllEffects(o, target, "manual"), null);
+     s.currentPlayerIndex = 0; e.endTurn(); e.startTurn(); s.phase = "main_1";
+     assert.equal(e.changePosition(o, target).success, false); e.endTurn(); assert.equal(target.themedState.frozenUntil, undefined);
+ });
+ test("结束阶段共鸣只在自己回合触发，恢复可超过8000LP", () => {
+     const { e, p, o } = setup(); source(p, [skill("chorus", "onTurnEnd")]);
+     p.monsterZone.push(monster({ attribute: "fire" })); source(o, [skill("charge", "onTurnEnd")]);
+ 
+== NEW FILE: src/test/js/pilot-roster.test.js == 
+import assert from "node:assert/strict";
+import test from "node:test";
+import { ALL_CARDS } from "../../main/resources/static/js/catalog.js";
+
+const ROSTER = {
+    picture_ex_030: "ignite", picture_ex_037: "venom", picture_ex_020: "bleed",
+    picture_ex_048: "paralyze", picture_ex_027: "detonate", picture_ex_056: "domain",
+    picture_ex_011: "domain", picture_ex_012: "detonate", picture_ex_013: "paralyze",
+    picture_ex_014: "bleed", picture_ex_018: "exile",
+    source_monster_015: "domain", source_monster_010: "infinity", source_monster_012: "bleed",
+    source_monster_014: "ignite", source_monster_013: "detonate", source_monster_008: "curse",
+    picture_ex_072: "exile",
+    picture_ssr7_032: "curse", picture_ssr7_036: "gamble", picture_ssr7_043: "paralyze",
+    picture_ssr7_026: "ignite", picture_ssr7_049: "bleed", picture_ex_107: "domain",
+    picture_ssr7_007: "ignite", picture_ssr7_016: "detonate", picture_ssr7_003: "exile",
+    picture_ssr7_013: "bleed", picture_ssr7_014: "curse", picture_ssr7_015: "bleed",
+};
+
+test("30 张试点卡动作映射正确且卡面可渲染", () => {
+    assert.equal(Object.keys(ROSTER).length, 30);
+    for (const [id, action] of Object.entries(ROSTER)) {
+        const card = ALL_CARDS.find(item => item.id === id);
+        assert.ok(card, `缺少卡：${id}`);
+        assert.deepEqual(card.effects.map(e => e.action), [action], `${id} 动作不符`);
+        assert.ok(card.effects[0].skillName?.length > 0, `${id} 缺技能名`);
+        assert.ok((card.description || "").includes(card.effects[0].description.replace(/^.*?：/u, "")), `${id} 卡面与效果不一致`);
+    }
+});
+
+test("30 张试点卡参数互不相同（同动作内）", () => {
+    const groups = new Map();
+    for (const id of Object.keys(ROSTER)) {
+        const card = ALL_CARDS.find(item => item.id === id);
+        const e = card.effects[0];
+        const key = `${e.trigger}|${e.action}`;
+        const params = JSON.stringify(e.params || {});
+        if (!groups.has(key)) groups.set(key, new Map());
+        assert.equal(groups.get(key).has(params), false, `${id} 参数重复`);
+        groups.get(key).set(params, id);
+    }
+});

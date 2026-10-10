@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>角色攻击过程 · 全角色回放</title>
+<style>
+  :root {
+    --bg: #06080e;
+    --edge: #1d2742;
+    --text: #e9edf8;
+    --dim: #8e99b8;
+    --accent: #f0c96b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 18px 18px 40px;
+    background: radial-gradient(1100px 480px at 50% -10%, #131a2c 0%, var(--bg) 64%);
+    color: var(--text);
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  }
+  header { max-width: 1360px; margin: 0 auto 12px; }
+  header h1 { font-size: 19px; margin: 0 0 6px; letter-spacing: .04em; }
+  header p { margin: 0; color: var(--dim); font-size: 12.5px; line-height: 1.7; }
+  header .hl { color: var(--accent); }
+
+  .layout { max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
+  @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+
+  .sidebar {
+    border: 1px solid var(--edge); border-radius: 12px; padding: 10px;
+    background: linear-gradient(180deg, #0e1424, #090d17);
+    display: flex; flex-direction: column; height: 720px;
+  }
+  .sidebar input[type=search] {
+    width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid #26324f;
+    background: #0b1120; color: #e6edff; font-family: inherit; font-size: 13px; outline: none;
+  }
+  .sidebar input[type=search]:focus { border-color: #3c4d7d; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .filters button {
+    font-size: 11.5px; padding: 3px 9px; border-radius: 999px; cursor: pointer;
+    background: #131b30; color: #aebada; border: 1px solid #26324f; font-family: inherit;
+  }
+  .filters button.on { background: #23335c; color: #fff; border-color: #5a7ac9; }
+  .list { flex: 1; overflow-y: auto; margin-top: 4px; padding-right: 4px; }
+  .list::-webkit-scrollbar { width: 8px; }
+  .list::-webkit-scrollbar-thumb { background: #22304f; border-radius: 4px; }
+  .group { font-size: 10.5px; letter-spacing: .16em; color: #6d7896; margin: 10px 2px 4px; }
+  .item {
+    display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 8px;
+    cursor: pointer; border: 1px solid transparent;
+  }
+  .item:hover { background: #101a30; }
+  .item.on { background: #14203c; border-color: #35508a; }
+  .item img { width: 30px; height: 40px; object-fit: cover; border-radius: 4px; background: #16203a; }
+  .item .nm { flex: 1; font-size: 12px; color: #d5e0fa; line-height: 1.3; }
+  .item .tag { font-size: 10px; color: #ffd684; border: 1px solid #6b5731; border-radius: 4px; padding: 0 4px; }
+
+  .stagecol { border: 1px solid var(--edge); border-radius: 12px; padding: 12px; background: linear-gradient(180deg, #0e1424, #090d17); }
+  .stagebar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .stagebar .who { font-size: 15px; font-weight: 700; color: #fff; }
+  .stagebar .badge {
+    font-size: 11.5px; padding: 3px 10px; border-radius: 999px;
+    background: #1b2745; color: #9fb6e8; border: 1px solid #2c3f6e;
+  }
+  .stagebar .spacer { flex: 1; }
+  .stagebar button {
+    background: #16203a; color: #d5e2ff; border: 1px solid #2b3a63; border-radius: 8px;
+    padding: 6px 14px; cursor: pointer; font-family: inherit; font-size: 13px;
+  }
+  .stagebar button:hover { background: #1d2a4c; }
+  .stagebar label { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--dim); cursor: pointer; }
+
+  .arena {
+    position: relative; height: 430px; border-radius: 12px; overflow: hidden; border: 1px solid #232c48;
+    background:
+      radial-gradient(700px 300px at 50% 38%, rgba(50, 30, 70, .45) 0%, rgba(16, 10, 26, .2) 60%, transparent 78%),
+      linear-gradient(180deg, #150d1a 0%, #0c0914 50%, #0a0a16 100%);
+  }
+  .arena .grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(90deg, rgba(150, 60, 90, .05) 0 1px, transparent 1px 110px),
+      repeating-linear-gradient(0deg, rgba(150, 60, 90, .04) 0 1px, transparent 1px 84px);
+  }
+  .arena .floor {
+    position: absolute; left: 50%; top: 56%; width: 860px; height: 300px; transform: translate(-50%, -50%);
+    border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(80, 190, 205, .10) 0%, transparent 62%);
+  }
+  .fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+
+  .slot-dash {
+    position: absolute; width: 132px; height: 186px; border-radius: 10px;
+    border: 1px dashed rgba(140, 100, 160, .45); background: rgba(255, 255, 255, .012);
+  }
+  .slot-dash.a { left: 128px; top: 118px; }
+  .slot-dash.t { right: 128px; top: 118px; border-color: rgba(200, 90, 110, .5); }
+
+  .card {
+    position: absolute; width: 132px; height: 186px; border-radius: 10px; padding: 6px 7px 5px;
+    background: linear-gradient(180deg, #151e36, #0a101f);
+    border: 1px solid #2c3c66; box-shadow: 0 10px 24px rgba(0, 0, 0, .6);
+    display: flex; flex-direction: column; will-change: transform;
+  }
+  .card.a { left: 128px; top: 118px; z-index: 6; }
+  .card.t { right: 128px; top: 118px; z-index: 5; }
+  .card .art { height: 104px; border-radius: 7px; background-size: cover; background-position: center 18%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09); }
+  .card .nm { font-size: 11px; line-height: 1.35; margin-top: 6px; color: #dfe8ff; height: 30px; overflow: hidden; }
+  .card .st { margin-top: auto; display: flex; justify-content: space-between; font-size: 9.5px; color: #93a2c6; }
+  .card .st b { color: #fff; font-size: 10px; }
+  .card .frostov {
+    position: absolute; inset: 0; border-radius: 10px; opacity: 0; pointer-events: none;
+    background: linear-gradient(160deg, rgba(190, 235, 255, .35), rgba(120, 190, 255, .14) 55%, rgba(255, 255, 255, .3));
+    box-shadow: inset 0 0 22px rgba(190, 235, 255, .7);
+  }
+  .card.hit { border-color: #ff8a8a; }
+
+  .reticle { position: absolute; pointer-events: none; z-index: 8; }
+  .reticle i { position: absolute; width: 16px; height: 16px; border: 3px solid #ff5d6b; box-shadow: 0 0 12px rgba(255, 90, 110, .85); }
+  .reticle i:nth-child(1) { left: -5px; top: -5px; border-right: none; border-bottom: none; }
+  .reticle i:nth-child(2) { right: -5px; top: -5px; border-left: none; border-bottom: none; }
+  .reticle i:nth-child(3) { left: -5px; bottom: -5px; border-right: none; border-top: none; }
+  .reticle i:nth-child(4) { right: -5px; bottom: -5px; border-left: none; border-top: none; }
+
+  .label {
+    position: absolute; z-index: 12; white-space: nowrap; pointer-events: none;
+    font-size: 14px; font-weight: 800; letter-spacing: .12em; color: #fff;
+    background: linear-gradient(180deg, rgba(60, 40, 20, .95), rgba(30, 18, 8, .95));
+    border: 1px solid rgba(255, 200, 110, .75); border-radius: 8px; padding: 3px 11px;
+    box-shadow: 0 0 18px rgba(255, 180, 80, .4);
+  }
+  .label.violet { background: linear-gradient(180deg, rgba(44, 26, 70, .95), rgba(22, 12, 38, .95)); border-color: rgba(200, 140, 255, .8); }
+  .label.cyan { background: linear-gradient(180deg, rgba(20, 44, 60, .95), rgba(8, 20, 30, .95)); border-color: rgba(140, 220, 255, .8); }
+
+  .dmg {
+    position: absolute; z-index: 14; font-size: 36px; font-weight: 900; pointer-events: none;
+    color: #ff5d5d; text-shadow: 0 0 14px rgba(255, 60, 60, .8), 0 3px 0 rgba(0, 0, 0, .8), 0 0 40px rgba(255, 90, 60, .5);
+  }
+  .dmg.fire { color: #ff9a4c; text-shadow: 0 0 14px rgba(255, 140, 60, .9), 0 3px 0 rgba(0, 0, 0, .8); }
+  .dmg.elec { color: #ffe45e; text-shadow: 0 0 14px rgba(255, 230, 80, .9), 0 3px 0 rgba(0, 0, 0, .8); }
+  .dmg.ice { color: #aee6ff; text-shadow: 0 0 14px rgba(150, 220, 255, .9), 0 3px 0 rgba(0, 0, 0, .8); }
+  .dmg.violet { color: #d9b3ff; text-shadow: 0 0 14px rgba(180, 90, 255, .9), 0 3px 0 rgba(0, 0, 0, .8); }
+
+  .p { position: absolute; border-radius: 50%; pointer-events: none; z-index: 7; }
+  .flashcard { position: absolute; border-radius: 10px; background: #fff; z-index: 9; pointer-events: none; }
+  .ring { position: absolute; border-radius: 50%; border: 2px solid; z-index: 7; pointer-events: none; }
+  .sring { position: absolute; border-radius: 50%; border: 2px solid; pointer-events: none; }
+  .shard { position: absolute; z-index: 7; pointer-events: none; }
+  .orb { position: absolute; z-index: 7; pointer-events: none; }
+  .beam { position: absolute; z-index: 7; pointer-events: none; transform-origin: 0 50%; }
+  .trail { position: absolute; border-radius: 999px; z-index: 6; pointer-events: none; filter: blur(2px); }
+  .after { position: absolute; z-index: 4; pointer-events: none; opacity: .35; }
+  .svgline { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: visible; }
+  .butterfly { position: absolute; z-index: 7; pointer-events: none; width: 16px; height: 12px; }
+  .butterfly i {
+    position: absolute; top: 0; width: 8px; height: 12px; border-radius: 60% 40% 55% 45%;
+    background: linear-gradient(160deg, #e6d2ff, #b06cff 70%);
+    box-shadow: 0 0 8px rgba(176, 108, 255, .8);
+  }
+  .butterfly i:nth-child(1) { left: 0; transform: rotate(-18deg); animation: wingL .3s ease-in-out infinite alternate; }
+  .butterfly i:nth-child(2) { right: 0; transform: rotate(18deg) scaleX(-1); animation: wingR .3s ease-in-out infinite alternate; }
+  @keyframes wingL { from { transform: rotate(-30deg); } to { transform: rotate(-2deg); } }
+  @keyframes wingR { from { transform: rotate(30deg) scaleX(-1); } to { transform: rotate(2deg) scaleX(-1); } }
+  .mist {
+    position: absolute; pointer-events: none;
+    background: radial-gradient(circle at 45% 40%, rgba(200, 140, 255, .5), rgba(120, 60, 180, .3) 55%, transparent 78%);
+    filter: blur(6px); border-radius: 50%;
+  }
+  .domain-tint { position: absolute; pointer-events: none; }
+  .note { position: absolute; pointer-events: none; }
+
+  .note-help { max-width: 1360px; margin: 12px auto 0; color: var(--dim); font-size: 12px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<header>
+  <h1>角色攻击过程 · 全角色回放（218 张怪兽卡）</h1>
+  <p>左侧点任意角色即可回放其攻击过程；每张卡的招式族与招式名由"攻击档案"映射生成（知名角色手工指定，其余按属性/风格推导）。
+  <span class="hl">演出只在攻击者与目标之间</span>，不动布局与规则。</p>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="fxRough" x="-60%" y="-60%" width="220%" height="220%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.021 0.06" numOctaves="3" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="fxRoughSoft" x="-60%" y="-60%" width="220%" height="220%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016 0.045" numOctaves="3" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="34" xChannelSelector="R" yChannelSelector="G"/>
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+    <filter id="fxGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="3.2"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="layout">
+  <aside class="sidebar">
+    <input type="search" id="search" placeholder="搜索角色名…">
+    <div class="filters" id="filters">
+      <button data-attr="" class="on">全部</button>
+      <button data-attr="fire">火</button>
+      <button data-attr="water">水</button>
+      <button data-attr="wind">风</button>
+      <button data-attr="earth">地</button>
+      <button data-attr="light">光</button>
+      <button data-attr="dark">暗</button>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+
+  <section class="stagecol">
+    <div class="stagebar">
+      <span class="who" id="who">—</span>
+      <span class="badge" id="badge">—</span>
+      <span class="spacer"></span>
+      <button id="replay">重播</button>
+      <button id="random">随机角色</button>
+      <label><input type="checkbox" id="slowmo">慢放 0.5×</label>
+    </div>
+    <div class="arena" id="arena">
+      <div class="grid"></div>
+      <div class="floor"></div>
+      <div class="slot-dash a"></div>
+      <div class="slot-dash t"></div>
+      <div class="card a" id="attacker"></div>
+      <div class="card t" id="target"></div>
+      <div class="fx" id="fx"></div>
+    </div>
+    <p class="note-help">提示：慢放 0.5× 用来看形状细节；右侧 badge 显示当前角色的招式族与招式名。逐个点左侧列表即可核对每个角色的攻击过程。</p>
+  </section>
+</div>
+
+<script type="module">
+import { MONSTERS } from "/files/cards-data.js";
+import { playCardAttack, getAttackProfile } from "/files/attack-fx.js";
+
+const arena = document.getElementById("arena");
+const fx = document.getElementById("fx");
+const attackerEl = document.getElementById("attacker");
+const targetEl = document.getElementById("target");
+const listEl = document.getElementById("list");
+const searchEl = document.getElementById("search");
+const filtersEl = document.getElementById("filters");
+const whoEl = document.getElementById("who");
+const badgeEl = document.getElementById("badge");
+const slowmoEl = document.getElementById("slowmo");
+
+const TARGET = { id: "target", name: "训练靶 · 真冬", atk: 1700, def: 1400, art: "/files/mafuyu.png" };
+
+let busy = false;
+let current = null;
+let speed = 1;
+let filterAttr = "";
+
+function cardHtml(card, isTarget) {
+  const art = card.art
+    ? `<div class="art" style="background-image:url('${card.art}')"></div>`
+    : `<div class="art" style="display:grid;place-items:center;font-size:30px;font-weight:900;color:rgba(255,255,255,.5)">${(card.name || "?")[0]}</div>`;
+  return `${art}
+    <div class="nm">${card.name}</div>
+    <div class="st"><span>ATK <b>${card.atk || 0}</b></span><span>DEF <b>${card.def || 0}</b></span></div>
+    <div class="frostov"></div>`;
+}
+
+function setAttacker(card) {
+  attackerEl.innerHTML = cardHtml(card);
+}
+function setTarget() {
+  targetEl.innerHTML = cardHtml(TARGET);
+}
+
+function resetStage() {
+  fx.innerHTML = "";
+  attackerEl.style.transform = "";
+  attackerEl.style.filter = "";
+  attackerEl.style.opacity = "1";
+  document.querySelectorAll(".item.on").forEach(e => e.classList.remove("on"));
+}
+
+async function play(card) {
+  if (busy || !card) return;
+  busy = true;
+  resetStage();
+  current = card;
+  setAttacker(card);
+  const profile = getAttackProfile(card);
+  whoEl.textContent = card.name;
+  badgeEl.textContent = profile.legacy ? "沿用旧演出 · R卡" : profile.family + " · " + profile.label;
+  const item = listEl.querySelector(`[data-id="${card.id}"]`);
+  if (item) {
+    item.classList.add("on");
+    item.scrollIntoView({ block: "nearest" });
+  }
+  try {
+    await playCardAttack({
+      arena, fx, attackerEl, targetEl,
+      card: { name: card.name, atk: card.atk, attribute: card.attr, rarity: card.rarity, id: card.id },
+      speed,
+    });
+  } catch (e) {
+    console.error(e);
+    badgeEl.textContent = "演出错误：" + (e && e.message ? e.message : e);
+  } finally {
+    busy = false;
+  }
+}
+
+function renderList() {
+  const query = searchEl.value.trim();
+  listEl.innerHTML = "";
+  const bySeries = new Map();
+  for (const m of MONSTERS) {
+    if (filterAttr && m.attr !== filterAttr) continue;
+    if (query && !m.name.includes(query)) continue;
+    if (!bySeries.has(m.series)) bySeries.set(m.series, []);
+    bySeries.get(m.series).push(m);
+  }
+  for (const [series, items] of bySeries) {
+    const g = document.createElement("div");
+    g.className = "group";
+    g.textContent = series + " · " + items.length;
+    listEl.appendChild(g);
+    for (const m of items) {
+      const row = document.createElement("div");
+      row.className = "item";
+      row.dataset.id = m.id;
+      const img = document.createElement("img");
+      img.loading = "lazy";
+      img.src = m.art || "";
+      img.alt = "";
+      const nm = document.createElement("div");
+      nm.className = "nm";
+      nm.textContent = m.name;
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = (m.rarity || "N") + " / " + m.attr;
+      row.appendChild(img);
+      row.appendChild(nm);
+      row.appendChild(tag);
+      row.addEventListener("click", () => play(m));
+      listEl.appendChild(row);
+    }
+  }
+}
+
+searchEl.addEventListener("input", renderList);
+filtersEl.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-attr]");
+  if (!btn) return;
+  filterAttr = btn.dataset.attr;
+  filtersEl.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === btn));
+  renderList();
+});
+document.getElementById("replay").addEventListener("click", () => play(current));
+document.getElementById("random").addEventListener("click", () => {
+  const m = MONSTERS[Math.floor(Math.random() * MONSTERS.length)];
+  play(m);
+});
+slowmoEl.addEventListener("change", (e) => { speed = e.target.checked ? 2 : 1; });
+
+setTarget();
+renderList();
+const first = MONSTERS.find(m => m.name.includes("炭治郎") && m.name.includes("火之神神乐")) || MONSTERS[0];
+setTimeout(() => play(first), 500);
+</script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+ .../controller.js"                                 |  3 +-
+ .../effects.js"                                    | 50 +++++++++++++++++++++-
+ 2 files changed, 50 insertions(+), 3 deletions(-)
+ .../status-effects.test.js"                                      | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+ .../style.css"                                                 | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/controller.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/controller.js"
+index c9ef69a..1cbadcd 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/controller.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/controller.js"
+@@ -10,21 +10,21 @@ import { getCardById } from "./catalog.js";
+ import {
+     playSummonEffect, playSpellEffect, playTrapEffect,
+     playAttackEffect, playAttackAnimation, showDamageNumber, playDestroyEffect,
+     playHealEffect, playPlayerHealEffect, playDrawEffect, playPhaseFlash,
+     animateDrawCard, animatePlayToZone, animatePlayToGraveyard, createCardBackHtml,
+     playFlipSummonEffect, playTrapChainEffect,
+     playMonsterEffect, playSpellEffectV2, playTrapEffectV2,
+     playDestroyEffectV2, playHealEffectV2, showAnnounceBanner,
+     playTrapActivationV3, playTrapActivationV5, playCounterTrapV3, playSpellCinematic,
+     animateCinematicDestroy, animateCinematicReturnToDeck, animateCinematicReturnToHand,
+-    animateTrapToGraveyard, playNegatedAttackBarrier,
++    animateTrapToGraveyard, playNegatedAttackBarrier, playCoinFlip,
+ } from "./effects.js?v=1.7.1";
+ 
+ const raf = typeof requestAnimationFrame === "function"
+     ? requestAnimationFrame
+     : typeof document !== "undefined" ? fn => setTimeout(fn, 0) : () => {};
+ 
+ // 特效锁定时间（毫秒）—— 必须 >= 横幅停留时间
+ const EFFECT_LOCK_MS = 2600;
+ const ANIMATED_DRAW_EFFECTS = new Set(["drawCards", "gameThroneDraw", "discardAndDraw", "healDrawNoSpecial", "recoverAndDrawV2"]);
+ 
+@@ -45,20 +45,21 @@ export class GameController {
+         this.aiMaxMainActions = 6;
+         this.onGameOver = null;
+         this.turnEnding = false;
+         this.turnAckTimer = null;
+         this._effectQueue = Promise.resolve();
+         this._pvpTurnGeneration = 0;
+         this.effectBusy = false; // 特效播放期间锁定操作
+         this._lockTimers = []; // 多个特效锁定计时器
+         /** 新手教学的教练对象（由 main.js 注入；为 null 时不影响任何逻辑） */
+         this.tutorial = null;
++        this.engine?.eventBus?.on?.("onCoinFlip", ({ result }) => playCoinFlip(result));
+     }
+ 
+     /** 教学钩子：把玩家动作告诉教练，只有当前步骤等待的动作才会推进。 */
+     notifyTutorial(action, payload = {}) {
+         if (!this.tutorial || this.tutorial.finished || this.tutorial.skipped) return false;
+         return this.tutorial.notify(action, payload);
+     }
+ 
+     // 特效锁定：播放特效期间禁止玩家操作（支持叠加，取最大时长）
+     _lockForEffect(duration = EFFECT_LOCK_MS) {
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/effects.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/effects.js"
+index be78f49..444879e 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\js/effects.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\js/effects.js"
+@@ -55,20 +55,33 @@ const RULE_VISUALS = {
+     banish: { label: "BANISH", color: "#b379ff", accent: "#342064", motion: "void" },
+     return: { label: "RETURN", color: "#63d9ff", accent: "#ffffff", motion: "sweep" },
+     revive: { label: "REVIVAL", color: "#9dffb4", accent: "#fff1a8", motion: "rise" },
+     summon: { label: "SPECIAL SUMMON", color: "#ffdd73", accent: "#d876ff", motion: "burst" },
+     lock: { label: "SEALED", color: "#bd8cff", accent: "#5f55ba", motion: "shield" },
+     weaken: { label: "WEAKEN", color: "#a873ff", accent: "#ff5d87", motion: "fall" },
+     field: { label: "FIELD SHIFT", color: "#64e3d0", accent: "#6d8cff", motion: "wave" },
+     effect: { label: "EFFECT", color: "#e4dfff", accent: "#8f7cff", motion: "burst" },
+ };
+ 
++export const THEMED_ACTION_VISUALS = {
++    ignite:   { label: "IGNITE", motion: "rise", color: "#ff7a3c", accent: "#ffd36b" },
++    venom:    { label: "VENOM", motion: "fall", color: "#9d6bff", accent: "#7dffa8" },
++    bleed:    { label: "BLEED", motion: "sweep", color: "#ff4f70", accent: "#ff9b8a" },
++    curse:    { label: "CURSE", motion: "shield", color: "#8c5cff", accent: "#2a1740" },
++    exile:    { label: "EXILE", motion: "void", color: "#7b5cff", accent: "#1b1035" },
++    paralyze: { label: "STUN", motion: "impact", color: "#ffe06b", accent: "#70dcff" },
++    detonate: { label: "DETONATE", motion: "impact", color: "#ff5d67", accent: "#ffb04a" },
++    infinity: { label: "INFINITY", motion: "shield", color: "#d7e6ff", accent: "#8fb8ff" },
++    domain:   { label: "DOMAIN", motion: "wave", color: "#cfd6ff", accent: "#8f7cff" },
++    gamble:   { label: "GAMBLE", motion: "spiral", color: "#ffd76b", accent: "#fff6c9" },
++};
++
+ const CARD_THEME_RULES = [
+     [/鸣人|九喇嘛/, { key: "chakra", label: "九喇嘛查克拉", color: "#ff8a2b", accent: "#ffe06b", glyph: "火" }],
+     [/佐助|须佐能乎/, { key: "susanoo", label: "须佐能乎", color: "#9366ff", accent: "#e4c4ff", glyph: "瞳" }],
+     [/我爱罗|砂瀑/, { key: "sand", label: "砂瀑结界", color: "#d8a35b", accent: "#fff0b0", glyph: "砂" }],
+     [/佩恩|神罗天征/, { key: "rinnegan", label: "轮回眼", color: "#b67cff", accent: "#ff697f", glyph: "轮" }],
+     [/卡卡西|雷切/, { key: "lightning", label: "雷切", color: "#70dcff", accent: "#ffffff", glyph: "雷" }],
+     [/纲手|怪力/, { key: "strength", label: "百豪怪力", color: "#7dff9e", accent: "#ff9bc8", glyph: "力" }],
+     [/日之呼吸|缘壹/, { key: "sunfire", label: "日之呼吸", color: "#ff6538", accent: "#ffd86b", glyph: "日" }],
+     [/初音未来|音浪|旋律|缤纷节拍|独奏/, { key: "music", label: "共鸣音轨", color: "#43f0db", accent: "#ff7fe1", glyph: "♪" }],
+     [/真冬|奏|绘名|瑞希|实乃理|宁宁|雫/, { key: "sekai", label: "SEKAI共鸣", color: "#63ddff", accent: "#ff77c7", glyph: "奏" }],
+@@ -167,22 +180,27 @@ function ruleVisualKey(effectType = "") {
+     if (/search|deck/.test(type)) return "search";
+     if (/token|summon/.test(type)) return "summon";
+     if (/cannot|lock|disable|seal|freeze/.test(type)) return "lock";
+     if (/debuff|reduce|discard/.test(type)) return "weaken";
+     if (/defense|protect|guard/.test(type)) return "guard";
+     if (/buff|attack|power/.test(type)) return "power";
+     if (/field|ocean|scene/.test(type)) return "field";
+     return "effect";
+ }
+ 
++function themedVisualKey(effect) {
++    if (effect?.type === "themedAction" && THEMED_ACTION_VISUALS[effect.action]) return effect.action;
++    return ruleVisualKey(effect?.type);
++}
++
+ function resolveRuleTargets(effect, origin, ownerIndex = 0) {
+-    const key = ruleVisualKey(effect.type);
++    const key = themedVisualKey(effect);
+     const effectType = String(effect.type || "").toLowerCase();
+     const ownPrefix = ownerIndex === 1 ? "#opponent-area" : "#player-area";
+     const enemyPrefix = ownerIndex === 1 ? "#player-area" : "#opponent-area";
+     const ownHand = ownerIndex === 1 ? "#opponent-hand" : "#hand-tray";
+     const enemyHand = ownerIndex === 1 ? "#hand-tray" : "#opponent-hand";
+     const ownDeck = ownerIndex === 1 ? "#opponent-deck-pile" : "#player-deck-pile";
+     const ownMonster = `[data-owner="${ownerIndex}"][data-zone="monster"]`;
+     const enemyMonster = `[data-owner="${ownerIndex === 1 ? 0 : 1}"][data-zone="monster"]`;
+     const enemyBackrow = `[data-owner="${ownerIndex === 1 ? 0 : 1}"][data-zone="spell-trap"][data-instance-id]`;
+     const enemyGraveyard = ownerIndex === 1 ? "#player-graveyard-pile" : "#opponent-graveyard-pile";
+@@ -220,22 +238,26 @@ function resolveRuleTargets(effect, origin, ownerIndex = 0) {
+ }
+ 
+ export function playRuleDrivenEffect(cardOrEffect, origin = null, ownerIndex = 0) {
+     if (!isBrowser) return false;
+     const effect = cardOrEffect?.effects?.[0] || cardOrEffect?.effect || cardOrEffect || {};
+     const battleScreen = document.getElementById("battle-screen");
+     if (!battleScreen) return;
+ 
+     const targets = resolveRuleTargets(effect, origin, ownerIndex).filter(item => item.target);
+     if (!targets.length) return false;
++    if (effect.type === "themedAction" && effect.skillName) showSkillBanner(effect.skillName, effect.skillLabel, effect.action);
++    if (effect.type === "themedAction" && effect.action === "domain" && typeof playDomainCinematic === "function") {
++        playDomainCinematic(effect.params?.field, cardOrEffect?.name, ownerIndex);
++    }
+     for (const { target, key } of targets) {
+-        const visual = RULE_VISUALS[key];
++        const visual = RULE_VISUALS[key] || THEMED_ACTION_VISUALS[key];
+         const rect = getRect(target);
+         const centerX = rect.width ? rect.left + rect.width / 2 : window.innerWidth / 2;
+         const centerY = rect.height ? rect.top + rect.height / 2 : window.innerHeight / 2;
+         const layer = document.createElement("div");
+         layer.className = `rule-fx rule-fx-${visual.motion} rule-fx-local`;
+         layer.style.cssText = `--rule-x:${centerX}px;--rule-y:${centerY}px;--rule-color:${visual.color};--rule-accent:${visual.accent};--rule-width:${Math.max(80, rect.width)}px;`;
+         layer.innerHTML = `<div class="rule-fx-core"></div><div class="rule-fx-ring"></div><div class="rule-fx-title"><strong>${visual.label}</strong></div>`;
+         for (let i = 0; i < 12; i++) {
+             const particle = document.createElement("i");
+             const angle = Math.random() * Math.PI * 2;
+@@ -252,20 +274,44 @@ export function playRuleDrivenEffect(cardOrEffect, origin = null, ownerIndex = 0
+         }
+         removeAfter(layer, 1250);
+         setTimeout(() => {
+             target.classList?.remove("rule-target-pulse");
+             battleScreen.classList.remove("rule-camera-impact");
+         }, 850);
+     }
+     return true;
+ }
+ 
++/**
++ * 技能横幅：主题行动结算时展示「主动技」名称
++ */
++export function showSkillBanner(skillName, label = "主动技", action = "") {
++    if (!isBrowser || !skillName) return;
++    const banner = document.createElement("div");
++    banner.className = "skill-banner";
++    banner.innerHTML = `<small>【${label}】</small><strong>${skillName}</strong>`;
++    (document.querySelector(".battle-screen") || document.body).appendChild(banner);
++    removeAfter(banner, 950);
++}
++
++/**
++ * 硬币演出：onCoinFlip 事件的正/反面表现
++ */
++export function playCoinFlip(result = "pending") {
++    if (!isBrowser) return;
++    const coin = document.createElement("div");
++    coin.className = `coin-flip ${result}`;
++    coin.innerHTML = `<div class="coin-face"></div><strong>${result === "heads" ? "正面" : result === "tails" ? "反面" : "抛硬币"}</strong>`;
++    (document.querySelector(".battle-screen") || document.body).appendChild(coin);
++    removeAfter(coin, 950);
++}
++
+ // =====================================================================
+ //  卡牌飞行动画系统
+ // =====================================================================
+ 
+ /**
+  * 创建一个飞行卡牌克隆体
+  */
+ function createFlyingCard(card, htmlFn) {
+     const el = document.createElement("div");
+     el.className = "flying-card";
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+index 926fb0e..2a008bc 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\test/status-effects.test.js"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\test/status-effects.test.js"
+@@ -690,10 +690,19 @@ test("麻痹阻止翻转召唤，解除后可翻转", () => {
+ 
+ test("pendingActions 不把麻痹怪兽算作可攻击", () => {
+     const { s, p, e } = board();
+     const c = createCardInstance({ id: "para_ui", name: "麻痹者", type: "monster", level: 4, attack: 1500, defense: 1000, effects: [] });
+     p.monsterZone.push(c);
+     c.canAttack = true;
+     c.themedState = { paralyzedUntil: s.turn + 1 };
+     const reasons = new GameController(s, e, {}).pendingActions(p);
+     assert.ok(!reasons.some(reason => reason.id === "attack"));
+ });
++
++import { THEMED_ACTION_VISUALS } from "../js/effects.js";
++
++test("10 个新动作都有特效映射且键唯一", () => {
++    const actions = ["ignite", "venom", "bleed", "curse", "exile", "paralyze", "detonate", "infinity", "domain", "gamble"];
++    const visuals = actions.map(a => THEMED_ACTION_VISUALS[a]);
++    for (const v of visuals) assert.ok(v && v.motion && v.color, "缺少视觉定义");
++    assert.equal(new Set(visuals.map(v => v.motion + v.color)).size, actions.length);
++});
+diff --git "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\css/style.css" "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\css/style.css"
+index 899ed49..e836ee9 100644
+--- "a/D:\\Sekai_two\\memory-16\\.superpowers\\sdd\\2026-09-23-status-effects-pilot\\snapshots\\base\\css/style.css"
++++ "b/D:\\Sekai_two\\memory-16\\SekaiGame\\src\\main\\resources\\static\\css/style.css"
+@@ -6944,10 +6944,20 @@ body[data-visual-route="bca"] .catalog-card.bca-card-frame[data-rarity="SR"] {
+         top: auto;
+         bottom: 10px;
+         transform: translate(-50%, 12px);
+         width: min(560px, calc(100vw - 20px));
+         padding: 10px 14px 9px;
+     }
+     .coach-panel.active { transform: translate(-50%, 0); }
+     .coach-text { font-size: 12px; line-height: 1.55; }
+     .coach-hint { display: none; }
+ }
++
++.skill-banner { position:absolute; left:50%; top:12%; transform:translateX(-50%); z-index:206; display:grid; justify-items:center; pointer-events:none; animation:skillBannerIn .9s ease-out forwards; }
++.skill-banner small { color:rgba(255,255,255,.75); letter-spacing:.4em; font-size:11px; }
++.skill-banner strong { color:#fff; font-size:clamp(18px,2.6vw,32px); letter-spacing:.1em; text-shadow:0 0 18px rgba(255,215,107,.8); }
++.coin-flip { position:fixed; left:50%; top:38%; transform:translate(-50%,-50%); z-index:272; display:grid; justify-items:center; gap:8px; pointer-events:none; animation:coinFlipSpin .9s ease-out forwards; }
++.coin-face { width:74px; height:74px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #fff6c9, #d9a441 60%, #7a5a1a 100%); box-shadow:0 0 30px rgba(255,215,107,.85); }
++.coin-flip.tails .coin-face { background:radial-gradient(circle at 35% 30%, #e8f1ff, #8fa8c9 60%, #40506b 100%); }
++.coin-flip strong { color:#fff; letter-spacing:.3em; }
++@keyframes skillBannerIn { 0%{opacity:0; transform:translateX(-50%) translateY(-14px);} 15%{opacity:1;} 80%{opacity:1;} 100%{opacity:0; transform:translateX(-50%) translateY(-4px);} }
++@keyframes coinFlipSpin { 0%{opacity:0; transform:translate(-50%,-50%) rotateY(0) scale(.7);} 20%{opacity:1;} 70%{transform:translate(-50%,-50%) rotateY(720deg) scale(1);} 100%{opacity:0; transform:translate(-50%,-50%) rotateY(900deg) scale(1);} }
