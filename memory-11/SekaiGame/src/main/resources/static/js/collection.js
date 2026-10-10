@@ -14,7 +14,7 @@ export const DEFAULT_COLLECTION = {
     selectedArtByCard: {},
     currency: { duelCoins: 2000, shards: { N: 0, R: 0, SR: 0, SSR: 0, UR: 0 } },
     statistics: { packsOpened: 0, duelsPlayed: 0, wins: 0, losses: 0, draws: 0, firstWinToday: null },
-    settings: { demoMode: false, animationSpeed: 1, reduceAnimations: false, logLevel: 1, defaultDifficulty: "normal", musicVolume: 0.5, sfxVolume: 0.7 },
+    settings: { demoMode: false, animationSpeed: 1, effectQuality: "auto", reduceAnimations: false, logLevel: 1, defaultDifficulty: "normal", musicVolume: 0.5, sfxVolume: 0.7 },
     decks: [],
     selectedDeckId: null,
     pityCounters: {},
@@ -88,7 +88,8 @@ export function enableDemoMode(collection, cardDatabase) {
     collection.currency.duelCoins = 999999;
     for (const card of cardDatabase) {
         if (card.enabled !== false) {
-            collection.cards[card.id] = (collection.cards[card.id] || 0) + 3;
+            // 幂等：每次启动都 +3 会让持有数变成 3N，超过 MAX_COPIES 上限。
+            collection.cards[card.id] = Math.max(collection.cards[card.id] || 0, MAX_COPIES);
         }
     }
 }

@@ -1,3 +1,4 @@
+import { applyStrategyRules } from "./strategy-card-rules.js";
 /**
  * catalog.js - 游戏使用的完整卡牌目录与插画映射
  */
@@ -10,12 +11,14 @@ import { PICTURE_SSR7_CARDS } from "./picture-ssr7.js?v=1.0.5";
 import { YGO_STARTER_CARDS } from "./ygo-starter.js";
 import { NIGHTCORD_ART, getArtById, getDefaultArt } from "./nightcord-art.js";
 import { normalizeCardPool } from "./card-rules.js?v=1.8.4";
+import { withCardImageSources } from "./card-images.js?v=1.0.0";
 
 const MEMBER_FALLBACK = {
     group: "nc_sp_ur_001",
 };
 
-export const ALL_CARDS = normalizeCardPool([...YGO_STARTER_CARDS, ...PICTURE_SSR7_CARDS, ...PICTURE_EXTENSION_CARDS, ...ELEMENT_CARDS, ...ANIME_CARDS, ...IMAGE_CARDS, ...GENERATED_CARDS]);
+// 归一化后再把卡图换成构建期生成的 WebP 缩略图（见 card-images.js）
+export const ALL_CARDS = withCardImageSources(normalizeCardPool([...YGO_STARTER_CARDS, ...PICTURE_SSR7_CARDS, ...PICTURE_EXTENSION_CARDS, ...ELEMENT_CARDS, ...ANIME_CARDS, ...IMAGE_CARDS, ...GENERATED_CARDS]).map(applyStrategyRules));
 export const NIGHTCORD_ONLY = ALL_CARDS.filter(card => card.series === "nightcord");
 
 export function getCardById(cardId) {
@@ -33,13 +36,17 @@ function getFallbackArt(card) {
 
 export function hydrateCardArt(card, selectedArtByCard = {}) {
     if (!card) return null;
-    if (card.series !== "nightcord" || card.id?.startsWith("gallery_")) return { ...card };
+    if (card.series !== "nightcord" || card.id?.startsWith("gallery_")) {
+        return { ...card };
+    }
 
     const selectedId = selectedArtByCard?.[card.id];
     const selected = selectedId ? getArtById(selectedId) : null;
     const art = selected || getDefaultArt(card.id) || getFallbackArt(card);
 
-    if (!art) return { ...card };
+    if (!art) {
+        return { ...card };
+    }
     return {
         ...card,
         image: art.image,

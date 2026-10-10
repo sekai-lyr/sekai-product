@@ -7,9 +7,20 @@ export class RandomSource {
     integer(min, max) { return Math.floor(this.next() * (max - min + 1)) + min; }
     pick(items) { return items.length > 0 ? items[this.integer(0, items.length - 1)] : null; }
     weightedPick(entries) {
-        let total = entries.reduce((s, e) => s + (e.weight || 1), 0);
+        // 权重为 0 必须表示"不会被抽中"。原来的 `e.weight || 1` 会把 0 变成 1，
+        // 于是保底期间被压到 0 的稀有度仍然各占 1 份权重（例如 pity>=50 时
+        // 本该只出 UR，实际变成 5 种稀有度均等）。
+        const weightOf = entry => {
+            const weight = Number(entry?.weight);
+            return Number.isFinite(weight) && weight > 0 ? weight : 0;
+        };
+        const total = entries.reduce((sum, entry) => sum + weightOf(entry), 0);
+        if (total <= 0) return entries.length > 0 ? entries[entries.length - 1].value : null;
         let roll = this.next() * total;
-        for (const e of entries) { roll -= (e.weight || 1); if (roll <= 0) return e.value; }
+        for (const entry of entries) {
+            roll -= weightOf(entry);
+            if (roll <= 0) return entry.value;
+        }
         return entries[entries.length - 1].value;
     }
     shuffle(items) {
@@ -29,8 +40,11 @@ export class RandomSource {
 export class SeededRandom extends RandomSource {
     constructor(seed) {
         super();
-        // 将种子转为4个32位状态
-        this._s = new Uint32Array(this._hashSeed(seed || Date.now()));
+        // 将种子转为4个32位状态。注意不能用 `seed || Date.now()`：
+        // 种子 0 或 "" 是合法种子，会被误判为"没有种子"而变成不确定的随机结果，
+        // 破坏"相同种子结果一致"的契约。
+        const effectiveSeed = seed === undefined || seed === null ? Date.now() : seed;
+        this._s = new Uint32Array(this._hashSeed(effectiveSeed));
     }
 
     _hashSeed(seed) {

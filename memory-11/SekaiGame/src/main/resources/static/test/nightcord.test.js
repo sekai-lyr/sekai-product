@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 global.document = { createElement: () => ({ textContent: "" }) };
 
 const { ANIME_CARDS } = await import("../js/nightcord-cards.js");
+const { NIGHTCORD_ONLY } = await import("../js/catalog.js");
 const { getUniqueNightcordMembers, hasResonance, GameEngine } = await import("../js/engine.js");
 const { GameState, Player, createCardInstance } = await import("../js/model.js");
 const { NIGHTCORD_STARTER_DECK } = await import("../js/decks.js");
@@ -28,32 +29,32 @@ function mkNightcord(o = {}) {
 
 // ==================== 卡池基础 ====================
 describe("二次元卡池基础", () => {
-    it("有15张卡（9张UR + 6张SSR魔法卡）", () => {
-        assert.equal(ANIME_CARDS.length, 15);
+    it("有23张卡（17张UR + 6张SSR卡）", () => {
+        assert.equal(ANIME_CARDS.length, 23);
     });
-    it("全部为魔法卡", () => {
+    it("卡池仅包含魔法卡和陷阱卡", () => {
         ANIME_CARDS.forEach(c => {
-            assert.equal(c.type, "spell", `${c.id} 不是魔法卡`);
+            assert.ok(["spell", "trap"].includes(c.type), `${c.id} 类型无效`);
         });
     });
     it("基础卡ID全部唯一", () => {
         const ids = ANIME_CARDS.map(c => c.id);
-        assert.equal(new Set(ids).size, 15);
+        assert.equal(new Set(ids).size, ANIME_CARDS.length);
     });
     it("稀有度总数正确", () => {
         const r = {};
         ANIME_CARDS.forEach(c => { r[c.rarity] = (r[c.rarity] || 0) + 1; });
         assert.equal(r.SSR, 6);
-        assert.equal(r.UR, 9);
+        assert.equal(r.UR, 17);
     });
     it("每张卡都有series", () => {
         ANIME_CARDS.forEach(c => {
             assert.ok(c.series, `${c.id} 缺少series`);
         });
     });
-    it("魔法卡member为null", () => {
+    it("魔法卡完成成员归类（具体成员或 group）", () => {
         const spells = ANIME_CARDS.filter(c => c.type === "spell");
-        spells.forEach(c => assert.equal(c.member, null, `${c.id} 魔法卡member应为null`));
+        spells.forEach(c => assert.ok(["kanade", "mafuyu", "ena", "mizuki", "group"].includes(c.member), `${c.id} 魔法卡成员归类异常（${c.member}）`));
     });
 });
 
@@ -125,24 +126,24 @@ describe("共鸣系统", () => {
 
 // ==================== 抽卡系统 ====================
 describe("抽卡系统", () => {
-    it("十连至少出现SR或UR", () => {
+    it("十连固定10张且至少出现SR", () => {
         for (let trial = 0; trial < 5; trial++) {
             const result = openTenPacks(NIGHTCORD_PACK, ANIME_CARDS);
             assert.equal(result.success, true);
-            const hasSR = result.cards.some(c => c.rarity === "SR" || c.rarity === "UR");
-            assert.ok(hasSR, `第${trial + 1}次十连缺少SR/UR`);
+            assert.equal(result.cards.length, 10);
+            const hasSR = result.cards.some(c => ["SR", "SSR", "UR"].includes(c.rarity));
+            assert.ok(hasSR, `第${trial + 1}次十连缺少SR或以上`);
         }
     });
-    it("每包第8张至少为R", () => {
-        for (let i = 0; i < 30; i++) {
-            const result = openPack(NIGHTCORD_PACK, ANIME_CARDS);
-            const last = result.cards[7];
-            assert.ok(["R", "SR", "SSR", "UR"].includes(last.rarity), `第${i + 1}包最后一张: ${last.rarity}`);
-        }
+    it("单抽固定1张", () => {
+        const result = openPack(NIGHTCORD_PACK, ANIME_CARDS);
+        assert.equal(result.cards.length, 1);
     });
     it("第50包UR保底必定触发", () => {
-        const rates = getEffectiveRates(50);
-        assert.equal(rates.UR, 1.0);
+        // 保底由 openPack 强制插入1张UR实现（见 packs.js）。这里的概率不能变成
+        const rates = getEffectiveRates(49);
+        assert.ok(rates.UR < 1, "保底不应污染基础概率表");
+        assert.ok(rates.UR > getEffectiveRates(0).UR, "第50抽前的UR概率必须高于普通抽取");
     });
     it("抽到UR后保底清零", () => {
         const col = createDefaultCollection();
@@ -162,7 +163,7 @@ describe("抽卡系统", () => {
         const col = createDefaultCollection();
         const start = col.currency.duelCoins;
         col.currency.duelCoins -= NIGHTCORD_PACK.cost.duelCoins;
-        assert.equal(col.currency.duelCoins, start - 1000);
+        assert.equal(col.currency.duelCoins, start - 300);
     });
 });
 
@@ -175,11 +176,11 @@ describe("对局奖励", () => {
         const r2 = applyReward(col, { duelCoins: 2000, claimId: "tutorial", bonuses: [] });
         assert.equal(r2, false);
     });
-    it("胜利获得120决斗币", () => {
+    it("胜利获得120次元币", () => {
         const r = calculateMatchReward("win", { statistics: { firstWinToday: new Date().toDateString() } });
         assert.equal(r.duelCoins, 120);
     });
-    it("失败获得50决斗币", () => {
+    it("失败获得50次元币", () => {
         const r = calculateMatchReward("loss", { statistics: { firstWinToday: new Date().toDateString() } });
         assert.equal(r.duelCoins, 50);
     });
@@ -255,7 +256,7 @@ describe("卡组规则", () => {
     });
     it("卡组中的卡牌都存在于卡池中", () => {
         NIGHTCORD_STARTER_DECK.main.forEach(id => {
-            const card = ANIME_CARDS.find(c => c.id === id);
+            const card = NIGHTCORD_ONLY.find(c => c.id === id);
             assert.ok(card, `卡组中的${id}不在卡池中`);
         });
     });

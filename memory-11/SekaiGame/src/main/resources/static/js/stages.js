@@ -1,32 +1,42 @@
-import { ALL_CARDS } from "./catalog.js?v=1.8.4";
+import { ALL_CARDS } from "./catalog.js?v=1.8.6-original";
 
 const RARITY_VALUE = { N: 1, R: 2, SR: 3, SSR: 4, UR: 5 };
+// effects 为旧式效果类型；actions 为主题动作（themedAction.action），两套都参与主题匹配。
 const THEMES = [
-    { key: "starter", name: "基础攻防", opponent: "见习决斗者", attributes: [], effects: ["buffSelfAttack", "drawCards", "destroyTarget"] },
-    { key: "flame", name: "烈焰强袭", opponent: "炎狱斗士", attributes: ["fire"], effects: ["directDamage", "doubleAttack", "damageAllEnemyMonsters"] },
-    { key: "ocean", name: "潮汐控制", opponent: "深海司祭", attributes: ["water"], effects: ["debuffEnemyAttack", "returnToHand", "freezeAll"] },
-    { key: "storm", name: "疾风连击", opponent: "岚之剑士", attributes: ["wind"], effects: ["doubleAttack", "groupDraw", "returnMultiple"] },
-    { key: "earth", name: "大地壁垒", opponent: "岩铠守门人", attributes: ["earth"], effects: ["buffSelfDefense", "protectAllies", "reduceDamage"] },
-    { key: "radiance", name: "辉光共鸣", opponent: "星辉奏者", attributes: ["light"], effects: ["healPlayer", "reviveRecentGraveyard", "groupBuff"] },
-    { key: "abyss", name: "暗渊处刑", opponent: "深渊执刑官", attributes: ["dark"], effects: ["temporaryBanish", "banishEnemyGraveyard", "destroyWeakest"] },
-    { key: "backrow", name: "秘术封锁", opponent: "机关策士", attributes: [], effects: ["destroySpellTrap", "destroyAllEnemySpellTraps", "counterDestroy"] },
-    { key: "resonance", name: "次元共鸣", opponent: "共鸣指挥家", attributes: ["light", "dark"], effects: ["tokenSummon", "reviveRecentGraveyard", "groupDraw"] },
-    { key: "finale", name: "终焉王座", opponent: "终焉决斗王", attributes: [], effects: ["freezeAll", "destroyAllEnemySpellTraps", "damageAllEnemyMonsters", "lockAttack"] },
+    { key: "starter", name: "基础攻防", opponent: "见习决斗者", attributes: [], effects: ["buffSelfAttack", "drawCards", "destroyTarget"], actions: ["charge", "study", "scout", "prepare", "ward"] },
+    { key: "flame", name: "烈焰强袭", opponent: "炎狱斗士", attributes: ["fire"], effects: ["directDamage", "doubleAttack", "damageAllEnemyMonsters"], actions: ["ignite", "burst", "detonate", "bomb", "pierce"] },
+    { key: "ocean", name: "潮汐控制", opponent: "深海司祭", attributes: ["water"], effects: ["debuffEnemyAttack", "returnToHand", "freezeAll"], actions: ["freeze", "sleep", "seal", "curse", "retreat"] },
+    { key: "storm", name: "疾风连击", opponent: "岚之剑士", attributes: ["wind"], effects: ["doubleAttack", "groupDraw", "returnMultiple"], actions: ["twin", "charge", "scout", "recycle"] },
+    { key: "earth", name: "大地壁垒", opponent: "岩铠守门人", attributes: ["earth"], effects: ["buffSelfDefense", "protectAllies", "reduceDamage"], actions: ["shelter", "ward", "sanctuary", "prepare"] },
+    { key: "radiance", name: "辉光共鸣", opponent: "星辉奏者", attributes: ["light"], effects: ["healPlayer", "reviveRecentGraveyard", "groupBuff"], actions: ["recover", "revive", "purify", "chorus"] },
+    { key: "abyss", name: "暗渊处刑", opponent: "深渊执刑官", attributes: ["dark"], effects: ["temporaryBanish", "banishEnemyGraveyard", "destroyWeakest"], actions: ["poison", "venom", "bleed", "exile", "devour"] },
+    { key: "backrow", name: "秘术封锁", opponent: "机关策士", attributes: [], effects: ["destroySpellTrap", "destroyAllEnemySpellTraps", "counterDestroy"], actions: ["disarm", "seal", "intercept", "mindgame", "dice"] },
+    { key: "resonance", name: "次元共鸣", opponent: "共鸣指挥家", attributes: ["light", "dark"], effects: ["tokenSummon", "reviveRecentGraveyard", "groupDraw"], actions: ["token", "deploy", "inherit", "chorus"] },
+    { key: "finale", name: "终焉王座", opponent: "终焉决斗王", attributes: [], effects: ["freezeAll", "destroyAllEnemySpellTraps", "damageAllEnemyMonsters", "lockAttack"], actions: ["domain", "timeStop", "burst", "detonate", "infinity", "reprisal", "twin"] },
 ];
 
 const CHAPTERS = [
-    { name: "启程篇", difficulty: "easy", rarities: ["N", "R"], skill: 1 },
-    { name: "进阶篇", difficulty: "normal", rarities: ["N", "R", "SR"], skill: 2 },
-    { name: "精英篇", difficulty: "hard", rarities: ["R", "SR", "SSR"], skill: 3 },
-    { name: "大师篇", difficulty: "expert", rarities: ["SR", "SSR", "UR"], skill: 4 },
-    { name: "极限篇", difficulty: "nightmare", rarities: ["N", "R", "SR", "SSR", "UR"], skill: 5 },
+    { name: "启程篇", difficulty: "easy", rarities: ["N", "R"], skill: 1, themes: [0, 1, 2] },
+    { name: "进阶篇", difficulty: "normal", rarities: ["N", "R", "SR"], skill: 2, themes: [1, 2, 3, 4, 5] },
+    { name: "精英篇", difficulty: "hard", rarities: ["R", "SR", "SSR"], skill: 3, themes: [3, 4, 5, 6, 7] },
+    { name: "大师篇", difficulty: "expert", rarities: ["SR", "SSR", "UR"], skill: 4, themes: [5, 6, 7, 8] },
+    { name: "极限篇", difficulty: "nightmare", rarities: ["SR", "SSR", "UR"], skill: 5, themes: [6, 7, 8, 9] },
 ];
+
+// 入门 N 卡池里少数卡（青眼/黑魔导/圣防）身材与清场效果远超 N 稀有度，
+// 且玩家无法从卡包获得；混入关卡会破坏难度曲线，统一从关卡配牌中剔除。
+function isStageLegalCard(card) {
+    if (card.series !== "starter_ygo") return true;
+    if (Number(card.attack || 0) >= 2400) return false;
+    return !(card.effects || []).some(effect => /destroyAll/.test(String(effect.type || "")));
+}
 
 export const AI_STAGES = Array.from({ length: 50 }, (_, index) => {
     const order = index + 1;
     const chapterIndex = Math.floor(index / 10);
-    const theme = THEMES[index % THEMES.length];
     const chapter = CHAPTERS[chapterIndex];
+    const chapterThemes = chapter.themes.map(themeIndex => THEMES[themeIndex]);
+    const theme = chapterThemes[index % chapterThemes.length];
     const withinChapter = index % 10;
     const power = Math.min(1, 0.18 + index * 0.0165);
     return {
@@ -38,6 +48,7 @@ export const AI_STAGES = Array.from({ length: 50 }, (_, index) => {
         theme: theme.key,
         themeAttributes: theme.attributes,
         themeEffects: theme.effects,
+        themeActions: theme.actions,
         difficulty: chapter.difficulty,
         reward: 250 + order * 55 + (withinChapter === 9 ? 500 : 0),
         rarities: chapter.rarities,
@@ -59,10 +70,26 @@ function effectTypes(card) {
     return (card.effects || []).map(effect => effect.type).filter(Boolean);
 }
 
+function effectActions(card) {
+    return (card.effects || []).map(effect => effect.action).filter(Boolean);
+}
+
+function themeMatchCount(card, stage) {
+    const types = effectTypes(card);
+    const actions = effectActions(card);
+    const typeMatches = types.filter(type => stage.themeEffects?.includes(type)).length;
+    const actionMatches = actions.filter(action => stage.themeActions?.includes(action)).length;
+    return typeMatches + actionMatches;
+}
+
+function cardMatchesTheme(card, stage) {
+    return Boolean(stage.themeAttributes?.includes(card.attribute)) || themeMatchCount(card, stage) > 0;
+}
+
 export function scoreCardForStage(card, stage) {
     const rarity = RARITY_VALUE[card.rarity] || 1;
     const effects = effectTypes(card);
-    const themeMatches = effects.filter(type => stage.themeEffects?.includes(type)).length;
+    const themeMatches = themeMatchCount(card, stage);
     const attributeMatch = stage.themeAttributes?.includes(card.attribute) ? 1 : 0;
     const priority = Number(card.aiHints?.priority || 0);
     if (card.type === "monster") {
@@ -87,8 +114,7 @@ function selectCopies(pool, count, stage, copies, maxCopies = 3) {
     const ranked = rankedPool(pool, stage);
     if (!ranked.length || count <= 0) return [];
     const windowSize = Math.min(ranked.length, Math.max(7, Math.ceil(count * (0.75 - stage.power * 0.35))));
-    const isThemed = card => stage.themeAttributes?.includes(card.attribute)
-        || effectTypes(card).some(type => stage.themeEffects?.includes(type));
+    const isThemed = card => cardMatchesTheme(card, stage);
     const themed = ranked.filter(isThemed);
     const other = ranked.filter(card => !isThemed(card));
     const themeSlots = Math.min(themed.length, Math.max(3, Math.ceil(windowSize * 0.55)));
@@ -111,7 +137,7 @@ function selectCopies(pool, count, stage, copies, maxCopies = 3) {
 }
 
 export function buildStageDeck(stage) {
-    const enabled = ALL_CARDS.filter(card => card.enabled !== false && stage.rarities.includes(card.rarity));
+    const enabled = ALL_CARDS.filter(card => card.enabled !== false && isStageLegalCard(card) && stage.rarities.includes(card.rarity));
     const monsterPool = enabled.filter(card => card.type === "monster" && Number(card.level || 0) <= stage.maxLevel);
     const lowLevel = monsterPool.filter(card => Number(card.level || 0) <= 4);
     const midLevel = monsterPool.filter(card => Number(card.level || 0) >= 5 && Number(card.level || 0) <= 6);
@@ -145,8 +171,7 @@ export function evaluateStageDeck(stage, deck = buildStageDeck(stage)) {
     const cards = deck.main.map(id => ALL_CARDS.find(card => card.id === id)).filter(Boolean);
     const monsters = cards.filter(card => card.type === "monster");
     const lowLevel = monsters.filter(card => Number(card.level || 0) <= 4).length;
-    const themed = cards.filter(card => effectTypes(card).some(type => stage.themeEffects?.includes(type))
-        || stage.themeAttributes?.includes(card.attribute)).length;
+    const themed = cards.filter(card => cardMatchesTheme(card, stage)).length;
     const averageScore = cards.reduce((sum, card) => sum + scoreCardForStage(card, stage), 0) / Math.max(1, cards.length);
     return {
         size: cards.length,

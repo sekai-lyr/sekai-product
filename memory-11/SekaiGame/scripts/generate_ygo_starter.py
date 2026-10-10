@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 JSON_OUTPUT = ROOT / "src/main/resources/card-data/ygo-starter.json"
 JS_OUTPUT = ROOT / "src/main/resources/static/js/ygo-starter.js"
 IMAGE_DIR = ROOT / "src/main/resources/static/assets/cards/ygo-starter"
+SIGNATURE_PATH = ROOT / "src/main/resources/card-data/ygo-starter-signatures.json"
 
 MONSTERS = [
     (89631139, "青眼白龙"), (46986414, "黑魔导"), (74677422, "真红眼黑龙"),
@@ -70,6 +71,12 @@ def effect(trigger, effect_type, value, description, selector=None):
     return item
 
 
+def load_signatures():
+    if not SIGNATURE_PATH.exists():
+        return {}
+    return json.loads(SIGNATURE_PATH.read_text(encoding="utf-8"))
+
+
 def fetch_cards():
     ids = [card[0] for card in MONSTERS + SPELLS + TRAPS]
     response = requests.get(
@@ -91,12 +98,14 @@ def download_image(card_id, source_url):
 
 def build():
     source = fetch_cards()
+    signatures = load_signatures()
     IMAGE_DIR.mkdir(parents=True, exist_ok=True)
     cards = []
 
     for card_id, name in MONSTERS:
         raw = source[card_id]
         download_image(card_id, raw["card_images"][0]["image_url_cropped"])
+        effects = signatures.get(f"ygo_n_{card_id}", [])
         cards.append({
             "id": f"ygo_n_{card_id}", "name": name, "series": "starter_ygo",
             "type": "monster", "attribute": raw.get("attribute", "DARK").lower(),
@@ -104,7 +113,7 @@ def build():
             "attack": raw.get("atk", 0), "defense": raw.get("def", 0), "rarity": "N",
             "cost": 0, "description": "",
             "image": f"./assets/cards/ygo-starter/{card_id}.jpg", "enabled": True,
-            "effectsJson": "[]",
+            "effectsJson": json.dumps(effects, ensure_ascii=False),
         })
 
     for card_id, name, effect_type, value, description in SPELLS:
@@ -114,6 +123,7 @@ def build():
         effects = [effect("manual", effect_type, value, description, selector if effect_type in {
             "destroyTarget", "debuffEnemyAttack", "debuffEnemyDefense", "lockAttack"
         } else None)]
+        effects = signatures.get(f"ygo_n_{card_id}", effects)
         cards.append({
             "id": f"ygo_n_{card_id}", "name": name, "series": "starter_ygo",
             "type": "spell", "attribute": "light", "race": None, "level": 0,
@@ -126,6 +136,7 @@ def build():
         raw = source[card_id]
         download_image(card_id, raw["card_images"][0]["image_url_cropped"])
         effects = [effect("onAttacked", effect_type, value, description)]
+        effects = signatures.get(f"ygo_n_{card_id}", effects)
         cards.append({
             "id": f"ygo_n_{card_id}", "name": name, "series": "starter_ygo",
             "type": "trap", "attribute": "dark", "race": None, "level": 0,

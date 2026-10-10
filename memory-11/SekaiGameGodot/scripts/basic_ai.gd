@@ -19,7 +19,7 @@ func take_turn(engine: DuelEngine, player_index := 1) -> void:
 			var attacker_index := _next_attacker(engine.state.players[player_index].monster_zone)
 			if attacker_index < 0: break
 			var targets: Array = engine.state.players[engine.state.opponent_of(player_index)].monster_zone
-			engine.attack(player_index, attacker_index, 0 if not targets.is_empty() else -1)
+			if not engine.attack(player_index, attacker_index, 0 if not targets.is_empty() else -1): break
 	engine.end_turn(player_index)
 
 func _next_attacker(monsters: Array) -> int:

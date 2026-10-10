@@ -11,11 +11,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 2500,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：破坏对方场上全部怪兽。",
     "image": "./assets/cards/ygo-starter/89631139.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "destroyAllEnemyMonsters",
+        "value": 0,
+        "skillName": "毁灭的爆裂疾风弹",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：破坏对方场上全部怪兽。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_46986414",
@@ -29,11 +39,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 2100,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：破坏对方场上全部魔法与陷阱卡。",
     "image": "./assets/cards/ygo-starter/46986414.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "destroyAllEnemySpellTraps",
+        "value": 0,
+        "skillName": "黑·魔·导",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：破坏对方场上全部魔法与陷阱卡。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_74677422",
@@ -47,11 +67,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 2000,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：给予对方1200点伤害。",
     "image": "./assets/cards/ygo-starter/74677422.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "directDamage",
+        "value": 1200,
+        "skillName": "黑炎弹",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：给予对方1200点伤害。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_70781052",
@@ -65,11 +95,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1200,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：对方全部怪兽攻击力下降700。",
     "image": "./assets/cards/ygo-starter/70781052.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "debuffAllEnemyAttack",
+        "value": 700,
+        "skillName": "魔降雷",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：对方全部怪兽攻击力下降700。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_91152256",
@@ -83,11 +123,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1200,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：己方场上每有1只怪兽，这张卡攻击力上升250。",
     "image": "./assets/cards/ygo-starter/91152256.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "gainAttackByCount",
+        "value": 250,
+        "skillName": "剑舞连斩",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：己方场上每有1只怪兽，这张卡攻击力上升250。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_15025844",
@@ -101,11 +151,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 2000,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：回复900LP。",
     "image": "./assets/cards/ygo-starter/15025844.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "healPlayer",
+        "value": 900,
+        "skillName": "圣泉祝福",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：回复900LP。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_5053103",
@@ -119,11 +179,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1000,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：这张卡攻击力上升600。",
     "image": "./assets/cards/ygo-starter/5053103.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "buffSelfAttack",
+        "value": 600,
+        "skillName": "巨斧粉碎",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：这张卡攻击力上升600。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_32452818",
@@ -137,11 +207,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1500,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：这张卡守备力上升700。",
     "image": "./assets/cards/ygo-starter/32452818.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "buffSelfDefense",
+        "value": 700,
+        "skillName": "筑坝壁垒",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：这张卡守备力上升700。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_13039848",
@@ -155,11 +235,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 2000,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：直到下个回合开始，这张卡不会成为对方效果的对象。",
     "image": "./assets/cards/ygo-starter/13039848.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "targetProtect",
+        "value": 0,
+        "skillName": "磐岩壁障",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：直到下个回合开始，这张卡不会成为对方效果的对象。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_76812113",
@@ -173,11 +263,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1400,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：特殊召唤1只攻击力与守备力均为700的衍生物。",
     "image": "./assets/cards/ygo-starter/76812113.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "tokenSummon",
+        "value": 700,
+        "skillName": "女郎幻影",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：特殊召唤1只攻击力与守备力均为700的衍生物。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_97590747",
@@ -191,11 +291,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1000,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "被破坏时：对方随机丢弃1张手牌。",
     "image": "./assets/cards/ygo-starter/97590747.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onDestroyed",
+        "type": "discardCards",
+        "value": 1,
+        "skillName": "鬼火惊扰",
+        "skillLabel": "遗志技",
+        "description": "被破坏时：对方随机丢弃1张手牌。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_23771716",
@@ -209,11 +319,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 800,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：对方攻击力最高的怪兽守备力下降600，守备力变为0则破坏。",
     "image": "./assets/cards/ygo-starter/23771716.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "debuffEnemyDefense",
+        "value": 600,
+        "skillName": "虹鳞蚀甲",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：对方攻击力最高的怪兽守备力下降600，守备力变为0则破坏。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "highestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_85639257",
@@ -227,11 +353,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 2000,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：将对方攻击力最高的怪兽暂时除外，回合结束时返回。",
     "image": "./assets/cards/ygo-starter/85639257.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "temporaryBanish",
+        "value": 0,
+        "skillName": "水镜放逐",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：将对方攻击力最高的怪兽暂时除外，回合结束时返回。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "highestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_48305365",
@@ -245,11 +387,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 1150,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：对方攻击力最高的怪兽守备力下降500，自己回复实际减少的数值。",
     "image": "./assets/cards/ygo-starter/48305365.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "damageAndHeal",
+        "value": 500,
+        "skillName": "血斧斩",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：对方攻击力最高的怪兽守备力下降500，自己回复实际减少的数值。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "highestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_69140098",
@@ -263,11 +421,28 @@ export const YGO_STARTER_CARDS = [
     "defense": 900,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：从卡组将1只怪兽加入手牌。",
     "image": "./assets/cards/ygo-starter/69140098.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "searchDeck",
+        "value": 1,
+        "skillName": "精灵引导",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：从卡组将1只怪兽加入手牌。",
+        "target": {
+          "owner": "self",
+          "zone": "deck",
+          "filters": {
+            "type": "monster"
+          }
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_49881766",
@@ -281,11 +456,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1500,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "被破坏时：双方各受到400点伤害。",
     "image": "./assets/cards/ygo-starter/49881766.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onDestroyed",
+        "type": "damageBothPlayers",
+        "value": 400,
+        "skillName": "地狱契约",
+        "skillLabel": "遗志技",
+        "description": "被破坏时：双方各受到400点伤害。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_14898066",
@@ -299,11 +484,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1200,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：从对方墓地除外最多2张卡。",
     "image": "./assets/cards/ygo-starter/14898066.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "banishEnemyGraveyard",
+        "value": 2,
+        "skillName": "噬魂",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：从对方墓地除外最多2张卡。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_11091375",
@@ -317,11 +512,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 1600,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：将对方攻击力最高的怪兽返回手牌。",
     "image": "./assets/cards/ygo-starter/11091375.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "returnToHand",
+        "value": 1,
+        "skillName": "宝石风暴",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：将对方攻击力最高的怪兽返回手牌。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "highestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_16587243",
@@ -335,11 +546,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 1700,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：对方攻击力最高的怪兽攻击力下降600。",
     "image": "./assets/cards/ygo-starter/16587243.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "debuffEnemyAttack",
+        "value": 600,
+        "skillName": "腐蚀粘液",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：对方攻击力最高的怪兽攻击力下降600。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "highestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_37265642",
@@ -353,11 +580,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 500,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：破坏对方攻击力最低的怪兽。",
     "image": "./assets/cards/ygo-starter/37265642.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "destroyTarget",
+        "value": 0,
+        "skillName": "三角突袭",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：破坏对方攻击力最低的怪兽。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "lowestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_7359741",
@@ -371,11 +614,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 800,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：给予对方600点直接伤害。",
     "image": "./assets/cards/ygo-starter/7359741.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "directAttackDamage",
+        "value": 600,
+        "skillName": "穿甲弹",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：给予对方600点直接伤害。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_69247929",
@@ -389,11 +642,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 100,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：己方攻击力最高的怪兽攻击力与守备力上升400。",
     "image": "./assets/cards/ygo-starter/69247929.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "modifyStat",
+        "value": 400,
+        "skillName": "野性基因",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：己方攻击力最高的怪兽攻击力与守备力上升400。",
+        "target": {
+          "owner": "self",
+          "zone": "monster",
+          "selector": "highestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_43096270",
@@ -407,11 +676,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 100,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：己方场上全部怪兽攻击力上升300。",
     "image": "./assets/cards/ygo-starter/43096270.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "buffAllAlliesAttack",
+        "value": 300,
+        "skillName": "翠玉辉光",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：己方场上全部怪兽攻击力上升300。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_58831685",
@@ -425,11 +704,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 800,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：对方攻击力最高的怪兽本回合不能攻击。",
     "image": "./assets/cards/ygo-starter/58831685.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "cannotAttack",
+        "value": 1,
+        "skillName": "深海缠绕",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：对方攻击力最高的怪兽本回合不能攻击。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "highestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_49003308",
@@ -443,11 +738,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 1000,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：对方攻击力最低的怪兽攻击力下降400。",
     "image": "./assets/cards/ygo-starter/49003308.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "debuffEnemyAttack",
+        "value": 400,
+        "skillName": "蛮力震慑",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：对方攻击力最低的怪兽攻击力下降400。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "lowestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_42071342",
@@ -461,11 +772,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1500,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：破坏对方1张魔法或陷阱卡。",
     "image": "./assets/cards/ygo-starter/42071342.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "destroySpellTrap",
+        "value": 1,
+        "skillName": "暗潮破阵",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：破坏对方1张魔法或陷阱卡。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_30532390",
@@ -479,11 +800,31 @@ export const YGO_STARTER_CARDS = [
     "defense": 600,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：从卡组将1只光属性怪兽加入手牌。",
     "image": "./assets/cards/ygo-starter/30532390.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "searchDeck",
+        "value": 1,
+        "skillName": "天眼侦察",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：从卡组将1只光属性怪兽加入手牌。",
+        "target": {
+          "owner": "self",
+          "zone": "deck",
+          "filters": {
+            "type": "monster",
+            "attribute": [
+              "light"
+            ]
+          }
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_66672569",
@@ -497,11 +838,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 0,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "被破坏时：己方1只4星以下怪兽攻击力与守备力上升400。",
     "image": "./assets/cards/ygo-starter/66672569.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onDestroyed",
+        "type": "buffAllyOnDestroy",
+        "value": 400,
+        "skillName": "腐龙遗念",
+        "skillLabel": "遗志技",
+        "description": "被破坏时：己方1只4星以下怪兽攻击力与守备力上升400。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_20277860",
@@ -515,11 +866,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 0,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "被破坏时：回复600LP。",
     "image": "./assets/cards/ygo-starter/20277860.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onDestroyed",
+        "type": "healPlayer",
+        "value": 600,
+        "skillName": "不死执念",
+        "skillLabel": "遗志技",
+        "description": "被破坏时：回复600LP。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_92667214",
@@ -533,11 +894,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 0,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：对方随机丢弃1张手牌。",
     "image": "./assets/cards/ygo-starter/92667214.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "discardCards",
+        "value": 1,
+        "skillName": "惊悚戏法",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：对方随机丢弃1张手牌。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_41392891",
@@ -551,11 +922,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1400,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：己方有盖放的后场时守备力上升400，否则攻击力上升400。",
     "image": "./assets/cards/ygo-starter/41392891.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "conditionalBuff",
+        "value": 400,
+        "skillName": "恶魔契约",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：己方有盖放的后场时守备力上升400，否则攻击力上升400。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_90357090",
@@ -569,11 +950,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 800,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：这张卡攻击力上升400。",
     "image": "./assets/cards/ygo-starter/90357090.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "buffSelfAttack",
+        "value": 400,
+        "skillName": "银牙撕咬",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：这张卡攻击力上升400。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_87796900",
@@ -587,11 +978,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1200,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：本回合只要己方场上还有其他怪兽，对方就不能攻击这张卡。",
     "image": "./assets/cards/ygo-starter/87796900.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "priorityTarget",
+        "value": 0,
+        "skillName": "要塞守护",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：本回合只要己方场上还有其他怪兽，对方就不能攻击这张卡。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_28279543",
@@ -605,11 +1006,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1500,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "被破坏时：给予对方600点伤害。",
     "image": "./assets/cards/ygo-starter/28279543.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onDestroyed",
+        "type": "directDamage",
+        "value": 600,
+        "skillName": "诅咒之焰",
+        "skillLabel": "遗志技",
+        "description": "被破坏时：给予对方600点伤害。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_6368038",
@@ -623,11 +1034,27 @@ export const YGO_STARTER_CARDS = [
     "defense": 2100,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：破坏对方攻击力最高的怪兽。",
     "image": "./assets/cards/ygo-starter/6368038.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "destroyTarget",
+        "value": 0,
+        "skillName": "螺旋枪杀",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：破坏对方攻击力最高的怪兽。",
+        "target": {
+          "owner": "opponent",
+          "zone": "monster",
+          "selector": "highestAttack",
+          "count": 1
+        },
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_30113682",
@@ -641,11 +1068,21 @@ export const YGO_STARTER_CARDS = [
     "defense": 1500,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "召唤成功时：本回合追加1次通常召唤。",
     "image": "./assets/cards/ygo-starter/30113682.jpg",
     "enabled": true,
-    "effectsJson": "[]",
-    "effects": []
+    "effects": [
+      {
+        "trigger": "onSummon",
+        "type": "additionalNormalSummon",
+        "value": 1,
+        "skillName": "最终审判",
+        "skillLabel": "登场技",
+        "description": "召唤成功时：本回合追加1次通常召唤。",
+        "oncePerTurn": true,
+        "hardOncePerTurn": true
+      }
+    ]
   },
   {
     "id": "ygo_n_53129443",
@@ -662,7 +1099,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/53129443.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"destroyTarget\", \"value\": 0, \"description\": \"破坏对方场上攻击力最高的1只怪兽。\", \"target\": {\"owner\": \"opponent\", \"zone\": \"monster\", \"selector\": \"highestAttack\", \"count\": 1}}]",
     "effects": [
       {
         "trigger": "manual",
@@ -693,7 +1129,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/83764718.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"recoverMonster\", \"value\": 0, \"description\": \"将自己墓地1只怪兽加入手牌。\"}]",
     "effects": [
       {
         "trigger": "manual",
@@ -718,7 +1153,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/66788016.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"destroyTarget\", \"value\": 0, \"description\": \"破坏对方场上攻击力最低的1只怪兽。\", \"target\": {\"owner\": \"opponent\", \"zone\": \"monster\", \"selector\": \"lowestAttack\", \"count\": 1}}]",
     "effects": [
       {
         "trigger": "manual",
@@ -749,7 +1183,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/19159413.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"destroySpellTrap\", \"value\": 0, \"description\": \"破坏对方场上1张魔法或陷阱卡。\"}]",
     "effects": [
       {
         "trigger": "manual",
@@ -774,7 +1207,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/51482758.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"destroySpellTrap\", \"value\": 0, \"description\": \"破坏对方场上1张盖放卡。\"}]",
     "effects": [
       {
         "trigger": "manual",
@@ -796,16 +1228,15 @@ export const YGO_STARTER_CARDS = [
     "defense": 0,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "抽2张卡。",
     "image": "./assets/cards/ygo-starter/55144522.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"drawCards\", \"value\": 1, \"description\": \"抽1张卡。\"}]",
     "effects": [
       {
         "trigger": "manual",
         "type": "drawCards",
-        "value": 1,
-        "description": "抽1张卡。"
+        "value": 2,
+        "description": "抽2张卡。"
       }
     ]
   },
@@ -821,16 +1252,15 @@ export const YGO_STARTER_CARDS = [
     "defense": 0,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "抽3张卡。",
     "image": "./assets/cards/ygo-starter/79571449.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"drawCards\", \"value\": 1, \"description\": \"抽1张卡。\"}]",
     "effects": [
       {
         "trigger": "manual",
         "type": "drawCards",
-        "value": 1,
-        "description": "抽1张卡。"
+        "value": 3,
+        "description": "抽3张卡。"
       }
     ]
   },
@@ -849,7 +1279,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/72302403.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"lockAttack\", \"value\": 1, \"description\": \"对方攻击力最高的怪兽本回合不能攻击。\", \"target\": {\"owner\": \"opponent\", \"zone\": \"monster\", \"selector\": \"highestAttack\", \"count\": 1}}]",
     "effects": [
       {
         "trigger": "manual",
@@ -880,7 +1309,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/4031928.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"debuffEnemyAttack\", \"value\": 500, \"description\": \"对方攻击力最高的怪兽攻击力下降500。\", \"target\": {\"owner\": \"opponent\", \"zone\": \"monster\", \"selector\": \"highestAttack\", \"count\": 1}}]",
     "effects": [
       {
         "trigger": "manual",
@@ -911,7 +1339,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/19523799.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"directDamage\", \"value\": 500, \"description\": \"给予对方500点伤害。\"}]",
     "effects": [
       {
         "trigger": "manual",
@@ -936,7 +1363,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/84257639.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"healPlayer\", \"value\": 800, \"description\": \"回复800LP。\"}]",
     "effects": [
       {
         "trigger": "manual",
@@ -961,7 +1387,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/25880422.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"manual\", \"type\": \"debuffEnemyDefense\", \"value\": 500, \"description\": \"对方守备力最高的怪兽守备力下降500。\", \"target\": {\"owner\": \"opponent\", \"zone\": \"monster\", \"selector\": \"highestAttack\", \"count\": 1}}]",
     "effects": [
       {
         "trigger": "manual",
@@ -992,7 +1417,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/4206964.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"destroyAttacker\", \"value\": 0, \"description\": \"对方攻击宣言时：破坏攻击怪兽。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1014,16 +1438,15 @@ export const YGO_STARTER_CARDS = [
     "defense": 0,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "对方攻击宣言时：那次攻击无效，并破坏对方全部攻击表示怪兽。",
     "image": "./assets/cards/ygo-starter/44095762.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"destroyAttacker\", \"value\": 0, \"description\": \"对方攻击宣言时：破坏攻击怪兽。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
-        "type": "destroyAttacker",
+        "type": "destroyAllAttackers",
         "value": 0,
-        "description": "对方攻击宣言时：破坏攻击怪兽。"
+        "description": "对方攻击宣言时：那次攻击无效，并破坏对方全部攻击表示怪兽。"
       }
     ]
   },
@@ -1042,7 +1465,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/12607053.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"reduceDamage\", \"value\": 1000, \"description\": \"对方攻击宣言时：本次伤害减少1000。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1067,7 +1489,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/17814387.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"buffSelfAttack\", \"value\": 500, \"description\": \"受到攻击时：己方怪兽攻击力上升500。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1092,7 +1513,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/44209392.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"buffSelfDefense\", \"value\": 500, \"description\": \"受到攻击时：己方怪兽守备力上升500。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1114,16 +1534,15 @@ export const YGO_STARTER_CARDS = [
     "defense": 0,
     "rarity": "N",
     "cost": 0,
-    "description": "",
+    "description": "对方攻击宣言时：那次攻击无效，并反击700点伤害。",
     "image": "./assets/cards/ygo-starter/83887306.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"destroyAttacker\", \"value\": 0, \"description\": \"对方攻击宣言时：破坏攻击怪兽。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
-        "type": "destroyAttacker",
-        "value": 0,
-        "description": "对方攻击宣言时：破坏攻击怪兽。"
+        "type": "counterAndDamage",
+        "value": 700,
+        "description": "对方攻击宣言时：那次攻击无效，并反击700点伤害。"
       }
     ]
   },
@@ -1142,7 +1561,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/80604091.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"healPlayer\", \"value\": 500, \"description\": \"受到攻击时：回复500LP。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1167,7 +1585,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/24068492.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"directDamage\", \"value\": 400, \"description\": \"对方攻击宣言时：给予对方400点伤害。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1192,7 +1609,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/77622396.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"reduceDamage\", \"value\": 800, \"description\": \"对方攻击宣言时：本次伤害减少800。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1217,7 +1633,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/50045299.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"cannotAttack\", \"value\": 1, \"description\": \"对方攻击宣言时：攻击怪兽本回合不能再次攻击。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1242,7 +1657,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/96355986.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"reflectDamage\", \"value\": 500, \"description\": \"对方攻击宣言时：反射500点伤害。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",
@@ -1267,7 +1681,6 @@ export const YGO_STARTER_CARDS = [
     "description": "",
     "image": "./assets/cards/ygo-starter/77414722.jpg",
     "enabled": true,
-    "effectsJson": "[{\"trigger\": \"onAttacked\", \"type\": \"reduceDamage\", \"value\": 1200, \"description\": \"对方攻击宣言时：本次伤害减少1200。\"}]",
     "effects": [
       {
         "trigger": "onAttacked",

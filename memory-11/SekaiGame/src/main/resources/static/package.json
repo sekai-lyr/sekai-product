@@ -5,11 +5,16 @@
   "type": "module",
   "scripts": {
     "start": "node scripts/server.mjs",
-    "test": "node --test test/*.test.js",
-    "check": "node --check js/main.js && node --check js/app.js && node --check js/ui.js && node --check js/controller.js && node --check js/engine.js",
-    "selftest": "node scripts/self-play.mjs"
+    "pvp": "node scripts/pvp-server.mjs",
+    "test": "node --test test/*.test.js && node --test ../../../test/js/*.test.js && node ../../../../scripts/test-ai-stages.mjs",
+    "check": "node -e \"const{readdirSync}=require('fs');const{execFileSync}=require('child_process');let bad=0;for(const d of ['js','scripts','test'])for(const f of readdirSync(d).filter(x=>/\\.(js|mjs)$/.test(x))){try{execFileSync(process.execPath,['--check',`${d}/${f}`]);}catch{bad++;console.error('语法错误:',`${d}/${f}`);}}process.exit(bad?1:0)\"",
+    "selftest": "node scripts/self-play.mjs",
+    "fuzz": "node scripts/fuzz-invariants.mjs 120",
+    "balance": "node scripts/self-play-balance.mjs 40",
+    "verify": "npm run check && npm test && npm run fuzz && npm run selftest"
   },
   "dependencies": {
+    "animejs": "^4.5.0",
     "ws": "^8.21.1"
   }
 }

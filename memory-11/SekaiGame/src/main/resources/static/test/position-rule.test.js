@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { GameState, Player, createCardInstance } from "../js/model.js";
 import { GameEngine } from "../js/engine.js";
-import { MONSTER_POSITION, PHASE } from "../js/constants.js";
+import { MONSTER_POSITION, PHASE, GAME_CONFIG } from "../js/constants.js";
 
 function createMonster() {
     return createCardInstance({
@@ -37,12 +37,33 @@ function setup() {
 }
 
 describe("攻击与表示形式选择规则", () => {
-    it("召唤后未攻击可以选择转为守备", () => {
+    it("官方规则下（开关关闭）召唤当回合不能手动转为守备", () => {
         const { state, engine, monster } = setup();
-        const result = engine.changePosition(state.players[0], monster);
-        assert.equal(result.success, true);
-        assert.equal(monster.position, MONSTER_POSITION.DEFENSE);
-        assert.equal(monster.canAttack, false);
+        const original = GAME_CONFIG.ALLOW_SUMMON_TURN_POSITION_CHANGE;
+        GAME_CONFIG.ALLOW_SUMMON_TURN_POSITION_CHANGE = false;
+        try {
+            const result = engine.changePosition(state.players[0], monster);
+            assert.equal(result.success, false);
+            assert.equal(monster.position, MONSTER_POSITION.ATTACK);
+            assert.equal(monster.canAttack, true);
+        } finally {
+            GAME_CONFIG.ALLOW_SUMMON_TURN_POSITION_CHANGE = original;
+        }
+    });
+
+    it("开关打开后召唤当回合可转守备，转后本回合不能攻击", () => {
+        const { state, engine, monster } = setup();
+        const original = GAME_CONFIG.ALLOW_SUMMON_TURN_POSITION_CHANGE;
+        GAME_CONFIG.ALLOW_SUMMON_TURN_POSITION_CHANGE = true;
+        try {
+            const result = engine.changePosition(state.players[0], monster);
+            assert.equal(result.success, true);
+            assert.equal(monster.position, MONSTER_POSITION.DEFENSE);
+            assert.equal(monster.positionChangedThisTurn, true);
+            assert.equal(monster.canAttack, false, "转为守备后本回合不能再攻击");
+        } finally {
+            GAME_CONFIG.ALLOW_SUMMON_TURN_POSITION_CHANGE = original;
+        }
     });
 
     it("攻击过后不能再转为守备", () => {

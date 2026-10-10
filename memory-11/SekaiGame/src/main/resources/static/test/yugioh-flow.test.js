@@ -108,7 +108,159 @@ describe("游戏王式核心回合", () => {
         state.players[0].monsterZone = [attacker];
         controller.selectAttacker(attacker);
         assert.equal(state.phase, PHASE.BATTLE);
+        assert.equal(state.selectedAttacker, null);
+        assert.equal(attacker.hasAttackedThisTurn, true);
+        assert.equal(state.players[1].lp, 6400);
+    });
+
+    test("选择攻击后取消可回到主要阶段发动主动技，且不消耗攻击机会", () => {
+        const { state, engine } = makeGame();
+        const ui = uiStub();
+        const controller = new GameController(state, engine, ui);
+        controller.mode = "local";
+        state.currentPlayerIndex = 0;
+        state.turn = 3;
+        state.firstTurn = false;
+        state.phase = PHASE.MAIN_1;
+        const attacker = createCardInstance(monster("cancel_attack", 4, 1600, 1200, {
+            rulesVersion: "test",
+            effects: [{ type: "themedAction", action: "charge", trigger: "manual", oncePerTurn: true, hardOncePerTurn: true }],
+        }));
+        attacker.canAttack = true;
+        state.players[0].monsterZone = [attacker];
+        state.players[1].monsterZone = [createCardInstance(monster("target", 4, 1000))];
+
+        controller.selectAttacker(attacker);
+        assert.equal(state.phase, PHASE.BATTLE);
         assert.equal(state.selectedAttacker, attacker);
+        controller.cancelAttackSelection();
+        assert.equal(state.phase, PHASE.MAIN_1);
+        assert.equal(state.selectedAttacker, null);
+        assert.equal(attacker.hasAttackedThisTurn, false);
+
+        controller.activateMonsterEffect(attacker, 0);
+        assert.equal(attacker.themedState.charges, 1);
+        assert.equal(attacker.canAttack, true);
+        assert.equal(attacker.hasAttackedThisTurn, false);
+        assert.ok(ui.logs.some(message => message.includes("已取消攻击")));
+    });
+
+    test("主动技进入目标选择阶段后仍能对所选目标结算", () => {
+        const { state, engine } = makeGame();
+        state.currentPlayerIndex = 0;
+        state.turn = 3;
+        state.firstTurn = false;
+        state.phase = PHASE.TARGET_SELECT;
+        const source = createCardInstance(monster("targeted_effect", 4, 1500, 1200, {
+            rulesVersion: "test",
+            effects: [{ type: "themedAction", action: "bomb", trigger: "manual", oncePerTurn: true, hardOncePerTurn: true }],
+        }));
+        const target = createCardInstance(monster("chosen_target"));
+        state.players[0].monsterZone = [source];
+        state.players[1].monsterZone = [target];
+
+        const message = engine.triggerAllEffects(state.players[0], source, "manual", { effectIndex: 0, selectedTarget: target });
+        assert.match(message, /爆破标记/);
+        assert.equal(target.themedState.bombTurn, 3);
+    });
+
+    test("尚未确认攻击时直接召唤仍处于主要阶段1，新怪兽当回合可攻击", () => {
+        const { state, engine } = makeGame();
+        const controller = new GameController(state, engine, uiStub());
+        controller.mode = "local";
+        state.turn = 3; state.firstTurn = false; state.phase = PHASE.MAIN_1;
+        const attacker = createCardInstance(monster("old"));
+        attacker.canAttack = true;
+        state.players[0].monsterZone = [attacker];
+        const target = createCardInstance(monster("enemy", 4, 100));
+        state.players[1].monsterZone = [target];
+        state.players[0].hand = [createCardInstance(monster("new"))];
+        controller.selectAttacker(attacker);
+        controller.summonMonster(0);
+        assert.equal(state.phase, PHASE.MAIN_1);
+        assert.equal(state.selectedAttacker, null);
+        const summoned = state.players[0].monsterZone[1];
+        controller._releaseEffectLocks();
+        controller.selectAttacker(summoned);
+        controller.attackTarget(target);
+        assert.equal(summoned.hasAttackedThisTurn, true);
+        assert.equal(attacker.hasAttackedThisTurn, false);
+        controller._releaseEffectLocks();
+    });
+
+    test("真正攻击后取消后续选择不能倒退至主要阶段1", () => {
+        const { state, engine } = makeGame();
+        const controller = new GameController(state, engine, uiStub());
+        controller.mode = "local";
+        state.turn = 3; state.firstTurn = false; state.phase = PHASE.MAIN_1;
+        const first = createCardInstance(monster("first")); first.canAttack = true;
+        const second = createCardInstance(monster("second")); second.canAttack = true;
+        state.players[0].monsterZone = [first, second];
+        state.players[1].monsterZone = [createCardInstance(monster("a", 4, 100)), createCardInstance(monster("b"))];
+        controller.selectAttacker(first);
+        controller.attackTarget(state.players[1].monsterZone[0]);
+        controller.selectAttacker(second);
+        controller.cancelTargetSelect();
+        assert.equal(state.phase, PHASE.BATTLE);
+        assert.equal(state.selectedAttacker, null);
+        assert.equal(second.hasAttackedThisTurn, false);
+        controller._ensureMainPhaseForHandAction();
+        assert.equal(state.phase, PHASE.MAIN_2);
+    });
+
+    test("三只怪兽在同一战斗阶段可以连续攻击", () => {
+        const { state, engine } = makeGame();
+        const controller = new GameController(state, engine, uiStub());
+        controller.mode = "local";
+        state.currentPlayerIndex = 0;
+        state.turn = 3;
+        state.firstTurn = false;
+        state.phase = PHASE.MAIN_1;
+        const attackers = [1200, 1400, 1600].map((attack, index) => {
+            const card = createCardInstance(monster(`attacker_${index}`, 4, attack));
+            card.canAttack = true;
+            return card;
+        });
+        state.players[0].monsterZone = attackers;
+        state.players[1].monsterZone = [];
+
+        attackers.forEach(attacker => controller.selectAttacker(attacker));
+
+        assert.equal(state.phase, PHASE.BATTLE);
+        assert.equal(state.selectedAttacker, null);
+        assert.deepEqual(attackers.map(card => card.hasAttackedThisTurn), [true, true, true]);
+        assert.equal(state.players[1].lp, 3800);
+    });
+
+    test("普通攻击动画不应锁住后续合法攻击", () => {
+        const { state, engine, controller } = (() => {
+            const state = new GameState();
+            state.players = [
+                new Player("P1", Array.from({ length: 40 }, (_, index) => monster(`a${index}`))),
+                new Player("P2", Array.from({ length: 40 }, (_, index) => monster(`b${index}`))),
+            ];
+            const ui = uiStub();
+            const engine = new GameEngine(state);
+            return { state, engine, controller: new GameController(state, engine, ui) };
+        })();
+        controller.mode = "local";
+        state.currentPlayerIndex = 0;
+        state.turn = 3;
+        state.firstTurn = false;
+        state.phase = PHASE.BATTLE;
+        const attacker = createCardInstance(monster("browser_like_attacker", 4, 1200));
+        attacker.canAttack = true;
+        state.players[0].monsterZone = [attacker];
+        state.players[1].monsterZone = [];
+        const previousDocument = global.document;
+        global.document = { querySelectorAll: () => [], querySelector: () => null };
+        try {
+            controller.selectAttacker(attacker);
+            assert.equal(controller.effectBusy, false);
+        } finally {
+            if (previousDocument === undefined) delete global.document;
+            else global.document = previousDocument;
+        }
     });
 
     test("战斗后再从手牌操作会自动进入主要阶段2", () => {

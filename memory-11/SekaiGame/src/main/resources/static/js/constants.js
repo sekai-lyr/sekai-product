@@ -5,7 +5,7 @@
 
 export const GAME_CONFIG = {
     START_LP: 8000,
-    MAX_LP: 8000,
+    MAX_LP: Number.MAX_SAFE_INTEGER,
     START_HAND_SIZE: 5,
     END_HAND_LIMIT: 6,
     MAX_HAND_SIZE: 99,
@@ -16,6 +16,14 @@ export const GAME_CONFIG = {
     MAX_EXTRA_DECK_SIZE: 15,
     MAX_SIDE_DECK_SIZE: 15,
     FIRST_TURN_NO_BATTLE: true,
+    // 本回合召唤/盖放的怪兽能否立刻手动变更表示形式（攻击↔守备）。
+    // false = 游戏王大师规则：召唤·特殊召唤·反转召唤的回合内不能变更表示形式
+    //   （官方规则书 yugioh-card.com 与 Master Duel 一致）。
+    // true（当前默认，房主自定义规则）= 召唤成功后、本回合尚未攻击前可以转为守备表示，
+    //   转为守备后本回合不能再攻击（守备表示不能攻击，且 positionChangedThisTurn 生效）。
+    // 想回到官方规则把这里改成 false 即可，三处判定（engine.changePosition、
+    // ui.js 操作面板、ui.js 卡面切换按钮）都读这个开关。
+    ALLOW_SUMMON_TURN_POSITION_CHANGE: true,
 };
 
 export const PHASE = {

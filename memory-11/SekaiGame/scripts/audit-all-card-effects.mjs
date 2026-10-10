@@ -4,14 +4,14 @@ import { GameController } from "../src/main/resources/static/js/controller.js";
 import { GameState, Player, createCardInstance } from "../src/main/resources/static/js/model.js";
 import { PHASE } from "../src/main/resources/static/js/constants.js";
 
-function createMonster(id, attack = 1500, defense = 1500) {
+function createMonster(id, attack = 1500, defense = 1500, level = 4, attribute = "water") {
     return createCardInstance({
         id,
         name: id,
         type: "monster",
-        attribute: "water",
+        attribute,
         race: "warrior",
-        level: 4,
+        level,
         attack,
         defense,
         rarity: "N",
@@ -30,19 +30,37 @@ function createScenario(cardDefinition, effect) {
     state.firstTurn = false;
     state.phase = PHASE.MAIN_1;
 
-    player.deck = Array.from({ length: 12 }, (_, index) => createMonster(`ally_deck_${index}`));
+    player.deck = Array.from({ length: 12 }, (_, index) => createMonster(`ally_deck_${index}`, 1500, 1500, 1 + (index % 4)));
     opponent.deck = Array.from({ length: 12 }, (_, index) => createMonster(`enemy_deck_${index}`));
-    player.hand = [createMonster("cost_1"), createMonster("cost_2"), createMonster("cost_3")];
+    player.hand = [createMonster("cost_1"), createMonster("cost_2"), createMonster("cost_3"), createMonster("low_1", 800, 800, 1), createMonster("low_2", 900, 900, 2)];
     opponent.hand = [createMonster("enemy_hand_1"), createMonster("enemy_hand_2"), createMonster("enemy_hand_3")];
-    player.monsterZone = [createMonster("ally_field_1", 1800, 1600), createMonster("ally_field_2", 1200, 2100)];
+    player.monsterZone = [
+        createMonster("ally_field_1", 1800, 1600, 4, "fire"),
+        createMonster("ally_field_2", 1200, 2100, 4, "water"),
+        createMonster("ally_field_3", 1000, 1000, 2, "wind"),
+        createMonster("ally_field_4", 900, 900, 1, "earth"),
+    ];
+    if (["token", "deploy", "revive"].includes(effect.action)) player.monsterZone = player.monsterZone.slice(0, 2);
     opponent.monsterZone = [createMonster("enemy_field_1", 1700, 1400), createMonster("enemy_field_2", 2400, 2000)];
-    player.graveyard = [createMonster("ally_grave_1"), createMonster("ally_grave_2")];
-    opponent.graveyard = [createMonster("enemy_grave_1")];
+    player.graveyard = [createMonster("ally_grave_1", 1500, 1500, 4), createMonster("ally_grave_2", 1400, 1400, 3), createMonster("ally_grave_3", 900, 900, 2), createMonster("ally_grave_4", 800, 800, 1)];
+    opponent.graveyard = [createMonster("enemy_grave_1"), createMonster("enemy_grave_2"), createMonster("enemy_grave_3"), createMonster("enemy_grave_4"), createMonster("enemy_grave_5")];
     player.lp = 8000;
     opponent.lp = 8000;
 
     const card = createCardInstance({ ...cardDefinition, effects: [effect], effect: undefined });
     const engine = new GameEngine(state, () => 0.25);
+    if (effect.type === "themedAction") {
+        card.themedState = { charges: 2 };
+        player.graveyard.push(createCardInstance({ id: "audit_trap_1", name: "伏线一", type: "trap", effects: [] }));
+        player.graveyard.push(createCardInstance({ id: "audit_trap_2", name: "伏线二", type: "trap", effects: [] }));
+        player.banished.push(createMonster("banished_1"), createMonster("banished_2"), createMonster("banished_3"));
+        for (let index = 0; index < 3; index++) {
+            const setBackrow = createCardInstance({ id: `audit_set_${index}`, name: `盖牌${index}`, type: "trap", effects: [] });
+            setBackrow.faceDown = true;
+            opponent.spellTrapZone.push(setBackrow);
+        }
+        player.deck[0].attribute = card.attribute;
+    }
     return { state, player, opponent, card, engine };
 }
 
@@ -60,8 +78,13 @@ function executeEffect(cardDefinition, effect) {
             throw new Error(result.message || "spell activation failed");
         }
     } else {
-        player.monsterZone.unshift(card);
-        engine.triggerAllEffects(player, card, effect.trigger || "manual");
+        if (effect.trigger === "onDestroyed") player.graveyard.push(card);
+        else player.monsterZone.unshift(card);
+        const context = effect.trigger === "onAttacked"
+            ? { attacker: state.opponentPlayer.monsterZone[0], attackerOwner: state.opponentPlayer, defenderOwner: player, battle: { canceled: false, reduction: 0 } }
+            : {};
+        const message = engine.triggerAllEffects(player, card, effect.trigger || "manual", context);
+        if (effect.type === "themedAction" && !message) throw new Error("positive fixture did not resolve themed action");
     }
 
     const integrityErrors = engine.checkStateIntegrity();

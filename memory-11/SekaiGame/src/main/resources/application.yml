@@ -1,16 +1,24 @@
 server:
   port: 8091
+  tomcat:
+    protocol: org.apache.coyote.http11.Http11Nio2Protocol
   servlet:
     encoding:
       charset: UTF-8
       enabled: true
       force: true
+  # 前端是 86 个未打包的 ES 模块加 316 KB 的 CSS，不压缩时登录页要传约 1.8 MB。
+  # 开启响应压缩后同一页面约 400 KB。
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: text/html,text/css,text/javascript,application/javascript,text/plain,application/json,image/svg+xml
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/sekai_friend?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
-    username: root
-    password: 123456520baba
+    url: ${APP_DB_URL:jdbc:mysql://localhost:3306/sekai_friend?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true}
+    username: ${APP_DB_USERNAME:root}
+    password: ${APP_DB_PASSWORD:20070831}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -29,7 +37,12 @@ spring:
 
 app:
   jwt:
-    secret: sekai-game-jwt-secret-key-2024
+    secret: ${APP_JWT_SECRET}
     expiration: 604800000
+    cookie-secure: ${APP_JWT_COOKIE_SECURE:false}
+  security:
+    admin-username: ${APP_ADMIN_USERNAME:}
+  seed:
+    enabled: ${APP_SEED_ENABLED:false}
   cors:
-    allowed-origins: "*"
+    allowed-origins: "${APP_CORS_ALLOWED_ORIGINS:http://127.0.0.1:8080,http://localhost:8080,http://127.0.0.1:8091,http://localhost:8091}"

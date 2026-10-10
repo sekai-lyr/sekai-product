@@ -14,18 +14,22 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class PvpWebSocketHandler extends TextWebSocketHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(PvpWebSocketHandler.class);
+    // 每条 end_turn/game_action 都会携带双方完整战局快照：实测 60 张卡组约 76 KB，
+    // 55 张起就超过旧的 64 KiB 上限，导致服务器直接关闭连接（PvP 第一回合即软锁）。
+    private static final int MAX_MESSAGE_LENGTH = 512 * 1024;
+    private static final int MIN_DECK_SIZE = 40;
+    private static final int MAX_DECK_SIZE = 60;
+    private static final int MAX_NAME_LENGTH = 40;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final SecureRandom secureRandom = new SecureRandom();
 
     // Room management
     private final Map<String, PvpRoom> rooms = new ConcurrentHashMap<>();
-    private final AtomicInteger nextRoomId = new AtomicInteger(1);
 
     // Session to room mapping
     private final Map<String, PvpPlayer> sessionPlayers = new ConcurrentHashMap<>();
@@ -48,6 +52,9 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
                 if (opponent != null && opponent.isOpen()) {
                     sendJson(opponent, Map.of("type", "opponent_disconnected"));
                 }
+                // 房间销毁时必须同时清掉双方会话记录：只清关闭方会让对手的连接
+                // 永远停留在"你已经在房间中"，必须刷新页面才能再次建房/加入。
+                if (opponent != null) sessionPlayers.remove(opponent.getId());
                 rooms.remove(player.roomId);
                 logger.info("Room {} closed", player.roomId);
             }
@@ -58,6 +65,11 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
+            if (message.getPayloadLength() > MAX_MESSAGE_LENGTH) {
+                sendJson(session, Map.of("type", "error", "reason", "消息过大"));
+                session.close(new CloseStatus(1009, "Message too big"));
+                return;
+            }
             JsonNode msg = objectMapper.readTree(message.getPayload());
             String type = msg.has("type") ? msg.get("type").asText() : "";
 
@@ -78,8 +90,15 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void handleCreateRoom(WebSocketSession session, JsonNode msg) throws IOException {
-        String roomId = String.valueOf(nextRoomId.getAndIncrement());
-        String playerName = msg.has("name") ? msg.get("name").asText() : "Player 1";
+        if (sessionPlayers.containsKey(session.getId())) {
+            sendJson(session, Map.of("type", "error", "reason", "你已经在房间中"));
+            return;
+        }
+        String roomId;
+        do {
+            roomId = String.valueOf(100000 + secureRandom.nextInt(900000));
+        } while (rooms.containsKey(roomId));
+        String playerName = normalizeName(msg.path("name").asText(null), "Player 1");
 
         PvpRoom room = new PvpRoom();
         room.host = session;
@@ -100,6 +119,10 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
 
     private void handleJoinRoom(WebSocketSession session, JsonNode msg) throws IOException {
         String roomId = msg.has("roomId") ? msg.get("roomId").asText() : "";
+        if (sessionPlayers.containsKey(session.getId()) || !roomId.matches("\\d{6}")) {
+            sendJson(session, Map.of("type", "error", "reason", "房间号无效"));
+            return;
+        }
         PvpRoom room = rooms.get(roomId);
 
         if (room == null) {
@@ -111,7 +134,7 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        String playerName = msg.has("name") ? msg.get("name").asText() : "Player 2";
+        String playerName = normalizeName(msg.path("name").asText(null), "Player 2");
         room.guest = session;
         room.guestName = playerName;
 
@@ -138,20 +161,23 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
         if (room == null) return;
 
         JsonNode deck = msg.has("deck") ? msg.get("deck") : objectMapper.createArrayNode();
-        if (room.gameStarted || !deck.isArray() || deck.isEmpty()) {
-            sendJson(session, Map.of("type", "error", "reason", "Invalid deck submission"));
+        if (room.gameStarted || !isValidDeck(deck)) {
+            sendJson(session, Map.of("type", "error", "reason", "卡组必须为40至60张，且同名卡不超过3张"));
             return;
         }
         if (player.playerIndex == 0) {
             room.hostDeck = deck;
-            room.ready.add(0);
         } else {
             room.guestDeck = deck;
-            room.ready.add(1);
         }
 
-        // Check if both players are ready
-        if (room.ready.size() == 2) {
+        // 准备与开局必须加锁：两个 set_deck 并发时可能出现重复 game_start
+        // 或永远等不到开局（room.ready 是非并发集合）。
+        synchronized (room) {
+            if (room.gameStarted) return;
+            room.ready.add(player.playerIndex);
+            if (room.ready.size() < 2 || room.hostDeck == null || room.guestDeck == null) return;
+
             room.hostDeck = shuffleDeck(room.hostDeck);
             room.guestDeck = shuffleDeck(room.guestDeck);
             room.gameStarted = true;
@@ -228,6 +254,17 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
                 sendJson(session, ack);
                 return;
             }
+            // 重发的结束回合（客户端重试）必须被忽略：否则回合转回来后，迟到的
+            // 重发会被当作新的结束回合，把陈旧快照推给对手并抢走回合。
+            if (!requestId.isEmpty() && requestId.equals(room.lastEndTurnRequestId)) {
+                ObjectNode ack = objectMapper.createObjectNode();
+                ack.put("type", "turn_changed");
+                ack.put("turn", room.turn);
+                ack.put("requestId", requestId);
+                sendJson(session, ack);
+                return;
+            }
+            room.lastEndTurnRequestId = requestId.isEmpty() ? null : requestId;
 
             JsonNode state = msg.get("state");
             WebSocketSession opponent = room.getOpponent(session);
@@ -258,12 +295,20 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
         if (player == null) return;
 
         PvpRoom room = rooms.get(player.roomId);
-        if (room == null) return;
+        if (room == null || !room.gameStarted) return;
 
         // Broadcast to both players
         ObjectNode gameOverMsg = objectMapper.createObjectNode();
         gameOverMsg.put("type", "game_over");
-        gameOverMsg.set("winner", msg.get("winner"));
+        // 客户端上报的 winner 是本地视角（0 = 自己获胜）；广播给对手时必须换算成
+        // 绝对玩家序号（0 = 房主），否则对手会把胜负判反。
+        JsonNode declaredWinner = msg.get("winner");
+        if (declaredWinner == null || declaredWinner.isNull()) {
+            gameOverMsg.putNull("winner");
+        } else {
+            int localWinner = declaredWinner.asInt(0);
+            gameOverMsg.put("winner", localWinner == 0 ? player.playerIndex : 1 - player.playerIndex);
+        }
         gameOverMsg.set("reason", msg.get("reason"));
 
         sendJson(room.host, gameOverMsg);
@@ -279,12 +324,40 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
 
         WebSocketSession opponent = room.getOpponent(session);
         if (opponent != null && opponent.isOpen()) {
+            String message = normalizeMessage(msg.path("message").asText(null));
+            if (message.isBlank()) return;
             ObjectNode chatMsg = objectMapper.createObjectNode();
             chatMsg.put("type", "chat");
             chatMsg.put("name", player.playerName);
-            chatMsg.set("message", msg.get("message"));
+            chatMsg.put("message", message);
             sendJson(opponent, chatMsg);
         }
+    }
+
+    private boolean isValidDeck(JsonNode deck) {
+        if (deck == null || !deck.isArray() || deck.size() < MIN_DECK_SIZE || deck.size() > MAX_DECK_SIZE) {
+            return false;
+        }
+        Map<String, Integer> counts = new HashMap<>();
+        for (JsonNode card : deck) {
+            if (!card.isTextual() || card.asText().isBlank() || card.asText().length() > 50) return false;
+            String cardId = card.asText();
+            int count = counts.merge(cardId, 1, Integer::sum);
+            if (count > 3) return false;
+        }
+        return true;
+    }
+
+    private String normalizeName(String value, String fallback) {
+        if (value == null) return fallback;
+        String normalized = value.trim();
+        return normalized.isBlank() ? fallback : normalized.substring(0, Math.min(MAX_NAME_LENGTH, normalized.length()));
+    }
+
+    private String normalizeMessage(String value) {
+        if (value == null) return "";
+        String normalized = value.trim();
+        return normalized.substring(0, Math.min(500, normalized.length()));
     }
 
     private void sendJson(WebSocketSession session, Object data) {
@@ -329,6 +402,8 @@ public class PvpWebSocketHandler extends TextWebSocketHandler {
         String seed;
         int turn;
         boolean gameStarted;
+        // 已处理过的结束回合请求 id：用于忽略客户端重发的同一条 end_turn。
+        String lastEndTurnRequestId;
         Set<Integer> ready = new HashSet<>();
 
         WebSocketSession getOpponent(WebSocketSession session) {

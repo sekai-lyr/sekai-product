@@ -7,7 +7,11 @@ import { GAME_CONFIG, MONSTER_POSITION, DURATION } from "./constants.js";
 
 export function shuffleArray(arr, rng = null) {
     const a = [...arr];
-    const rand = rng || Math.random;
+    // 兼容两种 RNG 形态：函数式随机源，或带 next() 的随机源对象
+    // （PvP 模式传入的是 SeededRandom 实例，直接当函数调用会抛 TypeError）。
+    const rand = typeof rng === "function"
+        ? rng
+        : (rng && typeof rng.next === "function" ? () => rng.next() : Math.random);
     for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(rand() * (i + 1));
         [a[i], a[j]] = [a[j], a[i]];
@@ -45,6 +49,8 @@ export function createCardInstance(cardData) {
         faceUp: true,
         canAttack: false,
         hasAttackedThisTurn: false,
+        attacksMadeThisTurn: 0,
+        doubleAttackThisTurn: false,
         positionChangedThisTurn: false,
         wasFlipSummoned: false,
 
@@ -67,9 +73,11 @@ export function createCardInstance(cardData) {
 
         // ---- 新增：状态标记 ----
         cannotAttack: false,
+        cannotBeAttacked: false,
         cannotBeTargeted: false,
         cannotBeDestroyedByBattle: false,
         cannotBeDestroyedByEffect: false,
+        preventsBattleDamage: false,
         attackLocked: false,        // 被"寄往遥远彼岸的信"永久封锁攻击
     };
 }
@@ -89,6 +97,7 @@ export class Player {
         this.fieldZone = null; // 场地卡槽（每个玩家最多1张）
         this.graveyard = [];
         this.banished = [];
+        this._tempBanished = [];
         this.extraDeck = [];
 
         // 回合状态
@@ -99,6 +108,10 @@ export class Player {
 
         // ---- 新增：回合级限制追踪 ----
         this.oncePerTurnEffectsUsed = new Set(); // instanceId 集合
+        /** 本回合已无效化攻击的次数（上限见 engine.BATTLE_RULES） */
+        this.attackNegationsThisTurn = 0;
+        /** 本回合已发动的攻击响应陷阱次数（上限见 controller/engine） */
+        this.attackResponsesThisTurn = 0;
     }
 
     drawCard() {
@@ -138,7 +151,8 @@ export class Player {
     }
 
     heal(amount) {
-        const heal = Math.max(0, Math.floor(Number(amount) || 0));
+        const poisoned = this.monsterZone.some(card => Number(card?.themedState?.statuses?.venom) > 0);
+        const heal = Math.max(0, Math.floor((Number(amount) || 0) / (poisoned ? 2 : 1)));
         this.lp = Math.min(this.maxLp, this.lp + heal);
     }
 
@@ -150,6 +164,8 @@ export class Player {
         this.cannotSpecialSummonThisTurn = false;
         this.noHandMonsterEffectThisTurn = false;
         this.fieldSpellDiscardCost = false;
+        this.attackNegationsThisTurn = 0;
+        this.attackResponsesThisTurn = 0;
         this.oncePerTurnEffectsUsed.clear();
         this.monsterZone.forEach(c => {
             // 朝比奈真冬效果：attackDisabledUntilEndPhase 持续到对方下个结束阶段
@@ -161,17 +177,20 @@ export class Player {
                 c.cannotAttack = c.attackLocked;
             }
             c.hasAttackedThisTurn = false;
+            c.attacksMadeThisTurn = 0;
             c.positionChangedThisTurn = false;
             c.oncePerTurnUsed = false;
             // 清除回合级效果标记
-            c.cannotBeTargeted = false;
+            c.cannotBeTargeted = c.themedState?.wardUntil != null;
+            c.cannotBeAttacked = false;
             c.cannotBeDestroyedByBattle = false;
             c.destructionPreventedThisTurn = false;
+            c.preventsBattleDamage = false;
             c.cannotActivateThisTurn = false;
             c.cancelAttack = false;
             c.effectNegated = false;
             c.doubleAttackThisTurn = false;
-            c.cannotUseAsMaterial = false;
+            c.cannotUseAsMaterial = !!c.isToken;
             c.attackRedirector = false;
             c.redirectValue = 0;
             c._redirectUsedThisTurn = false;
@@ -187,7 +206,11 @@ export class Player {
             if (c.setTurn > 0 && c.faceDown) {
                 c.canActivate = true;
             }
+            // "本回合不能发动"是回合级标记，手牌/后场的卡也必须在新回合恢复，
+            // 否则被标记过的卡会永久无法发动。
+            c.cannotActivateThisTurn = false;
         });
+        this.hand.forEach(c => { c.cannotActivateThisTurn = false; });
     }
 
     _recalcCardStats(card) {

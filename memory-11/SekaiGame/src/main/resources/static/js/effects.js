@@ -1,3 +1,5 @@
+import { playCardTransfer } from "./card-transfer.js";
+import { getDuelMotion, motionGeneration, createEffectElement, scheduleVisual as setTimeout, scheduleVisualFrame as requestAnimationFrame } from "./duel-motion.js";
 /**
  * effects.js
  * 战斗特效系统 —— 召唤、魔法、陷阱、攻击、伤害、破坏、治愈
@@ -5,16 +7,48 @@
  */
 
 import { getMonsterCinematicProfile } from "./monster-cinematics.js?v=1.1.1";
+import { themedActionParams } from "./themed-effects.js";
+import { playSound } from "./audio.js?v=1.0.0";
+import { sekaiCardBackHtml } from "./card-view.js?v=1.2.0-bca";
+import { getAttackProfile } from "./attack-fx-profiles.js?v=1.0.0";
+import { playCardAttack } from "./attack-fx.js?v=1.0.0";
+import { playCardPerformance } from "./card-performance-fx.js?v=17-card-atlas-4x4";
+import { getCardPerformance } from "./card-performance.js?v=14-trap-atlas-webp";
+import { getAuthoredScene } from "./authored-card-scenes.js?v=25-card-atlas-4x4";
 
 const isBrowser = typeof document !== "undefined";
+let attackVisualBusyUntil = 0;
+const authoredScene = (card, phase) => getAuthoredScene(getCardPerformance(card)?.id, phase);
 
 function removeAfter(el, ms) {
     setTimeout(() => el.remove(), ms);
 }
 
+// ---------------------------------------------------------------------
+//  特效节点预算
+//  一次命中特效会创建 80~120 个带 box-shadow / filter / animation 的绝对定位
+//  节点。连击、多体攻击、反击陷阱连锁时这些特效会叠加到同一帧，直接把主线程
+//  压到掉帧。这里限制同时存活的命中特效数量，并在已有特效在播时自动降级。
+// ---------------------------------------------------------------------
+const MAX_CONCURRENT_HIT_IMPACTS = 2;
+
+function hitImpactLoad() {
+    if (!isBrowser) return 0;
+    return document.querySelectorAll(".hit-impact-container").length;
+}
+
+/** 超预算时清掉最早创建的命中特效，保证新的一击永远有表现。 */
+function trimHitImpacts() {
+    if (!isBrowser) return;
+    const nodes = [...document.querySelectorAll(".hit-impact-container")];
+    const overflow = nodes.length - MAX_CONCURRENT_HIT_IMPACTS;
+    if (overflow <= 0) return;
+    for (let i = 0; i < overflow; i++) nodes[i].remove();
+}
+
 function spawnParticles(container, cls, count, spread = 30) {
-    for (let i = 0; i < count; i++) {
-        const p = document.createElement("div");
+    for (let i = 0; i < Math.ceil(count * getDuelMotion().particleRatio); i++) {
+        const p = createEffectElement("div");
         p.className = cls;
         const dx = (Math.random() - 0.5) * spread * 2;
         const dy = -(Math.random() * spread + 10);
@@ -35,6 +69,14 @@ function getRect(el) {
     return el;
 }
 
+function setBattleCamera(battleScreen, { x = 0, y = 0, scale = 1, duration = 180 } = {}) {
+    if (!battleScreen || getDuelMotion().quality === "low" || getDuelMotion().reduced) return;
+    battleScreen.style.setProperty("--bca-camera-x", x + "px");
+    battleScreen.style.setProperty("--bca-camera-y", y + "px");
+    battleScreen.style.setProperty("--bca-camera-scale", String(scale));
+    battleScreen.style.setProperty("--bca-camera-duration", duration + "ms");
+}
+
 const RULE_VISUALS = {
     power: { label: "POWER UP", color: "#ffd36b", accent: "#ff8a4c", motion: "rise" },
     guard: { label: "GUARD", color: "#70e6ff", accent: "#527dff", motion: "shield" },
@@ -51,6 +93,37 @@ const RULE_VISUALS = {
     weaken: { label: "WEAKEN", color: "#a873ff", accent: "#ff5d87", motion: "fall" },
     field: { label: "FIELD SHIFT", color: "#64e3d0", accent: "#6d8cff", motion: "wave" },
     effect: { label: "EFFECT", color: "#e4dfff", accent: "#8f7cff", motion: "burst" },
+};
+
+export const THEMED_ACTION_VISUALS = {
+    ignite:   { label: "IGNITE", motion: "rise", color: "#ff7a3c", accent: "#ffd36b" },
+    venom:    { label: "VENOM", motion: "fall", color: "#9d6bff", accent: "#7dffa8" },
+    bleed:    { label: "BLEED", motion: "sweep", color: "#ff4f70", accent: "#ff9b8a" },
+    curse:    { label: "CURSE", motion: "shield", color: "#8c5cff", accent: "#2a1740" },
+    exile:    { label: "EXILE", motion: "void", color: "#7b5cff", accent: "#1b1035" },
+    paralyze: { label: "STUN", motion: "impact", color: "#ffe06b", accent: "#70dcff" },
+    detonate: { label: "DETONATE", motion: "impact", color: "#ff5d67", accent: "#ffb04a" },
+    combust: { label: "爆血引爆", motion: "impact", color: "#ff5d67", accent: "#ffb04a" },
+    railgun: { label: "超电磁炮", motion: "sweep", color: "#7cdfff", accent: "#ffe06b" },
+    ensemble: { label: "舞台接力", motion: "spiral", color: "#7ce1dd", accent: "#ffa9da" },
+    tempoStrike: { label: "一闪蓄势", motion: "rise", color: "#ffe06b", accent: "#ffffff" },
+    infinity: { label: "INFINITY", motion: "shield", color: "#d7e6ff", accent: "#8fb8ff" },
+    domain:   { label: "DOMAIN", motion: "wave", color: "#cfd6ff", accent: "#8f7cff" },
+    gamble:   { label: "GAMBLE", motion: "spiral", color: "#ffd76b", accent: "#fff6c9" },
+};
+
+// 主题动作 → 音效名（唯一发声点：playRuleDrivenEffect 每次结算播一次）
+// gamble 走 onCoinFlip → playCoinFlip → playSound("coin")，此处不重复；
+// infinity 无专属音，不播（statusTick 语义属伤害跳字，错配）
+const THEMED_ACTION_SOUNDS = {
+    ignite:   "ignite",
+    venom:    "venom",
+    bleed:    "bleed",
+    curse:    "curse",
+    exile:    "exile",
+    paralyze: "paralyze",
+    detonate: "detonate",
+    domain:   "domain",
 };
 
 const CARD_THEME_RULES = [
@@ -85,7 +158,7 @@ export function getCardVisualTheme(cardOrName = "", type = "effect", attribute =
         : { name: cardOrName, type, attribute };
     const name = String(card.name || "");
     const matched = CARD_THEME_RULES.find(([pattern]) => pattern.test(name))?.[1];
-    const fallback = {
+    const fallbackTable = {
         fire: ["flame", "#ff7648", "#ffd05f", "炎"],
         water: ["tide", "#55cfff", "#b4f4ff", "水"],
         wind: ["gale", "#73efb0", "#dcff8f", "风"],
@@ -93,12 +166,15 @@ export function getCardVisualTheme(cardOrName = "", type = "effect", attribute =
         light: ["radiance", "#ffe66d", "#ffffff", "光"],
         dark: ["void", "#a36cff", "#ff6d9f", "暗"],
         none: ["arcane", "#8fdcff", "#d9a2ff", "术"],
-    }[card.attribute || card.element || attribute || "none"];
+    };
+    // 未知/非字符串属性（含 PvP 对端数据）一律回落到 none，避免解引用 undefined
+    const fallback = fallbackTable[card.attribute || card.element || attribute || "none"] || fallbackTable.none;
     const primaryEffect = card.effects?.[0] || card.effect || {};
     const effectKey = ruleVisualKey(primaryEffect.type || type);
     const effectVisual = RULE_VISUALS[effectKey] || RULE_VISUALS.effect;
     const seed = stableCardSeed(`${card.id || ""}:${name}:${card.image || ""}:${primaryEffect.type || type}:${primaryEffect.value || ""}`);
-    const base = matched || { key: fallback[0], label: "卡牌效果", color: fallback[1], accent: fallback[2], glyph: fallback[3] };
+    const fallbackVisual = fallback || fallbackTable.none;
+    const base = matched || { key: fallbackVisual[0], label: "卡牌效果", color: fallbackVisual[1], accent: fallbackVisual[2], glyph: fallbackVisual[3] };
     const moveName = name.split(/[·・]/).filter(Boolean).at(-1) || base.label;
     return {
         ...base,
@@ -124,7 +200,7 @@ function playCardThemeAccent(card, anchor = null) {
     const rect = getRect(anchor || document.getElementById("battlefield"));
     const x = rect.width ? rect.left + rect.width / 2 : window.innerWidth / 2;
     const y = rect.height ? rect.top + rect.height / 2 : window.innerHeight * .45;
-    const layer = document.createElement("div");
+    const layer = createEffectElement("div");
     layer.className = `card-theme-accent theme-${theme.key} theme-effect-${theme.effectKey} theme-motion-${theme.effectMotion} theme-v${theme.variant}`;
     layer.style.cssText = `--theme-x:${x}px;--theme-y:${y}px;--theme-color:${theme.color};--theme-accent:${theme.accent};--theme-power:${theme.intensity};--theme-hue:${theme.hueShift}deg;--theme-direction:${theme.direction};--theme-orbit:${theme.orbit};`;
     const imageEcho = theme.image
@@ -132,7 +208,7 @@ function playCardThemeAccent(card, anchor = null) {
         : "";
     layer.innerHTML = `${imageEcho}<div class="card-theme-glyph">${theme.glyph}</div><div class="card-theme-name"><strong>${escapeHtml(theme.label)}</strong><small>${theme.effectLabel}</small></div><div class="card-theme-ring"></div><div class="card-theme-cut"></div>`;
     for (let index = 0; index < 14; index++) {
-        const particle = document.createElement("i");
+        const particle = createEffectElement("i");
         const angle = (index / 14) * Math.PI * 2 + (theme.seed % 17) / 17;
         const distance = 55 + ((theme.seed >>> (index % 16)) % 95);
         particle.style.cssText = `--tx:${Math.cos(angle) * distance}px;--ty:${Math.sin(angle) * distance}px;--delay:${index * .025}s;`;
@@ -162,8 +238,42 @@ function ruleVisualKey(effectType = "") {
     return "effect";
 }
 
+export function themedVisualKey(effect) {
+    if (effect?.type === "themedAction" && THEMED_ACTION_VISUALS[effect.action]) return effect.action;
+    return ruleVisualKey(effect?.type);
+}
+
+// 状态类动作 → 临时徽记文案（层数由 themedActionParams 提供，保证与卡面/结算同源）
+const STATUS_MARK_META = {
+    ignite:   { label: "灼烧", stacks: true },
+    venom:    { label: "剧毒", stacks: true },
+    bleed:    { label: "出血", stacks: true },
+    curse:    { label: "诅咒", stacks: true },
+    paralyze: { label: "麻痹" },
+    exile:    { label: "异界" },
+    infinity: { label: "无下限" },
+    detonate: { label: "引爆" },
+};
+
+function showStatusMark(target, key, effect) {
+    const meta = STATUS_MARK_META[key];
+    if (!meta || typeof target?.appendChild !== "function") return;
+    const mark = createEffectElement("div");
+    mark.className = `status-mark status-mark-${key}`;
+    // 賭运麻痹与卡面一致：走抛硬币文案，不直接显示"麻痹"
+    let text = key === "paralyze" && effect?.params?.gamble === true ? "抛硬币" : meta.label;
+    if (meta.stacks) {
+        const stacks = Number(themedActionParams(effect)?.stacks);
+        if (Number.isFinite(stacks) && stacks > 0) text = `${meta.label}×${stacks}`;
+    }
+    mark.textContent = text;
+    mark.style.setProperty("--mark-color", THEMED_ACTION_VISUALS[key]?.color || "#ffffff");
+    target.appendChild(mark);
+    removeAfter(mark, 1250);
+}
+
 function resolveRuleTargets(effect, origin, ownerIndex = 0) {
-    const key = ruleVisualKey(effect.type);
+    const key = themedVisualKey(effect);
     const effectType = String(effect.type || "").toLowerCase();
     const ownPrefix = ownerIndex === 1 ? "#opponent-area" : "#player-area";
     const enemyPrefix = ownerIndex === 1 ? "#player-area" : "#opponent-area";
@@ -177,6 +287,33 @@ function resolveRuleTargets(effect, origin, ownerIndex = 0) {
     const ownHp = document.querySelector(`${ownPrefix} .hp-bar-wrap`);
     const enemyHp = document.querySelector(`${enemyPrefix} .hp-bar-wrap`);
     const enemyMonsterTarget = document.querySelector(`${enemyMonster}[data-instance-id]`);
+    // 主题动作按"打在目标卡上"落点：指向敌方的动作锚定 data-atk 最高的敌方怪兽槽
+    if (effectType === "themedaction" && THEMED_ACTION_VISUALS[effect.action]) {
+        const enemySlots = typeof document.querySelectorAll === "function"
+            ? [...document.querySelectorAll(`${enemyMonster}[data-instance-id]`)]
+            : [document.querySelector(`${enemyMonster}[data-instance-id]`)].filter(Boolean);
+        const strongest = () => enemySlots.slice()
+            .sort((a, b) => (Number(b.dataset?.atk) || 0) - (Number(a.dataset?.atk) || 0))[0];
+        if (effect.action === "infinity") return origin ? [{ target: origin, key }] : [];
+        if (effect.action === "exile" && effect.params?.self) return origin ? [{ target: origin, key }] : [];
+        if (effect.action === "paralyze") {
+            if (effect.params?.count === "all") {
+                const allSelector = `${enemyMonster}:not(.face-down-set)[data-instance-id]`;
+                const targets = typeof document.querySelectorAll === "function"
+                    ? [...document.querySelectorAll(allSelector)]
+                    : [document.querySelector(allSelector)].filter(Boolean);
+                return targets.map(target => ({ target, key }));
+            }
+            const target = strongest();
+            return target ? [{ target, key }] : [];
+        }
+        if (["ignite", "venom", "bleed", "curse", "exile", "detonate"].includes(effect.action)) {
+            const target = strongest();
+            return target ? [{ target, key }] : [];
+        }
+        // domain / gamble 维持战场锚点
+        return [{ target: document.getElementById("battlefield"), key }];
+    }
     if (effectType === "destroyallenemyspelltraps") {
         const targets = typeof document.querySelectorAll === "function"
             ? [...document.querySelectorAll(enemyBackrow)]
@@ -207,33 +344,58 @@ function resolveRuleTargets(effect, origin, ownerIndex = 0) {
     return [{ target: document.getElementById("battlefield"), key }];
 }
 
-export function playRuleDrivenEffect(cardOrEffect, origin = null, ownerIndex = 0) {
+export function playRuleDrivenEffect(cardOrEffect, origin = null, ownerIndex = 0, explicitTarget = null) {
     if (!isBrowser) return false;
     const effect = cardOrEffect?.effects?.[0] || cardOrEffect?.effect || cardOrEffect || {};
     const battleScreen = document.getElementById("battle-screen");
     if (!battleScreen) return;
 
-    const targets = resolveRuleTargets(effect, origin, ownerIndex).filter(item => item.target);
+    const targets = (explicitTarget
+        ? [{ target: explicitTarget, key: themedVisualKey(effect) }]
+        : resolveRuleTargets(effect, origin, ownerIndex)).filter(item => item.target);
     if (!targets.length) return false;
+    if (effect.type === "themedAction" && effect.skillName) showSkillBanner(effect.skillName, effect.skillLabel, effect.action);
+    // 主题动作音效：赌运麻痹的结果已由 coin 音覆盖，跳过规避双重发声
+    if (effect.type === "themedAction" && !(effect.action === "paralyze" && effect.params?.gamble === true)) {
+        const actionSound = THEMED_ACTION_SOUNDS[effect.action];
+        if (actionSound) playSound(actionSound);
+    }
+    if (effect.type === "themedAction" && effect.action === "domain") {
+        playDomainCinematic(effect.params?.field, cardOrEffect?.name, ownerIndex);
+    }
     for (const { target, key } of targets) {
-        const visual = RULE_VISUALS[key];
+        const visual = THEMED_ACTION_VISUALS[key] || RULE_VISUALS[key];
         const rect = getRect(target);
         const centerX = rect.width ? rect.left + rect.width / 2 : window.innerWidth / 2;
         const centerY = rect.height ? rect.top + rect.height / 2 : window.innerHeight / 2;
-        const layer = document.createElement("div");
+        const sourceRect = getRect(origin);
+        const sourceX = sourceRect.width ? sourceRect.left + sourceRect.width / 2 : centerX;
+        const sourceY = sourceRect.height ? sourceRect.top + sourceRect.height / 2 : centerY;
+        const layer = createEffectElement("div");
         layer.className = `rule-fx rule-fx-${visual.motion} rule-fx-local`;
         layer.style.cssText = `--rule-x:${centerX}px;--rule-y:${centerY}px;--rule-color:${visual.color};--rule-accent:${visual.accent};--rule-width:${Math.max(80, rect.width)}px;`;
-        layer.innerHTML = `<div class="rule-fx-core"></div><div class="rule-fx-ring"></div><div class="rule-fx-title"><strong>${visual.label}</strong></div>`;
-        for (let i = 0; i < 12; i++) {
-            const particle = document.createElement("i");
+        const routeDx = centerX - sourceX;
+        const routeDy = centerY - sourceY;
+        const routeLength = Math.hypot(routeDx, routeDy);
+        layer.style.setProperty("--rule-source-x", `${sourceX}px`);
+        layer.style.setProperty("--rule-source-y", `${sourceY}px`);
+        layer.style.setProperty("--rule-route-length", `${routeLength}px`);
+        layer.style.setProperty("--rule-route-angle", `${Math.atan2(routeDy, routeDx) * 180 / Math.PI}deg`);
+        battleScreen.dataset.lastRuleRouteLength = String(Math.round(routeLength));
+        battleScreen.dataset.lastRuleRouteDirection = `${Math.round(sourceX)},${Math.round(sourceY)}->${Math.round(centerX)},${Math.round(centerY)}`;
+        layer.innerHTML = `${routeLength > 16 ? '<div class="rule-fx-route"><i></i></div><div class="rule-fx-source"></div>' : ""}<div class="rule-fx-core"></div><div class="rule-fx-ring"></div><div class="rule-fx-title"><strong>${visual.label}</strong></div>`;
+        for (let i = 0; i < Math.ceil(12 * getDuelMotion().particleRatio); i++) {
+            const particle = createEffectElement("i");
             const angle = Math.random() * Math.PI * 2;
             const distance = 55 + Math.random() * 150;
             particle.style.cssText = `--px:${Math.cos(angle) * distance}px;--py:${Math.sin(angle) * distance}px;--delay:${Math.random() * .18}s;--size:${2 + Math.random() * 5}px;`;
             layer.appendChild(particle);
         }
-        battleScreen.appendChild(layer);
+        // 坐标来自视口；挂在 body 上，避免战场运镜 transform 改写 fixed 的参考系。
+        document.body.appendChild(layer);
+        showStatusMark(target, key, effect);
         target.classList?.add("rule-target-pulse");
-        if (visual.motion === "impact") {
+        if (visual.motion === "impact" && getDuelMotion().quality !== "low" && !getDuelMotion().reduced) {
             battleScreen.classList.remove("rule-camera-impact");
             void battleScreen.offsetWidth;
             battleScreen.classList.add("rule-camera-impact");
@@ -247,6 +409,31 @@ export function playRuleDrivenEffect(cardOrEffect, origin = null, ownerIndex = 0
     return true;
 }
 
+/**
+ * 技能横幅：主题行动结算时展示「主动技」名称
+ */
+export function showSkillBanner(skillName, label = "主动技", action = "") {
+    if (!isBrowser || !skillName) return;
+    const banner = createEffectElement("div");
+    banner.className = "skill-banner";
+    banner.innerHTML = `<small>【${label}】</small><strong>${skillName}</strong>`;
+    (document.querySelector(".battle-screen") || document.body).appendChild(banner);
+    removeAfter(banner, 950);
+}
+
+/**
+ * 硬币演出：onCoinFlip 事件的正/反面表现
+ */
+export function playCoinFlip(result = "pending") {
+    if (!isBrowser) return;
+    playSound("coin");
+    const coin = createEffectElement("div");
+    coin.className = `coin-flip ${result}`;
+    coin.innerHTML = `<div class="coin-face"></div><strong>${result === "heads" ? "正面" : result === "tails" ? "反面" : "抛硬币"}</strong>`;
+    (document.querySelector(".battle-screen") || document.body).appendChild(coin);
+    removeAfter(coin, 950);
+}
+
 // =====================================================================
 //  卡牌飞行动画系统
 // =====================================================================
@@ -254,13 +441,7 @@ export function playRuleDrivenEffect(cardOrEffect, origin = null, ownerIndex = 0
 /**
  * 创建一个飞行卡牌克隆体
  */
-function createFlyingCard(card, htmlFn) {
-    const el = document.createElement("div");
-    el.className = "flying-card";
-    el.innerHTML = htmlFn(card);
-    document.body.appendChild(el);
-    return el;
-}
+
 
 /**
  * 抽卡动画：卡牌从牌库漂浮→斜向飞向镜头放大（维持1秒）→回退缩小→滑入手牌
@@ -268,133 +449,9 @@ function createFlyingCard(card, htmlFn) {
  */
 export function animateDrawCard(card, htmlFn, isOpponent = false) {
     if (!isBrowser || !card) return Promise.resolve();
-
-    const deckPileId = isOpponent ? "opponent-deck-pile" : "player-deck-pile";
-    const handSelector = isOpponent ? ".opponent-hand" : "#hand-tray";
-    const deckPile = document.getElementById(deckPileId);
-    const handTray = document.querySelector(handSelector);
-    const battlefield = document.querySelector(".battlefield");
-    if (!deckPile || !handTray) return Promise.resolve();
-
-    const from = getRect(deckPile);
-    const to = getRect(handTray);
-
-    // 起点：牌库位置
-    const startX = from.left + from.width / 2 - 71;
-    const startY = from.top - 30;
-
-    // 终点：手牌托盘中央
-    const endX = to.left + to.width / 2 - 71;
-    const endY = to.top + 20;
-
-    // 镜头中心（画面中央偏上）
-    const camX = window.innerWidth / 2 - 71;
-    const camY = window.innerHeight * 0.35 - 101;
-
-    // === 阶段1：创建飞行卡牌 ===
-    const fly = createFlyingCard(card, htmlFn);
-    fly.style.left = `${startX}px`;
-    fly.style.top = `${startY}px`;
-    fly.style.opacity = "0";
-    fly.style.zIndex = "250";
-    fly.classList.add("draw-cinematic");
-
-    // === 光效拖尾 ===
-    const trail = document.createElement("div");
-    trail.className = "draw-light-trail";
-    trail.style.cssText = `position:fixed; z-index:249; pointer-events:none; left:${startX}px; top:${startY}px; width:142px; height:202px;`;
-    document.body.appendChild(trail);
-
-    // === 牌库发光 ===
-    const deckBack = deckPile.querySelector(".deck-card-back");
-    if (deckBack) {
-        deckBack.classList.add("deck-pulse-intense");
-        setTimeout(() => deckBack.classList.remove("deck-pulse-intense"), 600);
-    }
-
-    // === 镜头晃动容器 ===
-    const shakeTarget = battlefield || document.querySelector(".battle-screen");
-
-    // === 动画序列 ===
-    let resolve;
-    const done = new Promise(r => { resolve = r; });
-
-    // 阶段1：牌库漂浮升起 (0-400ms)
-    fly.style.transition = "none";
-    requestAnimationFrame(() => {
-        fly.style.opacity = "1";
-        fly.style.transition = "transform 0.4s cubic-bezier(.4,0,.2,1), opacity 0.3s ease";
-        fly.style.transform = "translateY(-40px) rotate(-8deg) scale(0.7)";
-        fly.style.filter = "brightness(1.5) blur(2px)";
-    });
-
-    // 阶段2：斜向高速飞向镜头，急剧放大 (400-1000ms = 600ms飞向镜头)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.6s cubic-bezier(.1,.9,.2,1), filter 0.6s ease";
-        fly.style.transform = `translate(${camX - startX}px, ${camY - startY}px) rotate(3deg) scale(3.2)`;
-        fly.style.filter = "brightness(1.6) blur(0px)";
-        fly.style.zIndex = "300";
-
-        // 光效拖尾跟随
-        trail.style.transition = "transform 0.6s cubic-bezier(.1,.9,.2,1), opacity 0.6s ease, filter 0.6s ease";
-        trail.style.transform = `translate(${camX - startX}px, ${camY - startY}px) scale(3)`;
-        trail.style.filter = "blur(4px)";
-        trail.style.opacity = "0.6";
-
-        // 镜头轻微晃动
-        if (shakeTarget) {
-            shakeTarget.style.transition = "none";
-            shakeTarget.style.transform = "translateX(-50%) translateY(2px)";
-            setTimeout(() => {
-                shakeTarget.style.transition = "transform 0.15s ease-out";
-                shakeTarget.style.transform = "translateX(-50%) translateY(-1px)";
-                setTimeout(() => {
-                    shakeTarget.style.transition = "transform 0.2s ease-out";
-                    shakeTarget.style.transform = "translateX(-50%) translateY(0)";
-                }, 150);
-            }, 50);
-        }
-    }, 400);
-
-    // 阶段3：近距离放大维持1秒 (1000-2000ms)
-
-    // 阶段4：减速回退缩小 (2000-3200ms = 1200ms回退)
-    setTimeout(() => {
-        fly.style.transition = "transform 1.2s cubic-bezier(.25,.8,.25,1), filter 1.2s ease";
-        fly.style.transform = `translate(${endX - startX}px, ${endY - startY}px) rotate(-2deg) scale(1)`;
-        fly.style.filter = "brightness(1.1) blur(0px)";
-        fly.style.zIndex = "250";
-
-        // 拖尾跟随回退
-        trail.style.transition = "transform 1.2s cubic-bezier(.25,.8,.25,1), opacity 1.2s ease, filter 1.2s ease";
-        trail.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(1)`;
-        trail.style.filter = "blur(2px)";
-        trail.style.opacity = "0.3";
-    }, 2000);
-
-    // 阶段5：平稳滑入手牌，消失 (3200-3600ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s ease, filter 0.35s ease";
-        fly.style.transform = `translate(${endX - startX}px, ${endY + 30 - startY}px) rotate(0deg) scale(0.95)`;
-        fly.style.filter = "brightness(1) blur(0px)";
-        fly.style.opacity = "0";
-
-        // 拖尾消散
-        trail.style.transition = "opacity 0.35s ease";
-        trail.style.opacity = "0";
-
-        // 入手闪光
-        screenFlash("rgba(85,216,229,.08)");
-    }, 3200);
-
-    // 清理
-    setTimeout(() => {
-        fly.remove();
-        trail.remove();
-        resolve();
-    }, 3700);
-
-    return done;
+    return playCardTransfer(card, isOpponent ? createCardBackHtml(card) : htmlFn(card),
+        document.getElementById(isOpponent ? "opponent-deck-pile" : "player-deck-pile"),
+        document.querySelector(isOpponent ? ".opponent-hand" : "#hand-tray"), "draw");
 }
 
 /**
@@ -402,120 +459,7 @@ export function animateDrawCard(card, htmlFn, isOpponent = false) {
  * 电影级运镜，与抽卡风格一致
  */
 export function animatePlayCard(card, handCard, targetSlot, htmlFn) {
-    if (!isBrowser || !handCard) return Promise.resolve();
-
-    const from = getRect(handCard);
-    const to = targetSlot ? getRect(targetSlot) : from;
-    const battlefield = document.querySelector(".battlefield");
-
-    const startX = from.left;
-    const startY = from.top;
-    const endX = to.left + to.width / 2 - 71;
-    const endY = to.top + to.height / 2 - 101;
-
-    // 镜头中心（画面中央偏下）
-    const camX = window.innerWidth / 2 - 71;
-    const camY = window.innerHeight * 0.4 - 101;
-
-    // 手牌发光
-    handCard.classList.add("play-glow");
-
-    // 飞行卡牌
-    const fly = createFlyingCard(card, htmlFn);
-    fly.style.left = `${startX}px`;
-    fly.style.top = `${startY}px`;
-    fly.style.opacity = "0";
-    fly.style.zIndex = "250";
-
-    // 光效拖尾
-    const trail = document.createElement("div");
-    trail.className = "draw-light-trail";
-    trail.style.cssText = `position:fixed; z-index:249; pointer-events:none; left:${startX}px; top:${startY}px; width:142px; height:202px; opacity:0;`;
-    document.body.appendChild(trail);
-
-    const shakeTarget = battlefield || document.querySelector(".battle-screen");
-    const attr = card.attribute || card.element || "none";
-
-    // === 阶段1：手牌高亮弹起 (0-200ms) ===
-    requestAnimationFrame(() => {
-        fly.style.opacity = "1";
-        fly.style.transition = "transform 0.2s cubic-bezier(.4,0,.2,1), opacity 0.15s ease";
-        fly.style.transform = "translateY(-30px) rotate(5deg) scale(1.1)";
-        fly.style.filter = "brightness(2) blur(1px)";
-    });
-
-    // === 阶段2：冲向镜头放大 (200-450ms) ===
-    setTimeout(() => {
-        fly.style.transition = "transform 0.25s cubic-bezier(.1,.9,.2,1), filter 0.25s ease";
-        fly.style.transform = `translate(${camX - startX}px, ${camY - startY}px) rotate(-3deg) scale(2.8)`;
-        fly.style.filter = "brightness(2.5) blur(0px)";
-        fly.style.zIndex = "300";
-
-        // 拖尾跟随
-        trail.style.transition = "transform 0.25s cubic-bezier(.1,.9,.2,1), opacity 0.2s ease, filter 0.25s ease";
-        trail.style.transform = `translate(${camX - startX}px, ${camY - startY}px) scale(2.5)`;
-        trail.style.filter = "blur(4px)";
-        trail.style.opacity = "0.7";
-
-        // 镜头微晃
-        if (shakeTarget) {
-            shakeTarget.style.transition = "none";
-            shakeTarget.style.transform = "translateX(-50%) translateY(-2px)";
-            setTimeout(() => {
-                shakeTarget.style.transition = "transform 0.15s ease-out";
-                shakeTarget.style.transform = "translateX(-50%) translateY(1px)";
-                setTimeout(() => {
-                    shakeTarget.style.transition = "transform 0.2s ease-out";
-                    shakeTarget.style.transform = "translateX(-50%) translateY(0)";
-                }, 150);
-            }, 30);
-        }
-    }, 200);
-
-    // === 阶段3：回退缩小到场位 (450-700ms) ===
-    setTimeout(() => {
-        fly.style.transition = "transform 0.25s cubic-bezier(.25,.8,.25,1), filter 0.25s ease";
-        fly.style.transform = `translate(${endX - startX}px, ${endY - startY}px) rotate(2deg) scale(0.8)`;
-        fly.style.filter = "brightness(1.3) blur(0px)";
-        fly.style.zIndex = "250";
-
-        // 拖尾跟随
-        trail.style.transition = "transform 0.25s cubic-bezier(.25,.8,.25,1), opacity 0.3s ease, filter 0.25s ease";
-        trail.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(0.8)`;
-        trail.style.filter = "blur(2px)";
-        trail.style.opacity = "0.2";
-    }, 450);
-
-    // === 阶段4：落地定位 + 消散 (700-900ms) ===
-    setTimeout(() => {
-        fly.style.transition = "transform 0.15s cubic-bezier(.4,0,.2,1), opacity 0.2s ease, filter 0.15s ease";
-        fly.style.transform = `translate(${endX - startX}px, ${endY - startY}px) rotate(0deg) scale(0.75)`;
-        fly.style.filter = "brightness(1) blur(0px)";
-        fly.style.opacity = "0";
-
-        // 拖尾消散
-        trail.style.transition = "opacity 0.2s ease";
-        trail.style.opacity = "0";
-
-        // 落地冲击
-        if (targetSlot) {
-            const sw = document.createElement("div");
-            sw.className = `summon-shockwave ${attr}`;
-            targetSlot.appendChild(sw);
-            removeAfter(sw, 550);
-        }
-        screenFlash(getFlashColor(card));
-    }, 700);
-
-    // 清理
-    setTimeout(() => {
-        fly.remove();
-        trail.remove();
-        handCard.classList.remove("play-glow");
-        resolve();
-    }, 950);
-
-    return new Promise(resolve => { setTimeout(resolve, 0); resolve; });
+    return animatePlayToZone(card, handCard, targetSlot, htmlFn);
 }
 
 /**
@@ -523,138 +467,8 @@ export function animatePlayCard(card, handCard, targetSlot, htmlFn) {
  * 全程带光效拖尾、动态模糊、镜头晃动，流畅连贯帅气运镜
  */
 export function animatePlayToGraveyard(card, handCard, htmlFn, graveyardId = "player-graveyard-pile") {
-    if (!isBrowser || !handCard) return Promise.resolve();
-
-    const from = getRect(handCard);
-    const graveyardPile = document.getElementById(graveyardId);
-    const battlefield = document.querySelector(".battlefield");
-
-    const startX = from.left;
-    const startY = from.top;
-
-    // 终点：墓地区位置
-    let endX, endY;
-    if (graveyardPile) {
-        const gyRect = getRect(graveyardPile);
-        endX = gyRect.left + gyRect.width / 2 - 71;
-        endY = gyRect.top + 20;
-    } else {
-        // 兜底：左边与牌库对称的位置
-        endX = window.innerWidth * 0.2 - 71;
-        endY = window.innerHeight * 0.65 - 101;
-    }
-
-    // 镜头中心（画面中央偏上）
-    const camX = window.innerWidth / 2 - 71;
-    const camY = window.innerHeight * 0.35 - 101;
-
-    // 手牌发光
-    handCard.classList.add("play-glow");
-
-    // 飞行卡牌
-    const fly = createFlyingCard(card, htmlFn);
-    fly.style.left = `${startX}px`;
-    fly.style.top = `${startY}px`;
-    fly.style.opacity = "0";
-    fly.style.zIndex = "250";
-
-    // 光效拖尾
-    const trail = document.createElement("div");
-    trail.className = "draw-light-trail";
-    trail.style.cssText = `position:fixed; z-index:249; pointer-events:none; left:${startX}px; top:${startY}px; width:142px; height:202px; opacity:0;`;
-    document.body.appendChild(trail);
-
-    const shakeTarget = battlefield || document.querySelector(".battle-screen");
-
-    // === 动画序列 ===
-    let resolve;
-    const done = new Promise(r => { resolve = r; });
-
-    // 阶段1：手牌漂浮升起 (0-400ms)
-    requestAnimationFrame(() => {
-        fly.style.opacity = "1";
-        fly.style.transition = "transform 0.4s cubic-bezier(.4,0,.2,1), opacity 0.3s ease";
-        fly.style.transform = "translateY(-30px) rotate(5deg) scale(1.1)";
-        fly.style.filter = "brightness(1.5) blur(1px)";
-    });
-
-    // 阶段2：斜向高速飞向镜头，急剧放大 (400-1000ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.6s cubic-bezier(.1,.9,.2,1), filter 0.6s ease";
-        fly.style.transform = `translate(${camX - startX}px, ${camY - startY}px) rotate(-3deg) scale(3.2)`;
-        fly.style.filter = "brightness(1.6) blur(0px)";
-        fly.style.zIndex = "300";
-
-        // 拖尾跟随
-        trail.style.transition = "transform 0.6s cubic-bezier(.1,.9,.2,1), opacity 0.4s ease, filter 0.6s ease";
-        trail.style.transform = `translate(${camX - startX}px, ${camY - startY}px) scale(3)`;
-        trail.style.filter = "blur(4px)";
-        trail.style.opacity = "0.6";
-
-        // 镜头微晃
-        if (shakeTarget) {
-            shakeTarget.style.transition = "none";
-            shakeTarget.style.transform = "translateX(-50%) translateY(-2px)";
-            setTimeout(() => {
-                shakeTarget.style.transition = "transform 0.15s ease-out";
-                shakeTarget.style.transform = "translateX(-50%) translateY(1px)";
-                setTimeout(() => {
-                    shakeTarget.style.transition = "transform 0.2s ease-out";
-                    shakeTarget.style.transform = "translateX(-50%) translateY(0)";
-                }, 150);
-            }, 30);
-        }
-    }, 400);
-
-    // 阶段3：近距离放大维持1秒 (1000-2000ms)
-
-    // 阶段4：减速回退缩小向墓区 (2000-3200ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 1.2s cubic-bezier(.25,.8,.25,1), filter 1.2s ease";
-        fly.style.transform = `translate(${endX - startX}px, ${endY - startY}px) rotate(2deg) scale(1)`;
-        fly.style.filter = "brightness(1.1) blur(0px)";
-        fly.style.zIndex = "250";
-
-        // 拖尾跟随回退
-        trail.style.transition = "transform 1.2s cubic-bezier(.25,.8,.25,1), opacity 1.2s ease, filter 1.2s ease";
-        trail.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(1)`;
-        trail.style.filter = "blur(2px)";
-        trail.style.opacity = "0.3";
-    }, 2000);
-
-    // 阶段5：平稳滑入墓区，消失 (3200-3600ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s ease, filter 0.35s ease";
-        fly.style.transform = `translate(${endX - startX}px, ${endY + 20 - startY}px) rotate(0deg) scale(0.8)`;
-        fly.style.filter = "brightness(1) blur(0px)";
-        fly.style.opacity = "0";
-
-        // 拖尾消散
-        trail.style.transition = "opacity 0.35s ease";
-        trail.style.opacity = "0";
-
-        // 墓区闪光
-        if (graveyardPile) {
-            graveyardPile.style.transition = "box-shadow 0.3s ease";
-            graveyardPile.style.boxShadow = "0 0 40px rgba(255,180,80,.5)";
-            setTimeout(() => {
-                graveyardPile.style.boxShadow = "";
-                graveyardPile.style.transition = "";
-            }, 400);
-        }
-
-        screenFlash("rgba(255,180,80,.08)");
-    }, 3200);
-
-    // 清理
-    setTimeout(() => {
-        fly.remove();
-        trail.remove();
-        handCard.classList.remove("play-glow");
-        resolve();
-    }, 3700);
-
-    return done;
+    if (!isBrowser || !card) return Promise.resolve();
+    return playCardTransfer(card, htmlFn(card), handCard, document.getElementById(graveyardId), "graveyard");
 }
 
 /**
@@ -662,8 +476,8 @@ export function animatePlayToGraveyard(card, handCard, htmlFn, graveyardId = "pl
  */
 export function createCardBackHtml(card) {
     const typeLabel = card?.type === "trap" ? "TRAP" : card?.type === "spell" ? "SPELL" : "NC";
-    const label = card?.type === "monster" ? "" : "SET";
-    return `<div class="card in-field"><div class="card-frame face-down-frame"><div class="card-back-icon">${typeLabel}</div><div class="card-back-label">${label}</div></div></div>`;
+    const label = card?.type === "monster" ? "SET" : typeLabel;
+    return `<div class="card in-field"><div class="card-frame face-down-frame"><div class="card-back-icon">${typeLabel}</div>${sekaiCardBackHtml({ label })}</div></div>`;
 }
 
 /**
@@ -673,144 +487,11 @@ export function createCardBackHtml(card) {
  * options.endScale: 落地缩放比例（魔法/陷阱区较小，用0.7）
  */
 export function animatePlayToZone(card, fromEl, targetSlot, htmlFn, options = {}) {
-    if (!isBrowser || !fromEl) return Promise.resolve();
-
-    const from = getRect(fromEl);
-    const to = targetSlot ? getRect(targetSlot) : from;
-
-    const startX = from.left;
-    const startY = from.top;
-    const endX = to.left + to.width / 2 - 71;
-    const endY = to.top + to.height / 2 - 101;
-
-    // 镜头中心（画面中央偏上）
-    const camX = startX;
-    const camY = startY;
-
-    const battlefield = document.querySelector(".battlefield");
-    const shakeTarget = battlefield || document.querySelector(".battle-screen");
-    const attr = card.attribute || card.element || "none";
-    const endScale = options.endScale || 0.8;
-    // 旋转：卡背默认360度旋转，卡面默认12度微旋
-    const targetRotation = options.targetRotation !== undefined
-        ? options.targetRotation
-        : (options.isCardBack ? 360 : 12);
-
-    // 选择显示卡面还是卡背
-    const cardHtml = options.isCardBack ? createCardBackHtml(card) : htmlFn(card);
-
-    // 手牌发光（如果不是临时元素）
-    if (fromEl.classList) fromEl.classList.add("play-glow");
-
-    // 飞行卡牌
-    const fly = createFlyingCard(card, () => cardHtml);
-    fly.style.left = `${startX}px`;
-    fly.style.top = `${startY}px`;
-    fly.style.opacity = "0";
-    fly.style.zIndex = "250";
-    fly.style.perspective = "800px";
-
-    // 光效拖尾
-    const trail = document.createElement("div");
-    trail.className = "draw-light-trail";
-    trail.style.cssText = `position:fixed; z-index:249; pointer-events:none; left:${startX}px; top:${startY}px; width:142px; height:202px; opacity:0;`;
-    document.body.appendChild(trail);
-
-    let resolve;
-    const done = new Promise(r => { resolve = r; });
-
-    // 阶段1：手牌高亮弹起 + 起始旋转 (0-200ms)
-    requestAnimationFrame(() => {
-        fly.style.opacity = "1";
-        fly.style.transition = "transform 0.2s cubic-bezier(.4,0,.2,1), opacity 0.15s ease";
-        fly.style.transform = `translateY(-30px) rotate(${targetRotation * 0.05}deg) scale(1.1)`;
-        fly.style.filter = "brightness(2) blur(1px)";
-    });
-
-    // 阶段2：冲向镜头放大 + 中段旋转 (200-500ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.3s cubic-bezier(.1,.9,.2,1), filter 0.3s ease";
-        fly.style.transform = `translate(${camX - startX}px, ${camY - startY}px) rotate(${targetRotation * 0.4}deg) scale(2.8)`;
-        fly.style.filter = "brightness(2.5) blur(0px)";
-        fly.style.zIndex = "300";
-
-        trail.style.transition = "transform 0.3s cubic-bezier(.1,.9,.2,1), opacity 0.2s ease, filter 0.3s ease";
-        trail.style.transform = `translate(${camX - startX}px, ${camY - startY}px) scale(2.5)`;
-        trail.style.filter = "blur(4px)";
-        trail.style.opacity = "0.7";
-
-        // 镜头微晃
-        if (shakeTarget) {
-            shakeTarget.style.transition = "none";
-            shakeTarget.style.transform = "translateX(-50%) translateY(-2px)";
-            setTimeout(() => {
-                shakeTarget.style.transition = "transform 0.15s ease-out";
-                shakeTarget.style.transform = "translateX(-50%) translateY(1px)";
-                setTimeout(() => {
-                    shakeTarget.style.transition = "transform 0.2s ease-out";
-                    shakeTarget.style.transform = "translateX(-50%) translateY(0)";
-                }, 150);
-            }, 30);
-        }
-    }, 200);
-
-    // 阶段3：回退缩小到场位 + 后段旋转 (500-800ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.3s cubic-bezier(.25,.8,.25,1), filter 0.3s ease";
-        fly.style.transform = `translate(${endX - startX}px, ${endY - startY}px) rotate(${targetRotation * 0.85}deg) scale(${endScale + 0.1})`;
-        fly.style.filter = "brightness(1.3) blur(0px)";
-        fly.style.zIndex = "250";
-
-        trail.style.transition = "transform 0.3s cubic-bezier(.25,.8,.25,1), opacity 0.3s ease, filter 0.3s ease";
-        trail.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(${endScale + 0.1})`;
-        trail.style.filter = "blur(2px)";
-        trail.style.opacity = "0.2";
-    }, 500);
-
-    // 阶段4：落地定位 + 旋转归零 + 消散 (800-1000ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.2s cubic-bezier(.4,0,.2,1), opacity 0.25s ease, filter 0.2s ease";
-        fly.style.transform = `translate(${endX - startX}px, ${endY - startY}px) rotate(${targetRotation}deg) scale(${endScale})`;
-        fly.style.filter = "brightness(1) blur(0px)";
-        fly.style.opacity = "0";
-
-        trail.style.transition = "opacity 0.2s ease";
-        trail.style.opacity = "0";
-
-        // 落地冲击
-        if (targetSlot) {
-            const sw = document.createElement("div");
-            sw.className = `summon-shockwave ${attr}`;
-            targetSlot.appendChild(sw);
-            removeAfter(sw, 550);
-        }
-        screenFlash(getFlashColor(card));
-    }, 800);
-
-    // 清理
-    setTimeout(() => {
-        fly.remove();
-        trail.remove();
-        if (fromEl.classList) fromEl.classList.remove("play-glow");
-        resolve();
-    }, 1100);
-
-    return done;
+    if (!isBrowser || !card) return Promise.resolve();
+    return playCardTransfer(card, options.isCardBack ? createCardBackHtml(card) : htmlFn(card), fromEl, targetSlot || fromEl);
 }
 
-function spawnTrailParticle(from, to) {
-    const p = document.createElement("div");
-    p.className = "fly-trail";
-    const t = Math.random() * 0.6;
-    const x = from.left + (to.left - from.left) * t + (Math.random() - 0.5) * 30;
-    const y = from.top + (to.top - from.top) * t + (Math.random() - 0.5) * 30;
-    p.style.left = `${x}px`;
-    p.style.top = `${y}px`;
-    p.style.setProperty("--tx", `${(Math.random() - 0.5) * 20}px`);
-    p.style.setProperty("--ty", `${-Math.random() * 15}px`);
-    document.body.appendChild(p);
-    removeAfter(p, 450);
-}
+
 
 function getFlashColor(card) {
     const attr = card.attribute || card.element || "none";
@@ -823,8 +504,8 @@ function getFlashColor(card) {
 }
 
 function screenFlash(color) {
-    if (!isBrowser) return;
-    const el = document.createElement("div");
+    if (!isBrowser || getDuelMotion().reduced || getDuelMotion().quality === "low") return;
+    const el = createEffectElement("div");
     el.className = "screen-flash";
     el.style.setProperty("--flash-color", color);
     document.body.appendChild(el);
@@ -842,12 +523,17 @@ function screenFlash(color) {
 function playLevelSummonCinematic(fieldSlot, cardName, level, options = {}) {
     if (!fieldSlot) return;
     const starLevel = Math.max(1, Math.min(12, Number(level) || 1));
-    const tributeCount = Math.max(0, Number(options.tributeCount) || (options.tributeSummon ? (starLevel >= 7 ? 2 : 1) : 0));
+    const tributeFallback = options.tributeSummon ? (starLevel >= 7 ? 2 : 1) : 0;
+    const tributeRaw = Number(options.tributeCount);
+    // Infinity / NaN / 超大数（PvP 对端可传 1e999 → Infinity）统一夹到 0..3 的有限整数
+    const tributeCount = Number.isFinite(tributeRaw)
+        ? Math.min(3, Math.max(0, Math.round(tributeRaw)))
+        : tributeFallback;
     const rect = getRect(fieldSlot);
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     const tier = starLevel >= 9 ? "cosmic" : starLevel >= 7 ? "legendary" : starLevel >= 5 ? "tribute" : starLevel >= 3 ? "advanced" : "basic";
-    const overlay = document.createElement("div");
+    const overlay = createEffectElement("div");
     overlay.className = `level-summon-cinematic level-summon-${tier}`;
     overlay.style.setProperty("--summon-x", `${centerX}px`);
     overlay.style.setProperty("--summon-y", `${centerY}px`);
@@ -869,7 +555,7 @@ function playLevelSummonCinematic(fieldSlot, cardName, level, options = {}) {
 
     const stars = overlay.querySelector(".level-summon-stars");
     for (let index = 0; index < starLevel; index++) {
-        const star = document.createElement("b");
+        const star = createEffectElement("b");
         star.textContent = "★";
         star.style.setProperty("--star-index", index);
         star.style.setProperty("--star-count", starLevel);
@@ -877,10 +563,12 @@ function playLevelSummonCinematic(fieldSlot, cardName, level, options = {}) {
         stars.appendChild(star);
     }
 
-    for (let index = 0; index < tributeCount; index++) {
-        const soul = document.createElement("div");
+    // 二次防御：循环上界再夹一次，保证渲染的 DOM 节点数量有界
+    const soulCount = Math.min(3, Math.max(0, Math.round(Number(tributeCount) || 0)));
+    for (let index = 0; index < soulCount; index++) {
+        const soul = createEffectElement("div");
         soul.className = "tribute-soul-pillar";
-        soul.style.setProperty("--soul-offset", `${(index - (tributeCount - 1) / 2) * 150}px`);
+        soul.style.setProperty("--soul-offset", `${(index - (soulCount - 1) / 2) * 150}px`);
         soul.style.setProperty("--soul-delay", `${index * 180}ms`);
         overlay.appendChild(soul);
     }
@@ -955,7 +643,7 @@ export function getMonsterParticleProfile(card = {}) {
 
 function createMonsterParticleLayer({ phase, profile, signature, startX, startY, endX = startX, endY = startY }) {
     const family = monsterParticleFamily(profile, signature.attribute);
-    const layer = document.createElement("div");
+    const layer = createEffectElement("div");
     const safeStyle = String(profile?.style || "arcane").replace(/[^a-z0-9-]/gi, "-");
     layer.className = `monster-particle-field monster-particle-${phase} particle-family-${family} particle-style-${safeStyle} particle-variant-${signature.variant}`;
     layer.style.cssText = [
@@ -972,7 +660,7 @@ function createMonsterParticleLayer({ phase, profile, signature, startX, startY,
     const baseCount = phase === "summon" ? 30 : 22;
     const count = Math.round(baseCount * signature.intensity);
     for (let index = 0; index < count; index++) {
-        const particle = document.createElement("i");
+        const particle = createEffectElement("i");
         particle.className = `monster-theme-particle particle-${index % 4}`;
         const angle = seededVisualUnit(signature.seed, index) * Math.PI * 2;
         const radius = 45 + seededVisualUnit(signature.seed ^ 0xa511e9b3, index) * (phase === "summon" ? 190 : 95);
@@ -991,7 +679,7 @@ function createMonsterParticleLayer({ phase, profile, signature, startX, startY,
 
     const structureCount = family === "thunder" ? 7 : family === "water" ? 5 : family === "wind" ? 8 : 4;
     for (let index = 0; index < structureCount; index++) {
-        const structure = document.createElement("b");
+        const structure = createEffectElement("b");
         structure.className = `monster-theme-structure structure-${index}`;
         structure.style.cssText = `--structure-index:${index};--structure-delay:${index * .055}s;--structure-turn:${(360 / structureCount) * index + signature.tilt}deg;`;
         layer.appendChild(structure);
@@ -1006,7 +694,7 @@ function playMonsterSummonSignature(fieldSlot, cardName, rarity, attribute) {
     if (!signature.enabled || !fieldSlot) return;
     const profile = getMonsterCinematicProfile({ name: cardName, rarity, attribute });
     const rect = getRect(fieldSlot);
-    const overlay = document.createElement("div");
+    const overlay = createEffectElement("div");
     overlay.className = `monster-signature summon-signature signature-v${signature.variant} cinematic-${profile.summonStyle || profile.style}${signature.zenitsu ? " signature-zenitsu" : ""}`;
     overlay.style.cssText = `--sig-x:${rect.left + rect.width / 2}px;--sig-y:${rect.top + rect.height / 2}px;--sig-hue:${signature.hue};--sig-tilt:${signature.tilt}deg;--sig-power:${signature.intensity};`;
     overlay.innerHTML = `<i></i><i></i><i></i><i></i><strong>${escapeHtml(profile.summonTitle)}</strong>`;
@@ -1032,7 +720,7 @@ function playMonsterAttackSignature(from, to, attackerCard) {
     const endY = to.top + to.height / 2;
     const distance = Math.hypot(endX - startX, endY - startY);
     const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
-    const overlay = document.createElement("div");
+    const overlay = createEffectElement("div");
     overlay.className = `monster-signature attack-signature signature-v${signature.variant} cinematic-${profile.attackStyle || profile.style}${signature.zenitsu ? " signature-zenitsu" : ""}`;
     overlay.style.cssText = `--sig-x:${startX}px;--sig-y:${startY}px;--sig-distance:${distance}px;--sig-angle:${angle}deg;--sig-hue:${signature.hue};--sig-tilt:${signature.tilt}deg;--sig-power:${signature.intensity};`;
     overlay.innerHTML = `<i></i><i></i><i></i><strong>${escapeHtml(profile.attackTitle)}</strong>`;
@@ -1044,6 +732,17 @@ function playMonsterAttackSignature(from, to, attackerCard) {
 
 export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", level = 0, rarity = "N", options = {}) {
     if (!isBrowser) return;
+    if (options.faceDown || fieldSlot?.classList?.contains("face-down-set")) return Promise.resolve();
+    if (authoredScene(cardName, "summon")) {
+        showSummonBanner(attribute, cardName, level);
+        if (options.tributeSummon || options.fusionSummon) {
+            const epoch = motionGeneration();
+            return playCardPerformance(cardName, options.tributeSummon ? "tribute" : "fusion", fieldSlot, fieldSlot, options.materialRects || [])
+                .then(() => epoch !== motionGeneration() || fieldSlot?.isConnected === false ? undefined : playCardPerformance(cardName, "summon", fieldSlot));
+        }
+        return playCardPerformance(cardName, "summon", fieldSlot);
+    }
+    playCardPerformance(cardName, options.tributeSummon ? "tribute" : options.fusionSummon ? "fusion" : "summon", fieldSlot, fieldSlot, options.materialRects || []);
 
     showSummonBanner(attribute, cardName, level);
     playLevelSummonCinematic(fieldSlot, cardName, level, options);
@@ -1064,7 +763,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         const slotRect = fieldSlot ? getRect(fieldSlot) : { left: cx - 50, top: cy - 65, width: 100, height: 130 };
         // 地面裂纹
         for (let i = 0; i < 6; i++) {
-            const crack = document.createElement("div");
+            const crack = createEffectElement("div");
             crack.className = "summon-fire-crack";
             const angle = (i / 6) * Math.PI * 2;
             const dist = 30 + Math.random() * 40;
@@ -1074,7 +773,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         }
         // 火柱粒子
         for (let i = 0; i < 18; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "summon-fire-pillar";
             const ox = (Math.random() - 0.5) * 80;
             p.style.cssText = `left:${slotRect.left + slotRect.width/2 + ox}px; top:${slotRect.top + slotRect.height}px; animation-delay:${i*0.03}s; height:${40+Math.random()*80}px;`;
@@ -1083,7 +782,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         }
         // 熔岩碎片飞溅
         for (let i = 0; i < 14; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "summon-ember";
             const angle = Math.random() * Math.PI * 2;
             const dist = 40 + Math.random() * 80;
@@ -1092,7 +791,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
             removeAfter(p, 900);
         }
         // 热浪扭曲
-        const heatwave = document.createElement("div");
+        const heatwave = createEffectElement("div");
         heatwave.className = "summon-heatwave";
         heatwave.style.cssText = `left:${slotRect.left - 20}px; top:${slotRect.top - 20}px; width:${slotRect.width+40}px; height:${slotRect.height+40}px;`;
         container.appendChild(heatwave);
@@ -1112,7 +811,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         const slotRect = fieldSlot ? getRect(fieldSlot) : { left: cx - 50, top: cy - 65, width: 100, height: 130 };
         // 多层涟漪
         for (let i = 0; i < 4; i++) {
-            const ripple = document.createElement("div");
+            const ripple = createEffectElement("div");
             ripple.className = "summon-water-ripple";
             ripple.style.cssText = `left:${slotRect.left + slotRect.width/2}px; top:${slotRect.top + slotRect.height/2}px; animation-delay:${i*0.12}s;`;
             container.appendChild(ripple);
@@ -1120,7 +819,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         }
         // 水泡上升
         for (let i = 0; i < 20; i++) {
-            const bubble = document.createElement("div");
+            const bubble = createEffectElement("div");
             bubble.className = "summon-water-bubble";
             const ox = (Math.random() - 0.5) * 100;
             const size = 4 + Math.random() * 8;
@@ -1130,7 +829,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         }
         // 水花飞溅（顶部）
         for (let i = 0; i < 12; i++) {
-            const splash = document.createElement("div");
+            const splash = createEffectElement("div");
             splash.className = "summon-water-splash";
             const ox = (Math.random() - 0.5) * 60;
             splash.style.cssText = `left:${slotRect.left + slotRect.width/2 + ox}px; top:${slotRect.top}px; --sy:${-20-Math.random()*40}px; --sx:${ox*0.5}px; animation-delay:${Math.random()*0.3}s;`;
@@ -1152,7 +851,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         const slotRect = fieldSlot ? getRect(fieldSlot) : { left: cx - 50, top: cy - 65, width: 100, height: 130 };
         // 旋风环（多层）
         for (let i = 0; i < 3; i++) {
-            const tornado = document.createElement("div");
+            const tornado = createEffectElement("div");
             tornado.className = "summon-wind-tornado";
             tornado.style.cssText = `left:${slotRect.left + slotRect.width/2}px; top:${slotRect.top + slotRect.height/2}px; animation-delay:${i*0.15}s; --scale:${1+i*0.3};`;
             container.appendChild(tornado);
@@ -1160,7 +859,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         }
         // 飘散叶片/羽毛
         for (let i = 0; i < 16; i++) {
-            const leaf = document.createElement("div");
+            const leaf = createEffectElement("div");
             leaf.className = "summon-wind-leaf";
             const angle = (i / 16) * Math.PI * 2;
             const dist = 30 + Math.random() * 50;
@@ -1170,7 +869,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         }
         // 空气涡流线
         for (let i = 0; i < 8; i++) {
-            const line = document.createElement("div");
+            const line = createEffectElement("div");
             line.className = "summon-wind-line";
             const angle = (i / 8) * 360;
             line.style.cssText = `left:${slotRect.left + slotRect.width/2}px; top:${slotRect.top + slotRect.height/2}px; transform:rotate(${angle}deg); animation-delay:${i*0.06}s;`;
@@ -1192,7 +891,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         const slotRect = fieldSlot ? getRect(fieldSlot) : { left: cx - 50, top: cy - 65, width: 100, height: 130 };
         // 地面震裂线
         for (let i = 0; i < 8; i++) {
-            const crack = document.createElement("div");
+            const crack = createEffectElement("div");
             crack.className = "summon-earth-crack";
             const angle = (i / 8) * Math.PI * 2;
             const len = 25 + Math.random() * 35;
@@ -1202,7 +901,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         }
         // 碎石飞溅
         for (let i = 0; i < 20; i++) {
-            const rock = document.createElement("div");
+            const rock = createEffectElement("div");
             rock.className = "summon-earth-rock";
             const angle = Math.random() * Math.PI * 2;
             const dist = 25 + Math.random() * 70;
@@ -1212,7 +911,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
             removeAfter(rock, 700);
         }
         // 扬尘
-        const dust = document.createElement("div");
+        const dust = createEffectElement("div");
         dust.className = "summon-earth-dust";
         dust.style.cssText = `left:${slotRect.left - 30}px; top:${slotRect.top + slotRect.height - 20}px; width:${slotRect.width + 60}px;`;
         container.appendChild(dust);
@@ -1230,21 +929,21 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         const slotRect = fieldSlot ? getRect(fieldSlot) : { left: cx - 50, top: cy - 65, width: 100, height: 130 };
         // 神圣光柱
         for (let i = 0; i < 3; i++) {
-            const pillar = document.createElement("div");
+            const pillar = createEffectElement("div");
             pillar.className = "summon-light-pillar";
             pillar.style.cssText = `left:${slotRect.left + slotRect.width/2 + (i-1)*30}px; top:0; animation-delay:${i*0.1}s;`;
             container.appendChild(pillar);
             removeAfter(pillar, 800);
         }
         // 十字光芒
-        const cross = document.createElement("div");
+        const cross = createEffectElement("div");
         cross.className = "summon-light-cross";
         cross.style.cssText = `left:${slotRect.left + slotRect.width/2}px; top:${slotRect.top + slotRect.height/2}px;`;
         container.appendChild(cross);
         removeAfter(cross, 700);
         // 光粒子上升
         for (let i = 0; i < 24; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "summon-light-particle";
             const ox = (Math.random() - 0.5) * 100;
             p.style.cssText = `left:${slotRect.left + slotRect.width/2 + ox}px; top:${slotRect.top + slotRect.height}px; animation-delay:${i*0.04}s;`;
@@ -1261,7 +960,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
             }, 200);
         }
         // 过曝闪光
-        const overexpose = document.createElement("div");
+        const overexpose = createEffectElement("div");
         overexpose.className = "summon-light-overexpose";
         container.appendChild(overexpose);
         removeAfter(overexpose, 600);
@@ -1271,7 +970,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         const darkSlotRect = fieldSlot ? getRect(fieldSlot) : { left: cx - 50, top: cy - 65, width: 100, height: 130 };
         // 暗影触手
         for (let i = 0; i < 6; i++) {
-            const tendril = document.createElement("div");
+            const tendril = createEffectElement("div");
             tendril.className = "summon-dark-tendril";
             const ox = (Math.random() - 0.5) * 80;
             tendril.style.cssText = `left:${darkSlotRect.left + darkSlotRect.width/2 + ox}px; top:${darkSlotRect.top + darkSlotRect.height}px; animation-delay:${i*0.06}s; --twist:${(Math.random()-0.5)*30}deg;`;
@@ -1279,14 +978,14 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
             removeAfter(tendril, 800);
         }
         // 紫色漩涡
-        const vortex = document.createElement("div");
+        const vortex = createEffectElement("div");
         vortex.className = "summon-dark-vortex";
         vortex.style.cssText = `left:${darkSlotRect.left + darkSlotRect.width/2}px; top:${darkSlotRect.top + darkSlotRect.height/2}px;`;
         container.appendChild(vortex);
         removeAfter(vortex, 900);
         // 虚空碎片
         for (let i = 0; i < 14; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "summon-dark-void";
             const angle = Math.random() * Math.PI * 2;
             const dist = 20 + Math.random() * 50;
@@ -1295,7 +994,7 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
             removeAfter(p, 700);
         }
         // 暗角+画面压暗
-        const darken = document.createElement("div");
+        const darken = createEffectElement("div");
         darken.className = "summon-dark-darken";
         container.appendChild(darken);
         removeAfter(darken, 800);
@@ -1311,12 +1010,12 @@ export function playSummonEffect(fieldSlot, attribute = "none", cardName = "", l
         screenFlash("rgba(140,60,255,.12)");
     } else {
         // 无属性（默认）：基础闪光环
-        const ring = document.createElement("div");
+        const ring = createEffectElement("div");
         ring.className = "summon-ring none";
         ring.style.cssText = fieldSlot ? "" : "position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:200;";
         container.appendChild(ring);
         removeAfter(ring, 650);
-        const flash = document.createElement("div");
+        const flash = createEffectElement("div");
         flash.className = "summon-flash";
         flash.style.cssText = fieldSlot ? "" : "position:fixed; left:0; top:0; right:0; bottom:0; z-index:199;";
         container.appendChild(flash);
@@ -1339,17 +1038,17 @@ export function playSpellEffect(fieldSlot, attribute = "none", cardName = "") {
     // 全屏通告
     showAnnounceBanner("spell", attribute, cardName);
 
-    const circle = document.createElement("div");
+    const circle = createEffectElement("div");
     circle.className = `spell-circle ${attribute}`;
     fieldSlot.appendChild(circle);
     removeAfter(circle, 900);
 
-    const glow = document.createElement("div");
+    const glow = createEffectElement("div");
     glow.className = "spell-glow";
     fieldSlot.appendChild(glow);
     removeAfter(glow, 1000);
 
-    const beam = document.createElement("div");
+    const beam = createEffectElement("div");
     beam.className = "spell-beam";
     fieldSlot.appendChild(beam);
     removeAfter(beam, 650);
@@ -1366,17 +1065,17 @@ export function playTrapEffect(fieldSlot, subtype = "counter", cardName = "") {
     // 全屏通告 —— 陷阱最重要的视觉反馈
     showAnnounceBanner("trap", subtype, cardName);
 
-    const barrier = document.createElement("div");
+    const barrier = createEffectElement("div");
     barrier.className = `trap-barrier ${subtype}`;
     fieldSlot.appendChild(barrier);
     removeAfter(barrier, 1100);
 
-    const flash = document.createElement("div");
+    const flash = createEffectElement("div");
     flash.className = "trap-flash";
     fieldSlot.appendChild(flash);
     removeAfter(flash, 550);
 
-    const hex = document.createElement("div");
+    const hex = createEffectElement("div");
     hex.className = `trap-hex ${subtype}`;
     fieldSlot.appendChild(hex);
     removeAfter(hex, 1000);
@@ -1392,8 +1091,12 @@ export function showAnnounceBanner(type, subtype, cardName) {
 }
 
 function escapeHtml(s) {
-    if (!s) return "";
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 /**
@@ -1430,35 +1133,46 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
     };
     const c = attrColors[attribute] || { core: "rgba(255,180,80,.8)", color: "rgba(255,220,140,.95)", glow: "rgba(255,200,100,.6)", spark: "#ffdd88", burst: "rgba(255,240,180,.7)" };
 
+    // 已有命中特效在播 → 砍半粒子数；再多就直接降级为一次轻量闪光，
+    // 否则连锁攻击时几十个特效层叠在同一帧会把渲染线程彻底压死。
+    const load = hitImpactLoad();
+    if (load >= MAX_CONCURRENT_HIT_IMPACTS) {
+        trimHitImpacts();
+        screenFlash(c.glow.replace(/[\d.]+\)/, ".12)"));
+        return;
+    }
+    const degrade = load > 0;
+    const scale = base => (degrade ? Math.max(2, Math.round(base * 0.5)) : base);
+
     // --- 0. 冻帧闪光（命中瞬间全屏白闪 + 暗角） ---
-    const freezeFlash = document.createElement("div");
+    const freezeFlash = createEffectElement("div");
     freezeFlash.className = "hit-freeze-flash";
     freezeFlash.style.cssText = `--hx:${x / window.innerWidth * 100}%; --hy:${y / window.innerHeight * 100}%;`;
     container.appendChild(freezeFlash);
     removeAfter(freezeFlash, 300);
 
     // 暗角
-    const vignette = document.createElement("div");
+    const vignette = createEffectElement("div");
     vignette.className = "hit-vignette";
     container.appendChild(vignette);
     removeAfter(vignette, 450);
 
     // --- 主容器 ---
-    const box = document.createElement("div");
+    const box = createEffectElement("div");
     box.className = "hit-impact-container";
     box.style.cssText = `left:${x}px; top:${y}px; --hit-color:${c.color}; --hit-glow:${c.glow};`;
     container.appendChild(box);
 
     // --- 1. 中心白色闪光核（更大） ---
-    const core = document.createElement("div");
+    const core = createEffectElement("div");
     core.className = "hit-core";
     core.style.background = `radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,.9) 10%, ${c.core} 35%, transparent 65%)`;
     box.appendChild(core);
 
     // --- 2. 径向爆发扇形（8个白色扇形从中心射出） ---
-    const burstCount = isDirectAttack ? 12 : 8;
+    const burstCount = scale(isDirectAttack ? 12 : 8);
     for (let i = 0; i < burstCount; i++) {
-        const burst = document.createElement("div");
+        const burst = createEffectElement("div");
         burst.className = "hit-burst";
         const angle = (i / burstCount) * 360 + (Math.random() - 0.5) * 10;
         const len = (isDirectAttack ? 120 : 80) + Math.random() * 60;
@@ -1469,7 +1183,7 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
     // --- 3. 冲击波环（3层） ---
     const waveCount = isDirectAttack ? 3 : 3;
     for (let i = 0; i < waveCount; i++) {
-        const wave = document.createElement("div");
+        const wave = createEffectElement("div");
         wave.className = "hit-shockwave";
         wave.style.borderColor = c.color;
         wave.style.boxShadow = `0 0 ${16 + i * 6}px ${c.glow}, 0 0 ${30 + i * 10}px ${c.glow.replace(/[\d.]+\)/, '.2)')}, inset 0 0 ${10 + i * 3}px ${c.glow}`;
@@ -1477,9 +1191,9 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
     }
 
     // --- 4. 能量射线（更粗更亮） ---
-    const rayCount = isDirectAttack ? 14 : 10;
+    const rayCount = scale(isDirectAttack ? 14 : 10);
     for (let i = 0; i < rayCount; i++) {
-        const ray = document.createElement("div");
+        const ray = createEffectElement("div");
         ray.className = "hit-ray";
         const angle = (i / rayCount) * 360 + (Math.random() - 0.5) * 8;
         const len = (isDirectAttack ? 110 : 70) + Math.random() * 60;
@@ -1488,9 +1202,9 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
     }
 
     // --- 5. 飞溅火花（更多更大） ---
-    const sparkCount = isDirectAttack ? 22 : 14;
+    const sparkCount = scale(isDirectAttack ? 22 : 14);
     for (let i = 0; i < sparkCount; i++) {
-        const spark = document.createElement("div");
+        const spark = createEffectElement("div");
         spark.className = "hit-spark";
         const angle = Math.random() * Math.PI * 2;
         const dist = 25 + Math.random() * (isDirectAttack ? 90 : 60);
@@ -1502,7 +1216,7 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
         box.appendChild(spark);
 
         // 火花拖尾线
-        const trail = document.createElement("div");
+        const trail = createEffectElement("div");
         trail.className = "hit-spark-trail";
         const trailAngle = angle * (180 / Math.PI);
         const trailLen = 18 + Math.random() * 30;
@@ -1511,9 +1225,9 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
     }
 
     // --- 6. 环形碎片（命中点飞散的菱形碎片） ---
-    const debrisCount = isDirectAttack ? 10 : 6;
+    const debrisCount = scale(isDirectAttack ? 10 : 6);
     for (let i = 0; i < debrisCount; i++) {
-        const debris = document.createElement("div");
+        const debris = createEffectElement("div");
         debris.className = "hit-debris";
         const angle = (i / debrisCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
         const dist = 30 + Math.random() * (isDirectAttack ? 70 : 45);
@@ -1529,7 +1243,7 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
 
     // --- 7. 直接攻击额外：全屏扫描线 + 更强闪光 ---
     if (isDirectAttack) {
-        const scanlines = document.createElement("div");
+        const scanlines = createEffectElement("div");
         scanlines.className = "hit-scanlines";
         scanlines.style.setProperty("--hit-color", c.color);
         container.appendChild(scanlines);
@@ -1538,11 +1252,13 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
         screenFlash(c.glow.replace(/[\d.]+\)/, ".25)"));
     }
 
-    // --- 7b. 属性专属打击附加特效 ---
-    if (attribute === "fire") {
+    // --- 7b. 属性专属打击附加特效（已有特效在播时省略，避免同帧叠加过多节点） ---
+    if (degrade) {
+        // 降级：只保留核心闪光与震动
+    } else if (attribute === "fire") {
         // 火属性：命中点火焰喷溅 + 烟雾
         for (let i = 0; i < 6; i++) {
-            const flame = document.createElement("div");
+            const flame = createEffectElement("div");
             flame.style.cssText = `position:fixed; left:${x}px; top:${y}px; z-index:${isDirectAttack ? 272 : 271}; pointer-events:none; width:4px; height:${10+Math.random()*15}px; background:linear-gradient(to top, rgba(255,100,30,.9), rgba(255,200,60,.4), transparent); border-radius:2px 2px 0 0; transform:rotate(${(Math.random()-0.5)*40}deg); animation:fireHitFlame .5s ease-out forwards; animation-delay:${i*0.03}s;`;
             container.appendChild(flame);
             removeAfter(flame, 500);
@@ -1550,7 +1266,7 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
     } else if (attribute === "water") {
         // 水属性：命中点水花飞溅
         for (let i = 0; i < 8; i++) {
-            const splash = document.createElement("div");
+            const splash = createEffectElement("div");
             const angle = Math.random() * Math.PI * 2;
             const dist = 15 + Math.random() * 40;
             splash.style.cssText = `position:fixed; left:${x}px; top:${y}px; z-index:271; pointer-events:none; width:3px; height:8px; border-radius:2px; background:rgba(100,200,255,.8); box-shadow:0 0 6px rgba(80,180,255,.5); --sx:${Math.cos(angle)*dist}px; --sy:${Math.sin(angle)*dist - 20}px; animation:waterHitSplash .5s ease-out forwards; animation-delay:${i*0.03}s;`;
@@ -1559,21 +1275,21 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
         }
     } else if (attribute === "light") {
         // 光属性：命中点神圣十字闪光
-        const holyCross = document.createElement("div");
+        const holyCross = createEffectElement("div");
         holyCross.style.cssText = `position:fixed; left:${x}px; top:${y}px; z-index:271; pointer-events:none; width:40px; height:40px; margin:-20px; animation:lightHitCross .4s ease-out forwards;`;
         holyCross.innerHTML = `<div style="position:absolute;left:50%;top:0;width:2px;height:100%;background:rgba(255,240,120,.8);transform:translateX(-50%);box-shadow:0 0 8px rgba(255,240,120,.5);"></div><div style="position:absolute;top:50%;left:0;height:2px;width:100%;background:rgba(255,240,120,.8);transform:translateY(-50%);box-shadow:0 0 8px rgba(255,240,120,.5);"></div>`;
         container.appendChild(holyCross);
         removeAfter(holyCross, 450);
     } else if (attribute === "dark") {
         // 暗属性：命中点暗影腐蚀圈
-        const corruption = document.createElement("div");
+        const corruption = createEffectElement("div");
         corruption.style.cssText = `position:fixed; left:${x}px; top:${y}px; z-index:271; pointer-events:none; width:0; height:0; margin:0; border-radius:50%; background:radial-gradient(circle, rgba(100,40,180,.6), transparent 60%); animation:darkHitCorrupt .5s ease-out forwards;`;
         container.appendChild(corruption);
         removeAfter(corruption, 500);
     } else if (attribute === "earth") {
         // 地属性：命中点碎石飞溅
         for (let i = 0; i < 6; i++) {
-            const rock = document.createElement("div");
+            const rock = createEffectElement("div");
             const angle = Math.random() * Math.PI * 2;
             const dist = 20 + Math.random() * 35;
             rock.style.cssText = `position:fixed; left:${x}px; top:${y}px; z-index:271; pointer-events:none; width:${3+Math.random()*4}px; height:${3+Math.random()*4}px; background:rgba(200,170,80,.8); clip-path:polygon(30% 0%, 100% 20%, 80% 100%, 0% 70%); --rx:${Math.cos(angle)*dist}px; --ry:${Math.sin(angle)*dist - 15}px; --rr:${Math.random()*360}deg; animation:earthHitRock .4s ease-out forwards; animation-delay:${i*0.025}s;`;
@@ -1583,7 +1299,7 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
     } else if (attribute === "wind") {
         // 风属性：命中点风刃弧线
         for (let i = 0; i < 4; i++) {
-            const blade = document.createElement("div");
+            const blade = createEffectElement("div");
             const angle = (i / 4) * 360 + Math.random() * 30;
             blade.style.cssText = `position:fixed; left:${x}px; top:${y}px; z-index:271; pointer-events:none; width:30px; height:2px; background:linear-gradient(90deg, transparent, rgba(160,255,200,.7), transparent); transform-origin:left center; transform:rotate(${angle}deg); animation:windHitBlade .35s ease-out forwards; animation-delay:${i*0.04}s;`;
             container.appendChild(blade);
@@ -1614,15 +1330,22 @@ export function playHitImpact(x, y, attribute = "none", isDirectAttack = false) 
  * @param attackerSurvived - 攻击后攻击方是否存活
  * @param playerHud - 直接攻击时的玩家HUD元素
  */
-export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, attackerSurvived, playerHud) {
+function playAttackAnimationLegacy(attackerSlot, targetSlot, attackerCard, attackerSurvived, playerHud) {
     if (!isBrowser || !attackerSlot || !attackerCard) return Promise.resolve();
 
+    const now = Date.now();
+    const lightweight = now < attackVisualBusyUntil;
+    attackVisualBusyUntil = Math.max(attackVisualBusyUntil, now + (lightweight ? 350 : 1150));
     const from = getRect(attackerSlot);
     const to = targetSlot ? getRect(targetSlot) : (playerHud ? getRect(playerHud) : from);
     const battlefield = document.querySelector(".battlefield");
-    playMonsterAttackSignature(from, to, attackerCard);
+    if (battlefield) {
+        battlefield.classList.add("attack-performance-mode");
+        setTimeout(() => battlefield.classList.remove("attack-performance-mode"), 1300);
+    }
+    if (!lightweight) playMonsterAttackSignature(from, to, attackerCard);
 
-    const sourceElement = typeof attackerSlot.getBoundingClientRect === "function" ? attackerSlot : null;
+    const sourceElement = typeof attackerSlot.querySelector === "function" ? attackerSlot : null;
     const sourceCard = sourceElement?.querySelector(".card") || sourceElement;
     const previousVisibility = sourceCard?.style.visibility || "";
     if (sourceCard) sourceCard.style.visibility = "hidden";
@@ -1631,9 +1354,9 @@ export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, atta
     };
 
     // 创建飞行克隆体
-    const fly = document.createElement("div");
-    fly.className = "flying-card attack-fly";
-    fly.innerHTML = `<div class="card in-field rarity-${attackerCard.rarity || "N"}"><div class="card-frame elem-${attackerCard.attribute || "none"} type-monster"><div class="card-header"><span class="card-name">${escapeHtml(attackerCard.name)}</span><span class="card-level">Lv.${attackerCard.level || "?"}</span></div><div class="card-art"><div class="card-art-inner">${createFlyingCardInner(attackerCard)}</div></div><div class="card-footer"><span class="stat-atk"><span>ATK</span>${attackerCard.currentAttack || 0}</span></div></div></div>`;
+    const fly = createEffectElement("div");
+    fly.className = `flying-card attack-fly${lightweight ? " attack-fly-lite" : ""}`;
+    fly.innerHTML = `<div class="card in-field rarity-${escapeHtml(attackerCard.rarity || "N")}"><div class="card-frame elem-${attackerCard.attribute || "none"} type-monster"><div class="card-header"><span class="card-name">${escapeHtml(attackerCard.name)}</span><span class="card-level">Lv.${attackerCard.level || "?"}</span></div><div class="card-art"><div class="card-art-inner">${createFlyingCardInner(attackerCard)}</div></div><div class="card-footer"><span class="stat-atk"><span>ATK</span>${attackerCard.currentAttack || 0}</span></div></div></div>`;
 
     // 起始位置：怪兽槽位中心
     const startX = from.left + from.width / 2 - 48;
@@ -1660,7 +1383,7 @@ export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, atta
         fly.style.opacity = "1";
         fly.style.transition = "transform 0.15s cubic-bezier(.4,0,.2,1), opacity 0.1s ease";
         fly.style.transform = "translateY(-15px) scale(1.05)";
-        fly.style.filter = "brightness(1.4)";
+        fly.style.filter = lightweight ? "none" : "brightness(1.4)";
     });
 
     // 阶段2：冲向目标 (150-450ms)
@@ -1673,11 +1396,13 @@ export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, atta
             wind: "rgba(120,255,160,.4)", earth: "rgba(200,170,80,.4)",
             light: "rgba(255,240,120,.5)", dark: "rgba(180,100,255,.5)",
         };
-        fly.style.filter = `brightness(1.6) drop-shadow(0 0 10px ${trailColors[attr] || "rgba(255,200,100,.4)"})`;
-        // 属性专属冲刺拖尾
-        if (attr !== "none") {
+        fly.style.filter = lightweight
+            ? "none"
+            : `brightness(1.6) drop-shadow(0 0 10px ${trailColors[attr] || "rgba(255,200,100,.4)"})`;
+        // 属性专属冲刺拖尾；连续攻击时省略，避免叠加大量短命节点。
+        if (!lightweight && attr !== "none") {
             for (let t = 0; t < 4; t++) {
-                const trail = document.createElement("div");
+                const trail = createEffectElement("div");
                 trail.style.cssText = `position:fixed; z-index:258; pointer-events:none; width:20px; height:4px; border-radius:2px; left:${startX + dx * (t / 4) + 48}px; top:${startY + dy * (t / 4) + 62}px; transform:rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg); background:linear-gradient(90deg, transparent, ${trailColors[attr]}, transparent); opacity:${0.6 - t * 0.12}; animation:attackTrailFade .3s linear forwards;`;
                 document.body.appendChild(trail);
                 removeAfter(trail, 350);
@@ -1701,16 +1426,15 @@ export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, atta
 
     // 阶段3：碰撞！(450ms)
     setTimeout(() => {
-        // 增强版打击命中特效
         const hitX = endX + 48;
         const hitY = endY + 62;
         const isDirect = !targetSlot;
-        playHitImpact(hitX, hitY, attackerCard.attribute || "none", isDirect);
+        if (!lightweight) playHitImpact(hitX, hitY, attackerCard.attribute || "none", isDirect);
 
         // 卡牌碰撞回弹
         fly.style.transition = "transform 0.1s ease-out, filter 0.1s ease";
         fly.style.transform = `translate(${dx * 0.85}px, ${dy * 0.85}px) scale(1.1)`;
-        fly.style.filter = "brightness(2) blur(1px)";
+        fly.style.filter = lightweight ? "none" : "brightness(2) blur(1px)";
     }, 450);
 
     // 阶段4：根据结果决定去向 (600ms)
@@ -1719,7 +1443,7 @@ export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, atta
             // 存活：滑回原位
             fly.style.transition = "transform 0.5s cubic-bezier(.25,.8,.25,1), filter 0.5s ease, opacity 0.5s ease";
             fly.style.transform = "translate(0, 0) scale(1)";
-            fly.style.filter = "brightness(1.1)";
+            fly.style.filter = lightweight ? "none" : "brightness(1.1)";
             fly.style.opacity = "1";
 
             // 回到原位后消失
@@ -1731,24 +1455,24 @@ export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, atta
         } else {
             // 被破坏：碎裂消失
             // 镜像破碎效果
-            const shatter = document.createElement("div");
+            const shatter = createEffectElement("div");
             shatter.className = "mirror-shatter";
             shatter.style.cssText = `position:fixed; left:${startX}px; top:${startY}px; width:96px; height:125px; z-index:265;`;
 
             // 裂纹
-            const crack = document.createElement("div");
+            const crack = createEffectElement("div");
             crack.className = "mirror-crack";
             crack.style.cssText = `--a1:${30 + Math.random() * 30}deg; --a2:${120 + Math.random() * 40}deg; --a3:${200 + Math.random() * 30}deg;`;
             shatter.appendChild(crack);
 
             // 闪光
-            const flash = document.createElement("div");
+            const flash = createEffectElement("div");
             flash.className = "mirror-flash";
             shatter.appendChild(flash);
 
             // 碎片
             for (let i = 0; i < 14; i++) {
-                const shard = document.createElement("div");
+                const shard = createEffectElement("div");
                 shard.className = "mirror-shard";
                 const angle = (i / 14) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
                 const dist = 40 + Math.random() * 50;
@@ -1768,7 +1492,7 @@ export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, atta
             fly.style.transition = "transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s ease, filter 0.35s ease";
             fly.style.transform = `translate(${dx}px, ${dy}px) scale(0.2) rotate(${(Math.random()-0.5)*30}deg)`;
             fly.style.opacity = "0";
-            fly.style.filter = "brightness(2.5) blur(3px)";
+            fly.style.filter = lightweight ? "none" : "brightness(2.5) blur(3px)";
 
             setTimeout(() => { restoreSource(); shatter.remove(); fly.remove(); resolve(); }, 500);
         }
@@ -1777,10 +1501,95 @@ export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, atta
     return done;
 }
 
+/**
+ * 新版攻击演出入口：按「攻击档案」播放专属招式（只动特效层）。
+ * R 稀有度与异常情况回退旧版演出（playAttackAnimationLegacy）。
+ */
+export function playAttackAnimation(attackerSlot, targetSlot, attackerCard, attackerSurvived, playerHud) {
+    if (!isBrowser || !attackerSlot || !attackerCard) return Promise.resolve();
+    const performanceOwner = Number(attackerSlot.dataset?.owner ?? 0);
+    const performanceTarget = targetSlot || playerHud || document.getElementById(performanceOwner === 0 ? "opponent-area" : "player-area");
+    const performance = playCardPerformance(attackerCard, "attack", attackerSlot, performanceTarget);
+    if (authoredScene(attackerCard, "attack")) return performance;
+    let profile = null;
+    try { profile = getAttackProfile(attackerCard); } catch (error) { profile = null; }
+    if (!profile || profile.legacy) {
+        return playAttackAnimationLegacy(attackerSlot, targetSlot, attackerCard, attackerSurvived, playerHud);
+    }
+    const screen = document.getElementById("battle-screen");
+    if (!screen) {
+        return playAttackAnimationLegacy(attackerSlot, targetSlot, attackerCard, attackerSurvived, playerHud);
+    }
+    // 攻击者/目标可能是"纯矩形"（怪兽已在本回合结算中被破坏，DOM 元素已移除），
+    // 这种情况没有可动画的卡牌元素，回退旧版演出（克隆飞行）保证仍有攻击过程。
+    const resolveCardEl = (node) => (node && typeof node.querySelector === "function")
+        ? (node.querySelector(".card") || node)
+        : null;
+    const attackerEl = resolveCardEl(attackerSlot);
+    if (!attackerEl) {
+        return playAttackAnimationLegacy(attackerSlot, targetSlot, attackerCard, attackerSurvived, playerHud);
+    }
+    // 直接攻击（targetSlot 为空）时，演出目标指向"对手怪兽区整行"，
+    // 卡牌会朝对手场地方向竖直突进，而不是冲向角落的对手信息栏。
+    const attackerOwner = Number(attackerSlot.dataset?.owner ?? attackerSlot.closest?.("[data-owner]")?.dataset.owner ?? 0);
+    const targetEl = targetSlot
+        ? resolveCardEl(targetSlot)
+        : (playerHud
+            || document.querySelector(`[data-drop-zone="monster"][data-owner="${attackerOwner === 0 ? 1 : 0}"]`)
+            || document.getElementById("battlefield")
+            || screen);
+    if (!targetEl) {
+        return playAttackAnimationLegacy(attackerSlot, targetSlot, attackerCard, attackerSurvived, playerHud);
+    }
+    const card = {
+        id: attackerCard.id || attackerCard.instanceId || attackerCard.name,
+        name: attackerCard.name,
+        rarity: attackerCard.rarity || "N",
+        attribute: attackerCard.attribute || attackerCard.element || "none",
+        atk: Number(attackerCard.currentAttack != null ? attackerCard.currentAttack : attackerCard.attack) || 0,
+    };
+    // 战斗结算会立即刷新卡槽；飞行使用独立副本，避免原卡离场时动画中途消失。
+    const screenRect = screen.getBoundingClientRect();
+    const scaleX = screenRect.width / (screen.offsetWidth || screenRect.width || 1) || 1;
+    const scaleY = screenRect.height / (screen.offsetHeight || screenRect.height || 1) || 1;
+    const makeAnchor = (element, clone = false) => {
+        const rect = element.getBoundingClientRect();
+        const node = clone ? element.cloneNode(true) : createEffectElement("div");
+        node.removeAttribute("id");
+        node.removeAttribute("data-instance-id");
+        node.dataset.attackGhost = clone ? "attacker" : "target";
+        node.style.cssText = `position:absolute;left:${(rect.left - screenRect.left) / scaleX}px;top:${(rect.top - screenRect.top) / scaleY}px;width:${rect.width / scaleX}px;height:${rect.height / scaleY}px;margin:0;transform:none;translate:none;pointer-events:none;z-index:279;`;
+        screen.appendChild(node);
+        return node;
+    };
+    const flyingCard = makeAnchor(attackerEl, true);
+    const targetAnchor = makeAnchor(targetEl);
+    const oldVisibility = attackerEl.style.visibility;
+    attackerEl.style.visibility = "hidden";
+    return Promise.resolve(playCardAttack({ arena: screen, attackerEl: flyingCard, targetEl: targetAnchor, card, speed: 1 }))
+        .finally(() => {
+            flyingCard.remove();
+            targetAnchor.remove();
+            attackerEl.style.visibility = oldVisibility;
+        })
+        .catch((error) => {
+            console.warn("[attack-fx] 新演出异常，回退旧演出：", error);
+            return playAttackAnimationLegacy(attackerSlot, targetSlot, attackerCard, attackerSurvived, playerHud);
+        });
+}
+
 function createFlyingCardInner(card) {
-    const img = card.thumbnail || card.image;
-    if (img) return `<img src="${escapeHtml(img)}" alt="${escapeHtml(card.name)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`;
-    return `<div style="width:100%;height:100%;display:grid;place-items:center;font-size:28px;font-weight:900;color:rgba(255,255,255,.6)">${escapeHtml(card.name?.[0] || "?")}</div>`;
+    // 飞行卡牌（抽卡/出牌/卡包揭晓）用 640px 大图，缩略图在放大的演出里会发虚
+    const img = card.fullImage || card.image || card.thumbnail;
+    const imageClass = card?.rarity === "R" ? "" : "card-breeze-image";
+    const motionStyle = card?.rarity === "R"
+        ? ""
+        : `--card-breeze-delay:-${((stableCardSeed(`${card?.id || ""}:${card?.name || ""}:${card?.image || card?.thumbnail || ""}`) % 7000) / 1000).toFixed(3)}s;`;
+    const art = img
+        ? `<img class="${imageClass}" src="${escapeHtml(img)}" alt="${escapeHtml(card.name)}" style="width:100%;height:100%;object-fit:cover;${motionStyle}" onerror="this.style.display='none'">`
+        : `<div style="width:100%;height:100%;display:grid;place-items:center;font-size:28px;font-weight:900;color:rgba(255,255,255,.6)">${escapeHtml(card.name?.[0] || "?")}</div>`;
+    const effect = card?.rarity === "R" ? "" : '<span class="card-breeze-overlay" aria-hidden="true"></span>';
+    return `${art}${effect}`;
 }
 
 function spawnShatterFragments(container, count) {
@@ -1789,7 +1598,7 @@ function spawnShatterFragments(container, count) {
         "rgba(180,100,255,.08)", "rgba(85,216,229,.08)",
     ];
     for (let i = 0; i < count; i++) {
-        const f = document.createElement("div");
+        const f = createEffectElement("div");
         f.className = "shatter-fragment";
         const angle = (i / count) * Math.PI * 2;
         const dist = 30 + Math.random() * 40;
@@ -1814,7 +1623,7 @@ function spawnShatterFragments(container, count) {
  */
 export function showDamageNumber(container, value, type = "damage") {
     if (!isBrowser || !container || !value) return;
-    const el = document.createElement("div");
+    const el = createEffectElement("div");
     el.className = `damage-number ${type}`;
     el.textContent = type === "damage" ? `-${value}` : `+${value}`;
     container.appendChild(el);
@@ -1840,7 +1649,7 @@ export function playDestroyEffect(fieldSlot) {
  */
 export function playHealEffect(fieldSlot) {
     if (!isBrowser || !fieldSlot) return;
-    const glow = document.createElement("div");
+    const glow = createEffectElement("div");
     glow.className = "heal-glow";
     fieldSlot.appendChild(glow);
     removeAfter(glow, 750);
@@ -1872,14 +1681,14 @@ export function playFlipSummonEffect(fieldSlot, isDefense = false) {
         spawnGoldParticles(fieldSlot, 16);
 
         // 闪光环
-        const ring = document.createElement("div");
+        const ring = createEffectElement("div");
         ring.className = "flip-flash-ring";
         fieldSlot.appendChild(ring);
         removeAfter(ring, 650);
 
         // 防御表示额外护盾
         if (isDefense) {
-            const shield = document.createElement("div");
+            const shield = createEffectElement("div");
             shield.className = "defense-shield";
             fieldSlot.appendChild(shield);
             removeAfter(shield, 1050);
@@ -1891,7 +1700,7 @@ export function playFlipSummonEffect(fieldSlot, isDefense = false) {
 
 function spawnGoldParticles(container, count) {
     for (let i = 0; i < count; i++) {
-        const p = document.createElement("div");
+        const p = createEffectElement("div");
         p.className = "flip-gold-particle";
         const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
         const dist = 20 + Math.random() * 35;
@@ -1943,7 +1752,7 @@ export function playTrapActivationV3(trapSlot, trapCard, targetType = null, targ
     const done = new Promise(r => { resolve = r; });
 
     // === 全屏暗紫底光 ===
-    const overlay = document.createElement("div");
+    const overlay = createEffectElement("div");
     overlay.className = "trap-purple-overlay";
     container.appendChild(overlay);
     removeAfter(overlay, 2200);
@@ -1966,14 +1775,14 @@ export function playTrapActivationV3(trapSlot, trapCard, targetType = null, targ
         setTimeout(() => trapSlot.classList.remove("trap-flip-launch"), 550);
 
         // 翻转闪光（在陷阱槽位位置）
-        const flash = document.createElement("div");
+        const flash = createEffectElement("div");
         flash.style.cssText = `position:fixed; left:${slotRect.left + slotRect.width / 2}px; top:${slotRect.top + slotRect.height / 2}px; width:0; height:0; z-index:265; background:radial-gradient(circle, rgba(180,100,255,.7), transparent 70%); border-radius:50%; transform:translate(-50%,-50%); animation:mirrorFlash .4s ease-out forwards;`;
         container.appendChild(flash);
         removeAfter(flash, 500);
 
         // 紫色能量环（在陷阱槽位）
         for (let i = 0; i < 3; i++) {
-            const ring = document.createElement("div");
+            const ring = createEffectElement("div");
             ring.className = "magic-ring spell-effect-dark";
             ring.style.cssText = `position:fixed; left:${slotRect.left + slotRect.width / 2}px; top:${slotRect.top + slotRect.height / 2}px; transform:translate(-50%,-50%); z-index:210; animation-delay:${i * 0.1}s; --spell-color:rgba(180,100,255,.7); --spell-glow:rgba(180,100,255,.3);`;
             container.appendChild(ring);
@@ -2013,7 +1822,7 @@ export function playTrapActivationV3(trapSlot, trapCard, targetType = null, targ
         const camY = window.innerHeight * 0.35 - 101;
 
         // 创建飞行卡牌（显示翻开的卡面）
-        const fly = document.createElement("div");
+        const fly = createEffectElement("div");
         fly.className = "flying-card";
         fly.innerHTML = `<div class="card in-field rarity-${escapeHtml(trapCard.rarity || "N")}"><div class="card-frame elem-dark type-trap"><div class="card-header"><span class="card-name">${escapeHtml(trapCard.name)}</span></div><div class="card-art"><div class="card-art-inner">${createFlyingCardInner(trapCard)}</div></div><div class="card-footer"><span class="stat-type">TRAP</span></div></div></div>`;
         fly.style.left = `${fromX}px`;
@@ -2026,7 +1835,7 @@ export function playTrapActivationV3(trapSlot, trapCard, targetType = null, targ
         document.body.appendChild(fly);
 
         // 光效拖尾
-        const trail = document.createElement("div");
+        const trail = createEffectElement("div");
         trail.className = "draw-light-trail";
         trail.style.cssText = `position:fixed; z-index:259; pointer-events:none; left:${fromX}px; top:${fromY}px; width:142px; height:202px; opacity:0;`;
         document.body.appendChild(trail);
@@ -2140,7 +1949,7 @@ export function playCounterTrapV3(trapSlot, trapCard, attackerSlot = null, attac
     const done = new Promise(r => { resolve = r; });
 
     // === 全屏暗紫底光 ===
-    const overlay = document.createElement("div");
+    const overlay = createEffectElement("div");
     overlay.className = "trap-purple-overlay";
     container.appendChild(overlay);
     removeAfter(overlay, 2800);
@@ -2161,14 +1970,14 @@ export function playCounterTrapV3(trapSlot, trapCard, attackerSlot = null, attac
         setTimeout(() => trapSlot.classList.remove("trap-flip-launch"), 550);
 
         // 翻开闪光
-        const flash = document.createElement("div");
+        const flash = createEffectElement("div");
         flash.style.cssText = `position:fixed; left:${slotRect.left + slotRect.width/2}px; top:${slotRect.top + slotRect.height/2}px; width:0; height:0; z-index:265; background:radial-gradient(circle, rgba(180,100,255,.7), transparent 70%); border-radius:50%; transform:translate(-50%,-50%); animation:mirrorFlash .4s ease-out forwards;`;
         container.appendChild(flash);
         removeAfter(flash, 500);
 
         // 紫色能量环
         for (let i = 0; i < 2; i++) {
-            const ring = document.createElement("div");
+            const ring = createEffectElement("div");
             ring.className = "magic-ring spell-effect-dark";
             ring.style.cssText = `position:fixed; left:${slotRect.left + slotRect.width/2}px; top:${slotRect.top + slotRect.height/2}px; transform:translate(-50%,-50%); z-index:210; animation-delay:${i * 0.08}s; --spell-color:rgba(180,100,255,.7); --spell-glow:rgba(180,100,255,.3);`;
             container.appendChild(ring);
@@ -2183,7 +1992,7 @@ export function playCounterTrapV3(trapSlot, trapCard, attackerSlot = null, attac
         // 屏障挡住攻击
         if (attackerSlot) {
             const atkRect = getRect(attackerSlot);
-            const barrier = document.createElement("div");
+            const barrier = createEffectElement("div");
             barrier.className = "trap-counter-barrier";
             barrier.style.cssText = `position:fixed; left:${atkRect.left + atkRect.width/2}px; top:${atkRect.top - 20}px; transform:translate(-50%,-50%);`;
             container.appendChild(barrier);
@@ -2234,7 +2043,7 @@ export function playCounterTrapV3(trapSlot, trapCard, attackerSlot = null, attac
         const camY = window.innerHeight * 0.35 - 101;
 
         // 创建飞行卡牌（翻开的陷阱卡面）
-        const fly = document.createElement("div");
+        const fly = createEffectElement("div");
         fly.className = "flying-card";
         fly.innerHTML = `<div class="card in-field rarity-${escapeHtml(trapCard.rarity || "N")}"><div class="card-frame elem-dark type-trap"><div class="card-header"><span class="card-name">${escapeHtml(trapCard.name)}</span></div><div class="card-art"><div class="card-art-inner">${createFlyingCardInner(trapCard)}</div></div><div class="card-footer"><span class="stat-type">TRAP</span></div></div></div>`;
         fly.style.left = `${fromX}px`;
@@ -2247,7 +2056,7 @@ export function playCounterTrapV3(trapSlot, trapCard, attackerSlot = null, attac
         document.body.appendChild(fly);
 
         // 光效拖尾
-        const trail = document.createElement("div");
+        const trail = createEffectElement("div");
         trail.className = "draw-light-trail";
         trail.style.cssText = `position:fixed; z-index:259; pointer-events:none; left:${fromX}px; top:${fromY}px; width:142px; height:202px; opacity:0;`;
         document.body.appendChild(trail);
@@ -2332,8 +2141,16 @@ export function playCounterTrapV3(trapSlot, trapCard, attackerSlot = null, attac
  */
 export function playTrapActivationV5(trapSlot, trapCard) {
     if (!isBrowser || !trapSlot || !trapCard) return Promise.resolve();
+    const performance = playCardPerformance(trapCard, "trap", trapSlot);
+    if (authoredScene(trapCard, "trap")) {
+        showAnnounceBanner("trap", "trap", trapCard.name || "陷阱");
+        return performance;
+    }
+    if (document.body.classList.contains("reduce-motion") || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+        return performance;
+    }
 
-    const container = document.querySelector(".battle-screen") || document.body;
+    const container = document.body;
     const slotRect = getRect(trapSlot);
 
     let resolve;
@@ -2344,12 +2161,12 @@ export function playTrapActivationV5(trapSlot, trapCard) {
     setTimeout(() => trapSlot.classList.remove("trap-flip-launch"), 550);
 
     // 翻开闪光
-    const flash = document.createElement("div");
+    const flash = createEffectElement("div");
     flash.style.cssText = `position:fixed; left:${slotRect.left + slotRect.width / 2}px; top:${slotRect.top + slotRect.height / 2}px; width:0; height:0; z-index:265; background:radial-gradient(circle, rgba(180,100,255,.7), transparent 70%); border-radius:50%; transform:translate(-50%,-50%); animation:mirrorFlash .4s ease-out forwards;`;
     container.appendChild(flash);
     removeAfter(flash, 500);
 
-    const reveal = document.createElement("div");
+    const reveal = createEffectElement("div");
     reveal.className = "trap-cinematic-card";
     reveal.innerHTML = `<div class="card in-field rarity-${escapeHtml(trapCard.rarity || "N")}"><div class="card-frame elem-dark type-trap"><div class="card-header"><span class="card-name">${escapeHtml(trapCard.name || "陷阱")}</span></div><div class="card-art"><div class="card-art-inner">${createFlyingCardInner(trapCard)}</div></div><div class="card-footer"><span class="stat-type">TRAP</span></div></div></div>`;
     reveal.style.cssText = `position:fixed;left:${slotRect.left}px;top:${slotRect.top}px;width:${slotRect.width}px;height:${slotRect.height}px;z-index:270;pointer-events:none;opacity:0;transform:rotateY(180deg) scale(.72);transition:none;`;
@@ -2357,8 +2174,8 @@ export function playTrapActivationV5(trapSlot, trapCard) {
     requestAnimationFrame(() => {
         reveal.style.opacity = "1";
         reveal.style.transition = "left .75s cubic-bezier(.2,.8,.2,1), top .75s cubic-bezier(.2,.8,.2,1), transform .75s cubic-bezier(.2,.8,.2,1), filter .75s ease";
-        reveal.style.left = `${window.innerWidth / 2 - 71}px`;
-        reveal.style.top = `${window.innerHeight / 2 - 101}px`;
+        reveal.style.left = `${(window.innerWidth - slotRect.width) / 2}px`;
+        reveal.style.top = `${(window.innerHeight - slotRect.height) / 2}px`;
         reveal.style.transform = "rotateY(360deg) scale(1.18)";
         reveal.style.filter = "drop-shadow(0 0 28px rgba(190,90,255,.9))";
     });
@@ -2398,13 +2215,13 @@ export function playNegatedAttackBarrier(attackerSlot, targetSlot, attackerCard 
     const wallX = startX + (targetX - startX) * 0.52;
     const wallY = startY + (targetY - startY) * 0.52;
 
-    const barrier = document.createElement("div");
+    const barrier = createEffectElement("div");
     barrier.className = "negated-attack-wall";
     barrier.style.left = `${wallX}px`;
     barrier.style.top = `${wallY}px`;
     document.body.appendChild(barrier);
 
-    const movingCard = document.createElement("div");
+    const movingCard = createEffectElement("div");
     movingCard.className = "negated-attacker-card";
     movingCard.innerHTML = attackerSlot.querySelector(".card")?.outerHTML || `<strong>${escapeHtml(attackerCard?.name || "ATTACK")}</strong>`;
     movingCard.style.cssText = `left:${attackerRect.left}px;top:${attackerRect.top}px;width:${attackerRect.width}px;height:${attackerRect.height}px;`;
@@ -2440,83 +2257,9 @@ export function playNegatedAttackBarrier(attackerSlot, targetSlot, attackerCard 
  */
 export function animateTrapToGraveyard(trapSlot, trapCard) {
     if (!isBrowser || !trapSlot || !trapCard) return Promise.resolve();
-
-    const container = document.querySelector(".battle-screen") || document.body;
-    const slotRect = getRect(trapSlot);
-    const isPlayer = trapSlot.dataset.owner === "0";
-
-    // 墓地区DOM
-    const graveyardId = isPlayer ? "player-graveyard-pile" : "opponent-graveyard-pile";
-    const graveyardPile = document.getElementById(graveyardId);
-
-    let resolve;
-    const done = new Promise(r => { resolve = r; });
-
-    const fromX = slotRect.left;
-    const fromY = slotRect.top;
-
-    // 终点：墓地区位置
-    let endX, endY;
-    if (graveyardPile) {
-        const gyRect = getRect(graveyardPile);
-        endX = gyRect.left + gyRect.width / 2 - 71;
-        endY = gyRect.top + 20;
-    } else {
-        endX = isPlayer ? window.innerWidth * 0.2 - 71 : window.innerWidth * 0.8 - 71;
-        endY = isPlayer ? window.innerHeight * 0.65 - 101 : window.innerHeight * 0.2 - 101;
-    }
-
-    // 创建飞行卡牌
-    const fly = document.createElement("div");
-    fly.className = "flying-card";
-    fly.innerHTML = `<div class="card in-field rarity-${escapeHtml(trapCard.rarity || "N")}"><div class="card-frame elem-dark type-trap"><div class="card-header"><span class="card-name">${escapeHtml(trapCard.name)}</span></div><div class="card-art"><div class="card-art-inner">${createFlyingCardInner(trapCard)}</div></div><div class="card-footer"><span class="stat-type">TRAP</span></div></div></div>`;
-    fly.style.left = `${fromX}px`;
-    fly.style.top = `${fromY}px`;
-    fly.style.opacity = "0";
-    fly.style.zIndex = "260";
-    fly.style.transition = "none";
-    document.body.appendChild(fly);
-
-    // 阶段A：卡牌升起+旋转 (0-300ms)
-    requestAnimationFrame(() => {
-        fly.style.opacity = "1";
-        fly.style.transition = "transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.2s ease, filter 0.3s ease";
-        fly.style.transform = "translateY(-15px) rotateY(180deg) scale(1.05)";
-        fly.style.filter = "brightness(1.5)";
-    });
-
-    // 阶段B：直线飞向墓区 (300-700ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.4s cubic-bezier(.25,.8,.25,1), opacity 0.4s ease, filter 0.4s ease";
-        fly.style.transform = `translate(${endX - fromX}px, ${endY - fromY}px) rotateY(360deg) scale(0.9)`;
-        fly.style.filter = "brightness(1.1)";
-        fly.style.opacity = "0.8";
-    }, 300);
-
-    // 阶段C：滑入墓区消失 (700-1000ms)
-    setTimeout(() => {
-        fly.style.transition = "transform 0.3s ease, opacity 0.3s ease";
-        fly.style.transform = `translate(${endX - fromX}px, ${endY + 15 - fromY}px) rotateY(360deg) scale(0.7)`;
-        fly.style.opacity = "0";
-
-        // 墓区发光
-        if (graveyardPile) {
-            graveyardPile.style.transition = "box-shadow 0.3s ease";
-            graveyardPile.style.boxShadow = "0 0 30px rgba(180,100,255,.4)";
-            setTimeout(() => {
-                graveyardPile.style.boxShadow = "";
-                graveyardPile.style.transition = "";
-            }, 400);
-        }
-    }, 700);
-
-    // 清理
-    setTimeout(() => {
-        fly.remove();
-        resolve();
-    }, 1100);
-
-    return done;
+    const graveyardId = trapSlot.dataset?.owner === "0" ? "player-graveyard-pile" : "opponent-graveyard-pile";
+    const html = `<div class="card in-field rarity-${escapeHtml(trapCard.rarity || "N")}"><div class="card-frame type-trap"><div class="card-art">${createFlyingCardInner(trapCard)}</div></div></div>`;
+    return playCardTransfer(trapCard, html, trapSlot, document.getElementById(graveyardId), "graveyard");
 }
 
 /**
@@ -2529,9 +2272,9 @@ export function addFoilShimmer(cardElement) {
     if (!frame) return;
     if (frame.querySelector(".card-foil-overlay")) return;
 
-    const overlay = document.createElement("div");
+    const overlay = createEffectElement("div");
     overlay.className = "card-foil-overlay";
-    const shimmer = document.createElement("div");
+    const shimmer = createEffectElement("div");
     shimmer.className = "card-foil-shimmer";
     overlay.appendChild(shimmer);
     frame.appendChild(overlay);
@@ -2572,7 +2315,7 @@ export function playDrawEffect(rarity = "N", attribute = "none") {
 
     // ????
     const cx = window.innerWidth / 2;
-    const fly = document.createElement("div");
+    const fly = createEffectElement("div");
     fly.className = "draw-card-fly";
     fly.style.cssText = `left:${cx}px; top:35%; --rarity-color:${rc.color}; --rarity-border:${rc.border}; animation-delay:0.05s;`;
     document.body.appendChild(fly);
@@ -2580,7 +2323,7 @@ export function playDrawEffect(rarity = "N", attribute = "none") {
 
     // ??????
     for (let i = 0; i < 6; i++) {
-        const spark = document.createElement("div");
+        const spark = createEffectElement("div");
         spark.className = "draw-rarity-sparkle";
         const angle = (i / 6) * Math.PI * 2;
         const dist = 30 + Math.random() * 20;
@@ -2590,7 +2333,7 @@ export function playDrawEffect(rarity = "N", attribute = "none") {
     }
 
     // ????
-    const glow = document.createElement("div");
+    const glow = createEffectElement("div");
     glow.className = "draw-glow-enhanced";
     glow.style.cssText = `--draw-glow-color:${rc.color.replace('.3','.1')};`;
     document.getElementById("battle-screen")?.appendChild(glow);
@@ -2602,7 +2345,7 @@ export function playDrawEffect(rarity = "N", attribute = "none") {
  */
 export function playPhaseFlash() {
     if (!isBrowser) return;
-    const flash = document.createElement("div");
+    const flash = createEffectElement("div");
     flash.className = "phase-flash";
     document.getElementById("battle-screen")?.appendChild(flash);
     removeAfter(flash, 550);
@@ -2615,12 +2358,13 @@ export function playPhaseFlash() {
 /**
  * 怪兽效果发动特效（通用闪光 + 属性色环）
  */
-export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "none", card = null) {
+export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "none", card = null, effectIndex = null, explicitTarget = null, visualOrigin = null) {
     if (!isBrowser || !fieldSlot) return;
     const ownerIndex = Number(fieldSlot.dataset.owner || 0);
-    const effects = card?.effects?.length ? card.effects : [{ type: effectType }];
+    const selected = Number.isInteger(effectIndex) ? card?.effects?.[effectIndex] : null;
+    const effects = selected ? [selected] : (card?.effects?.length ? card.effects : [{ type: effectType }]);
     effects.forEach((effect, index) => {
-        setTimeout(() => playRuleDrivenEffect({ ...card, effects: [effect] }, fieldSlot, ownerIndex), index * 420);
+        setTimeout(() => playRuleDrivenEffect({ ...card, effects: [effect] }, visualOrigin || fieldSlot, ownerIndex, explicitTarget), index * 420);
     });
 
     // 发动闪光
@@ -2628,7 +2372,7 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
     setTimeout(() => fieldSlot.classList.remove("effect-activate"), 650);
 
     // 属性色魔法环
-    const ring = document.createElement("div");
+    const ring = createEffectElement("div");
     ring.className = `magic-ring spell-effect-${attribute}`;
     ring.style.setProperty("--spell-color", getAttributeColor(attribute));
     ring.style.setProperty("--spell-glow", getAttributeGlow(attribute));
@@ -2675,20 +2419,20 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
         spawnEffectParticles(fieldSlot, "draw-particle", 5);
     } else if (effectType === "priorityTarget") {
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "priority-shield-particle";
             const ox = (Math.random() - 0.5) * 40;
             p.style.cssText = `left:calc(50% + ${ox}px); top:50%; animation-delay:${i * 0.06}s;`;
             fieldSlot.appendChild(p);
             removeAfter(p, 800);
         }
-        const shieldRing = document.createElement("div");
+        const shieldRing = createEffectElement("div");
         shieldRing.className = "priority-shield-ring";
         fieldSlot.appendChild(shieldRing);
         removeAfter(shieldRing, 700);
     } else if (effectType === "conditionalBuff") {
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "conditional-buff-particle";
             const ox = (Math.random() - 0.5) * 40;
             const colors = ["rgba(255,200,60,.9)", "rgba(80,180,255,.9)"];
@@ -2699,7 +2443,7 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
         screenFlash("rgba(255,200,60,.08)");
     } else if (effectType === "searchWaterMonster") {
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "search-water-particle";
             const ox = (Math.random() - 0.5) * 50;
             const oy = (Math.random() - 0.5) * 50;
@@ -2709,7 +2453,7 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
         }
     } else if (effectType === "targetProtect") {
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "protect-barrier-particle";
             const angle = (i / 12) * Math.PI * 2;
             const dist = 20 + Math.random() * 10;
@@ -2717,26 +2461,26 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
             fieldSlot.appendChild(p);
             removeAfter(p, 900);
         }
-        const barrier = document.createElement("div");
+        const barrier = createEffectElement("div");
         barrier.className = "protect-barrier-shell";
         fieldSlot.appendChild(barrier);
         removeAfter(barrier, 600);
     } else if (effectType === "switchDefenseRedirect") {
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "defense-redirect-particle";
             const ox = (Math.random() - 0.5) * 40;
             p.style.cssText = `left:calc(50% + ${ox}px); top:50%; animation-delay:${i * 0.05}s;`;
             fieldSlot.appendChild(p);
             removeAfter(p, 700);
         }
-        const redirectShield = document.createElement("div");
+        const redirectShield = createEffectElement("div");
         redirectShield.className = "defense-redirect-shield";
         fieldSlot.appendChild(redirectShield);
         removeAfter(redirectShield, 500);
     } else if (effectType === "bounceBackrow") {
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "bounce-backrow-particle";
             p.style.cssText = `left:50%; top:50%; --bx:${(Math.random() - 0.5) * 60}px; --by:${(Math.random() - 0.5) * 20}px; animation-delay:${i * 0.06}s;`;
             fieldSlot.appendChild(p);
@@ -2744,7 +2488,7 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
         }
     } else if (effectType === "recycleWaterAndProtect") {
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "recycle-water-particle";
             p.style.cssText = `left:50%; top:50%; animation-delay:${i * 0.07}s;`;
             fieldSlot.appendChild(p);
@@ -2752,7 +2496,7 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
         }
     } else if (effectType === "effectDisruptor") {
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "disruptor-wave-particle";
             const angle = (i / 12) * Math.PI * 2;
             const dist = 25;
@@ -2760,27 +2504,27 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
             fieldSlot.appendChild(p);
             removeAfter(p, 600);
         }
-        const slice = document.createElement("div");
+        const slice = createEffectElement("div");
         slice.className = "disruptor-slice";
         fieldSlot.appendChild(slice);
         removeAfter(slice, 500);
         screenFlash("rgba(180,100,255,.1)");
     } else if (effectType === "buffAllyOnDestroy") {
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "ally-buff-spirit";
             const ox = (Math.random() - 0.5) * 30;
             p.style.cssText = `left:calc(50% + ${ox}px); top:50%; animation-delay:${i * 0.08}s;`;
             fieldSlot.appendChild(p);
             removeAfter(p, 800);
         }
-        const glow = document.createElement("div");
+        const glow = createEffectElement("div");
         glow.className = "ally-buff-glow";
         fieldSlot.appendChild(glow);
         removeAfter(glow, 800);
     } else if (effectType === "recycleSpellDraw") {
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "recycle-spell-particle";
             const ox = (Math.random() - 0.5) * 30;
             p.style.cssText = `left:calc(50% + ${ox}px); top:50%; animation-delay:${i * 0.06}s;`;
@@ -2790,20 +2534,20 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
         spawnEffectParticles(fieldSlot, "draw-particle", 4);
     } else if (effectType === "fusionSubstituteSpell") {
         for (let i = 0; i < 10; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "fusion-sub-particle";
             p.style.cssText = `left:50%; top:50%; animation-delay:${i * 0.05}s;`;
             fieldSlot.appendChild(p);
             removeAfter(p, 800);
         }
-        const fusionRing = document.createElement("div");
+        const fusionRing = createEffectElement("div");
         fusionRing.className = "fusion-sub-ring";
         fieldSlot.appendChild(fusionRing);
         removeAfter(fusionRing, 700);
         screenFlash("rgba(255,200,80,.1)");
     } else if (effectType === "searchSpellByDiscard") {
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "search-spell-discard-particle";
             const ox = (Math.random() - 0.5) * 40;
             p.style.cssText = `left:calc(50% + ${ox}px); top:50%; animation-delay:${i * 0.08}s;`;
@@ -2812,7 +2556,7 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
         }
     } else if (effectType === "discardToDisableAttack") {
         for (let i = 0; i < 10; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "disable-attack-particle";
             const angle = (i / 10) * Math.PI * 2;
             const dist = 20;
@@ -2820,7 +2564,7 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
             fieldSlot.appendChild(p);
             removeAfter(p, 700);
         }
-        const chain = document.createElement("div");
+        const chain = createEffectElement("div");
         chain.className = "disable-attack-chain";
         fieldSlot.appendChild(chain);
         removeAfter(chain, 500);
@@ -2835,6 +2579,12 @@ export function playMonsterEffect(fieldSlot, attribute = "none", effectType = "n
  */
 export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", effectType = "none", card = null, ownerIndex = 0) {
     if (!isBrowser) return;
+    if (authoredScene(card || cardName, "spell")) {
+        showAnnounceBanner("spell", attribute, cardName);
+        playRuleDrivenEffect(card || { name:cardName,type:effectType },fieldSlot,ownerIndex);
+        return playCardPerformance(card || cardName, "spell", fieldSlot || document.getElementById(ownerIndex === 0 ? "player-area" : "opponent-area"));
+    }
+    playCardPerformance(card || cardName, "spell", fieldSlot || document.getElementById(ownerIndex === 0 ? "player-area" : "opponent-area"));
     const effect = card?.effects?.[0] || card?.effect || { type: effectType };
     playCardThemeAccent(card || { name: cardName, type: "spell", attribute }, fieldSlot);
     const hasRuleTarget = playRuleDrivenEffect(card || { name: cardName, type: effectType }, fieldSlot, ownerIndex);
@@ -2853,7 +2603,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     const battlefield = document.querySelector(".battlefield");
 
     // 属性色魔法阵（更大更亮）
-    const circle = document.createElement("div");
+    const circle = createEffectElement("div");
     circle.className = `spell-circle ${attribute}`;
     circle.style.cssText = "position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:200;";
     container.appendChild(circle);
@@ -2861,14 +2611,14 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
 
     // 属性色扩散环（4层，更大）
     for (let i = 0; i < 4; i++) {
-        const ring = document.createElement("div");
+        const ring = createEffectElement("div");
         ring.className = `magic-ring spell-effect-${attribute}`;
         ring.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:200; animation-delay:${i * 0.08}s; --spell-color:${getAttributeColor(attribute)}; --spell-glow:${getAttributeGlow(attribute)};`;
         container.appendChild(ring);
         removeAfter(ring, 900 + i * 100);
     }
 
-    const glow = document.createElement("div");
+    const glow = createEffectElement("div");
     glow.className = "screen-flash";
     glow.style.cssText = `--flash-color:${getFlashColor({ attribute })}; position:fixed; left:0; top:0; right:0; bottom:0; z-index:199;`;
     container.appendChild(glow);
@@ -2896,19 +2646,19 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
 
     if (effectType === "drawCards") {
         // 抽卡：蓝色能量漩涡 + 卡牌雨 + 光柱
-        const vortex = document.createElement("div");
+        const vortex = createEffectElement("div");
         vortex.className = "spell-draw-vortex";
         vortex.style.cssText = "position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:210;";
         container.appendChild(vortex);
         removeAfter(vortex, 900);
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-draw-particle";
             p.style.cssText = `left:${cx - 40 + (i - 4) * 25}px; top:${cy - 30}px; animation-delay:${i * 0.06}s;`;
             container.appendChild(p);
             removeAfter(p, 1000);
         }
-        const beam = document.createElement("div");
+        const beam = createEffectElement("div");
         beam.className = "spell-draw-beam";
         beam.style.cssText = "position:fixed; left:50%; top:0; transform:translateX(-50%); z-index:205;";
         container.appendChild(beam);
@@ -2918,7 +2668,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         const isReviveV2 = effectType === "reviveRecentGraveyardV2";
         const reviveCount = isReviveV2 ? 18 : 12;
         for (let i = 0; i < reviveCount; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-revive-particle";
             const ox = (Math.random() - 0.5) * 80;
             p.style.cssText = `left:${cx + ox}px; top:${cy + 40}px; animation-delay:${i * 0.06}s;`;
@@ -2926,7 +2676,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
             removeAfter(p, 1200);
         }
         if (isReviveV2) {
-            const reviveGlow = document.createElement("div");
+            const reviveGlow = createEffectElement("div");
             reviveGlow.className = "spell-revive-glow";
             container.appendChild(reviveGlow);
             removeAfter(reviveGlow, 1000);
@@ -2935,21 +2685,21 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         // 回复：绿色光柱 + 十字治愈阵 + 大量光点上升
         // 治愈光柱（从底部到顶部）
         for (let i = 0; i < 3; i++) {
-            const pillar = document.createElement("div");
+            const pillar = createEffectElement("div");
             pillar.className = "spell-heal-pillar";
             pillar.style.cssText = `position:fixed; left:calc(50% + ${(i - 1) * 60}px); top:0; z-index:208; animation-delay:${i * 0.12}s;`;
             container.appendChild(pillar);
             removeAfter(pillar, 1000);
         }
         // 十字治愈光环
-        const cross = document.createElement("div");
+        const cross = createEffectElement("div");
         cross.className = "spell-heal-cross";
         cross.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:209;`;
         container.appendChild(cross);
         removeAfter(cross, 800);
         // 大量绿色光点上升（更多更大）
         for (let i = 0; i < 22; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-heal-particle";
             const ox = (Math.random() - 0.5) * 160;
             const oy = Math.random() * 50;
@@ -2967,7 +2717,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
             }, 300);
         }
         // 绿色全屏柔光
-        const healGlow = document.createElement("div");
+        const healGlow = createEffectElement("div");
         healGlow.style.cssText = "position:fixed; inset:0; z-index:198; pointer-events:none; background:radial-gradient(circle at 50% 60%, rgba(92,224,178,.15), transparent 60%); animation:hitVignette .6s ease-out forwards;";
         container.appendChild(healGlow);
         removeAfter(healGlow, 650);
@@ -2987,19 +2737,19 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
             }, 80);
         }
         // 色差效果（红蓝分离）
-        const chroma = document.createElement("div");
+        const chroma = createEffectElement("div");
         chroma.style.cssText = "position:fixed; inset:0; z-index:266; pointer-events:none; mix-blend-mode:screen; animation:chromaAberration .3s ease-out forwards;";
         container.appendChild(chroma);
         removeAfter(chroma, 350);
         // 中心爆裂闪光
-        const coreFlash = document.createElement("div");
+        const coreFlash = createEffectElement("div");
         coreFlash.className = "spell-destroy-core";
         coreFlash.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; transform:translate(-50%,-50%); z-index:215;`;
         container.appendChild(coreFlash);
         removeAfter(coreFlash, 500);
         // 裂纹扩散（更多）
         for (let i = 0; i < 10; i++) {
-            const crack = document.createElement("div");
+            const crack = createEffectElement("div");
             crack.className = "spell-destroy-crack";
             const angle = (i / 10) * 360 + (Math.random() - 0.5) * 15;
             crack.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; transform:translate(-50%,-50%) rotate(${angle}deg); z-index:214;`;
@@ -3008,7 +2758,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
         // 红色碎片爆裂（更多更大）
         for (let i = 0; i < 30; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-destroy-particle";
             const angle = (i / 30) * Math.PI * 2;
             const dist = 40 + Math.random() * 120;
@@ -3022,7 +2772,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
         // 冲击波环
         for (let i = 0; i < 3; i++) {
-            const ring = document.createElement("div");
+            const ring = createEffectElement("div");
             ring.className = "spell-destroy-ring";
             ring.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; transform:translate(-50%,-50%); z-index:213; animation-delay:${i * 0.08}s;`;
             container.appendChild(ring);
@@ -3036,7 +2786,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
             setTimeout(() => battlefield.classList.remove("hit-shake-heavy"), 450);
         }
         // 暗角效果
-        const darkVig = document.createElement("div");
+        const darkVig = createEffectElement("div");
         darkVig.className = "hit-vignette";
         darkVig.style.cssText = "position:fixed; inset:0; z-index:267; pointer-events:none; background:radial-gradient(ellipse at center, transparent 40%, rgba(100,0,0,.3) 100%);";
         container.appendChild(darkVig);
@@ -3045,14 +2795,14 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "returnToHand") {
         // 回手：漩涡吸入 + 卡牌旋转飞走 + 空间扭曲
         // 漩涡中心
-        const vortex = document.createElement("div");
+        const vortex = createEffectElement("div");
         vortex.className = "spell-return-vortex";
         vortex.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; transform:translate(-50%,-50%); z-index:212;`;
         container.appendChild(vortex);
         removeAfter(vortex, 800);
         // 卡牌从四周向中心旋转吸入
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-return-particle";
             const angle = (i / 8) * Math.PI * 2;
             const dist = 100 + Math.random() * 60;
@@ -3063,7 +2813,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "doubleAttack") {
         // 双重攻击：两道红色能量环
         for (let i = 0; i < 2; i++) {
-            const r = document.createElement("div");
+            const r = createEffectElement("div");
             r.className = "spell-double-ring";
             r.style.cssText = `position:fixed; left:50%; top:50%; z-index:210; animation-delay:${i * 0.15}s;`;
             container.appendChild(r);
@@ -3071,7 +2821,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
     } else if (effectType === "swapHands") {
         // 交换手牌：循环箭头
-        const orbit = document.createElement("div");
+        const orbit = createEffectElement("div");
         orbit.className = "spell-swap-orbit";
         orbit.style.cssText = "position:fixed; left:50%; top:50%; z-index:210;";
         container.appendChild(orbit);
@@ -3080,7 +2830,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         // 融合：两束光从两侧汇聚
         const offsets = [{ sx: -120, sy: -60 }, { sx: 120, sy: -60 }];
         offsets.forEach((off, i) => {
-            const b = document.createElement("div");
+            const b = createEffectElement("div");
             b.className = "spell-fusion-beam";
             b.style.cssText = `position:fixed; left:50%; top:50%; z-index:210; --sx:${off.sx}px; --sy:${off.sy}px; animation-delay:${i * 0.15}s;`;
             container.appendChild(b);
@@ -3088,7 +2838,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         });
     } else if (effectType === "snatchCards") {
         // 夺取：暗影之手
-        const hand = document.createElement("div");
+        const hand = createEffectElement("div");
         hand.className = "spell-snatch-hand";
         hand.textContent = "🫳";
         hand.style.cssText = "position:fixed; left:50%; top:40%; z-index:210;";
@@ -3097,7 +2847,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "recycleAndDraw") {
         // 回收：卡牌旋转回收
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-recycle-particle";
             const angle = (i / 6) * Math.PI * 2;
             const dist = 60 + Math.random() * 40;
@@ -3108,7 +2858,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "buffThenDebuff") {
         // 先增益后减益：金色上升 + 紫色下降
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-heal-particle";
             const ox = (Math.random() - 0.5) * 100;
             p.style.cssText = `left:${cx + ox}px; top:${cy}px; background:radial-gradient(circle, rgba(255,220,100,.9), rgba(255,180,60,.4)); animation-delay:${i * 0.06}s;`;
@@ -3117,7 +2867,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
         setTimeout(() => {
             for (let i = 0; i < 8; i++) {
-                const p = document.createElement("div");
+                const p = createEffectElement("div");
                 p.className = "spell-heal-particle";
                 const ox = (Math.random() - 0.5) * 100;
                 p.style.cssText = `left:${cx + ox}px; top:${cy}px; background:radial-gradient(circle, rgba(180,100,255,.9), rgba(120,60,200,.4)); animation:spellHealFloat 1s ease-in forwards; animation-delay:${i * 0.06}s;`;
@@ -3128,7 +2878,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "guessGame") {
         // 猜测游戏：问号粒子
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.style.cssText = `position:fixed; z-index:210; pointer-events:none; left:${cx + (Math.random() - 0.5) * 160}px; top:${cy + (Math.random() - 0.5) * 100}px; font-size:${20 + Math.random() * 20}px; color:rgba(255,200,100,.8); text-shadow:0 0 10px rgba(255,200,100,.5); animation:spellHealFloat ${0.8 + Math.random() * 0.4}s ease-out forwards; animation-delay:${i * 0.08}s;`;
             p.textContent = "?";
             container.appendChild(p);
@@ -3136,7 +2886,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
     } else if (effectType === "guessGameV2") {
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.style.cssText = `position:fixed; z-index:210; pointer-events:none; left:${cx + (Math.random() - 0.5) * 160}px; top:${cy + (Math.random() - 0.5) * 100}px; font-size:${20 + Math.random() * 20}px; color:rgba(255,200,100,.8); text-shadow:0 0 10px rgba(255,200,100,.5); animation:spellHealFloat ${0.8 + Math.random() * 0.4}s ease-out forwards; animation-delay:${i * 0.08}s;`;
             p.textContent = "?";
             container.appendChild(p);
@@ -3145,7 +2895,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "recoverAndDrawV2" || effectType === "healDrawNoSpecial") {
         // 回复+抽卡：绿光+蓝色抽卡粒子
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-recover-draw-particle";
             const ox = (Math.random() - 0.5) * 120;
             p.style.cssText = `left:${cx + ox}px; top:${cy + Math.random() * 30}px; animation-delay:${i * 0.05}s;`;
@@ -3153,7 +2903,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
             removeAfter(p, 1000);
         }
         for (let i = 0; i < 4; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-draw-particle";
             p.style.cssText = `left:${cx - 20 + (i - 2) * 30}px; top:${cy - 30}px; animation-delay:${i * 0.08 + 0.3}s;`;
             container.appendChild(p);
@@ -3162,7 +2912,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "discardAndDraw") {
         // 弃牌+抽卡：红→蓝转换粒子
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-discard-draw-particle";
             const ox = (Math.random() - 0.5) * 80;
             p.style.cssText = `left:${cx + ox}px; top:${cy + 20}px; animation-delay:${i * 0.06}s;`;
@@ -3171,7 +2921,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
         setTimeout(() => {
             for (let i = 0; i < 4; i++) {
-                const p = document.createElement("div");
+                const p = createEffectElement("div");
                 p.className = "spell-draw-particle";
                 p.style.cssText = `left:${cx - 16 + (i - 2) * 26}px; top:${cy - 20}px; animation-delay:${i * 0.08}s;`;
                 container.appendChild(p);
@@ -3181,7 +2931,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "lockAttack") {
         // ????: ??????
         for (let i = 0; i < 8; i++) {
-            const link = document.createElement("div");
+            const link = createEffectElement("div");
             link.className = "spell-lock-link";
             const angle = (i / 8) * Math.PI * 2;
             const dist = 35;
@@ -3191,13 +2941,13 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
     } else if (effectType === "gameThroneDraw") {
         // ????: ??+????
-        const crown = document.createElement("div");
+        const crown = createEffectElement("div");
         crown.className = "spell-throne-crown";
         crown.textContent = "??";
         container.appendChild(crown);
         removeAfter(crown, 800);
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-draw-particle";
             p.style.cssText = `left:${cx - 20 + (i - 3) * 30}px; top:${cy - 20}px; animation-delay:${i*0.1+0.2}s;`;
             container.appendChild(p);
@@ -3205,12 +2955,12 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
     } else if (effectType === "fieldOceanScene") {
         // ????: ??????
-        const transform = document.createElement("div");
+        const transform = createEffectElement("div");
         transform.className = "spell-field-transform";
         container.appendChild(transform);
         removeAfter(transform, 1000);
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-heal-particle";
             const ox = (Math.random() - 0.5) * 200;
             p.style.cssText = `left:${cx + ox}px; top:${cy + 30 + Math.random()*20}px; background:radial-gradient(circle,rgba(40,180,240,.8),rgba(20,120,200,.3)); animation-delay:${i*0.06}s;`;
@@ -3220,7 +2970,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "mutualHandRefresh") {
         // 双向洗牌：交错粒子
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-mutual-refresh-particle";
             const x = (i % 2 === 0) ? -40 : 40;
             p.style.cssText = `left:${cx + x + (Math.random() - 0.5) * 20}px; top:${cy + (Math.random() - 0.5) * 40}px; --mx:${-x}px; --my:0px; animation-delay:${i * 0.05}s;`;
@@ -3230,12 +2980,12 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         screenFlash("rgba(200,180,120,.08)");
     } else if (effectType === "cancelAttackAndReturn") {
         // 攻击取消+回手：爆发光晕
-        const cancelBurst = document.createElement("div");
+        const cancelBurst = createEffectElement("div");
         cancelBurst.className = "spell-cancel-attack-burst";
         container.appendChild(cancelBurst);
         removeAfter(cancelBurst, 600);
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-return-particle";
             const angle = Math.random() * Math.PI * 2;
             const dist = 80 + Math.random() * 40;
@@ -3245,12 +2995,12 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
     } else if (effectType === "preventDestructionByBanish") {
         // 除外防破：护盾
-        const banishShield = document.createElement("div");
+        const banishShield = createEffectElement("div");
         banishShield.className = "spell-banish-shield";
         container.appendChild(banishShield);
         removeAfter(banishShield, 800);
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-revive-particle";
             const ox = (Math.random() - 0.5) * 60;
             p.style.cssText = `left:${cx + ox}px; top:${cy - 20}px; animation-delay:${i * 0.06}s; background:rgba(180,160,220,.8);`;
@@ -3260,7 +3010,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "trapStackAndRecover") {
         // 堆叠回收：卡牌升起
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-stack-recover-particle";
             const ox = (Math.random() - 0.5) * 80;
             p.style.cssText = `left:${cx + ox}px; top:${cy + 30}px; animation-delay:${i * 0.06}s;`;
@@ -3269,12 +3019,12 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
     } else if (effectType === "temporaryBanish") {
         // 暂除外：漩涡传送门
-        const portal = document.createElement("div");
+        const portal = createEffectElement("div");
         portal.className = "spell-temp-banish-portal";
         container.appendChild(portal);
         removeAfter(portal, 700);
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-revive-particle";
             const angle = (i / 8) * Math.PI * 2;
             const dist = 40;
@@ -3284,12 +3034,12 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
     } else if (effectType === "negateCounterEffect") {
         // 反击无效化：白色爆裂
-        const negateBlast = document.createElement("div");
+        const negateBlast = createEffectElement("div");
         negateBlast.className = "spell-negate-counter-blast";
         container.appendChild(negateBlast);
         removeAfter(negateBlast, 500);
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-negate-shatter-particle";
             const angle = (i / 12) * Math.PI * 2;
             const dist = 30 + Math.random() * 40;
@@ -3309,14 +3059,14 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
                 battlefield.style.transform = "translateX(-50%)";
             }, 150);
         }
-        const aura = document.createElement("div");
+        const aura = createEffectElement("div");
         aura.className = "spell-buff-aura";
         aura.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:210;`;
         container.appendChild(aura);
         removeAfter(aura, 900);
         // 金色能量射线
         for (let i = 0; i < 12; i++) {
-            const ray = document.createElement("div");
+            const ray = createEffectElement("div");
             ray.className = "hit-ray";
             const angle = (i / 12) * 360;
             ray.style.cssText = `position:fixed; left:50%; top:50%; transform:rotate(${angle}deg); z-index:209; --ray-len:${80 + Math.random() * 40}px; --hit-spark-color:#ffdd88;`;
@@ -3324,14 +3074,14 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
             removeAfter(ray, 500);
         }
         for (let i = 0; i < 18; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-buff-particle";
             const ox = (Math.random() - 0.5) * 200;
             p.style.cssText = `left:${cx + ox}px; top:${cy + 40}px; animation-delay:${i * 0.04}s;`;
             container.appendChild(p);
             removeAfter(p, 1000);
         }
-        const goldGlow = document.createElement("div");
+        const goldGlow = createEffectElement("div");
         goldGlow.style.cssText = "position:fixed; inset:0; z-index:198; pointer-events:none; background:radial-gradient(circle at 50% 50%, rgba(255,211,107,.15), transparent 55%); animation:hitVignette .7s ease-out forwards;";
         container.appendChild(goldGlow);
         removeAfter(goldGlow, 750);
@@ -3347,14 +3097,14 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
                 battlefield.style.transform = "translateX(-50%)";
             }, 150);
         }
-        const wave = document.createElement("div");
+        const wave = createEffectElement("div");
         wave.className = "spell-debuff-wave";
         wave.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:210;`;
         container.appendChild(wave);
         removeAfter(wave, 900);
         // 暗紫色能量射线（向下压制）
         for (let i = 0; i < 8; i++) {
-            const ray = document.createElement("div");
+            const ray = createEffectElement("div");
             ray.className = "hit-ray";
             const angle = (i / 8) * 360 + 22.5;
             ray.style.cssText = `position:fixed; left:50%; top:50%; transform:rotate(${angle}deg); z-index:209; --ray-len:${70 + Math.random() * 30}px; --hit-spark-color:#cc88ff;`;
@@ -3362,7 +3112,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
             removeAfter(ray, 500);
         }
         for (let i = 0; i < 16; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-debuff-particle";
             const angle = (i / 16) * Math.PI * 2;
             const dist = 60 + Math.random() * 80;
@@ -3379,7 +3129,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
                 battlefield.style.transform = "translateX(-50%)";
             }, 200);
         }
-        const darkGlow = document.createElement("div");
+        const darkGlow = createEffectElement("div");
         darkGlow.style.cssText = "position:fixed; inset:0; z-index:198; pointer-events:none; background:radial-gradient(circle at 50% 50%, rgba(100,40,160,.1), transparent 55%); animation:hitVignette .7s ease-out forwards;";
         container.appendChild(darkGlow);
         removeAfter(darkGlow, 750);
@@ -3396,7 +3146,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
             }, 60);
         }
         for (let i = 0; i < 4; i++) {
-            const bolt = document.createElement("div");
+            const bolt = createEffectElement("div");
             bolt.className = "spell-damage-bolt";
             bolt.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:212; animation-delay:${i * 0.1}s;`;
             container.appendChild(bolt);
@@ -3404,7 +3154,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
         // 红色冲击环（3层）
         for (let i = 0; i < 3; i++) {
-            const ring = document.createElement("div");
+            const ring = createEffectElement("div");
             ring.className = "spell-destroy-ring";
             ring.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; transform:translate(-50%,-50%); z-index:211; animation-delay:${i * 0.08}s;`;
             container.appendChild(ring);
@@ -3412,7 +3162,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         }
         // 红色碎片飞散
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-destroy-particle";
             const angle = (i / 12) * Math.PI * 2;
             const dist = 40 + Math.random() * 60;
@@ -3440,7 +3190,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
         for (let i = 0; i < 2; i++) {
             const yDir = i === 0 ? -1 : 1;
             for (let j = 0; j < 10; j++) {
-                const p = document.createElement("div");
+                const p = createEffectElement("div");
                 p.className = "spell-destroy-particle";
                 const angle = (j / 10) * Math.PI;
                 const dist = 40 + Math.random() * 70;
@@ -3455,7 +3205,7 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
     } else if (effectType === "mutualHandRefresh") {
         // 交换手牌：双向粒子流
         for (let i = 0; i < 16; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-mutual-refresh-particle";
             const x = (i % 2 === 0) ? -50 : 50;
             p.style.cssText = `left:${cx + x + (Math.random() - 0.5) * 20}px; top:${cy + (Math.random() - 0.5) * 60}px; --mx:${-x}px; --my:0px; animation-delay:${i * 0.04}s;`;
@@ -3469,8 +3219,18 @@ export function playSpellEffectV2(fieldSlot, attribute = "none", cardName = "", 
 /**
  * 陷阱卡连锁发动特效（在屏幕中央播放，根据效果类型增强）
  */
-export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", effectType = "none", card = null, ownerIndex = 0) {
+export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", effectType = "none", card = null, ownerIndex = 0, { activationPlayed = false } = {}) {
+    if (activationPlayed && authoredScene(card || cardName, "trap")) {
+        playRuleDrivenEffect(card || { name: cardName, type: effectType }, fieldSlot, ownerIndex);
+        return Promise.resolve();
+    }
     if (!isBrowser) return;
+    if (authoredScene(card || cardName, "trap")) {
+        showAnnounceBanner("trap", subtype, cardName);
+        playRuleDrivenEffect(card || { name:cardName,type:effectType },fieldSlot,ownerIndex);
+        return playCardPerformance(card || cardName, "trap", fieldSlot || document.getElementById(ownerIndex === 0 ? "player-area" : "opponent-area"));
+    }
+    playCardPerformance(card || cardName, "trap", fieldSlot || document.getElementById(ownerIndex === 0 ? "player-area" : "opponent-area"));
     playRuleDrivenEffect(card || { name: cardName, type: effectType }, fieldSlot, ownerIndex);
 
     showAnnounceBanner("trap", subtype, cardName);
@@ -3481,7 +3241,7 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
     const cy = window.innerHeight / 2;
 
     // 紫色魔法阵（更大更亮）
-    const circle = document.createElement("div");
+    const circle = createEffectElement("div");
     circle.className = "trap-magic-circle";
     circle.style.cssText = "position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:200;";
     container.appendChild(circle);
@@ -3489,7 +3249,7 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
 
     // 锁链（更多更密）
     for (let i = 0; i < 8; i++) {
-        const chain = document.createElement("div");
+        const chain = createEffectElement("div");
         chain.className = "trap-chain";
         chain.style.cssText = `position:fixed; left:50%; top:50%; z-index:200; transform:rotate(${i * 45}deg); animation-delay:${i * 0.03}s;`;
         container.appendChild(chain);
@@ -3497,21 +3257,21 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
     }
 
     // 锁定符号
-    const lock = document.createElement("div");
+    const lock = createEffectElement("div");
     lock.className = "trap-lock-symbol";
     lock.style.cssText = "position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:201;";
     container.appendChild(lock);
     removeAfter(lock, 700);
 
     // 警告标志
-    const warn = document.createElement("div");
+    const warn = createEffectElement("div");
     warn.className = "trap-warning-sign";
     warn.style.cssText = "position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:202;";
     container.appendChild(warn);
     removeAfter(warn, 1050);
 
     // 紫色爆发（更大更强）
-    const burst = document.createElement("div");
+    const burst = createEffectElement("div");
     burst.className = "trap-purple-burst";
     burst.style.cssText = "position:fixed; left:0; top:0; right:0; bottom:0; z-index:199;";
     container.appendChild(burst);
@@ -3534,12 +3294,12 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
     // 根据陷阱效果类型追加专属特效
     if (effectType === "cannotAttack" || effectType === "cancelAttackAndReturn") {
         // 无效攻击：锁链屏障 + 红色X + 镜头急停
-        const barrier = document.createElement("div");
+        const barrier = createEffectElement("div");
         barrier.className = "trap-attack-barrier";
         barrier.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:210;`;
         container.appendChild(barrier);
         removeAfter(barrier, 800);
-        const xMark = document.createElement("div");
+        const xMark = createEffectElement("div");
         xMark.className = "trap-x-mark";
         xMark.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:211;`;
         container.appendChild(xMark);
@@ -3556,13 +3316,13 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
         screenFlash("rgba(255,60,60,.12)");
     } else if (effectType === "reduceDamage") {
         // 减伤：蓝色护盾展开
-        const shield = document.createElement("div");
+        const shield = createEffectElement("div");
         shield.className = "trap-shield";
         shield.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:210;`;
         container.appendChild(shield);
         removeAfter(shield, 800);
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "trap-shield-particle";
             const angle = (i / 6) * Math.PI * 2;
             p.style.cssText = `left:${cx + Math.cos(angle) * 50}px; top:${cy + Math.sin(angle) * 50}px; animation-delay:${i * 0.06}s;`;
@@ -3572,13 +3332,13 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
         screenFlash("rgba(80,180,255,.1)");
     } else if (effectType === "returnToHand") {
         // 回手：漩涡吸入
-        const vortex = document.createElement("div");
+        const vortex = createEffectElement("div");
         vortex.className = "trap-return-vortex";
         vortex.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:210;`;
         container.appendChild(vortex);
         removeAfter(vortex, 800);
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "spell-return-particle";
             const angle = (i / 8) * Math.PI * 2;
             const dist = 80;
@@ -3589,14 +3349,14 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
         screenFlash("rgba(180,100,255,.1)");
     } else if (effectType === "reflectDamage") {
         // 反射伤害：镜面反弹 + 红色冲击
-        const mirror = document.createElement("div");
+        const mirror = createEffectElement("div");
         mirror.className = "trap-reflect-mirror";
         mirror.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:210;`;
         container.appendChild(mirror);
         removeAfter(mirror, 700);
         // 红色反弹粒子
         for (let i = 0; i < 10; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "trap-reflect-particle";
             const angle = Math.random() * Math.PI * 2;
             const dist = 40 + Math.random() * 60;
@@ -3616,13 +3376,13 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
         screenFlash("rgba(255,100,80,.12)");
     } else if (effectType === "destroyAttacker") {
         // 破坏攻击怪兽：碎裂爆破
-        const shatter = document.createElement("div");
+        const shatter = createEffectElement("div");
         shatter.className = "trap-destroy-burst";
         shatter.style.cssText = `position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:210;`;
         container.appendChild(shatter);
         removeAfter(shatter, 600);
         for (let i = 0; i < 14; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "trap-shatter-particle";
             const angle = (i / 14) * Math.PI * 2;
             const dist = 30 + Math.random() * 50;
@@ -3638,7 +3398,7 @@ export function playTrapEffectV2(fieldSlot, subtype = "counter", cardName = "", 
             battlefield.classList.add("hit-shake-heavy");
             setTimeout(() => battlefield.classList.remove("hit-shake-heavy"), 400);
         }
-        const darkVig = document.createElement("div");
+        const darkVig = createEffectElement("div");
         darkVig.className = "hit-vignette";
         darkVig.style.cssText = "position:fixed; inset:0; z-index:267; pointer-events:none; background:radial-gradient(ellipse at center, transparent 40%, rgba(100,0,0,.35) 100%);";
         container.appendChild(darkVig);
@@ -3656,24 +3416,24 @@ export function playDestroyEffectV2(fieldSlot) {
     if (!card) return;
 
     // 卡牌镜像破碎容器
-    const shatter = document.createElement("div");
+    const shatter = createEffectElement("div");
     shatter.className = "mirror-shatter";
 
     // 裂纹线（3条交叉）
-    const crack = document.createElement("div");
+    const crack = createEffectElement("div");
     crack.className = "mirror-crack";
     crack.style.cssText = `--a1:${30 + Math.random() * 30}deg; --a2:${120 + Math.random() * 40}deg; --a3:${200 + Math.random() * 30}deg;`;
     shatter.appendChild(crack);
 
     // 中心闪光
-    const flash = document.createElement("div");
+    const flash = createEffectElement("div");
     flash.className = "mirror-flash";
     shatter.appendChild(flash);
 
     // 碎片（12-16块不规则镜面碎片）
     const shardCount = 12 + Math.floor(Math.random() * 5);
     for (let i = 0; i < shardCount; i++) {
-        const shard = document.createElement("div");
+        const shard = createEffectElement("div");
         shard.className = "mirror-shard";
         const angle = (i / shardCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
         const dist = 40 + Math.random() * 60;
@@ -3718,14 +3478,14 @@ export function playDestroyEffectV2(fieldSlot) {
 export function playHealEffectV2(fieldSlot) {
     if (!isBrowser || !fieldSlot) return;
 
-    const glow = document.createElement("div");
+    const glow = createEffectElement("div");
     glow.className = "heal-glow";
     fieldSlot.appendChild(glow);
     removeAfter(glow, 750);
 
     // 绿色上升粒子
     for (let i = 0; i < 8; i++) {
-        const p = document.createElement("div");
+        const p = createEffectElement("div");
         p.className = "buff-particle";
         const dx = (Math.random() - 0.5) * 40;
         p.style.cssText = `left:calc(50% + ${dx}px); top:calc(50%); animation-delay:${i * 0.05}s;`;
@@ -3757,7 +3517,7 @@ export function playRecycleEffect(handCards, isOpponent = false) {
     if (handTray) {
         const rect = handTray.getBoundingClientRect();
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "recycle-particle";
             const x = rect.left + Math.random() * rect.width;
             const y = rect.top + Math.random() * rect.height * 0.5;
@@ -3772,7 +3532,7 @@ export function playRecycleEffect(handCards, isOpponent = false) {
     if (deckPile) {
         const rect = deckPile.getBoundingClientRect();
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "draw-particle";
             p.style.cssText = `left:${rect.left + rect.width / 2}px; top:${rect.top + rect.height / 2}px; animation-delay:${i * 0.08}s;`;
             container.appendChild(p);
@@ -3797,7 +3557,7 @@ export function playSnatchEffect(isSuccess) {
         // 成功：金色光束 + 星形爆发
         screenFlash("rgba(255,211,107,.15)");
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "snatch-particle success";
             const angle = (i / 8) * Math.PI * 2;
             const dist = 40 + Math.random() * 50;
@@ -3809,7 +3569,7 @@ export function playSnatchEffect(isSuccess) {
         // 失败：红色闪光 + 碎片
         screenFlash("rgba(255,111,141,.12)");
         for (let i = 0; i < 6; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             p.className = "snatch-particle fail";
             const dx = (Math.random() - 0.5) * 100;
             const dy = (Math.random() - 0.5) * 60;
@@ -3830,7 +3590,7 @@ export function playBuffDebuffEffect(fieldSlot, buffValue, penaltyValue) {
 
     // 增益阶段（绿色上升）
     for (let i = 0; i < 6; i++) {
-        const p = document.createElement("div");
+        const p = createEffectElement("div");
         p.className = "buff-particle";
         const dx = (Math.random() - 0.5) * 40;
         p.style.cssText = `left:calc(50% + ${dx}px); top:calc(50%); animation-delay:${i * 0.05}s;`;
@@ -3844,7 +3604,7 @@ export function playBuffDebuffEffect(fieldSlot, buffValue, penaltyValue) {
     return new Promise(resolve => {
         setTimeout(() => {
             for (let i = 0; i < 6; i++) {
-                const p = document.createElement("div");
+                const p = createEffectElement("div");
                 p.className = "debuff-particle";
                 const dx = (Math.random() - 0.5) * 40;
                 p.style.cssText = `left:calc(50% + ${dx}px); top:calc(50%); animation-delay:${i * 0.05}s;`;
@@ -3865,7 +3625,7 @@ export function playBigHealEffect(playerHud, value) {
 
     // 全屏绿色光效
     const container = document.querySelector(".battle-screen") || document.body;
-    const glow = document.createElement("div");
+    const glow = createEffectElement("div");
     glow.className = "big-heal-glow";
     glow.style.cssText = "position:fixed; left:0; top:0; right:0; bottom:0; z-index:150; pointer-events:none;";
     container.appendChild(glow);
@@ -3873,7 +3633,7 @@ export function playBigHealEffect(playerHud, value) {
 
     // 粒子上升
     for (let i = 0; i < 10; i++) {
-        const p = document.createElement("div");
+        const p = createEffectElement("div");
         p.className = "heal-particle-big";
         const x = 20 + Math.random() * 60;
         p.style.cssText = `left:${x}%; bottom:10%; animation-delay:${i * 0.06}s;`;
@@ -3899,7 +3659,7 @@ export function playMutationEffect(fieldSlot) {
     const container = document.querySelector(".battle-screen") || document.body;
 
     // DNA螺旋光效
-    const helix = document.createElement("div");
+    const helix = createEffectElement("div");
     helix.className = "mutation-helix";
     helix.style.cssText = "position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:200;";
     container.appendChild(helix);
@@ -3929,13 +3689,13 @@ export function playTimeSlowEffect(duration = 600) {
     const bf = document.querySelector(".battlefield");
 
     // 画面冻结闪光
-    const freeze = document.createElement("div");
+    const freeze = createEffectElement("div");
     freeze.style.cssText = `position:fixed; inset:0; z-index:268; pointer-events:none; background:rgba(255,255,255,.12); animation:timeSlowFreeze ${duration}ms ease-out forwards;`;
     container.appendChild(freeze);
     removeAfter(freeze, duration + 50);
 
     // 暗角加深
-    const vig = document.createElement("div");
+    const vig = createEffectElement("div");
     vig.style.cssText = `position:fixed; inset:0; z-index:267; pointer-events:none; background:radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.5) 100%); animation:hitVignette ${duration}ms ease-out forwards;`;
     container.appendChild(vig);
     removeAfter(vig, duration + 50);
@@ -3958,13 +3718,13 @@ export function playChromaticBurst() {
     if (!isBrowser) return;
     const container = document.querySelector(".battle-screen") || document.body;
 
-    const chroma = document.createElement("div");
+    const chroma = createEffectElement("div");
     chroma.style.cssText = "position:fixed; inset:0; z-index:269; pointer-events:none; mix-blend-mode:screen; animation:chromaAberration .4s ease-out forwards;";
     container.appendChild(chroma);
     removeAfter(chroma, 450);
 
     // 白色闪光核心
-    const core = document.createElement("div");
+    const core = createEffectElement("div");
     core.style.cssText = "position:fixed; left:50%; top:45%; width:100px; height:100px; margin:-50px; z-index:270; pointer-events:none; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,.8), rgba(200,180,255,.3) 40%, transparent 70%); animation:hitCoreFlash .35s cubic-bezier(.15,.9,.3,1) forwards;";
     container.appendChild(core);
     removeAfter(core, 400);
@@ -3978,7 +3738,7 @@ export function playParticleRain(color = "rgba(255,211,107,.6)", count = 30) {
     const container = document.querySelector(".battle-screen") || document.body;
 
     for (let i = 0; i < count; i++) {
-        const p = document.createElement("div");
+        const p = createEffectElement("div");
         const x = Math.random() * window.innerWidth;
         const delay = Math.random() * 0.8;
         const dur = 0.6 + Math.random() * 0.6;
@@ -4017,7 +3777,7 @@ export function playEnergyPulse(color1 = "rgba(255,211,107,.5)", color2 = "rgba(
     const container = document.querySelector(".battle-screen") || document.body;
 
     for (let i = 0; i < 4; i++) {
-        const ring = document.createElement("div");
+        const ring = createEffectElement("div");
         ring.style.cssText = `position:fixed; left:50%; top:45%; z-index:200; pointer-events:none; width:40px; height:40px; margin:-20px; border:2px solid ${i % 2 === 0 ? color1 : color2}; border-radius:50%; box-shadow:0 0 15px ${i % 2 === 0 ? color1 : color2}; animation:energyPulseExpand 1s cubic-bezier(.25,.8,.25,1) forwards; animation-delay:${i * 0.12}s;`;
         container.appendChild(ring);
         removeAfter(ring, 1200);
@@ -4070,9 +3830,10 @@ export function playSSRMonsterCinematic(attribute = "none") {
  */
 export function playSpellCinematic(attribute = "none", cardName = "", rarity = "N") {
     if (!isBrowser) return Promise.resolve();
+    if (authoredScene(cardName, "spell")) return Promise.resolve();
 
-    const bf = document.querySelector(".battlefield");
     const container = document.querySelector(".battle-screen") || document.body;
+    const battleScreen = document.querySelector(".battle-screen");
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight * 0.45;
 
@@ -4084,24 +3845,21 @@ export function playSpellCinematic(attribute = "none", cardName = "", rarity = "
     const glowColor = attrGlow[attribute] || "rgba(85,216,229,.12)";
 
     // === 阶段1：镜头快速推进 + 暗角加深 (0-300ms) ===
-    if (bf) {
-        bf.style.transition = "transform 0.3s cubic-bezier(.3,1,.4,1)";
-        bf.style.transform = "translateX(-50%) scale(1.12)";
-    }
-    const vig = document.createElement("div");
+    setBattleCamera(battleScreen, { scale: 1.12, duration: 300 });
+    const vig = createEffectElement("div");
     vig.style.cssText = `position:fixed; inset:0; z-index:196; pointer-events:none; background:radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0,0,0,.55) 100%); animation:hitVignette .4s ease-out forwards;`;
     container.appendChild(vig);
     removeAfter(vig, 500);
 
     // === 阶段2：属性色能量从中心汇聚 (300-600ms) ===
     setTimeout(() => {
-        const core = document.createElement("div");
+        const core = createEffectElement("div");
         core.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; z-index:200; pointer-events:none; width:20px; height:20px; margin:-10px; border-radius:50%; background:radial-gradient(circle, ${glowColor}, transparent 70%); animation:spellCinematicCore .5s ease-out forwards;`;
         container.appendChild(core);
         removeAfter(core, 600);
 
         for (let i = 0; i < 12; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             const angle = (i / 12) * Math.PI * 2;
             const dist = 120 + Math.random() * 60;
             p.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; z-index:201; pointer-events:none; width:4px; height:4px; border-radius:50%; background:${glowColor}; box-shadow:0 0 8px ${glowColor}; --tx:${Math.cos(angle) * dist}px; --ty:${Math.sin(angle) * dist}px; animation:spellCinematicConverge .5s cubic-bezier(.4,0,.2,1) forwards; animation-delay:${i * 0.02}s;`;
@@ -4109,37 +3867,31 @@ export function playSpellCinematic(attribute = "none", cardName = "", rarity = "
             removeAfter(p, 600);
         }
 
-        if (bf) {
-            bf.style.transition = "transform 0.15s ease-out";
-            bf.style.transform = "translateX(-50%) scale(1.08) translateY(-2px)";
-        }
+        setBattleCamera(battleScreen, { y: -2, scale: 1.08, duration: 150 });
     }, 300);
 
     // === 阶段3：能量爆发 + 镜头回弹 (600-900ms) ===
     setTimeout(() => {
-        const burst = document.createElement("div");
+        const burst = createEffectElement("div");
         burst.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; z-index:202; pointer-events:none; width:40px; height:40px; margin:-20px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,.7), ${glowColor} 40%, transparent 70%); animation:spellCinematicBurst .4s ease-out forwards;`;
         container.appendChild(burst);
         removeAfter(burst, 500);
 
         for (let i = 0; i < 2; i++) {
-            const ring = document.createElement("div");
+            const ring = createEffectElement("div");
             ring.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; z-index:201; pointer-events:none; width:30px; height:30px; margin:-15px; border:2px solid ${glowColor}; border-radius:50%; animation:spellCinematicRing .6s cubic-bezier(.25,.8,.25,1) forwards; animation-delay:${i * 0.1}s;`;
             container.appendChild(ring);
             removeAfter(ring, 700);
         }
 
-        if (bf) {
-            bf.style.transition = "transform 0.3s cubic-bezier(.25,.8,.25,1)";
-            bf.style.transform = "translateX(-50%) scale(1)";
-        }
+        setBattleCamera(battleScreen, { duration: 300 });
         screenFlash(glowColor.replace(/[\d.]+\)$/, ".1)"));
     }, 600);
 
     // === 阶段4：残余粒子飘散 (900-1000ms) ===
     setTimeout(() => {
         for (let i = 0; i < 8; i++) {
-            const p = document.createElement("div");
+            const p = createEffectElement("div");
             const angle = Math.random() * Math.PI * 2;
             const dist = 30 + Math.random() * 50;
             p.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; z-index:200; pointer-events:none; width:3px; height:3px; border-radius:50%; background:${glowColor}; --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist - 30}px; animation:spellCinematicFade .5s ease-out forwards; animation-delay:${i*0.04}s;`;
@@ -4171,7 +3923,7 @@ function getAttributeGlow(attr) {
 
 function spawnEffectParticles(container, cls, count) {
     for (let i = 0; i < count; i++) {
-        const p = document.createElement("div");
+        const p = createEffectElement("div");
         p.className = cls;
         const dx = (Math.random() - 0.5) * 50;
         p.style.cssText = `left:calc(50% + ${dx}px); top:calc(50%); animation-delay:${i * 0.06}s;`;
@@ -4184,224 +3936,12 @@ function spawnEffectParticles(container, cls, count) {
 //  电影级破坏特效 —— 卡牌飞到屏幕中央 → 震动裂纹 → 粉碎飞散 → 墓地
 // =====================================================================
 export function animateCinematicDestroy(fieldSlot, card, htmlFn, graveyardId = "player-graveyard-pile") {
-    if (!isBrowser || !fieldSlot) return Promise.resolve();
-
-    const battlefield = document.querySelector(".battlefield") || document.querySelector(".battle-screen");
-    const graveyardPile = document.getElementById(graveyardId);
-
-    // 起点：怪兽在场上的位置
-    const fromRect = getRect(fieldSlot);
-    const startX = fromRect.left;
-    const startY = fromRect.top;
-
-    // 终点：屏幕中央偏上（镜头前）
-    const camX = window.innerWidth / 2 - 71;
-    const camY = window.innerHeight * 0.38 - 101;
-
-    // 墓地终点
-    let graveX, graveY;
-    if (graveyardPile) {
-        const gyRect = getRect(graveyardPile);
-        graveX = gyRect.left + gyRect.width / 2 - 71;
-        graveY = gyRect.top + 20;
-    } else {
-        graveX = window.innerWidth * 0.2 - 71;
-        graveY = window.innerHeight * 0.65 - 101;
-    }
-
-    return new Promise(resolve => {
-        // === 阶段1：卡牌从场上浮起到屏幕中央 (0-500ms) ===
-        const fly = createFlyingCard(card, htmlFn);
-        fly.style.left = `${startX}px`;
-        fly.style.top = `${startY}px`;
-        fly.style.opacity = "0";
-        fly.style.zIndex = "350";
-
-        // 光效拖尾
-        const trail = document.createElement("div");
-        trail.className = "draw-light-trail";
-        trail.style.cssText = `position:fixed;z-index:349;pointer-events:none;left:${startX}px;top:${startY}px;width:142px;height:202px;opacity:0;`;
-        document.body.appendChild(trail);
-
-        requestAnimationFrame(() => {
-            fly.style.opacity = "1";
-            fly.style.transition = "transform 0.5s cubic-bezier(.2,.8,.3,1), filter 0.5s ease, opacity 0.3s ease";
-            fly.style.transform = `translate(${camX - startX}px, ${camY - startY}px) scale(1.28)`;
-            fly.style.filter = "brightness(1.8) drop-shadow(0 0 20px rgba(255,80,100,.5))";
-
-            trail.style.transition = "transform 0.5s cubic-bezier(.2,.8,.3,1), opacity 0.3s ease";
-            trail.style.transform = `translate(${camX - startX}px, ${camY - startY}px) scale(1.2)`;
-            trail.style.opacity = "0.6";
-        });
-
-        // === 阶段2：卡牌震动 + 裂纹出现 (500-900ms) ===
-        setTimeout(() => {
-            // 镜头震动
-            if (battlefield) {
-                battlefield.style.transition = "none";
-                battlefield.style.transform = "translateX(-50%) translateY(-3px)";
-                setTimeout(() => {
-                    battlefield.style.transition = "transform 0.15s ease-out";
-                    battlefield.style.transform = "translateX(-50%) translateY(2px)";
-                    setTimeout(() => {
-                        battlefield.style.transition = "transform 0.2s ease-out";
-                        battlefield.style.transform = "translateX(-50%) translateY(0)";
-                    }, 150);
-                }, 50);
-            }
-
-            // 卡牌抖动
-            fly.style.animation = "destroyShake 0.4s ease-in-out";
-
-            // 裂纹叠加层
-            const crack = document.createElement("div");
-            crack.style.cssText = `
-                position:absolute; inset:0; z-index:10; pointer-events:none;
-                background:
-                    linear-gradient(${30 + Math.random() * 30}deg, transparent 45%, rgba(255,255,255,.9) 49%, rgba(255,255,255,.9) 51%, transparent 55%),
-                    linear-gradient(${120 + Math.random() * 40}deg, transparent 45%, rgba(255,255,255,.7) 49%, rgba(255,255,255,.7) 51%, transparent 55%),
-                    linear-gradient(${200 + Math.random() * 30}deg, transparent 45%, rgba(255,200,200,.6) 49%, rgba(255,200,200,.6) 51%, transparent 55%);
-                opacity:0; animation:destroyCrack 0.3s ease-out forwards;
-            `;
-            fly.querySelector(".card-frame")?.appendChild(crack);
-
-            const fracture = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            fracture.setAttribute("viewBox", "0 0 142 202");
-            fracture.setAttribute("class", "destroy-fracture-map");
-            const fractureCenter = { x: 68 + Math.random() * 10, y: 92 + Math.random() * 18 };
-            const fracturePoints = [];
-            for (let i = 0; i < 13; i++) {
-                const angle = (i / 13) * Math.PI * 2 + (Math.random() - 0.5) * 0.22;
-                const radius = 90 + Math.random() * 70;
-                const endX = fractureCenter.x + Math.cos(angle) * radius;
-                const endY = fractureCenter.y + Math.sin(angle) * radius;
-                fracturePoints.push({ x: endX, y: endY });
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                const bendX = fractureCenter.x + Math.cos(angle) * radius * 0.45 + (Math.random() - 0.5) * 16;
-                const bendY = fractureCenter.y + Math.sin(angle) * radius * 0.45 + (Math.random() - 0.5) * 16;
-                path.setAttribute("d", `M ${fractureCenter.x} ${fractureCenter.y} L ${bendX} ${bendY} L ${endX} ${endY}`);
-                path.style.animationDelay = `${i * 0.018}s`;
-                fracture.appendChild(path);
-            }
-            fracturePoints.forEach((point, index) => {
-                if (index % 2) return;
-                const next = fracturePoints[(index + 1) % fracturePoints.length];
-                const branch = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                branch.setAttribute("d", `M ${(point.x + fractureCenter.x) / 2} ${(point.y + fractureCenter.y) / 2} Q ${fractureCenter.x + (Math.random() - 0.5) * 45} ${fractureCenter.y + (Math.random() - 0.5) * 55} ${(next.x + fractureCenter.x) / 2} ${(next.y + fractureCenter.y) / 2}`);
-                branch.classList.add("branch");
-                fracture.appendChild(branch);
-            });
-            fly.appendChild(fracture);
-        }, 500);
-
-        // === 阶段3：卡牌粉碎爆炸 (900-1400ms) ===
-        setTimeout(() => {
-            // 中心闪光
-            const flash = document.createElement("div");
-            flash.style.cssText = `
-                position:fixed; z-index:400; left:${camX + 71}px; top:${camY + 101}px;
-                width:20px; height:20px; transform:translate(-50%,-50%);
-                border-radius:50%; pointer-events:none;
-                background:radial-gradient(circle, rgba(255,255,255,.9), rgba(255,100,80,.5), transparent);
-                animation:destroyBurstFlash 0.5s ease-out forwards;
-            `;
-            document.body.appendChild(flash);
-            removeAfter(flash, 600);
-
-            // 冲击波环
-            const ring = document.createElement("div");
-            ring.style.cssText = `
-                position:fixed; z-index:399; left:${camX + 71}px; top:${camY + 101}px;
-                width:60px; height:60px; transform:translate(-50%,-50%);
-                border:3px solid rgba(255,100,80,.8); border-radius:50%; pointer-events:none;
-                animation:destroyShockwave 0.6s cubic-bezier(.2,.8,.3,1) forwards;
-            `;
-            document.body.appendChild(ring);
-            removeAfter(ring, 700);
-
-            // 碎片飞散（16块）
-            const columns = 5;
-            const rows = 6;
-            const shardCount = columns * rows;
-            for (let i = 0; i < shardCount; i++) {
-                const column = i % columns;
-                const row = Math.floor(i / columns);
-                const shard = document.createElement("div");
-                shard.className = "destroy-glass-shard";
-                shard.innerHTML = htmlFn(card);
-                const centerOffsetX = (column + 0.5) / columns - 0.5;
-                const centerOffsetY = (row + 0.5) / rows - 0.5;
-                const angle = Math.atan2(centerOffsetY, centerOffsetX) + (Math.random() - 0.5) * 0.45;
-                const dist = 75 + Math.random() * 145;
-                const sx = Math.cos(angle) * dist;
-                const sy = Math.sin(angle) * dist + 45 + Math.random() * 65;
-                const sr = (Math.random() - 0.5) * 980;
-                const x1 = column * 20 + Math.random() * 4;
-                const x2 = (column + 1) * 20 - Math.random() * 4;
-                const y1 = row * (100 / rows) + Math.random() * 4;
-                const y2 = (row + 1) * (100 / rows) - Math.random() * 4;
-                shard.style.cssText = `
-                    position:fixed; z-index:360; pointer-events:none;
-                    left:${camX}px; top:${camY}px; width:142px; height:202px;
-                    clip-path:polygon(${x1}% ${y1}%, ${x2}% ${Math.max(0, y1 - 2)}%, ${Math.min(100, x2 + 2)}% ${y2}%, ${Math.max(0, x1 - 2)}% ${Math.min(100, y2 + 2)}%);
-                    --sx:${sx}px; --sy:${sy}px; --sr:${sr}deg;
-                    animation:destroyGlassFly .95s cubic-bezier(.16,.72,.24,1) forwards;
-                    animation-delay:${Math.random() * 0.11}s;
-                `;
-                document.body.appendChild(shard);
-                removeAfter(shard, 1250);
-            }
-
-            // 卡牌缩小消失
-            fly.style.transition = "transform 0.4s cubic-bezier(.5,0,.8,.2), opacity 0.4s ease, filter 0.4s ease";
-            fly.style.transform += " scale(0.1)";
-            fly.style.opacity = "0";
-            fly.style.filter = "brightness(3) blur(4px)";
-
-            // 拖尾消失
-            trail.style.transition = "opacity 0.3s ease";
-            trail.style.opacity = "0";
-
-            // 屏幕闪光
-            screenFlash("rgba(255,100,80,.12)");
-        }, 900);
-
-        // === 阶段4：碎片飞向墓地 (1400-2200ms) ===
-        setTimeout(() => {
-            fly.remove();
-            trail.remove();
-
-            // 飞向墓地的碎片（5片残骸）
-            for (let i = 0; i < 5; i++) {
-                const piece = document.createElement("div");
-                const offsetX = (Math.random() - 0.5) * 80;
-                const offsetY = (Math.random() - 0.5) * 60;
-                piece.style.cssText = `
-                    position:fixed; z-index:260; pointer-events:none;
-                    left:${camX + 71 + offsetX}px; top:${camY + 101 + offsetY}px;
-                    width:${10 + Math.random() * 14}px; height:${12 + Math.random() * 16}px;
-                    background:rgba(255,255,255,.5);
-                    clip-path:polygon(${Math.random()*40}% 0%, 100% ${Math.random()*40}%, ${60+Math.random()*40}% 100%, 0% ${60+Math.random()*40}%);
-                    transition:transform 0.7s cubic-bezier(.4,0,.2,1), opacity 0.7s ease;
-                    --tx2:${graveX - camX - 71 + offsetX}px; --ty2:${graveY - camY - 101 + offsetY}px;
-                `;
-                document.body.appendChild(piece);
-
-                requestAnimationFrame(() => {
-                    piece.style.transform = `translate(${graveX - camX - 71 + offsetX}px, ${graveY - camY - 101 + offsetY}px) rotate(${(Math.random()-0.5)*360}deg) scale(0.3)`;
-                    piece.style.opacity = "0";
-                });
-                removeAfter(piece, 900);
-            }
-
-            // 墓地发光
-            if (graveyardPile) {
-                graveyardPile.classList.add("graveyard-pulse");
-                setTimeout(() => graveyardPile.classList.remove("graveyard-pulse"), 600);
-            }
-
-            setTimeout(resolve, 700);
-        }, 1400);
+    if (!isBrowser || !fieldSlot || !card) return Promise.resolve();
+    const epoch = motionGeneration();
+    const source = getRect(fieldSlot);
+    return playCardPerformance(card, "destroy", source).then(() => {
+        if (epoch !== motionGeneration()) return;
+        return playCardTransfer(card, htmlFn(card), source, document.getElementById(graveyardId), "destroy");
     });
 }
 
@@ -4409,179 +3949,8 @@ export function animateCinematicDestroy(fieldSlot, card, htmlFn, graveyardId = "
 //  电影级回卡组特效 —— 龙卷风漩涡 → 卡牌旋转吸入 → 飞回卡组
 // =====================================================================
 export function animateCinematicReturnToDeck(card, htmlFn, fromSlot, deckId = "player-deck-pile") {
-    if (!isBrowser) return Promise.resolve();
-
-    const battlefield = document.querySelector(".battlefield") || document.querySelector(".battle-screen");
-    const deckPile = document.getElementById(deckId);
-
-    // 起点
-    let startX, startY;
-    if (fromSlot) {
-        const fromRect = getRect(fromSlot);
-        startX = fromRect.left + fromRect.width / 2 - 71;
-        startY = fromRect.top + fromRect.height / 2 - 101;
-    } else {
-        startX = window.innerWidth / 2 - 71;
-        startY = window.innerHeight * 0.45 - 101;
-    }
-
-    // 终点：卡组位置
-    let deckX, deckY;
-    if (deckPile) {
-        const deckRect = getRect(deckPile);
-        deckX = deckRect.left + deckRect.width / 2 - 71;
-        deckY = deckRect.top - 30;
-    } else {
-        deckX = window.innerWidth * 0.8 - 71;
-        deckY = window.innerHeight * 0.3 - 101;
-    }
-
-    // 中心点（漩涡位置）
-    const centerX = startX + 71;
-    const centerY = startY + 101;
-
-    return new Promise(resolve => {
-        // === 阶段1：龙卷风漩涡出现 (0-400ms) ===
-        const vortex = document.createElement("div");
-        vortex.style.cssText = `
-            position:fixed; z-index:350; pointer-events:none;
-            left:${centerX}px; top:${centerY}px;
-            width:120px; height:120px; transform:translate(-50%,-50%);
-        `;
-        // 多层漩涡环
-        for (let i = 0; i < 4; i++) {
-            const ring = document.createElement("div");
-            const size = 60 + i * 25;
-            const delay = i * 0.08;
-            ring.style.cssText = `
-                position:absolute; left:50%; top:50%;
-                width:${size}px; height:${size}px;
-                transform:translate(-50%,-50%);
-                border:2px solid rgba(85,216,229,${0.7 - i * 0.15});
-                border-radius:50%; border-top-color:transparent; border-right-color:transparent;
-                animation:tornadoSpin ${0.8 + i * 0.2}s linear infinite;
-                animation-delay:${delay}s;
-            `;
-            vortex.appendChild(ring);
-        }
-        // 中心能量点
-        const core = document.createElement("div");
-        core.style.cssText = `
-            position:absolute; left:50%; top:50%;
-            width:20px; height:20px; transform:translate(-50%,-50%);
-            border-radius:50%;
-            background:radial-gradient(circle, rgba(85,216,229,.8), rgba(123,114,255,.4), transparent);
-            animation:tornadoVortex 1.2s cubic-bezier(.4,0,.2,1) forwards;
-        `;
-        vortex.appendChild(core);
-        document.body.appendChild(vortex);
-
-        // 镜头震动
-        if (battlefield) {
-            battlefield.style.transition = "none";
-            battlefield.style.transform = "translateX(-50%) translateY(-2px)";
-            setTimeout(() => {
-                battlefield.style.transition = "transform 0.2s ease-out";
-                battlefield.style.transform = "translateX(-50%) translateY(0)";
-            }, 100);
-        }
-
-        // === 阶段2：卡牌被漩涡吸入旋转 (400-1000ms) ===
-        setTimeout(() => {
-            // 飞行卡牌
-            const fly = createFlyingCard(card, htmlFn);
-            fly.style.left = `${startX}px`;
-            fly.style.top = `${startY}px`;
-            fly.style.zIndex = "360";
-            fly.style.transition = "transform 0.6s cubic-bezier(.4,0,.2,1), opacity 0.6s ease, filter 0.6s ease";
-            fly.style.transform = "scale(1) rotate(0deg)";
-            fly.style.filter = "brightness(1.3)";
-
-            // 卡牌旋转缩小（被漩涡吸入）
-            requestAnimationFrame(() => {
-                fly.style.transform = "scale(0.4) rotate(540deg)";
-                fly.style.opacity = "0.3";
-                fly.style.filter = "brightness(2) blur(2px)";
-            });
-
-            // 光效拖尾跟随
-            const trail = document.createElement("div");
-            trail.className = "draw-light-trail";
-            trail.style.cssText = `position:fixed;z-index:355;pointer-events:none;left:${startX}px;top:${startY}px;width:142px;height:202px;opacity:0;`;
-            document.body.appendChild(trail);
-            requestAnimationFrame(() => {
-                trail.style.transition = "transform 0.6s cubic-bezier(.4,0,.2,1), opacity 0.4s ease";
-                trail.style.transform = `translate(${centerX - startX - 71}px, ${centerY - startY - 101}px) scale(0.3) rotate(360deg)`;
-                trail.style.opacity = "0.5";
-                trail.style.filter = "blur(3px)";
-            });
-
-            setTimeout(() => {
-                fly.remove();
-                trail.remove();
-            }, 650);
-        }, 400);
-
-        // === 阶段3：漩涡收缩 + 卡牌飞向卡组 (1000-1800ms) ===
-        setTimeout(() => {
-            // 漩涡收缩消失
-            vortex.style.transition = "transform 0.4s cubic-bezier(.5,0,.8,.2), opacity 0.4s ease";
-            vortex.style.transform = "translate(-50%,-50%) scale(0)";
-            vortex.style.opacity = "0";
-            setTimeout(() => vortex.remove(), 500);
-
-            // 卡牌从漩涡中心飞向卡组
-            const fly2 = createFlyingCard(card, htmlFn);
-            fly2.style.left = `${centerX - 71}px`;
-            fly2.style.top = `${centerY - 101}px`;
-            fly2.style.zIndex = "260";
-            fly2.style.opacity = "0.6";
-            fly2.style.transform = "scale(0.3) rotate(0deg)";
-            fly2.style.filter = "brightness(1.5) blur(1px)";
-
-            requestAnimationFrame(() => {
-                fly2.style.transition = "transform 0.7s cubic-bezier(.2,.8,.3,1), opacity 0.7s ease, filter 0.5s ease";
-                fly2.style.transform = `translate(${deckX - centerX + 71}px, ${deckY - centerY + 101}px) scale(0.5) rotate(-180deg)`;
-                fly2.style.opacity = "0";
-                fly2.style.filter = "brightness(1) blur(2px)";
-            });
-
-            // 卡组发光
-            if (deckPile) {
-                const deckBack = deckPile.querySelector(".deck-card-back");
-                if (deckBack) {
-                    deckBack.classList.add("deck-pulse-intense");
-                    setTimeout(() => deckBack.classList.remove("deck-pulse-intense"), 800);
-                }
-            }
-
-            // 涟漪粒子
-            for (let i = 0; i < 8; i++) {
-                const p = document.createElement("div");
-                const angle = (i / 8) * Math.PI * 2;
-                const dist = 20 + Math.random() * 30;
-                p.style.cssText = `
-                    position:fixed; z-index:255; pointer-events:none;
-                    left:${centerX}px; top:${centerY}px;
-                    width:4px; height:4px; border-radius:50%;
-                    background:rgba(85,216,229,.7);
-                    box-shadow:0 0 6px rgba(85,216,229,.5);
-                    transition:transform 0.5s ease-out, opacity 0.5s ease;
-                `;
-                document.body.appendChild(p);
-                requestAnimationFrame(() => {
-                    p.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`;
-                    p.style.opacity = "0";
-                });
-                removeAfter(p, 600);
-            }
-
-            setTimeout(() => {
-                fly2.remove();
-                resolve();
-            }, 750);
-        }, 1000);
-    });
+    if (!isBrowser || !card) return Promise.resolve();
+    return playCardTransfer(card, htmlFn(card), fromSlot, document.getElementById(deckId), "return-deck");
 }
 
 // =====================================================================
@@ -4589,212 +3958,46 @@ export function animateCinematicReturnToDeck(card, htmlFn, fromSlot, deckId = "p
 //  视觉风格：紫色/蓝色次元能量，螺旋上升，卡牌被扭曲吸入
 // =====================================================================
 export function animateCinematicReturnToHand(card, htmlFn, fromSlot, handId = "opponent-hand") {
-    if (!isBrowser) return Promise.resolve();
-
-    const battlefield = document.querySelector(".battlefield") || document.querySelector(".battle-screen");
-    const handEl = document.getElementById(handId) || document.querySelector(".opponent-hand");
-
-    // 起点
-    let startX, startY;
-    if (fromSlot) {
-        const fromRect = getRect(fromSlot);
-        startX = fromRect.left + fromRect.width / 2 - 71;
-        startY = fromRect.top + fromRect.height / 2 - 101;
-    } else {
-        startX = window.innerWidth / 2 - 71;
-        startY = window.innerHeight * 0.45 - 101;
-    }
-
-    // 终点：对方手牌区域
-    let handX, handY;
-    if (handEl) {
-        const handRect = getRect(handEl);
-        handX = handRect.left + handRect.width / 2 - 71;
-        handY = handRect.top - 20;
-    } else {
-        handX = window.innerWidth / 2 - 71;
-        handY = 30;
-    }
-
-    // 中心点
-    const centerX = startX + 71;
-    const centerY = startY + 101;
-
-    return new Promise(resolve => {
-        // === 阶段1：次元裂缝在怪兽脚下撕裂 (0-500ms) ===
-        const rift = document.createElement("div");
-        rift.style.cssText = `
-            position:fixed; z-index:350; pointer-events:none;
-            left:${centerX}px; top:${centerY}px;
-            width:140px; height:140px; transform:translate(-50%,-50%);
-        `;
-
-        // 裂缝核心（椭圆形能量体）
-        const core = document.createElement("div");
-        core.style.cssText = `
-            position:absolute; left:50%; top:50%; width:30px; height:30px;
-            transform:translate(-50%,-50%);
-            border-radius:50%;
-            background:radial-gradient(circle, rgba(123,114,255,.9), rgba(85,216,229,.4), transparent);
-            box-shadow:0 0 30px rgba(123,114,255,.6), 0 0 60px rgba(85,216,229,.3);
-            animation:tornadoVortex 0.8s cubic-bezier(.4,0,.2,1) forwards;
-        `;
-        rift.appendChild(core);
-
-        // 裂缝光环（3层旋转环）
-        for (let i = 0; i < 3; i++) {
-            const ring = document.createElement("div");
-            const size = 50 + i * 30;
-            const dur = 1.2 + i * 0.3;
-            ring.style.cssText = `
-                position:absolute; left:50%; top:50%;
-                width:${size}px; height:${size}px;
-                transform:translate(-50%,-50%);
-                border:2px solid rgba(123,114,255,${0.6 - i * 0.15});
-                border-radius:50%;
-                border-top-color:transparent; border-bottom-color:transparent;
-                animation:tornadoSpin ${dur}s linear infinite;
-                animation-delay:${i * 0.1}s;
-            `;
-            rift.appendChild(ring);
-        }
-
-        // 能量粒子（环绕裂缝）
-        for (let i = 0; i < 8; i++) {
-            const particle = document.createElement("div");
-            const angle = (i / 8) * Math.PI * 2;
-            const dist = 35 + Math.random() * 20;
-            const px = Math.cos(angle) * dist;
-            const py = Math.sin(angle) * dist;
-            particle.style.cssText = `
-                position:absolute; left:50%; top:50%;
-                width:4px; height:4px; border-radius:50%;
-                background:rgba(123,114,255,.8);
-                box-shadow:0 0 8px rgba(123,114,255,.6);
-                transform:translate(${px}px, ${py}px);
-                animation:particleFloat 1.5s ease-in-out infinite;
-                animation-delay:${i * 0.15}s;
-            `;
-            rift.appendChild(particle);
-        }
-
-        document.body.appendChild(rift);
-
-        // 镜头震动
-        if (battlefield) {
-            battlefield.style.transition = "none";
-            battlefield.style.transform = "translateX(-50%) translateY(-2px)";
-            setTimeout(() => {
-                battlefield.style.transition = "transform 0.2s ease-out";
-                battlefield.style.transform = "translateX(-50%) translateY(0)";
-            }, 100);
-        }
-
-        // === 阶段2：卡牌被次元裂缝吸入，螺旋上升 (500-1200ms) ===
-        setTimeout(() => {
-            const fly = createFlyingCard(card, htmlFn);
-            fly.style.left = `${startX}px`;
-            fly.style.top = `${startY}px`;
-            fly.style.zIndex = "360";
-
-            // 卡牌螺旋上升动画
-            const duration = 900;
-            const startTime = performance.now();
-            const travelX = handX - startX;
-            const travelY = handY - startY;
-
-            function animateSpiral(now) {
-                const elapsed = now - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                // 缓动函数
-                const ease = 1 - Math.pow(1 - progress, 3);
-
-                // 螺旋运动
-                const arc = Math.sin(progress * Math.PI) * -110;
-                const swirlX = Math.sin(progress * Math.PI * 8) * 24 * (1 - progress);
-                const swirlY = Math.cos(progress * Math.PI * 8) * 16 * (1 - progress);
-                const x = travelX * ease + swirlX;
-                const y = travelY * ease + arc + swirlY;
-                const scale = 1 - ease * 0.58;
-                const opacity = progress < 0.88 ? 1 : (1 - progress) / 0.12;
-
-                fly.style.transform = `translate(${x}px, ${y}px) rotate(${progress * 540}deg) scale(${scale})`;
-                fly.style.opacity = Math.max(0, opacity);
-                fly.style.filter = `brightness(${1 + Math.sin(progress * Math.PI) * 0.65}) blur(${progress * 1.2}px)`;
-
-                if (progress < 1) {
-                    requestAnimationFrame(animateSpiral);
-                } else {
-                    fly.remove();
-                }
-            }
-            requestAnimationFrame(animateSpiral);
-
-            // 光效拖尾
-            const trail = document.createElement("div");
-            trail.style.cssText = `
-                position:fixed; z-index:355; pointer-events:none;
-                left:${centerX - 4}px; top:${centerY - 4}px;
-                width:8px; height:8px; border-radius:50%;
-                background:rgba(123,114,255,.6);
-                box-shadow:0 0 15px rgba(123,114,255,.5);
-                transition:transform 0.7s cubic-bezier(.4,0,.2,1), opacity 0.7s ease;
-            `;
-            document.body.appendChild(trail);
-            requestAnimationFrame(() => {
-                trail.style.transform = `translate(0, -80px) scale(8)`;
-                trail.style.opacity = "0";
-            });
-            removeAfter(trail, 800);
-        }, 500);
-
-        // === 阶段3：裂缝收缩消失 + 对方手牌区闪光 (1200-1800ms) ===
-        setTimeout(() => {
-            // 裂缝收缩
-            rift.style.transition = "transform 0.4s cubic-bezier(.5,0,.8,.2), opacity 0.4s ease";
-            rift.style.transform = "translate(-50%,-50%) scale(0) rotate(180deg)";
-            rift.style.opacity = "0";
-            setTimeout(() => rift.remove(), 500);
-
-            // 能量爆发
-            for (let i = 0; i < 12; i++) {
-                const p = document.createElement("div");
-                const angle = (i / 12) * Math.PI * 2;
-                const dist = 15 + Math.random() * 25;
-                p.style.cssText = `
-                    position:fixed; z-index:355; pointer-events:none;
-                    left:${centerX}px; top:${centerY}px;
-                    width:3px; height:3px; border-radius:50%;
-                    background:rgba(123,114,255,.8);
-                    box-shadow:0 0 6px rgba(123,114,255,.5);
-                    transition:transform 0.5s ease-out, opacity 0.5s ease;
-                `;
-                document.body.appendChild(p);
-                requestAnimationFrame(() => {
-                    p.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`;
-                    p.style.opacity = "0";
-                });
-                removeAfter(p, 600);
-            }
-
-            // 对方手牌区闪光
-            if (handEl) {
-                const flash = document.createElement("div");
-                flash.style.cssText = `
-                    position:absolute; inset:-10px; z-index:10; pointer-events:none;
-                    border:2px solid rgba(123,114,255,.6);
-                    border-radius:4px;
-                    animation:healGlow 0.5s ease-out forwards;
-                `;
-                handEl.style.position = "relative";
-                handEl.appendChild(flash);
-                removeAfter(flash, 600);
-            }
-
-            // 屏幕微闪
-            screenFlash("rgba(123,114,255,.08)");
-
-            setTimeout(resolve, 600);
-        }, 1200);
-    });
+    if (!isBrowser || !card) return Promise.resolve();
+    return playCardTransfer(card, htmlFn(card), fromSlot, document.getElementById(handId), "return-hand");
 }
+
+// =====================================================================
+//  领域展开演出
+// =====================================================================
+
+export const DOMAIN_CINEMATICS = {
+    wuji:      { title: "領域展開 · 無量空處", subtitle: "五条悟", color: "#cfd6ff", accent: "#0c0d1a", style: "information" },
+    za_warudo: { title: "スタープラチナ・ザ・ワールド", subtitle: "空条承太郎", color: "#ffe06b", accent: "#2b1f00", style: "clock" },
+    rojin:     { title: "破壊殺・羅針", subtitle: "猗窩座", color: "#ff5d67", accent: "#2a0a0c", style: "compass" },
+    ongaku:    { title: "苍穹音浪", subtitle: "初音未来", color: "#63ddff", accent: "#3a0b4f", style: "stage" },
+};
+
+export function playDomainCinematic(fieldId, cardName = "", ownerIndex = 0) {
+    if (!isBrowser) return;
+    const def = DOMAIN_CINEMATICS[fieldId] || DOMAIN_CINEMATICS.wuji;
+    // 音效由 playRuleDrivenEffect 统一派发（action → "domain"），此处不再重复播放
+    const reduced = Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+    // reduced-motion 只保留领域横幅 + 单次能量脉冲，跳过时间减速/色差爆发/粒子雨
+    if (!reduced) playTimeSlowEffect(700);
+    playEnergyPulse(def.color, "rgba(255,255,255,.35)");
+    const overlay = createEffectElement("div");
+    overlay.className = `domain-overlay domain-${def.style}`;
+    overlay.style.setProperty("--domain-color", def.color);
+    overlay.style.setProperty("--domain-accent", def.accent);
+    overlay.innerHTML = `<div class="domain-vignette"></div><div class="domain-title"><small>${def.subtitle}</small><strong>${def.title}</strong></div>`;
+    (document.querySelector(".battle-screen") || document.body).appendChild(overlay);
+    removeAfter(overlay, 1700);
+    if (def.style === "clock" && !reduced) playChromaticBurst();
+    if (def.style === "stage" && !reduced) playParticleRain(def.color, 24);
+    if (reduced) overlay.classList.add("reduced");
+    // 领域存续徽记
+    const chip = createEffectElement("div");
+    chip.className = "domain-chip";
+    chip.textContent = def.title;
+    chip.style.setProperty("--domain-color", def.color);
+    document.getElementById("battle-screen")?.appendChild(chip);
+    removeAfter(chip, 20000);
+}
+
+

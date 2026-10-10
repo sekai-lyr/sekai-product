@@ -1,5 +1,6 @@
 // The compact rule layer used by every card source in the published client.
 import { designRarityRules } from "./rarity-rules.js?v=1.3.2";
+import { authoredCardRules, hasAuthoredRules, prepareSignatureParams } from "./authored-card-rules.js";
 const effect = (type, value, description, target) => ({ trigger: "manual", type, value, ...(target ? { target } : {}), description });
 const ENEMY_BEST = { owner: "opponent", zone: "monster", selector: "highestAttack", count: 1 };
 const ENEMY_WEAKEST = { owner: "opponent", zone: "monster", selector: "lowestAttack", count: 1 };
@@ -112,7 +113,7 @@ function galleryEffect(card) {
         return [
             effect("healPlayer", 1000 + boost, `回复${1000 + boost}LP。`),
             effect("buffAllAlliesAttack", boost, `己方场上全部怪兽攻击力上升${boost}。`),
-            effect("cannotBeAttacked", 0, "己方全部怪兽本回合不会被战斗破坏。", { owner: "self", zone: "monster", selector: "all" }),
+            effect("cannotBeAttacked", 0, "己方全部怪兽本回合不能被攻击。", { owner: "self", zone: "monster", selector: "all" }),
         ];
     }
     const patterns = [
@@ -152,9 +153,31 @@ function fallbackEffect(card) {
     return effect("buffAllAlliesAttack", stat + (number % 3) * 100, `己方场上全部怪兽攻击力+${stat + (number % 3) * 100}。`);
 }
 
+const MEMBER_PATTERNS = [
+    [/宵崎奏|宫崎奏/, "kanade"],
+    [/朝比奈真冬|真冬/, "mafuyu"],
+    [/东云绘名|绘名/, "ena"],
+    [/晓山瑞希|瑞希/, "mizuki"],
+];
+
+/** 图鉴成员归类：角色名命中的卡归于对应成员；Nightcord 组队主题卡归为 group。 */
+function inferMember(card) {
+    const name = String(card?.name || "");
+    for (const [pattern, member] of MEMBER_PATTERNS) {
+        if (pattern.test(name)) return member;
+    }
+    return card?.series === "nightcord" ? "group" : null;
+}
+
 export function applyPlayableRules(card) {
     if (!card) return card;
     const normalized = balanceMonsterStats({ ...card, enabled: card.enabled !== false });
+    normalized.lore = typeof normalized.lore === "string" ? normalized.lore : "";
+    normalized.aiHints = {
+        role: normalized.type === "monster" ? "attacker" : normalized.type === "trap" ? "counter" : "support",
+        priority: 0,
+        ...(normalized.aiHints || {}),
+    };
     if (normalized.series === "starter_ygo") {
         normalized.effects = Array.isArray(card.effects) ? card.effects : [];
         normalized.description = normalized.effects
@@ -166,9 +189,15 @@ export function applyPlayableRules(card) {
         }
         return normalized;
     }
+    if (hasAuthoredRules(normalized.id)) {
+        const authored = authoredCardRules(normalized);
+        if (!authored.member) authored.member = inferMember(authored);
+        return authored;
+    }
     const designed = designRarityRules(normalized);
     if (designed) {
         Object.assign(normalized, designed);
+        if (!normalized.member) normalized.member = inferMember(normalized);
         return normalized;
     }
     // 有CARD_RULES定义的优先用CARD_RULES，否则保留原始效果
@@ -181,9 +210,11 @@ export function applyPlayableRules(card) {
         normalized.effects = Array.isArray(chosen) ? chosen : [chosen];
         normalized.description = normalized.effects.map(item => item.description).filter(Boolean).join("\n");
     }
+    if (!normalized.member) normalized.member = inferMember(normalized);
     return normalized;
 }
 
 export function normalizeCardPool(cards) {
+    prepareSignatureParams(cards);
     return cards.map(applyPlayableRules);
 }

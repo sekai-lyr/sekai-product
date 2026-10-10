@@ -42,7 +42,6 @@ function syncToBackend(data) {
         try {
             await api.updateUser(userId, {
                 nickname: data.profile?.name,
-                duelCoins: data.currency?.duelCoins,
             });
             // 先获取服务端已有卡组
             const serverResult = await api.getUserDecks(userId);
@@ -122,8 +121,12 @@ export function migrateSave(input) {
     data.statistics.draws ||= 0;
     data.settings ||= {};
     data.settings.animationSpeed ??= 1;
+    data.settings.effectQuality ??= "auto";
     data.settings.reduceAnimations ??= false;
     data.settings.logLevel ??= 1;
+    if (data.settings.lobbyCardId === undefined) data.settings.lobbyCardId = null;
+    if (!Array.isArray(data.settings.lobbyCardIds)) data.settings.lobbyCardIds = [];
+    if (data.settings.lobbyCardIds.length === 0 && data.settings.lobbyCardId) data.settings.lobbyCardIds = [data.settings.lobbyCardId];
     data.decks = Array.isArray(data.decks) ? data.decks : [];
     data.selectedDeckId ||= data.decks[0]?.id || null;
     data.pityCounters ||= {};

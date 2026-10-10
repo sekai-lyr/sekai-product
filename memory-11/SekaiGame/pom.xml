@@ -76,6 +76,27 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <!--
+                  assets/cards/generated 里是 307 张 PNG（合计约 874 MB），
+                  只被 js/generated-art.js 的 GENERATED_ART_PATHS 引用，而该导出在
+                  整个代码库里没有任何 import —— 属于纯存量资源。排除后 jar 从
+                  约 1.15 GB 降到约 0.3 GB。原始文件仍留在源码目录里，没有删除。
+                  若以后要启用这些素材，删掉这段 <excludes> 即可。
+                -->
+                <excludes>
+                    <exclude>static/assets/cards/generated/**</exclude>
+                    <!--
+                      卡背母图（881 KB PNG）。它只是 build-card-back.py 的输入，
+                      运行时用的是同目录下由它生成的 sekai-card-back.webp，
+                      所以母图不必进 jar。源码目录里的文件没有删除。
+                    -->
+                    <exclude>static/assets/cardbacks/source/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

@@ -110,12 +110,13 @@ export function buildSuggestedDeck({ collection, cardDatabase, attribute = null,
 
     const deck = [];
     const deckCounts = {};
-    const maxCopies = Math.min(DECK_RULES.MAX_COPIES, 3);
+    const copyLimit = card => Math.min(getCardCopyLimit(card), collection.cards[card.id] || 0);
 
     function addToDeck(card) {
+        if (deck.length >= size || (deckCounts[card.id] || 0) >= copyLimit(card)) return false;
         deckCounts[card.id] = (deckCounts[card.id] || 0) + 1;
-        if (deckCounts[card.id] <= maxCopies) { deck.push(card.id); return true; }
-        return false;
+        deck.push(card.id);
+        return true;
     }
 
     let monsterTarget, spellTarget, trapTarget;
@@ -125,9 +126,25 @@ export function buildSuggestedDeck({ collection, cardDatabase, attribute = null,
         case "control": monsterTarget = 23; spellTarget = 10; trapTarget = 7; break;
         default: monsterTarget = 24; spellTarget = 9; trapTarget = 7;
     }
+    monsterTarget = Math.round(monsterTarget * size / 40);
+    spellTarget = Math.round(spellTarget * size / 40);
+    trapTarget = Math.max(0, size - monsterTarget - spellTarget);
 
     const sortedMonsters = [...monsters].sort((a, b) => (b.attack || 0) - (a.attack || 0));
-    for (const m of sortedMonsters) { if (deck.length >= monsterTarget) break; addToDeck(m); }
+    const lowLevel = sortedMonsters.filter(card => Number(card.level) >= 1 && Number(card.level) <= 4);
+    // 先保证通常召唤的起手基础，再加入高星终结者；优先不同卡名，再补复数。
+    for (let copy = 0; copy < DECK_RULES.MAX_COPIES; copy++) {
+        for (const card of lowLevel) {
+            if (deck.length >= Math.min(monsterTarget, Math.round(size * .4))) break;
+            addToDeck(card);
+        }
+    }
+    for (let copy = 0; copy < DECK_RULES.MAX_COPIES; copy++) {
+        for (const card of sortedMonsters) {
+            if (deck.length >= monsterTarget) break;
+            addToDeck(card);
+        }
+    }
 
     // 如果有魔法卡才添加
     if (spells.length > 0) {
@@ -143,11 +160,12 @@ export function buildSuggestedDeck({ collection, cardDatabase, attribute = null,
         for (const t of sortedTraps) { if (currentTrapCount >= trapTarget) break; if (addToDeck(t)) currentTrapCount++; }
     }
 
-    while (deck.length < size && available.length > 0) {
-        const before = deck.length;
-        const card = rng.pick(available);
-        addToDeck(card);
-        if (deck.length === before) break; // 无法添加更多卡牌
+    while (deck.length < size) {
+        // 每次迭代都重新过滤掉已达同名上限的卡：原来的实现随机抽到一张已满的卡就
+        // 直接 break，即使收藏里还有别的卡可用，也会返回不足 40 张的非法卡组。
+        const candidates = available.filter(card => (deckCounts[card.id] || 0) < copyLimit(card));
+        if (candidates.length === 0) break;
+        addToDeck(rng.pick(candidates));
     }
 
     return rng.shuffle(deck).slice(0, size);

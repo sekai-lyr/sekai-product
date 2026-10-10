@@ -6,19 +6,19 @@ const customCards = ALL_CARDS.filter(card => ["picture", "source_archive"].inclu
 
 describe("自制卡稀有度规则分层", () => {
     it("每张自制卡都有唯一规则签名", () => {
-        assert.equal(new Set(customCards.map(card => card.ruleSignature)).size, customCards.length);
+        // 30 张试点卡刻意共用同一动作（如 M:bleed），规则差异转移到候选参数上；
+        // 参数唯一性由 src/test/js/effect-diversity.test.js 全局锁定，这里把参数并入签名。
+        const signatureOf = card => `${card.type}:${card.ruleSignature}:${JSON.stringify(card.effects[0]?.params || {})}`;
+        assert.equal(new Set(customCards.map(signatureOf)).size, customCards.length);
     });
 
-    it("SR以上非陷阱卡拥有多段效果", () => {
+    it("每张自制卡保留一项角色专属效果（SSR/UR 怪兽可多一条支援余响）", () => {
         customCards
-            .filter(card => ["SR", "SSR", "UR"].includes(card.rarity) && card.type !== "trap")
-            .forEach(card => assert.ok(card.effects.length >= 2, `${card.id} 缺少连携效果`));
-    });
-
-    it("UR非陷阱卡固定拥有三段终结效果", () => {
-        customCards
-            .filter(card => card.rarity === "UR" && card.type !== "trap")
-            .forEach(card => assert.equal(card.effects.length, 3, `${card.id} 不是三段效果`));
+            .forEach(card => {
+                const secondaryAllowed = card.type === "monster" && ["SSR", "UR"].includes(card.rarity);
+                const maxEffects = secondaryAllowed ? 2 : 1;
+                assert.ok(card.effects.length >= 1 && card.effects.length <= maxEffects, `${card.id} 效果数量异常（${card.effects.length}）`);
+            });
     });
 
     it("所有自制卡效果都有描述和执行类型", () => {

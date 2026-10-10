@@ -1,22 +1,27 @@
+import { configureDuelMotion, cancelDuelMotion } from "./duel-motion.js";
 /**
  * main.js - 产品入口：认证、存档、游戏大厅与决斗流程
  */
-import { Player, GameState } from "./model.js";
-import { GameEngine } from "./engine.js?v=1.7.19";
-import { GameUI } from "./ui.js?v=1.7.21";
-import { GameController } from "./controller.js?v=1.6.27";
-import { CardGameApp } from "./app.js?v=1.8.3";
-import { ALL_CARDS, getCardById, hydrateCardArt } from "./catalog.js?v=1.8.4";
-import { getAIDeck } from "./decks.js?v=1.7.1";
+import { Player, GameState, createCardInstance } from "./model.js";
+import { GameEngine } from "./engine.js?v=1.8.1-strategy";
+import { GameUI } from "./ui.js?v=1.9.2-card-atlas-4x4";
+import { GameController } from "./controller.js?v=1.8.2-card-atlas-4x4";
+import { CardGameApp } from "./app.js?v=3.8.2-card-atlas-4x4";
+import { ALL_CARDS, getCardById, hydrateCardArt } from "./catalog.js?v=1.8.6-original";
+import { getAIDeck, getStarterDeck } from "./decks.js?v=1.7.1";
 import { SeededRandom } from "./rng.js";
 import { GAME_CONFIG } from "./constants.js";
 import { loadSave, saveData } from "./storage.js?v=1.7.4";
 import { createNewProfile, ensureProfile } from "./profile.js?v=1.7.1";
 import { enableDemoMode } from "./collection.js?v=1.7.0";
 import { createDeck } from "./deck.js?v=1.7.4";
-import { calculateMatchReward, applyReward } from "./rewards.js?v=1.7.4";
+import { calculateMatchReward, applyReward } from "./rewards.js?v=1.7.5-strategy";
 import * as api from "./api.js?v=1.7.4";
 import { saveAuth, loadAuth, clearAuth, isAuthenticated } from "./auth.js";
+import { playAuthIgnition } from "./card-ignition.js?v=1.0.7";
+import { setSoundEnabled } from "./audio.js?v=1.0.0";
+import { TUTORIAL_CARDS, buildTutorialDecks, orderTutorialDeck, TutorialCoach } from "./tutorial.js?v=1.0.0";
+import { initializeController2D } from "./controller-2d.js?v=2.1.0-mesh-model";
 
 function showFatalGameError(error) {
     const message = error instanceof Error
@@ -48,7 +53,7 @@ const authForm = document.getElementById("auth-form");
 const authError = document.getElementById("auth-error");
 const authTabs = document.querySelectorAll("[data-auth-mode]");
 const nickField = document.querySelector(".auth-nick-field");
-let authMode = "login";
+let authMode = window.__nightcordAuthMode || "login";
 
 // 离线用户存储
 const OFFLINE_USERS_KEY = "nightcord_offline_users";
@@ -68,18 +73,10 @@ function verifyOfflineUser(username, password) {
     return null;
 }
 
-// 预置用户：sekai / 123456520baba
-(function seedOfflineUsers() {
-    const users = getOfflineUsers();
-    if (!users["sekai"]) {
-        users["sekai"] = { password: "123456520baba", nickname: "sekai" };
-        localStorage.setItem(OFFLINE_USERS_KEY, JSON.stringify(users));
-    }
-})();
-
 authTabs.forEach(tab => {
     tab.addEventListener("click", () => {
         authMode = tab.dataset.authMode;
+        window.__nightcordAuthMode = authMode;
         authTabs.forEach(t => t.classList.toggle("active", t === tab));
         nickField.classList.toggle("hidden", authMode === "login");
         authError.textContent = "";
@@ -97,15 +94,18 @@ function getPathRoute() {
 
 function showAuthScreen(mode) {
     authMode = mode;
+    window.__nightcordAuthMode = mode;
     authTabs.forEach(t => t.classList.toggle("active", t.dataset.authMode === mode));
     nickField.classList.toggle("hidden", mode === "login");
     authScreen.classList.remove("hidden");
     document.getElementById("app-shell").classList.add("is-hidden");
+    playAuthIgnition(authScreen.querySelector("[data-auth-ignition]"));
 }
 
 function attachAuthHandler() {
     const form = document.getElementById("auth-form");
     if (!form) return;
+    window.__nightcordAuthReady = true;
     form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const username = document.getElementById("auth-username").value.trim();
@@ -217,7 +217,9 @@ async function syncFromServer(userId) {
     const serverCollection = Array.isArray(collectionResult)
         ? collectionResult
         : Object.values(collectionResult).filter(item => item && typeof item === "object" && item.cardId);
-    collection.inventorySynced = Boolean(collectionResult.success && serverCollection.length > 0);
+    // 合法但背包为空的账号同样算同步成功；用卡牌数量判断会把空背包误判成
+    // session 失效，从而 clearAuth() 把玩家反复踢回登录页。
+    collection.inventorySynced = Boolean(collectionResult.success);
     if (collectionResult.success && serverCollection.length > 0) {
         collection.cards = {};
         for (const item of serverCollection) {
@@ -238,73 +240,166 @@ async function syncFromServer(userId) {
 }
 
 async function syncDuelToServer(userId, matchResult, reward, mode = "ai", stage = null) {
-    await api.recordDuel(userId, {
+    if (!userId) return;
+    const result = await api.recordDuel(userId, {
         result: matchResult,
         opponentType: mode,
         opponentName: stage?.opponent || (mode === "pvp" ? "PvP玩家" : "Nightcord AI"),
         coinsEarned: reward?.duelCoins || 0,
     });
-    await api.updateUser(userId, { duelCoins: collection.currency.duelCoins });
+    if (result.success && Number.isFinite(Number(result.duelCoins))) {
+        collection.currency.duelCoins = Number(result.duelCoins);
+        saveData(collection);
+        app?.renderTopbar();
+    }
+}
+
+async function waitForAuthenticatedSession(userId) {
+    const retryDelays = [0, 100, 250, 500, 800, 1200];
+    for (const delay of retryDelays) {
+        if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay));
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 1500);
+        try {
+            const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+                credentials: "include",
+                headers: { Accept: "application/json" },
+                signal: controller.signal,
+            });
+            if (response.ok) return true;
+        } catch {
+            // Cookie persistence and the first navigation can finish on different ticks.
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
+    return false;
 }
 
 // ---- App Start ----
-async function startApp() {
+/**
+ * 把已保存的显示设置应用到 <body>。保存设置时必须调用它，
+ * 启动流程也必须调用一次，否则刷新后 reduce-motion / hide-duel-log 会丢失。
+ */
+function applyDisplaySettings(settings = {}) {
+    configureDuelMotion(settings);
+    document.body.classList.toggle("reduce-motion", Boolean(settings.reduceAnimations));
+    document.body.classList.toggle("hide-duel-log", Number(settings.logLevel ?? 1) === 0);
+    // 音效开关的唯一来源是存档（默认开启），启动时回放一次
+    setSoundEnabled(settings.soundEnabled !== false);
+}
+
+/**
+ * 离线（localhost 且后端不可用）新档如果既没有卡牌也没有卡组，玩家就永远无法凑出
+ * 40 张卡组 → 无法决斗 → 无法赚币，只能清档重来。这里补一份入门卡组及其卡牌。
+ */
+function grantOfflineStarterIfEmpty(target) {
+    const hasCards = Object.values(target.cards || {}).some(count => Number(count) > 0);
+    const hasDeck = Array.isArray(target.decks) && target.decks.length > 0;
+    if (hasCards || hasDeck) return false;
+    const deck = getStarterDeck();
+    target.decks = [deck];
+    target.selectedDeckId = deck.id;
+    const counts = {};
+    for (const cardId of deck.main) counts[cardId] = (counts[cardId] || 0) + 1;
+    for (const [cardId, count] of Object.entries(counts)) target.cards[cardId] = count;
+    return true;
+}
+
+async function startApp() {    const appShell = document.getElementById("app-shell");
+    const appLoading = document.getElementById("app-loading");
     authScreen.classList.add("hidden");
-    document.getElementById("app-shell").classList.remove("is-hidden");
+    appShell.classList.add("is-hidden");
+    appLoading?.classList.remove("is-hidden");
 
-    collection = ensureProfile(loadSave() || createNewProfile());
+    try {
+        collection = ensureProfile(loadSave() || createNewProfile());
+        const auth = loadAuth();
 
-    // 测试模式：全卡x3 + 999999决斗币（仅在设置中手动开启时生效）
-    if (collection.settings.demoMode) {
-        enableDemoMode(collection, ALL_CARDS);
-        collection.currency.duelCoins = 999999;
-    }
-
-    saveData(collection);
-
-    const auth = loadAuth();
-    if (auth?.userId) {
-        let synced = false;
-        try { synced = await syncFromServer(auth.userId); } catch (e) { synced = false; }
-        if (!synced) {
+        // 登录后的 Cookie 可能在页面跳转后的首个事件循环才可用。
+        // 先确认会话，再启动本地存档同步，避免把短暂的 403 当成登录失效。
+        if (auth?.userId && !(await waitForAuthenticatedSession(auth.userId))) {
             clearAuth();
-            document.getElementById("app-shell").classList.add("is-hidden");
             authScreen.classList.remove("hidden");
             authError.textContent = "登录状态已失效，请重新登录以同步服务器卡牌";
             return;
         }
-        if (String(auth.username || "").toLowerCase() === "sekai") {
-            collection.cards = Object.fromEntries(
-                ALL_CARDS.filter(card => card.enabled !== false).map(card => [card.id, 3]),
-            );
-            collection.inventorySynced = true;
+
+        // 无后端的离线模式：补一份入门卡组，否则新档无法进入决斗。
+        if (!auth?.userId) grantOfflineStarterIfEmpty(collection);
+
+        // 测试模式：全卡x3 + 999999次元币（仅在设置中手动开启时生效）
+        if (collection.settings.demoMode) {
+            enableDemoMode(collection, ALL_CARDS);
+            collection.currency.duelCoins = 999999;
         }
+
+        if (auth?.userId) {
+            try {
+                const csrfResult = await api.ensureCsrf();
+                if (!csrfResult.success) throw new Error("CSRF 初始化失败");
+            } catch (e) {
+                clearAuth();
+                authScreen.classList.remove("hidden");
+                authError.textContent = "登录状态已失效，请重新登录以同步服务器卡牌";
+                return;
+            }
+        }
+
         saveData(collection);
+
+        if (auth?.userId) {
+            let synced = false;
+            try {
+                synced = await syncFromServer(auth.userId);
+            } catch (e) { synced = false; }
+            if (!synced) {
+                clearAuth();
+                authScreen.classList.remove("hidden");
+                authError.textContent = "登录状态已失效，请重新登录以同步服务器卡牌";
+                return;
+            }
+            saveData(collection);
+        }
+
+        app = new CardGameApp(collection, {
+            onStartDuel: config => createNewGame(config.mode, config.deck, config.pvpClient, config.gameInfo, config),
+        });
+
+        // 回放已保存的显示设置：这两个 body class 之前只在"保存设置"的瞬间生效，
+        // 刷新页面后就失效（复选框仍是勾选状态，界面却恢复默认）。
+        applyDisplaySettings(collection.settings || {});
+
+        // Logout button in settings
+        const originalRenderSettings = app.renderSettings.bind(app);
+        app.renderSettings = function() {
+            originalRenderSettings();
+            const settingsPanel = this.screenRoot.querySelector(".settings-panel");
+            if (settingsPanel) {
+                const logoutBtn = document.createElement("button");
+                logoutBtn.className = "secondary-action";
+                logoutBtn.style.marginTop = "12px";
+                logoutBtn.style.borderColor = "rgba(255,111,141,.4)";
+                logoutBtn.style.color = "#ffc4d0";
+                logoutBtn.textContent = "退出登录";
+                logoutBtn.addEventListener("click", async () => {
+                    try { await api.logout(); } catch { /* 本地状态仍需清理 */ }
+                    clearAuth();
+                    location.reload();
+                });
+                settingsPanel.appendChild(logoutBtn);
+            }
+        };
+    } catch (error) {
+        appShell.classList.add("is-hidden");
+        authScreen.classList.remove("hidden");
+        authError.textContent = "大厅初始化失败，请刷新后重试";
+        showFatalGameError(error);
+    } finally {
+        appLoading?.classList.add("is-hidden");
     }
 
-    app = new CardGameApp(collection, {
-        onStartDuel: config => createNewGame(config.mode, config.deck, config.pvpClient, config.gameInfo, config),
-    });
-
-    // Logout button in settings
-    const originalRenderSettings = app.renderSettings.bind(app);
-    app.renderSettings = function() {
-        originalRenderSettings();
-        const settingsPanel = this.screenRoot.querySelector(".settings-panel");
-        if (settingsPanel) {
-            const logoutBtn = document.createElement("button");
-            logoutBtn.className = "secondary-action";
-            logoutBtn.style.marginTop = "12px";
-            logoutBtn.style.borderColor = "rgba(255,111,141,.4)";
-            logoutBtn.style.color = "#ffc4d0";
-            logoutBtn.textContent = "退出登录";
-            logoutBtn.addEventListener("click", () => {
-                clearAuth();
-                location.reload();
-            });
-            settingsPanel.appendChild(logoutBtn);
-        }
-    };
+    if (app) appShell.classList.remove("is-hidden");
 }
 
 // ---- Game Logic ----
@@ -316,14 +411,27 @@ function buildDeckCards(deckDefinition) {
 }
 
 function createNewGame(mode = "ai", playerDeck = app.getSelectedDeck(), pvpClient = null, gameInfo = null, matchConfig = {}) {
-    if (!playerDeck) {
+    // 教学模式自带卡组，不要求玩家先有一副合法卡组（否则新号永远进不了教学）
+    if (!playerDeck && mode !== "tutorial") {
         app.showShell();
         app.toast("没有可用卡组", "error");
         return;
     }
-    currentController?.clearAiTimer();
+    currentController?.dispose();
+    cancelDuelMotion("new-duel");
     matchSettled = false;
     currentMatch = { mode, playerDeck, pvpClient, stage: matchConfig.stage || null, opponentDeck: matchConfig.opponentDeck || null };
+
+    // 教学模式：卡组与起手都由 tutorial.js 指定，开局状态可复现
+    const isTutorial = mode === "tutorial";
+    const tutorialDecks = isTutorial ? buildTutorialDecks() : null;
+    const effectivePlayerDeck = tutorialDecks
+        ? { id: "tutorial_player", name: "教学卡组", main: orderTutorialDeck(tutorialDecks.player, [TUTORIAL_CARDS.learner, TUTORIAL_CARDS.learner, TUTORIAL_CARDS.learner, TUTORIAL_CARDS.trap]) }
+        : playerDeck;
+    const effectiveOpponentDeck = tutorialDecks
+        ? { id: "tutorial_opponent", name: "教学对手", main: orderTutorialDeck(tutorialDecks.opponent, [TUTORIAL_CARDS.dummy, TUTORIAL_CARDS.dummy, TUTORIAL_CARDS.dummy]) }
+        : (matchConfig.opponentDeck || playerDeck);
+    if (isTutorial) currentMatch.playerDeck = effectivePlayerDeck;
 
     // PvP模式：使用共享随机种子，确保双方随机结果一致
     let rng = null;
@@ -341,23 +449,39 @@ function createNewGame(mode = "ai", playerDeck = app.getSelectedDeck(), pvpClien
             .map(card => hydrateCardArt(card, collection.selectedArtByCard));
     } else {
         // AI：使用和玩家一样的卡组
-        opponentCards = buildDeckCards(matchConfig.opponentDeck || playerDeck);
+        opponentCards = buildDeckCards(effectiveOpponentDeck);
     }
 
     const playerCards = mode === "pvp" && Array.isArray(gameInfo?.deck)
         ? gameInfo.deck.map(cardId => getCardById(cardId)).filter(Boolean).map(card => hydrateCardArt(card, collection.selectedArtByCard))
-        : buildDeckCards(playerDeck);
-    const preserveDeckOrder = mode === "pvp";
+        : buildDeckCards(effectivePlayerDeck);
+    // 教学与 PvP 都按原顺序构建：教学需要固定的起手，PvP 由服务端洗牌
+    const preserveDeckOrder = mode === "pvp" || isTutorial;
     const state = new GameState();
     state.players = [
-        new Player(collection.profile?.name || "决斗者", playerCards, rng, preserveDeckOrder),
-        new Player(gameInfo?.opponentName || matchConfig.stage?.opponent || (mode === "training" ? "练习 AI" : "Nightcord AI"), opponentCards, rng, preserveDeckOrder),
+        new Player(isTutorial ? "你" : (collection.profile?.name || "决斗者"), playerCards, rng, preserveDeckOrder),
+        new Player(gameInfo?.opponentName || matchConfig.stage?.opponent || (isTutorial ? "教学对手" : ["training", "practice"].includes(mode) ? "练习 AI" : "Nightcord AI"), opponentCards, rng, preserveDeckOrder),
     ];
 
     const engine = new GameEngine(state, rng);
     currentUI = currentUI || new GameUI();
     currentController = new GameController(state, engine, currentUI);
-    currentController.mode = mode === "training" ? "ai" : mode;
+    currentController.mode = ["training", "practice"].includes(mode) || isTutorial ? "ai" : mode;
+    if (isTutorial) {
+        // 教学：放慢 AI、限制它的行动次数，并预置一只怪用来演示陷阱响应
+        currentController.aiActionDelay = 900;
+        currentController.aiMaxMainActions = 2;
+        if (TUTORIAL_CARDS.dummy && state.players[1].monsterZone.length === 0) {
+            const dummy = state.players[1].deck.find(card => card.id === TUTORIAL_CARDS.dummy.id)
+                || createCardInstance(TUTORIAL_CARDS.dummy);
+            const index = state.players[1].deck.indexOf(dummy);
+            if (index >= 0) state.players[1].deck.splice(index, 1);
+            state.players[1].monsterZone.push(dummy);
+            dummy.setTurn = 0;
+            dummy.faceUp = true;
+            dummy.position = "attack";
+        }
+    }
     if (matchConfig.stage) {
         currentController.aiDifficulty = matchConfig.stage.difficulty;
         currentController.aiProfile = { ...(matchConfig.stage.ai || {}) };
@@ -369,12 +493,29 @@ function createNewGame(mode = "ai", playerDeck = app.getSelectedDeck(), pvpClien
     currentController.pvpClient = pvpClient;
     currentUI.mode = mode;
     currentUI.onReturnHome = () => {
+        currentController?.dispose();
+        cancelDuelMotion("return-home");
         if (pvpClient) pvpClient.disconnect();
         app.navigate("home");
     };
     currentController.onGameOver = result => settleMatch(result);
+    if (isTutorial) {
+        // 教学：注入教练。跳过/完成都回到大厅，且不结算奖励、不计数战绩。
+        currentController.tutorial = new TutorialCoach({
+            ui: currentUI,
+            onFinish: ({ completed, skipped }) => {
+                currentUI.hideCoach();
+                currentController.clearAiTimer();
+                currentUI.showMenu();       // 关掉决斗界面（内部会回到大厅）
+                app.toast(skipped ? "已跳过教学" : "教学完成，去实战试试吧", "success", 2600);
+                void completed;
+            },
+        });
+    }
     currentUI.clearLog();
     currentUI.showBattle();
+    // 每次进入决斗默认收起日志；需要时由顶部“战斗日志”按钮打开。
+    document.body.classList.add("duel-log-collapsed");
 
     if (mode === "pvp" && pvpClient) {
         // PvP模式：根据先手/后手决定是否立即行动
@@ -398,7 +539,12 @@ function createNewGame(mode = "ai", playerDeck = app.getSelectedDeck(), pvpClien
                 currentController.checkAndRefresh();
             }
         };
-        pvpClient.onOpponentDisconnect = () => { currentController.onGameOver({ winner: 0, isDraw: false }); };
+        // 对手掉线不等于自己获胜：断线单独按平局结算（0 奖励）。若判负对手并发放
+        // PvP 胜利奖励（+1000），两个客户端可以互相掉线无限刷币。
+        pvpClient.onOpponentDisconnect = () => {
+            currentUI?.addLog("对手已断开连接，本局按平局结算（不发放奖励）", "gameover");
+            currentController.onGameOver({ winner: null, isDraw: true });
+        };
         pvpClient.onGameOver = (winner, reason) => {
             const myWin = winner === gameInfo.yourIndex;
             currentController.onGameOver({ winner: myWin ? 0 : 1, isDraw: false });
@@ -417,12 +563,18 @@ function createNewGame(mode = "ai", playerDeck = app.getSelectedDeck(), pvpClien
         }
     } else {
         currentController.start();
+        if (isTutorial) {
+            // 教练要等首回合进入主要阶段（手牌已渲染）后再显示，否则提示会悬在空画面上
+            currentController.tutorial?.start();
+        }
     }
 }
 
 function settleMatch({ winner, isDraw }) {
     if (matchSettled || !currentMatch) return;
     matchSettled = true;
+    // 教学与借用卡组试炼不发奖励、不计入统计
+    if (["tutorial", "practice"].includes(currentMatch.mode)) return;
     let result = "draw";
     if (!isDraw) result = winner === 0 ? "win" : "loss";
     const reward = calculateMatchReward(result, {
@@ -441,11 +593,12 @@ function settleMatch({ winner, isDraw }) {
 
     // Sync duel to backend
     const auth = loadAuth();
-    if (auth) syncDuelToServer(auth.userId, result, reward, currentMatch.mode, currentMatch.stage).catch(() => {});
+    if (auth?.userId) syncDuelToServer(auth.userId, result, reward, currentMatch.mode, currentMatch.stage).catch(() => {});
 }
 
 function returnHome() {
-    currentController?.clearAiTimer();
+    currentController?.dispose();
+    cancelDuelMotion("return-home");
     currentUI?.hideGameOver();
     currentUI?.showMenu();
 }
@@ -469,16 +622,13 @@ function initializeDomBindings() {
     if (domBindingsInitialized) return;
     domBindingsInitialized = true;
 
+    initializeController2D();
+
     currentUI ||= new GameUI();
     currentUI.onReturnHome = () => app?.navigate("home");
 
     document.querySelector("#end-turn-button")?.addEventListener("click", () => currentController?.endTurn());
     document.querySelector("#btn-next-phase")?.addEventListener("click", () => currentController?.nextPhase());
-    document.querySelector("#btn-cancel-target")?.addEventListener("click", () => {
-        if (!currentController) return;
-        if (currentController.state.phase === "tribute_select") currentController.cancelTribute();
-        else currentController.cancelTargetSelect();
-    });
     document.querySelector("#btn-battle-exit")?.addEventListener("click", returnHome);
     document.querySelector("#btn-back-menu")?.addEventListener("click", returnHome);
     document.querySelector("#btn-rematch")?.addEventListener("click", rematch);
@@ -490,6 +640,7 @@ function initializeDomBindings() {
         if (currentUI?.closeTopOverlay?.()) return;
         if (currentController?.state.phase === "tribute_select") currentController.cancelTribute();
         else if (currentController?.state.phase === "target_select" || currentController?.state.phase === "graveyard_select") currentController.cancelTargetSelect();
+        else if (currentController?.state.phase === "battle" && currentController?.state.selectedAttacker) currentController.cancelAttackSelection();
     });
 
     app?.renderTopbar();
@@ -501,9 +652,7 @@ function initializeDomBindings() {
 if (new URLSearchParams(location.search).has("reset")) {
     localStorage.removeItem("dimensional_duel_save");
     localStorage.removeItem("nightcord_auth");
-    localStorage.setItem("nightcord_offline_users", JSON.stringify({
-        "sekai": { password: "123456520baba", nickname: "sekai" }
-    }));
+    localStorage.removeItem(OFFLINE_USERS_KEY);
     history.replaceState(null, "", location.pathname);
 }
 
@@ -511,7 +660,7 @@ if (new URLSearchParams(location.search).has("reset")) {
 const route = getPathRoute();
 if (route === "login") {
     // /login → 强制显示登录页
-    showAuthScreen("login");
+    showAuthScreen(window.__nightcordAuthModeTouched ? window.__nightcordAuthMode : "login");
 } else if (route === "register") {
     // /register → 强制显示注册页
     showAuthScreen("register");
@@ -524,8 +673,10 @@ if (route === "login") {
     }
 }
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initializeDomBindings, { once: true });
-} else {
-    initializeDomBindings();
+if (route === "game") {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeDomBindings, { once: true });
+    } else {
+        initializeDomBindings();
+    }
 }

@@ -20,12 +20,19 @@ signal duel_finished(winner: int, reason: String)
 
 var state := DuelState.new()
 var rng := RandomNumberGenerator.new()
+var used_effects: Dictionary = {}
+
+func supports_effect(effect: Dictionary) -> bool:
+	if effect.get("type", "") == "themedAction":
+		return effect.get("action", "") == "token"
+	return supports_effect_type(str(effect.get("type", "")))
 
 func supports_effect_type(effect_type: String) -> bool:
 	return effect_type in SUPPORTED_EFFECT_TYPES
 
 func start_duel(deck_a: Array[String], deck_b: Array[String], seed: int = 1) -> bool:
 	state = DuelState.new()
+	used_effects.clear()
 	rng.seed = seed
 	if deck_a.size() < 20 or deck_b.size() < 20:
 		return false
@@ -86,6 +93,7 @@ func set_spell_trap(player_index: int, hand_index: int) -> bool:
 		return false
 	player.hand.remove_at(hand_index)
 	card.face_up = false
+	card.set_turn = state.turn
 	player.spell_trap_zone.append(card)
 	_resolve("%s盖放了1张卡" % player.name)
 	_emit_change()
@@ -100,6 +108,22 @@ func activate_spell(player_index: int, hand_index: int) -> bool:
 	var card: Dictionary = player.hand[hand_index]
 	if card.type != "spell":
 		return false
+	var life_cost := 0
+	var discard_cost := 0
+	for effect: Dictionary in card.get("effects", []):
+		if effect.get("trigger", "") != "manual": continue
+		if not supports_effect(effect):
+			_resolve("尚未支持此卡效果：%s" % card.name)
+			return false
+		if not _check_effect_condition(player_index, effect.get("condition", {})): return false
+		if effect.get("hardOncePerTurn", false) and used_effects.has(_effect_key(player_index, card, effect)): return false
+		var cost: Dictionary = effect.get("cost", {})
+		match str(cost.get("type", "")):
+			"": pass
+			"payLife": life_cost += max(0, int(cost.get("value", 0)))
+			"discard": discard_cost += max(0, int(cost.get("value", 0)))
+			_: return false
+	if player.lp <= life_cost or player.hand.size() - 1 < discard_cost: return false
 	player.hand.remove_at(hand_index)
 	_resolve("%s发动了%s" % [player.name, card.name])
 	_trigger_effects(player_index, card, "manual")
@@ -110,12 +134,14 @@ func activate_spell(player_index: int, hand_index: int) -> bool:
 func enter_battle_phase(player_index: int) -> bool:
 	if not _is_action_turn(player_index) or state.phase != "main":
 		return false
+	if state.turn == 1:
+		return false
 	if state.players[player_index].skip_battle:
 		return false
 	state.phase = "battle"
 	for monster: Dictionary in state.players[player_index].monster_zone:
-		monster.attacks_left = 1
-		monster.can_attack = not monster.cannot_attack
+		monster.attacks_left = int(monster.get("attacks_per_turn", 1))
+		monster.can_attack = not monster.cannot_attack and monster.get("face_up", true) and monster.get("position", "attack") == "attack"
 	_emit_change()
 	return true
 
@@ -129,10 +155,15 @@ func attack(player_index: int, attacker_index: int, target_index := -1) -> bool:
 	var attacker: Dictionary = player.monster_zone[attacker_index]
 	if not attacker.can_attack or int(attacker.get("attacks_left", 0)) <= 0 or attacker.cannot_attack:
 		return false
+	if not attacker.get("face_up", true) or attacker.get("position", "attack") != "attack":
+		return false
+	# 目标未选定时不能先触发陷阱或消耗攻击次数。
+	if not opponent.monster_zone.is_empty() and (target_index < 0 or target_index >= opponent.monster_zone.size()):
+		return false
 	if _trigger_attack_traps(player_index, attacker):
-		attacker.attacks_left = 0
-		attacker.has_attacked = true
-		attacker.can_attack = false
+		attacker.attacks_left = max(0, int(attacker.get("attacks_left", 1)) - 1)
+		attacker.has_attacked = attacker.attacks_left <= 0
+		attacker.can_attack = attacker.attacks_left > 0 and player.monster_zone.has(attacker) and not attacker.cannot_attack
 		_emit_change()
 		return true
 	if opponent.monster_zone.is_empty():
@@ -144,7 +175,7 @@ func attack(player_index: int, attacker_index: int, target_index := -1) -> bool:
 		return false
 	attacker.attacks_left = max(0, int(attacker.get("attacks_left", 1)) - 1)
 	attacker.has_attacked = attacker.attacks_left <= 0
-	attacker.can_attack = attacker.attacks_left > 0
+	attacker.can_attack = attacker.attacks_left > 0 and player.monster_zone.has(attacker) and not attacker.cannot_attack
 	_emit_change()
 	return true
 
@@ -155,6 +186,7 @@ func end_turn(player_index: int) -> bool:
 		monster.has_attacked = false
 		monster.attacks_left = 0
 		monster.can_attack = false
+		monster.erase("attacks_per_turn")
 		monster.cannot_attack = false
 		monster.cannot_be_destroyed_by_battle = false
 		monster.cannot_be_targeted = false
@@ -163,33 +195,50 @@ func end_turn(player_index: int) -> bool:
 	_restore_temporarily_banished()
 	state.active_player = state.opponent_of(player_index)
 	state.turn += 1
+	used_effects.clear()
 	state.phase = "main"
 	draw_card(state.active_player)
 	_emit_change()
 	return true
 
 func activate_monster_effect(player_index: int, monster_index: int, effect_index: int) -> bool:
-	if not _is_action_turn(player_index): return false
+	if not _is_action_turn(player_index) or state.phase != "main": return false
 	var zone: Array = state.players[player_index].monster_zone
 	if monster_index < 0 or monster_index >= zone.size(): return false
 	var card: Dictionary = zone[monster_index]
+	if not card.get("face_up", true): return false
 	var effects: Array = card.get("effects", [])
 	if effect_index < 0 or effect_index >= effects.size(): return false
 	var effect: Dictionary = effects[effect_index]
 	if effect.get("trigger", "") != "manual": return false
+	if not supports_effect(effect):
+		_resolve("尚未支持此卡效果：%s" % card.name)
+		return false
 	var used_key := "manual_used_%d_%d" % [state.turn, effect_index]
 	if effect.get("oncePerTurn", false) and card.get(used_key, false): return false
+	if effect.get("hardOncePerTurn", false) and used_effects.has(_effect_key(player_index, card, effect)): return false
 	if not _check_effect_condition(player_index, effect.get("condition", {})): return false
 	if not _pay_effect_cost(player_index, effect.get("cost", {})): return false
 	_apply_effect(player_index, card, effect)
 	card[used_key] = true
+	used_effects[_effect_key(player_index, card, effect)] = true
 	_emit_change()
 	return true
+
+func _effect_key(player_index: int, card: Dictionary, effect: Dictionary) -> String:
+	return "%d:%d:%s:%d" % [state.turn, player_index, card.get("id", card.get("name", "")), card.get("effects", []).find(effect)]
 
 func _trigger_effects(player_index: int, card: Dictionary, trigger: String) -> void:
 	for effect: Dictionary in card.get("effects", []):
 		if str(effect.get("trigger", "")) == trigger:
+			if not supports_effect(effect):
+				state.add_log("尚未支持此卡效果：%s" % card.name)
+				continue
+			var used_key := _effect_key(player_index, card, effect)
+			if effect.get("hardOncePerTurn", false) and used_effects.has(used_key): continue
 			if not _check_effect_condition(player_index, effect.get("condition", {})): continue
+			if not _pay_effect_cost(player_index, effect.get("cost", {})): continue
+			used_effects[used_key] = true
 			_apply_effect(player_index, card, effect)
 
 func _apply_effect(player_index: int, card: Dictionary, effect: Dictionary, context: Dictionary = {}) -> void:
@@ -198,6 +247,12 @@ func _apply_effect(player_index: int, card: Dictionary, effect: Dictionary, cont
 	var value := int(effect.get("value", 0))
 	var target: Dictionary = context.get("target", {})
 	match str(effect.get("type", "")):
+		"themedAction":
+			if effect.get("action", "") == "token" and player.monster_zone.size() < DuelState.MONSTER_ZONE_SIZE:
+				var params: Dictionary = effect.get("params", {})
+				var attack_value := int(params.get("attack", 0))
+				var defense_value := int(params.get("defense", 1000))
+				player.monster_zone.append({"id":"token", "name":"%s·衍生物" % card.name, "type":"monster", "level":1, "is_token":true, "cannot_tribute":true, "attack":attack_value, "defense":defense_value, "current_attack":attack_value, "current_defense":defense_value, "position":"defense", "face_up":true, "can_attack":false, "has_attacked":false, "cannot_attack":false, "effects":[]})
 		"buffSelfAttack": card.current_attack += value
 		"buffSelfDefense": card.current_defense += value
 		"healPlayer": player.lp = min(99999, player.lp + value)
@@ -289,8 +344,9 @@ func _apply_effect(player_index: int, card: Dictionary, effect: Dictionary, cont
 		"protectAllies":
 			for monster: Dictionary in player.monster_zone: monster.cannot_be_destroyed_by_battle = true
 		"doubleAttack":
+			card.attacks_per_turn = 2
 			card.attacks_left = max(2, int(card.get("attacks_left", 0)))
-			card.can_attack = true
+			card.can_attack = state.phase == "battle" and card.get("position", "attack") == "attack" and card.get("face_up", true) and not card.get("cannot_attack", false)
 		"sacrificeDestroy":
 			player.lp = max(1, player.lp - int(player.lp * float(value) / 100.0))
 			for ignored in min(2, opponent.monster_zone.size()): _destroy_monster(state.opponent_of(player_index), _select_monster(opponent.monster_zone, "highest"))
@@ -325,16 +381,22 @@ func _pay_effect_cost(player_index: int, cost: Dictionary) -> bool:
 			if player.hand.size() < value: return false
 			for ignored in value: player.graveyard.append(player.hand.pop_at(rng.randi_range(0, player.hand.size() - 1)))
 			return true
-	return true
+	return false
 
 func _trigger_attack_traps(attacker_owner: int, attacker: Dictionary) -> bool:
 	var defender_owner := state.opponent_of(attacker_owner)
 	var defender := state.players[defender_owner]
 	for trap: Dictionary in defender.spell_trap_zone.duplicate():
 		if trap.get("type", "") != "trap": continue
+		if int(trap.get("set_turn", -1)) >= state.turn: continue
 		var effects: Array = trap.get("effects", [])
 		for effect: Dictionary in effects:
 			if effect.get("trigger", "") != "onAttacked": continue
+			if effect.get("type", "") not in ["destroyAttacker", "counterDestroy", "returnToHand", "reflectDamage", "reduceDamage", "cannotAttack"]: continue
+			if effect.get("hardOncePerTurn", false) and used_effects.has(_effect_key(defender_owner, trap, effect)): continue
+			if not _check_effect_condition(defender_owner, effect.get("condition", {})): continue
+			if not _pay_effect_cost(defender_owner, effect.get("cost", {})): continue
+			used_effects[_effect_key(defender_owner, trap, effect)] = true
 			defender.spell_trap_zone.erase(trap)
 			trap.face_up = true
 			var effect_type := str(effect.get("type", ""))
@@ -352,15 +414,17 @@ func _trigger_attack_traps(attacker_owner: int, attacker: Dictionary) -> bool:
 
 func _resolve_battle(attacker_owner: int, attacker: Dictionary, defender: Dictionary) -> void:
 	var defender_owner := state.opponent_of(attacker_owner)
+	defender.face_up = true
 	var attack_value := int(attacker.current_attack)
 	var defend_value := int(defender.current_attack if defender.get("position", "attack") == "attack" else defender.current_defense)
 	if attack_value > defend_value:
 		if not defender.get("cannot_be_destroyed_by_battle", false): _destroy_monster(defender_owner, defender)
-		_damage_player(defender_owner, attack_value - defend_value)
+		if defender.get("position", "attack") == "attack" or attacker.get("piercing", false):
+			_damage_player(defender_owner, attack_value - defend_value)
 	elif attack_value < defend_value:
 		if defender.get("position", "attack") == "attack" and not attacker.get("cannot_be_destroyed_by_battle", false): _destroy_monster(attacker_owner, attacker)
 		_damage_player(attacker_owner, defend_value - attack_value)
-	elif defender.get("position", "attack") == "attack":
+	elif attack_value > 0 and defender.get("position", "attack") == "attack":
 		if not defender.get("cannot_be_destroyed_by_battle", false): _destroy_monster(defender_owner, defender)
 		if not attacker.get("cannot_be_destroyed_by_battle", false): _destroy_monster(attacker_owner, attacker)
 	_resolve("%s攻击%s" % [attacker.name, defender.name])
@@ -370,6 +434,7 @@ func _destroy_monster(owner_index: int, monster: Dictionary) -> void:
 	var index: int = owner.monster_zone.find(monster)
 	if index < 0: return
 	owner.monster_zone.remove_at(index)
+	if monster.get("is_token", false): return
 	owner.graveyard.append(monster)
 	_trigger_effects(owner_index, monster, "onDestroyed")
 
@@ -379,6 +444,7 @@ func _return_monster_to_hand(owner_index: int, monster: Dictionary) -> void:
 	var index: int = owner.monster_zone.find(monster)
 	if index < 0: return
 	owner.monster_zone.remove_at(index)
+	if monster.get("is_token", false): return
 	monster.current_attack = int(monster.get("attack", 0))
 	monster.current_defense = int(monster.get("defense", 0))
 	monster.can_attack = false

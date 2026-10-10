@@ -2,29 +2,39 @@
 
 使用原生 HTML、CSS 和 JavaScript ES Module 制作的本地数字卡牌游戏。当前版本已经接通游戏大厅、卡包商店、收藏、卡组编辑、AI 对战、奖励和本地存档，并将决斗规则改为接近传统《游戏王》流程的自动阶段模式。
 
-## 在 IDEA 中运行
+## 在 IDEA 中运行完整游戏
 
-1. 解压项目。
-2. 在 IntelliJ IDEA 中选择 **Open**，打开项目根目录。
+1. 在 IntelliJ IDEA 中选择 **Open**，打开 `SekaiGame` 项目根目录。
+2. 配置 `APP_DB_PASSWORD` 和 `APP_JWT_SECRET`，并确保 MySQL 已启动。
 3. 在 IDEA Terminal 执行：
 
 ```bash
-npm start
-```
-
-也可以在 Windows 中双击：
-
-```text
-start.bat
+mvn spring-boot:run
 ```
 
 浏览器访问：
 
 ```text
+http://127.0.0.1:8091
+```
+
+Spring Boot 会同时提供页面、REST API 和 `/ws/pvp` WebSocket。
+
+## 仅调试前端
+
+在当前 `static` 目录执行：
+
+```bash
+npm start
+```
+
+也可以在 Windows 中双击 `start.bat`。这两种方式使用独立静态服务器：
+
+```text
 http://127.0.0.1:8080
 ```
 
-项目使用 ES Module，不能直接双击 `index.html`。更新版本后建议按一次 `Ctrl + F5`。
+此模式的本地 PvP 中继使用端口 8079。项目使用 ES Module，不能直接双击 `index.html`。更新版本后建议按一次 `Ctrl + F5`。
 
 ## 当前决斗规则
 
@@ -117,11 +127,11 @@ AI 不会再瞬间跳过整个回合。
 
 ```text
 游戏大厅
-→ 使用决斗币抽取 Nightcord 卡包
+→ 使用次元币进行 Nightcord 次元召唤
 → 卡牌和插画进入收藏
 → 在卡组编辑器中组建 40～60 张合法卡组
 → 使用当前卡组挑战 AI
-→ 对局结束获得决斗币
+→ 对局结束获得次元币
 → 继续抽卡并调整卡组
 ```
 

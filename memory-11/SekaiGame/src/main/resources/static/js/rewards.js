@@ -1,6 +1,6 @@
 /**
  * rewards.js - 对战奖励系统
- * 使用决斗币作为唯一货币，支持一次性领取保护
+ * 使用次元币作为唯一货币，支持一次性领取保护（存储字段沿用 duelCoins）
  */
 
 export const REWARD_TABLE = {
@@ -30,16 +30,22 @@ export const ONE_TIME_REWARDS = [
 ];
 
 export function calculateMatchReward(result, matchData, collection = null) {
-    if (matchData?.mode === "training") return { duelCoins: 0, bonuses: [], label: "练习模式无奖励", result };
+    if (["training", "practice"].includes(matchData?.mode)) return { duelCoins: 0, bonuses: [], label: "练习模式无奖励", result };
     if (matchData?.mode === "pvp") {
         return { duelCoins: PVP_REWARD_TABLE[result] || 0, bonuses: [], label: "联机决斗奖励", result };
     }
+
+    // 关卡决斗同样属于 AI 决斗：奖励为关卡奖励，并且必须参与每日首胜等通用奖励，
+    // 否则首页宣传的"AI决斗首胜 +300"永远不可能达成（关卡分支曾在此提前返回）。
+    let base;
+    let label;
     if (matchData?.stage) {
-        const amount = result === "win" ? Number(matchData.stage.reward || 0) : 0;
-        return { duelCoins: amount, bonuses: [], label: result === "win" ? `${matchData.stage.name}通关奖励` : "挑战失败无奖励", result };
+        base = result === "win" ? Number(matchData.stage.reward || 0) : 0;
+        label = result === "win" ? `${matchData.stage.name}通关奖励` : "挑战失败无奖励";
+    } else {
+        base = REWARD_TABLE[result] || 0;
     }
 
-    let base = REWARD_TABLE[result] || 0;
     const bonuses = [];
     const stats = matchData?.statistics || {};
 
@@ -51,11 +57,12 @@ export function calculateMatchReward(result, matchData, collection = null) {
         }
     }
 
-    return { duelCoins: base, bonuses, result };
+    return { duelCoins: base, bonuses, label, result };
 }
 
 export function applyReward(collection, reward) {
     if (!reward || reward.duelCoins === undefined) return false;
+    const result = reward.result || "win";
 
     // 一次性奖励检查
     if (reward.claimId) {
@@ -67,8 +74,8 @@ export function applyReward(collection, reward) {
     collection.currency.duelCoins = Math.max(0, (collection.currency.duelCoins || 0) + reward.duelCoins);
     collection.statistics.duelsPlayed++;
 
-    if (reward.result === "win") collection.statistics.wins++;
-    else if (reward.result === "loss") collection.statistics.losses++;
+    if (result === "win") collection.statistics.wins++;
+    else if (result === "loss") collection.statistics.losses++;
     else collection.statistics.draws++;
 
     // 更新每日首次胜利标记
