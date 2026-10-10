@@ -546,14 +546,16 @@ public class AnimeService {
     public String getRecentAnimeMoviesAniList(int limit) {
         try {
             LocalDate now = LocalDate.now();
-            int from = now.minusYears(1).getYear() * 10000 + now.minusYears(1).getMonthValue() * 100 + now.minusYears(1).getDayOfMonth();
-            int today = now.getYear() * 10000 + now.getMonthValue() * 100 + now.getDayOfMonth();
-            int until = now.plusYears(1).getYear() * 10000 + now.plusYears(1).getMonthValue() * 100 + now.plusYears(1).getDayOfMonth();
+            int safeLimit = limit < 1 || limit > 20 ? 12 : limit;
+            LocalDate fromDate = now.minusMonths(2);
+            LocalDate untilDate = now.plusDays(1);
+            int from = fromDate.getYear() * 10000 + fromDate.getMonthValue() * 100 + fromDate.getDayOfMonth();
+            int until = untilDate.getYear() * 10000 + untilDate.getMonthValue() * 100 + untilDate.getDayOfMonth();
             String fields = "id siteUrl title{romaji english native} status averageScore duration genres startDate{year month day} studios(isMain:true){nodes{name}}";
-            String query = "query($from:FuzzyDateInt,$today:FuzzyDateInt,$until:FuzzyDateInt,$limit:Int){recent:Page(perPage:$limit){media(type:ANIME,format:MOVIE,startDate_greater:$from,startDate_lesser:$today,sort:POPULARITY_DESC){" + fields + "}} upcoming:Page(perPage:$limit){media(type:ANIME,format:MOVIE,status:NOT_YET_RELEASED,startDate_greater:$today,startDate_lesser:$until,sort:POPULARITY_DESC){" + fields + "}}}";
+            String query = "query($from:FuzzyDateInt,$until:FuzzyDateInt,$limit:Int){Page(perPage:$limit){media(type:ANIME,format:MOVIE,startDate_greater:$from,startDate_lesser:$until,sort:POPULARITY_DESC){" + fields + "}}}";
             JSONObject payload = new JSONObject();
             payload.put("query", query);
-            payload.put("variables", JSONObject.of("from", from, "today", today, "until", until, "limit", Math.max(5, limit / 2)));
+            payload.put("variables", JSONObject.of("from", from, "until", until, "limit", safeLimit));
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://graphql.anilist.co"))
                     .timeout(Duration.ofSeconds(8))
@@ -564,45 +566,51 @@ public class AnimeService {
                     .build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) return null;
-            JSONObject data = JSON.parseObject(response.body()).getJSONObject("data");
-            JSONArray media = data.getJSONObject("recent").getJSONArray("media");
-            JSONArray upcoming = data.getJSONObject("upcoming").getJSONArray("media");
-            if (upcoming != null) media.addAll(upcoming);
+            JSONObject body = JSON.parseObject(response.body());
+            JSONObject data = body == null ? null : body.getJSONObject("data");
+            JSONObject page = data == null ? null : data.getJSONObject("Page");
+            JSONArray media = page == null ? null : page.getJSONArray("media");
             if (media == null || media.isEmpty()) return null;
-            StringBuilder result = new StringBuilder("近期动漫电影（过去一年已上映＋未来一年即将上映；AniList 实时数据，查询日期 ").append(now).append("）\n\n");
-            for (int index = 0; index < Math.min(media.size(), limit); index++) {
+            StringBuilder result = new StringBuilder("最近两个月中国大陆上映动漫电影（查询日期 ").append(now).append("）\n\n");
+            int resultCount = 0;
+            for (int index = 0; index < media.size() && resultCount < safeLimit; index++) {
                 JSONObject item = media.getJSONObject(index);
                 JSONObject titles = item.getJSONObject("title");
                 String title = titles.getString("native");
                 if (title == null || title.isBlank()) title = titles.getString("romaji");
                 JSONObject date = item.getJSONObject("startDate");
-                if (index == 0) result.append("【近期已上映】\n");
-                if (index == media.size() - (upcoming == null ? 0 : upcoming.size()) && upcoming != null && !upcoming.isEmpty()) result.append("\n【即将上映】\n");
-                result.append(index + 1).append(". ").append(title);
+                if (date == null || date.getInteger("year") == null || date.getInteger("month") == null || date.getInteger("day") == null) continue;
+                LocalDate releaseDate;
+                try {
+                    releaseDate = LocalDate.of(date.getInteger("year"), date.getInteger("month"), date.getInteger("day"));
+                } catch (RuntimeException ignored) {
+                    continue;
+                }
+                if (releaseDate.isBefore(fromDate) || !releaseDate.isBefore(untilDate)) continue;
+                MovieTicketService.TicketLink ticket = movieTicketService.findMaoyanMovie(title);
+                if (ticket == null || !ticket.hasMainlandRelease()) continue;
+
+                resultCount++;
+                result.append(resultCount).append(". ").append(title);
                 String english = titles.getString("english");
                 if (english != null && !english.isBlank()) result.append(" / ").append(english);
-                result.append("\n   日期：").append(date.getInteger("year"));
-                if (date.getInteger("month") != null) result.append("-").append(date.getInteger("month"));
-                if (date.getInteger("day") != null) result.append("-").append(date.getInteger("day"));
+                result.append("\n   AniList发行日期：").append(releaseDate);
                 result.append("｜状态：").append(item.getString("status"));
                 Integer score = item.getInteger("averageScore");
                 if (score != null) result.append("｜评分：").append(score).append("%");
                 Integer duration = item.getInteger("duration");
                 if (duration != null) result.append("｜时长：").append(duration).append("分钟");
-                JSONArray studios = item.getJSONObject("studios").getJSONArray("nodes");
+                JSONObject studioObject = item.getJSONObject("studios");
+                JSONArray studios = studioObject == null ? null : studioObject.getJSONArray("nodes");
                 if (studios != null && !studios.isEmpty()) result.append("｜制作：").append(studios.getJSONObject(0).getString("name"));
                 result.append("\n   来源：").append(item.getString("siteUrl")).append("\n\n");
-                MovieTicketService.TicketLink ticket = movieTicketService.findMaoyanMovie(title);
-                if (ticket != null) {
-                    result.append("   详情：猫眼《").append(ticket.title()).append("》 ").append(ticket.url()).append("\n")
-                            .append("   上映信息：").append(ticket.releaseInfo()).append("\n")
-                            .append("   购票状态：").append(ticket.purchaseStatus()).append("\n");
-                    if (ticket.purchasable()) result.append("   购票：打开上方猫眼详情页选择影院和场次\n");
-                    result.append("\n");
-                } else {
-                    result.append("   国内购票：猫眼/淘票票暂未收录该片，因此没有可用的电影详情购票链接。\n\n");
-                }
+                result.append("   详情：猫眼《").append(ticket.title()).append("》 ").append(ticket.url()).append("\n")
+                        .append("   上映信息：").append(ticket.releaseInfo()).append("\n")
+                        .append("   购票状态：").append(ticket.purchaseStatus()).append("\n");
+                if (ticket.purchasable()) result.append("   购票：打开上方猫眼详情页选择影院和场次\n");
+                result.append("\n");
             }
+            if (resultCount == 0) return "最近两个月内暂未查到同时满足‘动漫电影’、‘中国大陆上映’且有可核验购票信息的影片。";
             result.append("想继续查购票和路线，请告诉我你所在的城市/区县或商圈，例如：‘我在杭州滨江，帮我找附近能看的影院’。\n")
                     .append("选定电影后还可以说：‘提醒我上映当天去看’，我会生成日历提醒。\n")
                     .append("说明：具体排片与中国大陆上映状态以猫眼/淘票票页面和影院为准。");

@@ -52,7 +52,10 @@ public class MovieTicketService {
 
     public record TicketLink(long movieId, String title, String releaseInfo, int showStatus, String url) {
         public boolean hasMainlandRelease() {
-            return releaseInfo != null && releaseInfo.contains("中国大陆");
+            return releaseInfo != null
+                    && (releaseInfo.contains("中国大陆")
+                    || releaseInfo.contains("大陆上映")
+                    || releaseInfo.contains("内地上映"));
         }
 
         public boolean purchasable() {

@@ -26,10 +26,10 @@ public class DashScopeConfig {
     @Value("${DASHSCOPE_API_KEY:}")
     private String dashscopeApiKey;
 
-    @Value("${ilink.llm.vision.base-url:https://dashscope.aliyuncs.com/compatible-mode/v1}")
+    @Value("${dashscope.vision.base-url:https://dashscope.aliyuncs.com/compatible-mode/v1}")
     private String visionBaseUrl;
 
-    @Value("${ilink.llm.vision.model:qwen-vl-plus}")
+    @Value("${dashscope.vision.model:qwen-vl-plus}")
     private String visionModel;
 
     @PostConstruct
@@ -60,7 +60,7 @@ public class DashScopeConfig {
         @Value("${VISION_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}")
         private String baseUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1";
 
-        @Value("${ilink.llm.vision.model:qwen-vl-plus}")
+        @Value("${dashscope.vision.model:qwen-vl-plus}")
         private String model = "qwen-vl-plus";
 
         public String getApiKey() { return apiKey; }

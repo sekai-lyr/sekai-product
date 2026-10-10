@@ -7,7 +7,6 @@ import com.example.demo.chat.ChatMemoryService;
 import com.example.demo.chat.ChatMessage;
 import com.example.demo.chat.LlmService;
 import com.example.demo.chat.VectorStoreService;
-import com.example.demo.weather.service.WeatherService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -28,9 +27,6 @@ public class ToolCallingService {
     private static final int MAX_ITERATIONS = 5;
 
     private final LlmService llmService;
-    private final SpringAiTools springAiTools;
-    private final AnimeLifestyleTools animeLifestyleTools;
-    private final WeatherService weatherService;
     private final ChatMemoryService chatMemoryService;
     private final VectorStoreService vectorStoreService;
     private final Map<String, ToolInfo> toolRegistry = new LinkedHashMap<>();
@@ -38,22 +34,15 @@ public class ToolCallingService {
 
     @Autowired
     public ToolCallingService(LlmService llmService, SpringAiTools springAiTools,
-                              AnimeLifestyleTools animeLifestyleTools,
-                              WeatherService weatherService,
                               ChatMemoryService chatMemoryService,
                               VectorStoreService vectorStoreService) {
         this.llmService = llmService;
-        this.springAiTools = springAiTools;
-        this.animeLifestyleTools = animeLifestyleTools;
-        this.weatherService = weatherService;
         this.chatMemoryService = chatMemoryService;
         this.vectorStoreService = vectorStoreService;
         this.toolExecutor = Executors.newFixedThreadPool(
                 Math.min(Runtime.getRuntime().availableProcessors(), 4),
                 r -> { Thread t = new Thread(r, "tool-executor"); t.setDaemon(true); return t; });
         registerTools(springAiTools);
-        registerTools(animeLifestyleTools);
-        registerTools(weatherService);
         log.info("ToolCallingService initialized with {} tools + memory + RAG", toolRegistry.size());
     }
 
@@ -114,7 +103,15 @@ public class ToolCallingService {
                 // Skip first (system) and last (current user), add middle ones
                 for (int i = 0; i < history.size(); i++) {
                     ChatMessage msg = history.get(i);
-                    if (msg.getRole().equals("system")) continue;
+                    if (msg.getRole().equals("system")) {
+                        if (msg.getContent() != null && msg.getContent().startsWith("【对话摘要】")) {
+                            JSONObject summaryMsg = new JSONObject();
+                            summaryMsg.put("role", "system");
+                            summaryMsg.put("content", msg.getContent());
+                            messages.add(summaryMsg);
+                        }
+                        continue;
+                    }
                     JSONObject histMsg = new JSONObject();
                     histMsg.put("role", msg.getRole());
                     histMsg.put("content", msg.getContent());
@@ -158,8 +155,7 @@ public class ToolCallingService {
     public JSONArray buildToolsSchema(Set<String> allowedToolNames) {
         JSONArray tools = new JSONArray();
         for (Map.Entry<String, ToolInfo> entry : toolRegistry.entrySet()) {
-            if (allowedToolNames != null && !allowedToolNames.isEmpty()
-                    && !allowedToolNames.contains(entry.getKey())) continue;
+            if (allowedToolNames != null && !allowedToolNames.contains(entry.getKey())) continue;
             ToolInfo ti = entry.getValue();
             JSONObject tool = new JSONObject();
             tool.put("type", "function");
@@ -230,9 +226,8 @@ public class ToolCallingService {
                     JSONObject am = getAssistantMessage(resp);
                     if (am != null) messages.add(am);
                     List<ToolCallInfo> calls = parseToolCalls(resp);
-                    Map<String, Future<ToolCallResult>> futures = new LinkedHashMap<>();
                     for (ToolCallInfo tc : calls) {
-                        futures.put(tc.id, CompletableFuture.supplyAsync(() -> {
+                        Future<ToolCallResult> future = toolExecutor.submit(() -> {
                             long start = System.currentTimeMillis();
                             try {
                                 String r = executeTool(tc.toolName, tc.arguments);
@@ -242,14 +237,12 @@ public class ToolCallingService {
                                 return ToolCallResult.error(traceId, tc.toolName, tc.arguments, e.getMessage(),
                                         System.currentTimeMillis() - start);
                             }
-                        }, toolExecutor));
-                    }
-                    for (Map.Entry<String, Future<ToolCallResult>> e : futures.entrySet()) {
-                        ToolCallResult cr = e.getValue().get(10, TimeUnit.SECONDS);
+                        });
+                        ToolCallResult cr = future.get(10, TimeUnit.SECONDS);
                         history.add(cr);
                         files.addAll(extractGeneratedFiles(cr.getResult()));
                         JSONObject tm = new JSONObject();
-                        tm.put("role", "tool"); tm.put("tool_call_id", e.getKey());
+                        tm.put("role", "tool"); tm.put("tool_call_id", tc.id);
                         tm.put("content", cr.getResult()); messages.add(tm);
                     }
                     if (allowedToolNames != null && allowedToolNames.size() == 1) {

@@ -1,0 +1,113 @@
+:root {
+  color: #fff8e8;
+  background: #6e9faf;
+  font-family: "Avenir Next", "Segoe UI", Inter, ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
+  --ink: #fff8e8;
+  --muted: rgba(255, 248, 232, .76);
+  --sky: #9be5e2;
+  --gold: #f1c77e;
+  --gold-light: #ffe4ac;
+  --panel: rgba(29, 66, 72, .84);
+}
+
+* { box-sizing: border-box }
+html, body, #app { min-width: 320px; min-height: 100%; margin: 0 }
+body { min-height: 100vh; overflow: hidden; color: var(--ink); background: #6e9faf }
+button { cursor: pointer; font: inherit }
+a { color: inherit; text-decoration: none }
+.nexus-app { min-height: 100vh; background: #6e9faf }
+
+.nexus-header { position: absolute; top: 0; right: 0; left: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 0 5vw; background: linear-gradient(180deg, rgba(29, 66, 72, .5), transparent) }
+.nexus-brand { display: flex; flex: 0 1 auto; align-items: center; gap: 11px; min-width: 0; letter-spacing: .06em; text-transform: uppercase; text-shadow: 0 2px 15px rgba(20, 56, 65, .45) }
+.nexus-brand > span:last-child { min-width: 0 }
+.nexus-brand small, .nexus-brand strong { display: block; white-space: nowrap }
+.nexus-brand small { color: rgba(255, 248, 231, .78); font: 9px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .2em }
+.nexus-brand strong { margin-top: 2px; font-size: 13px; font-weight: 700 }
+.nexus-mark { display: grid; flex: 0 0 auto; place-items: center; width: 32px; height: 32px; border: 1px solid rgba(255, 246, 214, .92); border-radius: 12px; color: #33566a; background: var(--gold-light); font-size: 15px; font-weight: 800; box-shadow: 0 5px 18px rgba(26, 68, 75, .28) }
+.nexus-header-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 5px }
+.header-action { min-width: 42px; flex: 0 0 auto; border: 1px solid transparent; border-radius: 999px; color: rgba(255, 248, 231, .86); background: transparent; padding: 8px 11px; font-size: 12px; white-space: nowrap; transition: color .18s, border-color .18s, background .18s }
+.header-action:hover, .header-action:focus-visible { border-color: rgba(255, 248, 231, .42); color: #fff; background: rgba(255, 248, 231, .12) }
+.settings-panel { position: absolute; top: 62px; right: 5vw; z-index: 31; width: min(270px, calc(100vw - 40px)); padding: 17px; border: 1px solid rgba(255, 247, 220, .32); border-radius: 14px; color: var(--ink); background: rgba(29, 66, 72, .95); box-shadow: 0 18px 42px rgba(27, 65, 69, .28); backdrop-filter: blur(14px) }
+.settings-title { margin: 0 0 7px; color: var(--ink); font-size: 13px; font-weight: 700 }
+.settings-panel p:not(.settings-title) { margin: 0 0 14px; color: var(--muted); font-size: 12px; line-height: 1.55 }
+.settings-close { border: 1px solid rgba(255, 247, 220, .32); border-radius: 999px; color: var(--ink); background: transparent; padding: 7px 12px; font-size: 11px; white-space: nowrap }
+.settings-close:hover { border-color: var(--gold-light); color: var(--gold-light) }
+.nexus-main { height: 100dvh }
+
+.wild-stage { position: relative; width: 100%; min-height: 100dvh; overflow: hidden; isolation: isolate; background: #78aabd; touch-action: none; overscroll-behavior: none }
+.wild-canvas { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; outline: none; cursor: grab }
+.wild-canvas:active { cursor: grabbing }
+.wild-grade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(28, 74, 82, .38), transparent 25%, transparent 60%, rgba(32, 78, 75, .34) 100%), radial-gradient(ellipse at 51% 39%, transparent 18%, rgba(23, 61, 70, .12) 78%, rgba(19, 55, 64, .3) 100%) }
+.wild-fog { position: absolute; right: -22%; bottom: -14%; left: -22%; z-index: 2; height: 43%; opacity: .24; pointer-events: none; background: radial-gradient(ellipse at 50% 70%, rgba(242, 251, 245, .6), transparent 68%), radial-gradient(ellipse at 15% 78%, rgba(223, 244, 241, .24), transparent 52%); filter: blur(27px); animation: world-fog 18s ease-in-out infinite alternate }
+@keyframes world-fog { from { transform: translateX(-2%) } to { transform: translateX(3%) } }
+
+.wild-intro { position: absolute; top: 16%; left: 6vw; z-index: 5; width: min(430px, 38vw); pointer-events: none; text-shadow: 0 3px 22px rgba(23, 65, 72, .4) }
+.wild-kicker { margin: 0 0 13px; color: rgba(255, 231, 172, .94); font: 10px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .14em; text-transform: uppercase }
+.wild-intro h1 { margin: 0; color: #fff; font-size: clamp(50px, 6vw, 82px); font-weight: 650; letter-spacing: -.08em; line-height: .92 }
+.wild-subtitle { margin: 18px 0 10px; color: #fffdf5; font-size: 16px; font-weight: 600; line-height: 1.35 }
+.wild-description { max-width: 315px; margin: 0 0 17px; color: rgba(255, 251, 239, .82); font-size: 13px; line-height: 1.65 }
+.wild-region { display: flex; align-items: center; gap: 8px; margin: 0; color: rgba(224, 251, 247, .88); font: 10px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .1em; text-transform: uppercase }
+.wild-region span { width: 7px; height: 7px; border-radius: 50%; background: var(--gold-light); box-shadow: 0 0 11px rgba(255, 228, 172, .85) }
+
+.creature-card { position: absolute; right: 5vw; bottom: 8%; z-index: 6; width: min(340px, 27vw); padding: 19px 21px 18px; border: 1px solid rgba(255, 245, 215, .42); border-left: 3px solid var(--sky); border-radius: 18px; background: linear-gradient(145deg, rgba(39, 81, 82, .91), rgba(24, 55, 62, .86)); box-shadow: 0 22px 50px rgba(20, 64, 68, .3), inset 0 1px rgba(255, 255, 255, .2); backdrop-filter: blur(14px) }
+.creature-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--sky); font: 9px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .1em; text-transform: uppercase }
+.card-close { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid rgba(255, 245, 215, .34); border-radius: 50%; color: var(--ink); background: transparent; font-size: 17px; line-height: 1 }
+.card-close:hover { border-color: var(--gold-light); color: var(--gold-light) }
+.creature-card-title { display: flex; align-items: center; gap: 12px; margin: 18px 0 11px }
+.creature-dot { display: block; flex: 0 0 auto; width: 15px; height: 15px; border: 3px solid rgba(255, 239, 193, .8); border-radius: 50%; box-shadow: 0 0 18px rgba(255, 222, 142, .64) }
+.creature-card h2 { margin: 0; color: #fffdf5; font-size: 25px; font-weight: 650; letter-spacing: -.05em; line-height: 1.08 }
+.creature-card-title p { margin: 4px 0 0; color: rgba(221, 246, 239, .62); font: 9px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .04em }
+.creature-description { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.6 }
+.creature-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 0 0 15px; padding-top: 13px; border-top: 1px solid rgba(255, 245, 215, .2) }
+.creature-meta dt { color: var(--gold-light); font: 9px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase }
+.creature-meta dd { margin: 4px 0 0; color: rgba(255, 252, 240, .82); font-size: 11px }
+.creature-record { margin: 0; color: rgba(155, 229, 226, .82); font: 9px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase }
+.creature-empty { margin: 18px 0 2px; color: var(--muted); font-size: 12px; line-height: 1.6 }
+
+.world-controls { position: absolute; bottom: 7%; left: 5vw; z-index: 5; color: rgba(255, 251, 239, .72); font: 10px ui-monospace, SFMono-Regular, Consolas, monospace; line-height: 1.8; text-shadow: 0 2px 12px rgba(28, 66, 69, .55); pointer-events: none }
+.world-controls p { margin: 0 }
+.world-count { position: absolute; right: 5vw; bottom: 4.5%; z-index: 5; margin: 0; color: rgba(255, 226, 165, .9); font: 10px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 2px 12px rgba(28, 66, 69, .55) }
+.world-count span { color: rgba(255, 251, 239, .67) }
+
+.touch-pad { position: absolute; bottom: 18px; left: 15px; z-index: 8; display: grid; justify-items: center; gap: 2px; opacity: .85 }
+.touch-pad > div { display: flex; gap: 2px }
+.touch-pad button { display: grid; place-items: center; width: 38px; height: 34px; border: 1px solid rgba(255, 246, 215, .44); border-radius: 9px; color: #fff8e8; background: rgba(31, 76, 80, .7); font-size: 13px; -webkit-tap-highlight-color: transparent }
+.touch-pad button:active { color: #285565; background: var(--gold-light) }
+
+:focus-visible { outline: 2px solid var(--sky); outline-offset: 4px }
+@media (max-width: 767px) {
+  .nexus-header { min-height: 60px; padding: 0 16px }
+  .nexus-mark { width: 30px; height: 30px }
+  .nexus-brand { gap: 8px }
+  .nexus-brand strong { font-size: 12px }
+  .nexus-header-actions { gap: 1px }
+  .header-action { min-width: 38px; padding: 7px 8px; font-size: 11px }
+  .settings-panel { top: 56px; right: 16px; width: min(250px, calc(100vw - 32px)) }
+  .wild-intro { top: 10%; right: 16px; left: 16px; width: auto }
+  .wild-kicker { margin-bottom: 10px; font-size: 8px; letter-spacing: .1em }
+  .wild-intro h1 { font-size: clamp(38px, 11vw, 51px) }
+  .wild-subtitle { margin: 11px 0 7px; font-size: 13px }
+  .wild-description { max-width: 275px; margin-bottom: 10px; font-size: 11px; line-height: 1.5 }
+  .wild-region { font-size: 8px; letter-spacing: .06em }
+  .wild-fog { right: -44%; left: -44%; height: 38%; opacity: .26 }
+  .creature-card { right: 12px; bottom: 13px; left: 98px; width: auto; padding: 15px 16px 14px; border-radius: 15px }
+  .creature-card-title { margin: 12px 0 8px }
+  .creature-card h2 { font-size: 19px }
+  .creature-description { margin-bottom: 10px; font-size: 11px; line-height: 1.45 }
+  .creature-meta { margin-bottom: 10px; padding-top: 9px }
+  .world-controls { right: 16px; bottom: 113px; left: auto; font-size: 8px; text-align: right; line-height: 1.65 }
+  .world-count { right: 16px; bottom: 94px; font-size: 8px }
+}
+@media (min-width: 768px) and (max-width: 1120px) {
+  .nexus-header { padding: 0 4vw }
+  .wild-intro { left: 5vw; width: min(360px, 34vw) }
+  .wild-intro h1 { font-size: clamp(46px, 5.4vw, 64px) }
+  .creature-card { right: 4vw; width: min(310px, 29vw) }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .settings-panel, .creature-card { background: #245665; backdrop-filter: none }
+}

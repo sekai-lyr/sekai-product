@@ -26,10 +26,24 @@ public class VisionService {
     private static final Logger logger = LoggerFactory.getLogger(VisionService.class);
 
     private final DashScopeConfig config;
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private volatile HttpClient httpClient;
 
     public VisionService(DashScopeConfig config) {
         this.config = config;
+    }
+
+    private HttpClient getHttpClient() {
+        HttpClient current = httpClient;
+        if (current == null) {
+            synchronized (this) {
+                current = httpClient;
+                if (current == null) {
+                    current = HttpClient.newHttpClient();
+                    httpClient = current;
+                }
+            }
+        }
+        return current;
     }
 
     private static final String PROMPT = "请分析图片内容，并以纯JSON格式返回以下信息，不要包含markdown标记：" +
@@ -82,7 +96,7 @@ public class VisionService {
         
         String responseBody;
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
             responseBody = response.body();
             
             logger.info("Vision API response status: {}, body length: {}", 
@@ -149,7 +163,7 @@ public class VisionService {
         
         String responseBody;
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
             responseBody = response.body();
             
             logger.info("Vision API response status: {}, body length: {}", 
@@ -199,7 +213,7 @@ public class VisionService {
                 .POST(HttpRequest.BodyPublishers.ofString(JSON.toJSONString(requestBody)))
                 .build();
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
                 throw new IOException("Vision reference request failed with status: " + response.statusCode() + ", body: " + response.body());
             }

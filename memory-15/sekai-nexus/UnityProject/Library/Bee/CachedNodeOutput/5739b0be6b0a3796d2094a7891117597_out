@@ -1,0 +1,1 @@
+B:\Unity\Editor\6000.3.23f1\Editor\Data\Resources\PackageManager\BuiltInPackages\com.unity.ugui\Runtime\UGUI\EventSystem\UIElements\WorldDocumentRaycaster.cs(27,27): warning CS0109: The member 'WorldDocumentRaycaster.camera' does not hide an accessible member. The new keyword is not required.

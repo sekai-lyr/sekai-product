@@ -1,6 +1,6 @@
 package com.example.demo.auth;
 
-import com.example.demo.aicare.Result;
+import com.example.demo.web.Result;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

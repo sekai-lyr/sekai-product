@@ -32,10 +32,24 @@ public class ImageGenerationService {
     private static final Logger logger = LoggerFactory.getLogger(ImageGenerationService.class);
 
     private final DashScopeConfig config;
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private volatile HttpClient httpClient;
 
     public ImageGenerationService(DashScopeConfig config) {
         this.config = config;
+    }
+
+    private HttpClient getHttpClient() {
+        HttpClient current = httpClient;
+        if (current == null) {
+            synchronized (this) {
+                current = httpClient;
+                if (current == null) {
+                    current = HttpClient.newHttpClient();
+                    httpClient = current;
+                }
+            }
+        }
+        return current;
     }
 
     /**
@@ -79,7 +93,7 @@ public class ImageGenerationService {
             .POST(HttpRequest.BodyPublishers.ofString(jsonStr))
             .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
         String responseBody = response.body();
 
         logger.info("{} response status: {}, body: {}",
@@ -134,12 +148,12 @@ public class ImageGenerationService {
                 .header("Authorization", "Bearer " + config.getApiKey())
                 .GET()
                 .build();
-            HttpResponse<InputStream> downloadResp = httpClient.send(downloadReq, HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<InputStream> downloadResp = getHttpClient().send(downloadReq, HttpResponse.BodyHandlers.ofInputStream());
             if (downloadResp.statusCode() != 200) {
                 // Retry without auth (public OSS signed URL)
                 logger.info("Auth download returned {}, retrying without auth", downloadResp.statusCode());
                 HttpRequest retryReq = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
-                downloadResp = httpClient.send(retryReq, HttpResponse.BodyHandlers.ofInputStream());
+                downloadResp = getHttpClient().send(retryReq, HttpResponse.BodyHandlers.ofInputStream());
                 if (downloadResp.statusCode() != 200) {
                     throw new IOException("Failed to download generated image, status: " + downloadResp.statusCode());
                 }
@@ -172,8 +186,6 @@ public class ImageGenerationService {
         if (!Files.exists(uploadsPath)) {
             Files.createDirectories(uploadsPath);
         }
-
-        // Keep original PNG — JPEG conversion may produce incompatible format with WeChat
 
         String filename = "gen_" + UUID.randomUUID() + extension;
         Path targetPath = uploadsPath.resolve(filename);

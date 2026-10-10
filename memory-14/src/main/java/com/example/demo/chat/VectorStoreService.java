@@ -92,11 +92,15 @@ public class VectorStoreService {
             ensureIndexCreated();
             
             String vectorString = formatVector(queryEmbedding);
+            String vectorQuery = "@" + VECTOR_FIELD + ":[" + vectorString + "]=>{$vector_distance: L2}";
+            String scopedQuery = conversationId == null || conversationId.isBlank()
+                    ? vectorQuery
+                    : "@" + CONVERSATION_FIELD + ":{" + escapeTagValue(conversationId) + "} " + vectorQuery;
             
             String searchResult = redisTemplate.execute((RedisCallback<String>) connection -> {
                 byte[][] args = new byte[][]{
                     INDEX_NAME.getBytes(StandardCharsets.UTF_8),
-                    ("@" + VECTOR_FIELD + ":[" + vectorString + "]=>{$vector_distance: L2}").getBytes(StandardCharsets.UTF_8),
+                    scopedQuery.getBytes(StandardCharsets.UTF_8),
                     "LIMIT".getBytes(StandardCharsets.UTF_8),
                     "0".getBytes(StandardCharsets.UTF_8),
                     String.valueOf(topK).getBytes(StandardCharsets.UTF_8),
@@ -166,7 +170,7 @@ public class VectorStoreService {
                     CONTENT_FIELD.getBytes(StandardCharsets.UTF_8),
                     "TEXT".getBytes(StandardCharsets.UTF_8),
                     CONVERSATION_FIELD.getBytes(StandardCharsets.UTF_8),
-                    "TEXT".getBytes(StandardCharsets.UTF_8),
+                    "TAG".getBytes(StandardCharsets.UTF_8),
                     TIMESTAMP_FIELD.getBytes(StandardCharsets.UTF_8),
                     "NUMERIC".getBytes(StandardCharsets.UTF_8)
                 };
@@ -194,6 +198,17 @@ public class VectorStoreService {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    private String escapeTagValue(String value) {
+        StringBuilder escaped = new StringBuilder(value.length());
+        String specialCharacters = "\\,.<>{}[]\"':;!@#$%^&*()-+=~|";
+        for (int i = 0; i < value.length(); i++) {
+            char character = value.charAt(i);
+            if (specialCharacters.indexOf(character) >= 0) escaped.append('\\');
+            escaped.append(character);
+        }
+        return escaped.toString();
     }
     
     private byte[] serializeVector(float[] vector) {

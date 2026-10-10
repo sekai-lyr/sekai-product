@@ -1,0 +1,13 @@
+package com.sekai.world;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+@SpringBootApplication
+@EnableScheduling
+public class SekaiWorldEngineApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(SekaiWorldEngineApplication.class, args);
+    }
+}

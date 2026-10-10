@@ -2,6 +2,8 @@ package com.example.demo.ai;
 
 import com.example.demo.anime.AnimeImageRecognitionService;
 import com.example.demo.anime.AnimeService;
+import com.example.demo.chat.ChatMemoryService;
+import com.example.demo.chat.VectorStoreService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ public class AiController {
     private final AnimeImageRecognitionService animeImageRecognitionService;
     private final AnimeService animeService;
     private final AnimeEventService animeEventService;
+    private final ChatMemoryService chatMemoryService;
+    private final VectorStoreService vectorStoreService;
     private final Map<String, String> conversationCities = new ConcurrentHashMap<>();
 
     @PostMapping("/chat")
@@ -36,6 +40,7 @@ public class AiController {
             if (isRecentAnimeMovieQuestion(message)) {
                 String movies = animeService.getRecentAnimeMoviesAniList(15);
                 if (movies != null && !movies.isBlank()) {
+                    saveShortcutResult(request.get("conversationId"), message, movies);
                     response.put("success", true);
                     response.put("content", movies);
                     return ResponseEntity.ok(response);
@@ -113,6 +118,7 @@ public class AiController {
             if (isRecentAnimeMovieQuestion(message)) {
                 String movies = animeService.getRecentAnimeMoviesAniList(15);
                 if (movies != null && !movies.isBlank()) {
+                    saveShortcutResult(conversationId, message, movies);
                     response.put("success", true);
                     response.put("content", movies);
                     response.put("toolsUsed", 1);
@@ -123,7 +129,8 @@ public class AiController {
             List<String> validatedTools = toolCallingService.validateToolNames(allowedTools);
             Set<String> allowedToolSet = isAnimeEventQuestion(message)
                     ? Set.of("searchAnimeEventsChina")
-                    : (validatedTools.isEmpty() ? null : new HashSet<>(validatedTools));
+                    : (allowedTools == null || allowedTools.isEmpty()
+                    ? null : new HashSet<>(validatedTools));
             ToolCallResponse toolResponse = springAiChatService.chatWithTools(message, systemPrompt, allowedToolSet, conversationId);
             response.put("success", true);
             response.put("content", sanitizeUnannouncedEventAnswer(toolResponse.getText(), toolResponse));
@@ -159,9 +166,13 @@ public class AiController {
                 throw new IllegalArgumentException("请选择图片");
             }
             String imageUrl = image.startsWith("data:") ? image : "data:image/jpeg;base64," + image;
+            String question = request.get("question");
             log.info("Anime image recognition: dataLength={}", image.length());
+            String result = animeImageRecognitionService.recognize(imageUrl, question);
             response.put("success", true);
-            response.put("content", animeImageRecognitionService.recognize(imageUrl));
+            response.put("content", result);
+            saveShortcutResult(request.get("conversationId"),
+                    "用户上传图片并提问：" + (question == null || question.isBlank() ? "请识别这张图片" : question), result);
         } catch (Exception e) {
             log.error("Anime image analysis failed", e);
             response.put("success", false);
@@ -200,6 +211,16 @@ public class AiController {
             map.put("error", result.getErrorMessage());
         }
         return map;
+    }
+
+    private void saveShortcutResult(String conversationId, String userMessage, String assistantReply) {
+        if (conversationId == null || conversationId.isBlank()) return;
+        try {
+            chatMemoryService.saveMessagePair(conversationId, userMessage, assistantReply);
+            vectorStoreService.saveMessage(conversationId, userMessage, assistantReply);
+        } catch (Exception e) {
+            log.warn("Failed to save shortcut response for conversation {}: {}", conversationId, e.getMessage());
+        }
     }
 
     private String sanitizeUnannouncedEventAnswer(String answer, ToolCallResponse toolResponse) {

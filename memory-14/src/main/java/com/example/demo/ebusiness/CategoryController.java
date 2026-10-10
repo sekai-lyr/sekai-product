@@ -1,6 +1,6 @@
 package com.example.demo.ebusiness;
 
-import com.example.demo.aicare.Result;
+import com.example.demo.web.Result;
 import com.example.demo.chat.entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

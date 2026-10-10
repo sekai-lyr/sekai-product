@@ -196,7 +196,7 @@ public class AudioConverterService {
 
         // Ensure proper header for the detected format
         if ("silk".equals(detectedFormat)) {
-            // Try stripped raw PCM first (WeChat ILink may wrap raw PCM in SILK container)
+            // Try the stripped payload first because some SILK inputs contain an outer wrapper.
             byte[] rawPayload = extractRawPayload(inputData);
             logger.info("SILK detected, trying raw payload ({}) bytes as PCM", rawPayload.length);
             return rawPayload;
@@ -377,7 +377,7 @@ public class AudioConverterService {
         if (matchesHeader(data, SILK_HEADER)) {
             return "silk";
         }
-        // WeChat voice data may have a leading 0x02 (STX) byte before the SILK header
+        // Some voice data may have a leading 0x02 (STX) byte before the SILK header.
         if (data.length >= 7 && data[0] == 0x02 && matchesHeader(data, SILK_HEADER, 1)) {
             logger.info("SILK header detected after 0x02 prefix byte");
             return "silk";
@@ -389,7 +389,7 @@ public class AudioConverterService {
             return "amr";
         }
         if (matchesHeader(data, "#!".getBytes())) {
-            // Unknown magic number but has a WeChat-style header
+            // Unknown magic number with a text-style header.
             String headerStr = new String(data, 0, Math.min(16, data.length));
             logger.info("Unknown magic header: '{}'", headerStr.replace("\n", "\\n"));
             return "unknown_magic";

@@ -1,0 +1,10 @@
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { worldApi } from '../api/world'
+import type { EventChoice, EventDetails } from '../types'
+const route = useRoute(); const router = useRouter(); const worldId = Number(route.params.worldId); const eventId = Number(route.params.eventId); const data = ref<EventDetails | null>(null); const branchId = ref(0); const loading = ref(false); const message = ref('')
+onMounted(async () => { const overview = (await worldApi.overview(worldId)).data; branchId.value = Number(route.query.branchId) || overview.branches[0].id; data.value = (await worldApi.event(worldId, eventId, branchId.value)).data })
+async function choose(choice: EventChoice) { loading.value = true; message.value = ''; try { await worldApi.choose(worldId, eventId, branchId.value, choice.code); message.value = '选择已写入世界历史。'; if (data.value) data.value.event.status = 'RESOLVED' } catch (err: any) { message.value = err.response?.data?.message || '选择无法应用。' } finally { loading.value = false } }
+</script>
+<template><section class="page" v-if="data"><router-link class="back-link" :to="`/worlds/${worldId}`">← 返回世界总览</router-link><div class="event-hero"><p class="eyebrow">WORLD EVENT / {{ data.event.status }}</p><h1>{{ data.event.title }}</h1><p class="lede">{{ data.event.description }}</p><span class="event-date">{{ data.event.occurredOn }}</span></div><div class="choice-panel panel"><div class="panel-heading"><div><p class="eyebrow">YOUR INTERVENTION</p><h2>你要如何回应？</h2></div></div><div v-if="data.event.status === 'PENDING'" class="choice-grid"><button v-for="choice in data.choices" :key="choice.id" class="choice-card" :disabled="loading" @click="choose(choice)"><span>{{ String(choice.sortOrder).padStart(2, '0') }}</span><strong>{{ choice.label }}</strong><small>心情 {{ choice.moodDelta > 0 ? '+' : '' }}{{ choice.moodDelta }}</small></button></div><div v-else class="resolved-state">✓ 这个事件已经成为历史。</div><p v-if="message" class="success-message">{{ message }}</p></div></section><section v-else class="loading-state">正在读取事件…</section></template>

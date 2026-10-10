@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -23,7 +23,7 @@ html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 body{font-family:var(--font-body);color:var(--warm-white);background:var(--night-blue);overflow:hidden;height:100vh;height:100dvh;line-height:1.6}
 
 .bg-video{position:fixed;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;background:var(--night-blue)}
-.bg-fallback{position:fixed;inset:0;z-index:0;background:var(--night-blue) center/cover no-repeat;background-image:url(/assets/anime-login.webp);display:none}
+.bg-fallback{position:fixed;inset:0;z-index:0;background:var(--night-blue) center/cover no-repeat;background-image:url(/assets/anime-bg.jpg);display:none}
 .bg-video.failed+.bg-fallback{display:block}
 
 /* Chat shell */
@@ -37,7 +37,7 @@ body{font-family:var(--font-body);color:var(--warm-white);background:var(--night
 .new-chat:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
 .side-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:rgba(194,204,213,.55);padding:0 20px 10px}
 .prompt-list{padding:0 16px;display:flex;flex-direction:column;gap:5px;flex:1;overflow-y:auto}
-.prompt-chip{width:100%;padding:10px 14px;font-size:12px;color:rgba(194,204,213,.58);background:rgba(255,255,255,.03);border:1px solid transparent;border-radius:9px;cursor:pointer;text-align:left;transition:all .25s ease;line-height:1.45}
+.prompt-chip{width:100%;padding:10px 14px;font-size:13px;color:rgba(214,223,232,.78);background:rgba(255,255,255,.03);border:1px solid transparent;border-radius:9px;cursor:pointer;text-align:left;transition:all .25s ease;line-height:1.5}
 .prompt-chip:hover{border-color:var(--panel-border);background:rgba(255,255,255,.06);color:var(--warm-white)}
 .sidebar-foot{padding:16px;border-top:1px solid var(--panel-border)}
 .user-card{display:flex;align-items:center;gap:12px}
@@ -53,7 +53,7 @@ body{font-family:var(--font-body);color:var(--warm-white);background:var(--night
 .chat-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(8,18,34,0.60);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--panel-border)}
 .chat-topbar h2{font-family:var(--font-title);font-size:16px;letter-spacing:.04em;font-weight:600}
 .chat-topbar .online{font-size:11px;color:rgba(100,200,150,.8);margin-top:2px}
-.chat-topbar .eyebrow{font-size:12px;letter-spacing:.15em;color:rgba(194,204,213,.55);text-transform:uppercase}
+.chat-topbar .eyebrow{font-size:12px;letter-spacing:.15em;color:rgba(210,220,230,.8);text-transform:uppercase}
 .mobile-menu{display:none;background:none;border:none;color:var(--warm-white);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px}
 .mobile-menu:hover{background:rgba(255,255,255,.06)}
 
@@ -62,22 +62,22 @@ body{font-family:var(--font-body);color:var(--warm-white);background:var(--night
 .messages::-webkit-scrollbar-track{background:transparent}
 .messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
 
-.welcome{text-align:center;padding:clamp(30px,8vh,80px) 20px}
-.welcome .orb{width:58px;height:58px;margin:0 auto 18px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid var(--panel-border);font-family:var(--font-title);font-size:22px}
-.welcome h1{font-family:var(--font-title);font-size:clamp(20px,3vw,28px);font-weight:600;margin-bottom:8px}
-.welcome p{font-size:13px;color:rgba(194,204,213,.58);max-width:380px;margin:0 auto 22px;line-height:1.8}
+.welcome{text-align:center;align-self:center;width:min(660px,100%);padding:clamp(30px,7vh,60px) 26px 34px;background:rgba(8,20,40,.52);border:1px solid rgba(255,255,255,.14);border-radius:22px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.welcome .orb{width:58px;height:58px;margin:0 auto 18px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);font-family:var(--font-title);font-size:22px}
+.welcome h1{font-family:var(--font-title);font-size:clamp(20px,3vw,28px);font-weight:600;margin-bottom:8px;text-shadow:0 1px 3px rgba(4,10,22,.5)}
+.welcome p{font-size:14px;color:rgba(222,230,238,.92);max-width:400px;margin:0 auto 22px;line-height:1.85}
 .suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-.suggestion{padding:8px 16px;font-size:12px;color:rgba(194,204,213,.55);background:rgba(255,255,255,.04);border:1px solid var(--panel-border);border-radius:18px;cursor:pointer;transition:all .22s ease}
-.suggestion:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:var(--warm-white)}
+.suggestion{padding:9px 16px;font-size:13px;color:rgba(226,233,240,.94);background:rgba(10,24,46,.62);border:1px solid rgba(255,255,255,.22);border-radius:18px;cursor:pointer;transition:all .22s ease;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.suggestion:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:var(--warm-white)}
 
 .message{display:flex;max-width:80%}
 .message.user{align-self:flex-end}
 .message.ai{align-self:flex-start}
-.bubble{padding:12px 18px;border-radius:14px;font-size:13px;line-height:1.75;word-break:break-word;position:relative}
-.message.user .bubble{background:rgba(86,136,181,.2);border:1px solid rgba(86,136,181,.22);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom-right-radius:5px}
-.message.ai .bubble{background:rgba(255,255,255,.06);border:1px solid var(--panel-border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom-left-radius:5px}
+.bubble{padding:14px 18px;border-radius:14px;font-size:15px;line-height:1.85;word-break:break-word;position:relative;text-shadow:0 1px 2px rgba(4,10,22,.45)}
+.message.user .bubble{background:rgba(36,74,118,.7);border:1px solid rgba(140,186,216,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom-right-radius:5px}
+.message.ai .bubble{background:rgba(12,26,50,.64);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom-left-radius:5px}
 .bubble img{max-width:280px;max-height:200px;border-radius:8px;margin-bottom:8px;display:block}
-.bubble a{color:var(--sky-blue);text-decoration:underline}
+.bubble a{color:#8FC1E8;text-decoration:underline;text-underline-offset:3px}
 .bubble strong{color:var(--warm-white);font-weight:600}
 .typing{display:flex;gap:4px;padding:4px 0}
 .typing i{width:6px;height:6px;border-radius:50%;background:rgba(194,204,213,.5);animation:typingBounce 1.4s ease-in-out infinite}
@@ -89,17 +89,17 @@ body{font-family:var(--font-body);color:var(--warm-white);background:var(--night
 .image-preview.show{display:inline-block}
 .image-preview img{width:100%;border-radius:8px;display:block}
 .image-preview .remove-image{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:rgba(220,80,80,.85);color:white;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1}
-.composer{display:flex;align-items:flex-end;gap:10px;padding:12px 16px;background:rgba(255,255,255,.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--panel-border);border-radius:18px;transition:all .22s ease}
+.composer{display:flex;align-items:flex-end;gap:10px;padding:12px 16px;background:rgba(12,26,50,.58);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.18);border-radius:18px;transition:all .22s ease}
 .composer:focus-within{border-color:var(--sky-blue);box-shadow:0 0 0 3px rgba(86,136,181,.08)}
-.composer textarea{flex:1;resize:none;border:none;background:none;color:var(--warm-white);font-size:14px;font-family:var(--font-body);outline:none;max-height:150px;line-height:1.6;padding:4px 0}
-.composer textarea::placeholder{color:rgba(194,204,213,.25)}
+.composer textarea{flex:1;resize:none;border:none;background:none;color:var(--warm-white);font-size:15px;font-family:var(--font-body);outline:none;max-height:150px;line-height:1.7;padding:4px 0}
+.composer textarea::placeholder{color:rgba(206,217,228,.78)}
 .composer .attach,.composer .send{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .22s ease}
-.composer .attach{background:rgba(255,255,255,.06);color:rgba(194,204,213,.55)}
-.composer .attach:hover{background:rgba(255,255,255,.12);color:var(--warm-white)}
+.composer .attach{background:rgba(255,255,255,.1);color:rgba(216,225,234,.85)}
+.composer .attach:hover{background:rgba(255,255,255,.16);color:var(--warm-white)}
 .composer .send{background:linear-gradient(135deg,var(--sky-blue),var(--deep-blue));color:var(--warm-white);box-shadow:0 4px 14px rgba(86,136,181,.2)}
 .composer .send:hover{transform:scale(1.05);box-shadow:0 6px 20px rgba(86,136,181,.3)}
 .composer .send:disabled{opacity:.35;cursor:not-allowed;transform:none}
-.composer-note{font-size:10px;color:rgba(194,204,213,.25);text-align:center;margin-top:8px}
+.composer-note{font-size:11px;color:rgba(204,215,226,.68);text-align:center;margin-top:8px}
 
 @keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-6px);opacity:1}}
 
@@ -121,7 +121,7 @@ body{font-family:var(--font-body);color:var(--warm-white);background:var(--night
 </head>
 <body>
 
-<video class="bg-video" autoplay loop muted playsinline poster="/assets/anime-login.webp">
+<video class="bg-video" autoplay loop muted playsinline poster="/assets/anime-bg.jpg">
   <source src="/assets/anime-bg.mp4" type="video/mp4">
 </video>
 <div class="bg-fallback"></div>
@@ -206,7 +206,7 @@ function markdown(value){let s=escapeHtml(value);s=s.replace(/\[([^\]]+)\]\((htt
 function hideWelcome(){const welcome=$('welcome');if(welcome)welcome.remove()}
 function addMessage(role,content,image){hideWelcome();const row=document.createElement('div');row.className='message '+role;const bubble=document.createElement('div');bubble.className='bubble';if(image){const img=document.createElement('img');img.src=image;img.alt='用户上传的图片';bubble.appendChild(img)}const text=document.createElement('div');text.innerHTML=role==='ai'?markdown(content):escapeHtml(content).replace(/\n/g,'<br>');bubble.appendChild(text);row.appendChild(bubble);$('messages').appendChild(row);$('messages').scrollTop=$('messages').scrollHeight;return row}
 function typing(){hideWelcome();const row=document.createElement('div');row.className='message ai';row.innerHTML='<div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>';$('messages').appendChild(row);$('messages').scrollTop=$('messages').scrollHeight;return row}
-async function send(){const message=$('input').value.trim();if(busy||(!message&&!imageData))return;busy=true;$('send').disabled=true;const pendingImage=imageData;addMessage('user',message||'请识别这张图片',pendingImage);$('input').value='';clearImage();const wait=typing();try{let data;if(pendingImage){const response=await fetch('/api/ai/analyze-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:pendingImage})});data=await response.json()}else{const response=await fetch('/api/ai/chat-with-tools',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,conversationId})});data=await response.json()}wait.remove();if(data.success)addMessage('ai',data.content||'我完成了查询，但暂时没有可展示的内容。');else addMessage('ai','请求失败：'+(data.error||data.message||'未知错误'))}catch(error){wait.remove();addMessage('ai','连接暂时中断，请稍后再试。')}finally{busy=false;$('send').disabled=false;$('input').focus()}}
+async function send(){const message=$('input').value.trim();if(busy||(!message&&!imageData))return;busy=true;$('send').disabled=true;const pendingImage=imageData;addMessage('user',message||'请识别这张图片',pendingImage);$('input').value='';clearImage();const wait=typing();try{let data;if(pendingImage){const response=await fetch('/api/ai/analyze-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:pendingImage,question:message,conversationId})});data=await response.json()}else{const response=await fetch('/api/ai/chat-with-tools',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,conversationId})});data=await response.json()}wait.remove();if(data.success)addMessage('ai',data.content||'我完成了查询，但暂时没有可展示的内容。');else addMessage('ai','请求失败：'+(data.error||data.message||'未知错误'))}catch(error){wait.remove();addMessage('ai','连接暂时中断，请稍后再试。')}finally{busy=false;$('send').disabled=false;$('input').focus()}}
 function clearImage(){imageData=null;$('imageFile').value='';$('imagePreview').classList.remove('show');$('previewImage').src=''}
 $('attach').onclick=()=>$('imageFile').click();$('removeImage').onclick=clearImage;$('imageFile').onchange=()=>{const file=$('imageFile').files[0];if(!file)return;if(file.size>10*1024*1024){alert('图片请小于 10MB');return clearImage()}const reader=new FileReader();reader.onload=()=>{imageData=reader.result;$('previewImage').src=imageData;$('imagePreview').classList.add('show')};reader.readAsDataURL(file)};
 $('send').onclick=send;$('input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};$('input').oninput=()=>{$('input').style.height='auto';$('input').style.height=Math.min($('input').scrollHeight,150)+'px'};

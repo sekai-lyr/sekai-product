@@ -1,0 +1,44 @@
+{
+  "source_files": [
+    "B:/Blender/workspace/charmander_input_nobg.png"
+  ],
+  "primary_view": "front",
+  "style": "stylized cartoon creature",
+  "symmetry": "body, head, belly and paired limbs are approximately symmetric; tail and flame are asymmetric",
+  "structural_parts": [
+    "large rounded head",
+    "compact rounded torso",
+    "two short arms",
+    "two feet with white claws",
+    "cream belly patch",
+    "left-side curling tail",
+    "tail flame",
+    "two large blue-black eyes",
+    "small mouth/nose detail"
+  ],
+  "feature_landmarks": {
+    "head_top": [0.50, 0.08],
+    "eye_centers": [[0.42, 0.30], [0.58, 0.30]],
+    "belly_center": [0.50, 0.63],
+    "feet_baseline": 0.98,
+    "tail_flame_top": [0.30, 0.10]
+  },
+  "color_zones": {
+    "body": "warm orange",
+    "belly": "pale yellow cream",
+    "eyes": "dark navy with blue highlights and white glints",
+    "claws": "off white",
+    "flame": "red-orange outer flame with yellow-orange core"
+  },
+  "uncertainties": [
+    "backside depth is not visible in the single image",
+    "tail thickness and exact flame topology must be kept simple",
+    "hidden hand and foot geometry should not be over-invented"
+  ],
+  "validation": {
+    "front_silhouette_required": true,
+    "front_feature_alignment_required": true,
+    "reference_background_must_not_enter_asset": true,
+    "export_only_after_clay_review": true
+  }
+}

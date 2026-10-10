@@ -1,0 +1,4 @@
+-- 可选的数据库种子参考脚本。
+-- 应用中的 POST /api/worlds 会使用同一套 SeedWorldCatalog 按当前用户创建完整种子世界。
+-- 手工执行前请先设置：SET @owner_id = <sekai_user.id>;
+-- 生产环境不要直接执行本文件；用应用服务创建世界以保证 owner 隔离和事务边界。
