@@ -10,6 +10,7 @@ import com.sekai.memory.book.model.TimelineItem;
 import com.sekai.memory.book.model.User;
 import com.sekai.memory.book.model.YearlyReport;
 import com.sekai.memory.book.service.AnimeService;
+import com.sekai.memory.book.service.AnimeOrderService;
 import com.sekai.memory.book.service.CharacterFavoriteService;
 import com.sekai.memory.book.service.MembershipOrderService;
 import com.sekai.memory.book.service.QuoteService;
@@ -49,6 +50,9 @@ public class PageControl {
 
     @Resource
     private AnimeService animeService;
+
+    @Resource
+    private AnimeOrderService animeOrderService;
 
     @Resource
     private CharacterFavoriteService characterFavoriteService;
@@ -102,23 +106,65 @@ public class PageControl {
                         Model model,
                         @RequestParam(value = "keyword", required = false) String keyword,
                         @RequestParam(value = "page", defaultValue = "1") int page,
-                        @RequestParam(value = "autoSort", defaultValue = "false") boolean autoSort) {
+                        @RequestParam(value = "autoSort", defaultValue = "false") boolean autoSort,
+                        @RequestParam(value = "mode", required = false) String mode,
+                        @RequestParam(value = "sort", defaultValue = "default") String sort) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
         }
+        String viewMode = mode == null ? (String) session.getAttribute("animeViewMode") : mode;
+        boolean continuous = "continuous".equals(viewMode);
+        viewMode = continuous ? "continuous" : "paged";
+        session.setAttribute("animeViewMode", viewMode);
+        String sortOrder = Set.of("release-asc", "release-desc", "added-asc", "added-desc").contains(sort)
+                ? sort : (autoSort ? "release-asc" : "default");
+        boolean automaticSort = !"default".equals(sortOrder);
         int pageSize = 8;
         int total = animeService.countByUserId(user.getId(), keyword);
         int totalPages = Math.max((int) Math.ceil(total / (double) pageSize), 1);
         int currentPage = Math.min(Math.max(page, 1), totalPages);
         model.addAttribute("loginUser", user);
-        model.addAttribute("animeList", animeService.listByUserId(user.getId(), keyword, currentPage, pageSize));
+        List<Anime> animeList;
+        if (automaticSort) {
+            animeList = sortAnimeList(animeService.listByUserId(user.getId(), keyword), sortOrder);
+            if (!continuous) {
+                int from = Math.min((currentPage - 1) * pageSize, animeList.size());
+                animeList = animeList.subList(from, Math.min(from + pageSize, animeList.size()));
+            }
+        } else if (continuous) {
+            animeList = animeOrderService.sort(user.getId(), animeService.listByUserId(user.getId(), keyword));
+        } else {
+            animeList = animeService.listByUserId(user.getId(), keyword, currentPage, pageSize);
+        }
+        model.addAttribute("animeList", animeList);
+        model.addAttribute("viewMode", viewMode);
+        model.addAttribute("continuous", continuous);
+        model.addAttribute("canReorder", continuous && (keyword == null || keyword.isBlank()));
         model.addAttribute("keyword", keyword == null ? "" : keyword);
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("totalCount", total);
-        model.addAttribute("autoSortActive", autoSort);
+        model.addAttribute("autoSortActive", automaticSort);
+        model.addAttribute("sortOrder", sortOrder);
+        model.addAttribute("sortLabel", switch (sortOrder) {
+            case "release-asc" -> "放映日期：从早到晚";
+            case "release-desc" -> "放映日期：从晚到早";
+            case "added-asc" -> "加入时间：从早到晚";
+            case "added-desc" -> "加入时间：从晚到早";
+            default -> "默认顺序";
+        });
         return "anime";
+    }
+
+    private List<Anime> sortAnimeList(List<Anime> anime, String sortOrder) {
+        Comparator<Anime> comparator = switch (sortOrder) {
+            case "release-desc" -> Comparator.comparing(Anime::getReleaseDate, Comparator.nullsLast(Comparator.reverseOrder()));
+            case "added-asc" -> Comparator.comparing(Anime::getCreateTime, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "added-desc" -> Comparator.comparing(Anime::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder()));
+            default -> Comparator.comparing(Anime::getReleaseDate, Comparator.nullsLast(Comparator.naturalOrder()));
+        };
+        return anime.stream().sorted(comparator.thenComparing(Anime::getId, Comparator.nullsLast(Comparator.naturalOrder()))).toList();
     }
 
     @GetMapping("/anime/{id}")

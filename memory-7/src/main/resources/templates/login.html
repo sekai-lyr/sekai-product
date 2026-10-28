@@ -5,21 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai Picture | 登录</title>
     <link rel="stylesheet" th:href="@{/css/login.css}" href="/css/login.css">
+    <link rel="stylesheet" href="/css/gallery.css">
 </head>
 <body class="auth-page">
 <main class="auth-layout">
-    <section class="auth-art" data-reveal>
-        <img src="/uploads/wallpapers/sekai-import/sekai_import_0005_9f1472cd.jpg" alt="深蓝夜色中的动漫角色壁纸">
+    <section class="auth-art depth-scene auth-depth-scene" data-depth-scene data-scene="auth-login" data-reveal>
+        <span class="auth-depth-glow depth-layer" data-depth-layer="0.18" aria-hidden="true"></span>
+        <span class="auth-scan-line depth-layer" data-depth-layer="0.54" data-scan-line aria-hidden="true"></span>
+        <span class="auth-depth-particle auth-particle-one depth-layer" data-depth-layer="0.88" data-float="slow" aria-hidden="true"></span>
+        <span class="auth-depth-particle auth-particle-two depth-layer" data-depth-layer="1.1" data-float="fast" aria-hidden="true"></span>
+        <svg class="auth-orbit depth-layer" data-depth-layer="0.68" data-orbit="constellation" viewBox="0 0 160 160" aria-hidden="true">
+            <ellipse cx="80" cy="80" rx="59" ry="25"></ellipse>
+            <ellipse cx="80" cy="80" rx="59" ry="25" transform="rotate(62 80 80)"></ellipse>
+            <circle cx="139" cy="80" r="3"></circle>
+        </svg>
+        <img class="depth-image" src="/images/archive-0005.jpg" alt="深蓝夜色中的动漫角色壁纸">
         <div class="auth-art-copy">
-            <span class="auth-mark">SEKAI PICTURE</span>
-            <h1>把喜欢的画面，留在手边。</h1>
+            <span class="auth-mark">Sekai Picture</span>
+            <h1>把喜欢的画面，<br>留在手边。</h1>
             <p>一个为动漫壁纸准备的私人档案空间。搜索、收藏、分类、上传和下载，都从一张图开始。</p>
+            <div class="auth-art-meta"><span>Search</span><span>Collect</span><span>Archive</span></div>
         </div>
     </section>
 
-    <section class="auth-form-panel" data-reveal>
-        <div class="auth-form-shell">
-            <a class="auth-brand" href="/login">Sekai Picture</a>
+    <section class="auth-form-panel">
+        <div class="auth-form-shell" data-reveal>
+            <a class="auth-brand" href="/login" aria-label="Sekai Picture 登录页">
+                <span class="auth-brand-mark" aria-hidden="true"></span>
+                <span>Sekai Picture<small>private wallpaper archive</small></span>
+            </a>
             <h2>欢迎回来</h2>
             <p class="auth-lead">登录你的壁纸图库，继续整理下一张喜欢的图。</p>
             <div class="server-message success" th:if="${message}" th:text="${message}"></div>
@@ -40,6 +54,7 @@
     </section>
 </main>
 <script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
+<script src="/js/gallery.js" defer></script>
 <script th:src="@{/js/login.js}" src="/js/login.js"></script>
 </body>
 </html>

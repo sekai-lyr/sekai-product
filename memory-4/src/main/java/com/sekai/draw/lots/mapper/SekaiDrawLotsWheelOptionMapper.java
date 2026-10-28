@@ -10,7 +10,8 @@ import java.util.List;
 public interface SekaiDrawLotsWheelOptionMapper {
     int insert(SekaiDrawLotsWheelOptionDO record);
     SekaiDrawLotsWheelOptionDO selectByIdForUser(@Param("id") Long id, @Param("userId") Long userId);
-    List<SekaiDrawLotsWheelOptionDO> selectByUserId(@Param("userId") Long userId);
-    List<SekaiDrawLotsWheelOptionDO> selectEnabledByUserId(@Param("userId") Long userId);
+    List<SekaiDrawLotsWheelOptionDO> selectByUserId(@Param("userId") Long userId, @Param("deckId") Long deckId);
+    List<SekaiDrawLotsWheelOptionDO> selectEnabledByUserId(@Param("userId") Long userId, @Param("deckId") Long deckId);
     int deleteForUser(@Param("id") Long id, @Param("userId") Long userId);
+    int updateForUser(SekaiDrawLotsWheelOptionDO option);
 }

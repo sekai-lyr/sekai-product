@@ -2,6 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sekai.picture.mapper.SekaiPictureWallpaperMapper">
     <resultMap id="BaseResultMap" type="com.sekai.picture.dataobject.SekaiPictureWallpaperDO">
+        <result property="contentHash" column="content_hash"/>
+        <result property="deletedAt" column="deleted_at"/>
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="categoryId" column="category_id"/>
@@ -24,7 +26,7 @@
     </resultMap>
 
     <sql id="Joined_Column_List">
-        w.id, w.user_id, w.category_id, c.name AS category_name, w.title, w.character_name,
+        w.content_hash, w.deleted_at, w.id, w.user_id, w.category_id, c.name AS category_name, w.title, w.character_name,
         w.source_name, w.tags, w.image_url, w.file_name, w.file_size, w.width, w.height,
         w.color_tone, w.is_original, w.download_count, w.create_time, w.update_time,
         CASE WHEN f.id IS NULL THEN 0 ELSE 1 END AS is_favorite
@@ -33,10 +35,10 @@
     <insert id="insert" parameterType="com.sekai.picture.dataobject.SekaiPictureWallpaperDO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sekai_picture_wallpaper (
             user_id, category_id, title, character_name, source_name, tags, image_url,
-            file_name, file_size, width, height, color_tone, is_original, download_count
+            file_name, file_size, width, height, color_tone, is_original, download_count, content_hash
         ) VALUES (
             #{userId}, #{categoryId}, #{title}, #{characterName}, #{sourceName}, #{tags}, #{imageUrl},
-            #{fileName}, #{fileSize}, #{width}, #{height}, #{colorTone}, #{original}, #{downloadCount}
+            #{fileName}, #{fileSize}, #{width}, #{height}, #{colorTone}, #{original}, #{downloadCount}, #{contentHash}
         )
     </insert>
 
@@ -45,7 +47,7 @@
         FROM sekai_picture_wallpaper w
         LEFT JOIN sekai_picture_category c ON c.id = w.category_id
         LEFT JOIN sekai_picture_favorite f ON f.wallpaper_id = w.id AND f.user_id = #{userId}
-        WHERE w.id = #{id} AND w.user_id = #{userId}
+        WHERE w.id = #{id} AND w.user_id = #{userId} AND w.deleted_at IS NULL
     </select>
 
     <select id="listByUserId" resultMap="BaseResultMap">
@@ -79,7 +81,7 @@
     </select>
 
     <sql id="Search_Filter">
-        WHERE w.user_id = #{userId}
+        WHERE w.user_id = #{userId} AND w.deleted_at IS NULL
         <if test="categoryId != null">
             AND w.category_id = #{categoryId}
         </if>
@@ -120,7 +122,7 @@
         FROM sekai_picture_wallpaper w
         LEFT JOIN sekai_picture_category c ON c.id = w.category_id
         LEFT JOIN sekai_picture_favorite f ON f.wallpaper_id = w.id AND f.user_id = #{userId}
-        WHERE w.user_id = #{userId}
+        WHERE w.user_id = #{userId} AND w.deleted_at IS NULL
         ORDER BY w.download_count DESC, w.id DESC
         LIMIT #{limit}
     </select>
@@ -128,7 +130,7 @@
     <select id="listColorTonesByUserId" resultType="string">
         SELECT DISTINCT color_tone
         FROM sekai_picture_wallpaper
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND deleted_at IS NULL
           AND color_tone IS NOT NULL
           AND color_tone != ''
         ORDER BY color_tone ASC
@@ -154,18 +156,18 @@
             color_tone = #{colorTone},
             is_original = #{original},
             update_time = NOW()
-        WHERE id = #{id} AND user_id = #{userId}
+        WHERE id = #{id} AND user_id = #{userId} AND deleted_at IS NULL
     </update>
 
-    <delete id="deleteByIdAndUserId">
-        DELETE FROM sekai_picture_wallpaper
-        WHERE id = #{id} AND user_id = #{userId}
-    </delete>
+    <update id="deleteByIdAndUserId">
+        UPDATE sekai_picture_wallpaper SET deleted_at = NOW()
+        WHERE id = #{id} AND user_id = #{userId} AND deleted_at IS NULL
+    </update>
 
     <update id="batchMoveCategory">
         UPDATE sekai_picture_wallpaper
         SET category_id = #{categoryId}, update_time = NOW()
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND deleted_at IS NULL
           AND id IN
           <foreach collection="ids" item="id" open="(" separator="," close=")">
               #{id}
@@ -173,19 +175,62 @@
     </update>
 
     <select id="countOriginalByUserId" resultType="int">
-        SELECT COUNT(1) FROM sekai_picture_wallpaper WHERE user_id = #{userId} AND is_original = 1
+        SELECT COUNT(1) FROM sekai_picture_wallpaper WHERE user_id = #{userId} AND deleted_at IS NULL AND is_original = 1
     </select>
 
     <select id="sumDownloadCountByUserId" resultType="java.lang.Integer">
         SELECT COALESCE(SUM(download_count), 0)
         FROM sekai_picture_wallpaper
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND deleted_at IS NULL
     </select>
 
     <update id="increaseDownloadCount">
         UPDATE sekai_picture_wallpaper
         SET download_count = download_count + 1
-        WHERE id = #{id} AND user_id = #{userId}
+        WHERE id = #{id} AND user_id = #{userId} AND deleted_at IS NULL
     </update>
+
+    <select id="findOwned" resultMap="BaseResultMap">
+        SELECT * FROM sekai_picture_wallpaper WHERE id = #{id} AND user_id = #{userId}
+    </select>
+    <select id="findHash" resultMap="BaseResultMap">
+        SELECT * FROM sekai_picture_wallpaper WHERE user_id = #{userId} AND content_hash = #{hash} LIMIT 1
+    </select>
+    <select id="listTrash" resultMap="BaseResultMap">
+        SELECT * FROM sekai_picture_wallpaper WHERE user_id = #{userId} AND deleted_at IS NOT NULL ORDER BY deleted_at DESC, id DESC
+    </select>
+    <select id="listUnhashed" resultMap="BaseResultMap">
+        SELECT * FROM sekai_picture_wallpaper WHERE user_id = #{userId} AND content_hash IS NULL
+    </select>
+    <update id="setHash">
+        UPDATE sekai_picture_wallpaper SET content_hash = #{hash} WHERE id = #{id} AND content_hash IS NULL
+    </update>
+    <update id="restore">
+        UPDATE sekai_picture_wallpaper SET deleted_at = NULL WHERE id = #{id} AND user_id = #{userId} AND deleted_at IS NOT NULL
+    </update>
+    <delete id="purge">
+        DELETE FROM sekai_picture_wallpaper WHERE id = #{id} AND user_id = #{userId} AND deleted_at IS NOT NULL
+    </delete>
+    <select id="listImageUrls" resultType="string">SELECT image_url FROM sekai_picture_wallpaper</select>
+    <select id="health" resultType="com.sekai.picture.model.ArchiveHealth">
+        SELECT COALESCE(SUM(CASE WHEN deleted_at IS NULL AND category_id IS NULL THEN 1 ELSE 0 END),0) AS uncategorized,
+            COALESCE(SUM(CASE WHEN deleted_at IS NULL AND (tags IS NULL OR TRIM(tags) = '') THEN 1 ELSE 0 END),0) AS untagged,
+            COALESCE(SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END),0) AS trash_count,
+            COALESCE(SUM(file_size),0) AS stored_bytes,
+            COALESCE(SUM(CASE WHEN deleted_at IS NULL THEN download_count ELSE 0 END),0) AS downloads
+        FROM sekai_picture_wallpaper WHERE user_id = #{userId}
+    </select>
+    <sql id="NeedsFilter">
+        WHERE w.user_id = #{userId} AND w.deleted_at IS NULL
+        <choose><when test="needs == 'uncategorized'">AND w.category_id IS NULL</when>
+        <otherwise>AND (w.tags IS NULL OR TRIM(w.tags) = '')</otherwise></choose>
+    </sql>
+    <select id="countNeeds" resultType="int">SELECT COUNT(1) FROM sekai_picture_wallpaper w <include refid="NeedsFilter"/></select>
+    <select id="listNeeds" resultMap="BaseResultMap">
+        SELECT <include refid="Joined_Column_List"/> FROM sekai_picture_wallpaper w
+        LEFT JOIN sekai_picture_category c ON c.id = w.category_id
+        LEFT JOIN sekai_picture_favorite f ON f.wallpaper_id = w.id AND f.user_id = #{userId}
+        <include refid="NeedsFilter"/> ORDER BY w.id DESC LIMIT #{limit} OFFSET #{offset}
+    </select>
 </mapper>
 

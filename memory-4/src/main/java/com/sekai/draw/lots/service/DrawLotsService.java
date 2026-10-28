@@ -13,6 +13,7 @@ import java.util.List;
 
 public interface DrawLotsService {
     DashboardStats getStats(User user);
+    DrawRecord todayRecord(User user);
     Result<DrawRecord> draw(User user, String mood);
     Result<DrawRecord> draw(User user, String mood, String wishTopic, String focus);
     Result<DrawRecord> dailyDraw(User user, String mood, String focus);

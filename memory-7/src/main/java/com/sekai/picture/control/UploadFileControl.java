@@ -1,61 +1,57 @@
 package com.sekai.picture.control;
 
+import com.sekai.picture.mapper.SekaiPictureWallpaperMapper;
+import com.sekai.picture.model.User;
+import com.sekai.picture.service.ImageStorage;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 
 @Controller
 public class UploadFileControl {
-
-    private final List<Path> uploadRoots = List.of(
-            Path.of("uploads").toAbsolutePath().normalize(),
-            Path.of(System.getProperty("user.dir"), "uploads").toAbsolutePath().normalize(),
-            Path.of("B:/Sekai/Sekai/sekai/memory-7/uploads").toAbsolutePath().normalize()
-    );
-
-    @GetMapping("/uploads/{*filePath}")
-    public ResponseEntity<Resource> uploadFile(@PathVariable String filePath) throws IOException {
-        return serve("", filePath);
+    private final SekaiPictureWallpaperMapper wallpapers;
+    private final ImageStorage storage;
+    public UploadFileControl(SekaiPictureWallpaperMapper wallpapers, ImageStorage storage) {
+        this.wallpapers = wallpapers; this.storage = storage;
     }
-
-    @GetMapping("/wallpaper-image/{*filePath}")
-    public ResponseEntity<Resource> wallpaperImage(@PathVariable String filePath) throws IOException {
-        return serve("wallpapers", filePath);
+    @GetMapping({"/uploads/{*filePath}", "/wallpaper-image/{*filePath}"})
+    public ResponseEntity<Resource> legacyPath() { return ResponseEntity.notFound().build(); }
+    @GetMapping("/media/{id}")
+    public ResponseEntity<Resource> original(@PathVariable Long id, HttpSession session) throws IOException {
+        return serve(id, session, false);
     }
-
-    private ResponseEntity<Resource> serve(String rootChild, String filePath) throws IOException {
-        if (filePath == null || filePath.isBlank()) {
-            return ResponseEntity.notFound().build();
+    @GetMapping("/media/{id}/thumbnail")
+    public ResponseEntity<Resource> thumbnail(@PathVariable Long id, HttpSession session) throws IOException {
+        return serve(id, session, true);
+    }
+    private ResponseEntity<Resource> serve(Long id, HttpSession session, boolean thumbnail) throws IOException {
+        if (!(session.getAttribute("loginUser") instanceof User user)) return ResponseEntity.status(401).build();
+        var wallpaper = wallpapers.findOwned(id, user.getId());
+        if (wallpaper == null) return ResponseEntity.notFound().build();
+        var file = storage.resolve(wallpaper.getImageUrl());
+        if (file == null) {
+            URI remote;
+            try { remote = URI.create(wallpaper.getImageUrl()); }
+            catch (IllegalArgumentException e) { return ResponseEntity.notFound().build(); }
+            if (!"https".equalsIgnoreCase(remote.getScheme()) || remote.getHost() == null) return ResponseEntity.notFound().build();
+            return ResponseEntity.status(302).location(remote).header("Cache-Control", "private, no-store").build();
         }
-
-        String relativePath = filePath.startsWith("/") ? filePath.substring(1) : filePath;
-        for (Path uploadRoot : uploadRoots) {
-            Path normalizedRoot = rootChild.isBlank()
-                    ? uploadRoot.toAbsolutePath().normalize()
-                    : uploadRoot.resolve(rootChild).toAbsolutePath().normalize();
-            Path file = normalizedRoot.resolve(relativePath).normalize();
-            if (file.startsWith(normalizedRoot) && Files.isRegularFile(file)) {
-                String contentType = Files.probeContentType(file);
-                if (contentType == null) {
-                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-                }
-
-                return ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(contentType))
-                        .body(new UrlResource(file.toUri()));
-            }
+        if (!Files.isRegularFile(file)) return ResponseEntity.notFound().build();
+        if (thumbnail) {
+            try { file = storage.thumbnail(id, file); }
+            catch (IOException e) { return ResponseEntity.status(422).build(); }
         }
-
-        return ResponseEntity.notFound().build();
+        String type = Files.probeContentType(file);
+        if (type == null || !java.util.Set.of("image/jpeg", "image/png", "image/gif", "image/webp").contains(type))
+            return ResponseEntity.status(422).build();
+        return ResponseEntity.ok().header("Content-Type", type).header("Cache-Control", "private, no-store")
+                .header("X-Content-Type-Options", "nosniff").body(new UrlResource(file.toUri()));
     }
 }
-

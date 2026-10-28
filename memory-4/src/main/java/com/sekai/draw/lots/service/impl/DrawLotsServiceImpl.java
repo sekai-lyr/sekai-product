@@ -44,6 +44,20 @@ public class DrawLotsServiceImpl implements DrawLotsService {
     @Resource
     private SekaiDrawLotsFavoriteMapper favoriteMapper;
 
+    @Resource
+    private com.sekai.draw.lots.mapper.SekaiDrawLotsUserMapper userMapper;
+    @Resource
+    private com.sekai.draw.lots.mapper.JournalMapper journalMapper;
+    @Resource
+    private com.sekai.draw.lots.service.JournalService journalService;
+
+    @Override
+    public DrawRecord todayRecord(User user) {
+        DrawRecord record = recordMapper.selectTodayDaily(user.getId());
+        if (record != null) record.setFavorited(isFavorite(user, record.getCharacterId()));
+        return record;
+    }
+
     @Override
     public DashboardStats getStats(User user) {
         DashboardStats stats = new DashboardStats();
@@ -70,7 +84,9 @@ public class DrawLotsServiceImpl implements DrawLotsService {
         if (user == null || user.getId() == null) {
             return Result.fail("请先登录");
         }
-        return createDrawRecord(user, mood, wishTopic, focus, null);
+        Result<DrawRecord> result = createDrawRecord(user, mood, wishTopic, focus, null, "RANDOM", null, null);
+        if (result.isSuccess()) getAchievements(user);
+        return result;
     }
 
     @Override
@@ -85,19 +101,24 @@ public class DrawLotsServiceImpl implements DrawLotsService {
                 new RitualCard("第二签", "今日助力", null),
                 new RitualCard("第三签", "下一步行动", null)
         );
+        String ritualId = java.util.UUID.randomUUID().toString();
         for (RitualCard card : cards) {
-            Result<DrawRecord> drawResult = createDrawRecord(user, mood, topic + " · " + card.getTheme(), focus, card.getTheme());
+            Result<DrawRecord> drawResult = createDrawRecord(user, mood, wishTopic, focus, card.getTheme(), "RITUAL", ritualId, null);
             if (!drawResult.isSuccess()) {
-                return Result.fail(drawResult.getMessage());
+                throw new IllegalStateException(drawResult.getMessage());
             }
             card.setRecord(drawResult.getData());
         }
 
+        getAchievements(user);
         RitualResult ritual = buildRitualResult(cards, topic);
         return Result.ok(ritual);
     }
 
-    private Result<DrawRecord> createDrawRecord(User user, String mood, String wishTopic, String focus, String ritualTheme) {
+    private Result<DrawRecord> createDrawRecord(User user, String mood, String wishTopic, String focus, String ritualTheme, String drawType, String ritualId, java.time.LocalDate dailyDate) {
+        if (wishTopic != null && wishTopic.trim().length() > 40) return Result.fail("愿望不能超过 40 个字符");
+        if (mood != null && !List.of("平静", "燃", "想摆烂", "需要灵感", "有点焦虑", "有点孤单").contains(mood)) return Result.fail("请选择有效心情");
+        if (focus != null && !List.of("", "bright", "calm", "power", "healing", "main").contains(focus)) return Result.fail("请选择有效伙伴偏好");
         String normalizedFocus = focusKeyword(trimToNull(focus));
         SekaiDrawLotsCharacterDO characterDO = normalizedFocus == null
                 ? characterMapper.selectRandom()
@@ -112,6 +133,12 @@ public class DrawLotsServiceImpl implements DrawLotsService {
 
         SekaiDrawLotsRecordDO recordDO = new SekaiDrawLotsRecordDO();
         recordDO.setUserId(user.getId());
+        recordDO.setDrawType(drawType);
+        recordDO.setRitualId(ritualId);
+        recordDO.setDailyDate(dailyDate);
+        if (!"DAILY".equals(drawType) && trimToNull(wishTopic) != null) {
+            recordDO.setWishId(journalService.create(user.getId(), wishTopic).getId());
+        }
         recordDO.setCharacterId(characterDO.getId());
         recordDO.setFortuneId(fortuneDO.getId());
         recordDO.setLuckScore(scoreWithWishBonus(fortuneDO.getLuckScore(), wishTopic, normalizedFocus));
@@ -120,9 +147,11 @@ public class DrawLotsServiceImpl implements DrawLotsService {
         recordDO.setMessage(buildMessage(recordDO.getWishTopic(), CharacterLocalizationUtil.displayName(characterDO.getEnglishName()), fortuneDO.getLevelName(), normalizedFocus, ritualTheme));
         recordMapper.insert(recordDO);
 
+        recordDO.setDrawTime(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Shanghai")));
         DrawRecord record = recordDO.convertToRecord();
         record.setCharacter(characterDO.convertToCharacter());
         record.setFortune(fortuneDO.convertToFortune());
+        record.setFavorited(isFavorite(user, characterDO.getId()));
         return Result.ok(record);
     }
 
@@ -132,11 +161,16 @@ public class DrawLotsServiceImpl implements DrawLotsService {
         if (user == null || user.getId() == null) {
             return Result.fail("请先登录");
         }
+        userMapper.lockById(user.getId());
         DrawRecord today = recordMapper.selectTodayDaily(user.getId());
         if (today != null) {
+            today.setFavorited(isFavorite(user, today.getCharacterId()));
             return Result.ok(today);
         }
-        return draw(user, mood, "每日固定签", focus);
+        Result<DrawRecord> result = createDrawRecord(user, mood, "每日固定签", focus, null, "DAILY", null,
+                java.time.LocalDate.now(java.time.ZoneId.of("Asia/Shanghai")));
+        if (result.isSuccess()) getAchievements(user);
+        return result;
     }
 
     @Override
@@ -145,28 +179,31 @@ public class DrawLotsServiceImpl implements DrawLotsService {
             return List.of();
         }
         DashboardStats stats = getStats(user);
-        List<DrawRecord> recentRecords = recordMapper.selectRecentByUserId(user.getId(), 80);
-        int ritualRecords = countMatching(recentRecords, record -> containsText(record.getWishTopic(), "三连签仪式"));
-        int uniqueWishTopics = (int) recentRecords.stream()
-                .map(DrawRecord::getWishTopic)
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(topic -> !topic.isEmpty())
-                .distinct()
-                .count();
-        int highScoreRecords = countMatching(recentRecords, record -> record.getLuckScore() != null && record.getLuckScore() >= 90);
+        Map<String, Object> counts = journalMapper.achievementCounts(user.getId());
+        int ritualRecords = ((Number) counts.get("rituals")).intValue();
+        int uniqueWishTopics = ((Number) counts.get("topics")).intValue();
+        int highScoreRecords = ((Number) counts.get("highs")).intValue();
+        int dailyRecords = ((Number) counts.get("dailies")).intValue();
         int streakDays = recordMapper.countStreakDays(user.getId());
 
         List<Achievement> achievements = new ArrayList<>();
         achievements.add(new Achievement("first-draw", "初次相遇", "完成第一次抽签", "bronze", stats.getTotalDraws(), 1, "去首页抽出第一位守护伙伴。"));
-        achievements.add(new Achievement("daily-spark", "今日点火", "今天至少抽一签", "bronze", stats.getTodayDraws(), 1, "抽一次今日固定签即可点亮。"));
+        achievements.add(new Achievement("daily-spark", "今日点火", "完成第一次每日固定签", "bronze", dailyRecords, 1, "抽一次今日固定签即可点亮。"));
         achievements.add(new Achievement("ten-draws", "签文收集者", "累计完成 10 次抽签", "silver", stats.getTotalDraws(), 10, "继续抽签积累自己的角色轨迹。"));
-        achievements.add(new Achievement("ritual-reader", "三连签读者", "完成一次三连签仪式", "silver", ritualRecords, 3, "首页点击三连签仪式，一次会生成三张签。"));
+        achievements.add(new Achievement("ritual-reader", "三连签读者", "完成一次三连签仪式", "silver", ritualRecords, 1, "首页点击三连签仪式，一次会生成三张签。"));
         achievements.add(new Achievement("high-score", "星光大吉", "至少出现 1 次 90 分以上签", "gold", highScoreRecords, 1, "高分签会自动点亮这个成就。"));
         achievements.add(new Achievement("collector", "羁绊收藏家", "收藏 5 位角色", "silver", stats.getFavoriteCharacters(), 5, "在角色详情或抽签结果里收藏喜欢的角色。"));
         achievements.add(new Achievement("theme-weaver", "愿望织线者", "记录 5 个不同许愿主题", "gold", uniqueWishTopics, 5, "在首页许愿主题里换几个不同目标。"));
         achievements.add(new Achievement("active-week", "七日观星", "近 30 天内活跃 7 天", "gold", streakDays, 7, "每天来抽一次固定签，慢慢点亮。"));
         achievements.add(new Achievement("hundred-club", "百签档案", "累计完成 100 次抽签", "platinum", stats.getTotalDraws(), 100, "长期记录后解锁。"));
+        var unlocked = new java.util.HashSet<>(journalMapper.unlocked(user.getId()));
+        for (Achievement achievement : achievements) {
+            if (achievement.isUnlocked()) journalMapper.unlock(user.getId(), achievement.getCode());
+            if (unlocked.contains(achievement.getCode())) {
+                achievement.setUnlocked(true);
+                achievement.setProgress(Math.max(achievement.getProgress(), achievement.getTarget()));
+            }
+        }
         return achievements;
     }
 
@@ -279,6 +316,7 @@ public class DrawLotsServiceImpl implements DrawLotsService {
             return Result.ok(false);
         }
         favoriteMapper.insert(user.getId(), characterId, "抽签收藏");
+        getAchievements(user);
         return Result.ok(true);
     }
 

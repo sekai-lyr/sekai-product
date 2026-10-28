@@ -3,7 +3,7 @@
 <mapper namespace="com.sekai.draw.lots.mapper.SekaiDrawLotsWheelSpinMapper">
     <resultMap id="BaseResultMap" type="com.sekai.draw.lots.dataobject.SekaiDrawLotsWheelSpinDO">
         <id property="id" column="id"/>
-        <result property="userId" column="user_id"/>
+        <result property="userId" column="user_id"/><result property="deckId" column="deck_id"/>
         <result property="optionId" column="option_id"/>
         <result property="resultTitle" column="result_title"/>
         <result property="resultDetail" column="result_detail"/>
@@ -13,14 +13,14 @@
     </resultMap>
 
     <sql id="BaseColumns">
-        id, user_id, option_id, result_title, result_detail, result_color, mood_line, create_time
+        id, user_id, deck_id, option_id, result_title, result_detail, result_color, mood_line, create_time
     </sql>
 
     <insert id="insert" parameterType="com.sekai.draw.lots.dataobject.SekaiDrawLotsWheelSpinDO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sekai_Draw_lots_wheel_spin
-        (user_id, option_id, result_title, result_detail, result_color, mood_line)
+        (user_id, deck_id, option_id, result_title, result_detail, result_color, mood_line)
         VALUES
-        (#{userId}, #{optionId}, #{resultTitle}, #{resultDetail}, #{resultColor}, #{moodLine})
+        (#{userId}, #{deckId}, #{optionId}, #{resultTitle}, #{resultDetail}, #{resultColor}, #{moodLine})
     </insert>
 
     <select id="selectByPrimaryKey" resultMap="BaseResultMap">
@@ -32,7 +32,7 @@
     <select id="selectRecentByUserId" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
         FROM sekai_Draw_lots_wheel_spin
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND deck_id = #{deckId}
         ORDER BY create_time DESC, id DESC
         LIMIT #{limit}
     </select>

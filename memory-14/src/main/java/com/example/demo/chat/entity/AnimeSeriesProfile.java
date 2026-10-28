@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class AnimeSeriesProfile {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

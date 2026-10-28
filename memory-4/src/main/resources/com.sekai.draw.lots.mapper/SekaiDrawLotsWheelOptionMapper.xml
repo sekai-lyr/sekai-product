@@ -3,7 +3,7 @@
 <mapper namespace="com.sekai.draw.lots.mapper.SekaiDrawLotsWheelOptionMapper">
     <resultMap id="BaseResultMap" type="com.sekai.draw.lots.dataobject.SekaiDrawLotsWheelOptionDO">
         <id property="id" column="id"/>
-        <result property="userId" column="user_id"/>
+        <result property="userId" column="user_id"/><result property="deckId" column="deck_id"/>
         <result property="title" column="title"/>
         <result property="detail" column="detail"/>
         <result property="weight" column="weight"/>
@@ -15,14 +15,14 @@
     </resultMap>
 
     <sql id="BaseColumns">
-        id, user_id, title, detail, weight, color, sort_order, enabled, create_time, update_time
+        id, user_id, deck_id, title, detail, weight, color, sort_order, enabled, create_time, update_time
     </sql>
 
     <insert id="insert" parameterType="com.sekai.draw.lots.dataobject.SekaiDrawLotsWheelOptionDO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sekai_Draw_lots_wheel_option
-        (user_id, title, detail, weight, color, sort_order, enabled)
+        (user_id, deck_id, title, detail, weight, color, sort_order, enabled)
         VALUES
-        (#{userId}, #{title}, #{detail}, #{weight}, #{color}, #{sortOrder}, #{enabled})
+        (#{userId}, #{deckId}, #{title}, #{detail}, #{weight}, #{color}, #{sortOrder}, #{enabled})
     </insert>
 
     <select id="selectByIdForUser" resultMap="BaseResultMap">
@@ -36,14 +36,14 @@
     <select id="selectByUserId" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
         FROM sekai_Draw_lots_wheel_option
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND deck_id = #{deckId}
         ORDER BY sort_order ASC, id ASC
     </select>
 
     <select id="selectEnabledByUserId" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
         FROM sekai_Draw_lots_wheel_option
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND deck_id = #{deckId}
           AND enabled = 1
         ORDER BY sort_order ASC, id ASC
     </select>
@@ -53,4 +53,8 @@
         WHERE id = #{id}
           AND user_id = #{userId}
     </delete>
+    <update id="updateForUser">
+        UPDATE sekai_Draw_lots_wheel_option SET title = #{title}, detail = #{detail}, weight = #{weight}, color = #{color}, sort_order = #{sortOrder}, enabled = #{enabled}
+        WHERE id = #{id} AND user_id = #{userId} AND deck_id = #{deckId}
+    </update>
 </mapper>

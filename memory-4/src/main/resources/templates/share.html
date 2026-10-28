@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('制作分享卡')}"></head>
+<body><header th:replace="~{fragments :: header('history')}"></header>
+<main class="dashboard"><div th:replace="~{fragments :: messages}"></div>
+
+<div class="page-heading"><div><h1>把这次相遇，留成一张卡。</h1><p>选择喜欢的纸面，保存给自己或分享给朋友。</p></div><a th:href="@{/history}">返回日历</a></div>
+<div class="share-layout"><img class="share-preview" th:src="@{/share/records/{id}.svg(id=${record.id},theme=${theme},hideName=${hideName})}" alt="分享卡预览" width="1080" height="1440"><section class="panel share-settings"><h2>分享卡设置</h2><form class="form-stack" th:action="@{/share/records/{id}(id=${record.id})}" method="get"><label>卡片模板<select name="theme"><option value="night" th:selected="${theme == 'night'}">夜色签笺</option><option value="paper" th:selected="${theme == 'paper'}">暖纸手账</option></select></label><label class="check-label"><input name="hideName" type="checkbox" value="true" th:checked="${hideName}">隐藏我的昵称</label><button>更新预览</button></form><p>下载文件与当前预览保持一致。愿望内容仍会出现在签文中，请在分享前查看。</p><div class="button-row"><a class="button" th:href="@{/share/records/{id}.png(id=${record.id},theme=${theme},hideName=${hideName},download=true)}" download>下载 PNG</a><a class="button secondary" th:href="@{/share/records/{id}.svg(id=${record.id},theme=${theme},hideName=${hideName},download=true)}" download>下载 SVG</a></div></section></div>
+
+</main><footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/app.js(v=20261028)}"></script></body></html>

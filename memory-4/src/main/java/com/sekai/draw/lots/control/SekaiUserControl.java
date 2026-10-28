@@ -40,6 +40,7 @@ public class SekaiUserControl {
             return "redirect:/register";
         }
         Result<User> result;
+        String rawPassword = user.getPassword();
         try {
             result = userService.register(user);
         } catch (CannotCreateTransactionException | DataAccessException e) {
@@ -50,7 +51,9 @@ public class SekaiUserControl {
             redirectAttributes.addFlashAttribute("error", result.getMessage());
             return "redirect:/register";
         }
-        redirectAttributes.addFlashAttribute("message", "Registration successful, please login");
+        Result<String> recovery = userService.rotateRecoveryCode(result.getData(), rawPassword);
+        redirectAttributes.addFlashAttribute("recoveryCode", recovery.getData());
+        redirectAttributes.addFlashAttribute("message", "注册成功。请先保存下方恢复码，再登录。");
         return "redirect:/login";
     }
 
@@ -58,6 +61,7 @@ public class SekaiUserControl {
     public String login(@RequestParam("userName") String userName,
                         @RequestParam("password") String password,
                         HttpSession session,
+                        jakarta.servlet.http.HttpServletRequest request,
                         RedirectAttributes redirectAttributes) {
         Result<User> result;
         try {
@@ -70,6 +74,7 @@ public class SekaiUserControl {
             redirectAttributes.addFlashAttribute("error", result.getMessage());
             return "redirect:/login";
         }
+        request.changeSessionId();
         session.setAttribute("loginUser", result.getData());
         return "redirect:/home";
     }
@@ -82,16 +87,38 @@ public class SekaiUserControl {
 
     @PostMapping("/user/reset-password")
     @ResponseBody
-    public Result<User> resetPassword(@RequestParam("userName") String userName,
+    public Result<Boolean> resetPassword(@RequestParam("token") String token,
                                       @RequestParam("newPassword") String newPassword) {
         try {
-            return userService.resetPassword(userName, newPassword);
+            return userService.resetPassword(token, newPassword);
         } catch (CannotCreateTransactionException | DataAccessException e) {
             return Result.fail("Database connection failed");
         }
     }
 
+    @GetMapping("/recover")
+    public String recoveryPage() { return "recover"; }
+
+    @PostMapping("/user/recovery-token")
+    @ResponseBody
+    public Result<String> recoveryToken(@RequestParam String userName, @RequestParam String recoveryCode) {
+        return userService.beginReset(userName, recoveryCode);
+    }
+
+    @GetMapping("/account")
+    public String account(HttpSession session, org.springframework.ui.Model model) {
+        model.addAttribute("loginUser", session.getAttribute("loginUser"));
+        return "account";
+    }
+
+    @PostMapping("/user/recovery-code")
+    public String recoveryCode(@RequestParam String currentPassword, HttpSession session, RedirectAttributes redirect) {
+        Result<String> result = userService.rotateRecoveryCode((User) session.getAttribute("loginUser"), currentPassword);
+        redirect.addFlashAttribute(result.isSuccess() ? "recoveryCode" : "error", result.isSuccess() ? result.getData() : result.getMessage());
+        return "redirect:/account";
+    }
+
     private String databaseUnavailableMessage() {
-        return "Database connection failed. Check DB_URL, DB_USERNAME, DB_PASSWORD env vars and restart.";
+        return "暂时无法连接服务，请稍后重试";
     }
 }

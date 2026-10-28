@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai 2048</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20261016-pv-player)}" href="/css/app.css?v=20261016-pv-player">
     <script th:if="${adsEnabled}" async
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
             th:src="'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ${adsClient}"
@@ -29,7 +29,7 @@
     <main class="content">
         <header class="topbar">
             <div>
-                <p class="eyebrow">原创角色合成游戏</p>
+                <p class="eyebrow">动漫角色合成游戏</p>
                 <h1>
                     <span th:text="'你好，' + ${loginUser.nickName}">你好，玩家</span>
                     <small class="vip-badge" th:if="${loginUser.vipActive}" th:text="${loginUser.vipLabel}">VIP</small>
@@ -276,6 +276,7 @@
 </dialog>
 
 <script th:if="${adsEnabled}">(adsbygoogle = window.adsbygoogle || []).push({});</script>
-<script th:src="@{/js/game2048.js}" src="/js/game2048.js"></script>
+<script th:src="@{/js/character-pv-sources.js(v=20261016-pv-player)}" src="/js/character-pv-sources.js?v=20261016-pv-player"></script>
+<script th:src="@{/js/game2048.js(v=20261016-pv-player)}" src="/js/game2048.js?v=20261016-pv-player"></script>
 </body>
 </html>

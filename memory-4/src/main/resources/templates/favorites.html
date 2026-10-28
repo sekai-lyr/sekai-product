@@ -1,16 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>收藏伙伴 - 灵感伙伴签</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=202605091650)}" href="/css/app.css?v=202605091650">
-</head>
+<head th:replace="~{fragments :: head('收藏伙伴')}"></head>
 <body>
-<header class="topbar">
-    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
-    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a th:href="@{/history}">历史</a><a class="active" th:href="@{/favorites}">收藏</a></nav>
-</header>
+<header th:replace="~{fragments :: header('characters')}"></header>
 <main class="dashboard">
     <section class="list-head">
         <div><p class="eyebrow">我的守护伙伴</p><h1>收藏伙伴</h1></div>
@@ -27,7 +19,7 @@
         </a>
     </section>
     <p class="muted" th:if="${#lists.isEmpty(characters)}">还没有收藏伙伴。抽签结果或伙伴详情里都可以收藏。</p>
-</main>
-<script th:src="@{/js/app.js(v=2026083001)}" src="/js/app.js?v=2026083001"></script>
+</main><footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/app.js(v=20261028)}"></script>
 </body>
 </html>
