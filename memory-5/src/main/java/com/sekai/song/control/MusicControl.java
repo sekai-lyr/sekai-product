@@ -1,15 +1,10 @@
 package com.sekai.song.control;
 
-import com.sekai.song.model.NeteaseImportResult;
-import com.sekai.song.model.MusicImportResult;
 import com.sekai.song.model.Playlist;
 import com.sekai.song.model.Song;
 import com.sekai.song.model.User;
-import com.sekai.song.service.BilibiliImportService;
 import com.sekai.song.service.CloudLyricService;
-import com.sekai.song.service.NeteaseImportService;
 import com.sekai.song.service.PlaylistService;
-import com.sekai.song.service.QqImportService;
 import com.sekai.song.service.SongService;
 import com.sekai.song.util.UploadPathUtil;
 import jakarta.annotation.Resource;
@@ -23,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -67,63 +64,11 @@ public class MusicControl {
     private PlaylistService playlistService;
 
     @Resource
-    private NeteaseImportService neteaseImportService;
-
-    @Resource
-    private QqImportService qqImportService;
-
-    @Resource
-    private BilibiliImportService bilibiliImportService;
-
-    @Resource
     private CloudLyricService cloudLyricService;
 
-    @PostMapping("/songs/add")
-    public String addSong(Song song, HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        song.setUserId(user.getId());
-        boolean success = songService.add(song);
-        redirectAttributes.addFlashAttribute(success ? "message" : "error",
-                success ? "歌曲已经加入你的动漫歌单" : "歌曲名不能为空");
-        return "redirect:/songs";
-    }
-
-    @PostMapping("/songs/update/{id}")
-    public String updateSong(@PathVariable Long id, Song song, HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        song.setId(id);
-        boolean success = songService.update(song, user.getId());
-        redirectAttributes.addFlashAttribute(success ? "message" : "error",
-                success ? "歌曲信息已更新" : "更新失败，请检查歌曲名");
-        return "redirect:/songs";
-    }
-
-    @PostMapping("/songs/delete/{id}")
-    public String deleteSong(@PathVariable Long id, HttpSession session) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        songService.delete(id, user.getId());
-        return "redirect:/songs";
-    }
-
-    @PostMapping("/songs/favorite/{id}")
-    public String favoriteSong(@PathVariable Long id,
-                               HttpSession session,
-                               @RequestParam(value = "returnTo", required = false) String returnTo) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        songService.toggleFavorite(id, user.getId());
-        return redirectTo(returnTo, "/songs");
+    @InitBinder
+    public void restrictMediaBinding(WebDataBinder binder) {
+        binder.setDisallowedFields("localAudioUrl", "localVideoUrl");
     }
 
     @PostMapping("/songs/audio/{id}")
@@ -322,7 +267,6 @@ public class MusicControl {
         return redirectTo(returnTo, "/player/" + id);
     }
 
-    @PostMapping("/playlists/{playlistId}/audio-folder")
     public String bindAudioFolder(@PathVariable Long playlistId,
                                   @RequestParam("audioFiles") MultipartFile[] audioFiles,
                                   HttpSession session,
@@ -351,7 +295,6 @@ public class MusicControl {
         return "redirect:/playlists/" + playlistId;
     }
 
-    @PostMapping("/playlists/{playlistId}/audio-folder-path")
     public String bindAudioFolderPath(@PathVariable Long playlistId,
                                       @RequestParam(value = "folderPath", required = false) String folderPath,
                                       HttpSession session,
@@ -404,7 +347,6 @@ public class MusicControl {
         return "redirect:/playlists/" + playlistId;
     }
 
-    @PostMapping("/playlists/local-audio-folder")
     public String importLocalAudioFolder(@RequestParam(value = "playlistId", required = false) Long playlistId,
                                          @RequestParam(value = "playlistName", required = false) String playlistName,
                                          @RequestParam(value = "coverUrl", required = false) String coverUrl,
@@ -425,7 +367,6 @@ public class MusicControl {
         return result.playlistId() == null ? "redirect:/playlists" : "redirect:/playlists/" + result.playlistId();
     }
 
-    @PostMapping("/playlists/local-audio-folder-path")
     public String importLocalAudioFolderPath(@RequestParam(value = "playlistId", required = false) Long playlistId,
                                              @RequestParam(value = "playlistName", required = false) String playlistName,
                                              @RequestParam(value = "coverUrl", required = false) String coverUrl,
@@ -734,138 +675,6 @@ public class MusicControl {
             }
         }
         return new AudioMetadata(name.isBlank() ? "未命名歌曲" : name, "本地文件");
-    }
-
-    @PostMapping("/playlists/add")
-    public String addPlaylist(Playlist playlist, HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        playlist.setUserId(user.getId());
-        boolean success = playlistService.add(playlist);
-        redirectAttributes.addFlashAttribute(success ? "message" : "error",
-                success ? "专属歌单创建完成" : "歌单名称不能为空");
-        return "redirect:/playlists";
-    }
-
-    @PostMapping("/playlists/update/{id}")
-    public String updatePlaylist(@PathVariable Long id,
-                                 Playlist playlist,
-                                 HttpSession session,
-                                 RedirectAttributes redirectAttributes) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        playlist.setId(id);
-        boolean success = playlistService.update(playlist, user.getId());
-        redirectAttributes.addFlashAttribute(success ? "message" : "error",
-                success ? "歌单信息已更新" : "歌单更新失败，请检查歌单名称");
-        return success ? "redirect:/playlists/" + id : "redirect:/playlists/" + id + "/edit";
-    }
-
-    @PostMapping("/playlists/delete/{id}")
-    public String deletePlaylist(@PathVariable Long id, HttpSession session) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        playlistService.delete(id, user.getId());
-        return "redirect:/playlists";
-    }
-
-    @PostMapping("/playlists/{playlistId}/songs/add")
-    public String addSongToPlaylist(@PathVariable Long playlistId,
-                                    @RequestParam("songId") Long songId,
-                                    HttpSession session) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        playlistService.addSong(playlistId, songId, user.getId());
-        return "redirect:/playlists/" + playlistId;
-    }
-
-    @PostMapping("/playlists/{playlistId}/songs/remove/{songId}")
-    public String removeSongFromPlaylist(@PathVariable Long playlistId,
-                                         @PathVariable Long songId,
-                                         HttpSession session) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        playlistService.removeSong(playlistId, songId, user.getId());
-        return "redirect:/playlists/" + playlistId;
-    }
-
-    @PostMapping("/netease/import")
-    public String importNeteaseSongs(@RequestParam(value = "songIds", required = false) String songIds,
-                                     @RequestParam(value = "link", required = false) String link,
-                                     @RequestParam(value = "playlistId", required = false) Long playlistId,
-                                     HttpSession session,
-                                     RedirectAttributes redirectAttributes) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        if ((songIds == null || songIds.isBlank()) && link != null) {
-            songIds = link;
-        }
-        NeteaseImportResult result = neteaseImportService.importSongs(songIds, playlistId, user.getId());
-        if (result.isSuccess()) {
-            redirectAttributes.addFlashAttribute("message", result.getMessage());
-            return "redirect:/playlists/" + result.getPlaylistId();
-        }
-        redirectAttributes.addFlashAttribute("error", result.getMessage());
-        redirectAttributes.addFlashAttribute("songIds", songIds);
-        return "redirect:/netease";
-    }
-
-    @PostMapping("/qq/import")
-    public String importQqSongs(@RequestParam(value = "songIds", required = false) String songIds,
-                                @RequestParam(value = "link", required = false) String link,
-                                @RequestParam(value = "playlistId", required = false) Long playlistId,
-                                HttpSession session,
-                                RedirectAttributes redirectAttributes) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        if ((songIds == null || songIds.isBlank()) && link != null) {
-            songIds = link;
-        }
-        MusicImportResult result = qqImportService.importSongs(songIds, playlistId, user.getId());
-        if (result.isSuccess()) {
-            redirectAttributes.addFlashAttribute("message", result.getMessage());
-            return "redirect:/playlists/" + result.getPlaylistId();
-        }
-        redirectAttributes.addFlashAttribute("error", result.getMessage());
-        redirectAttributes.addFlashAttribute("songIds", songIds);
-        return "redirect:/qq";
-    }
-
-    @PostMapping("/bilibili/import")
-    public String importBilibiliVideos(@RequestParam(value = "videoIds", required = false) String videoIds,
-                                       @RequestParam(value = "link", required = false) String link,
-                                       @RequestParam(value = "playlistId", required = false) Long playlistId,
-                                       HttpSession session,
-                                       RedirectAttributes redirectAttributes) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        if ((videoIds == null || videoIds.isBlank()) && link != null) {
-            videoIds = link;
-        }
-        MusicImportResult result = bilibiliImportService.importVideos(videoIds, playlistId, user.getId());
-        if (result.isSuccess()) {
-            redirectAttributes.addFlashAttribute("message", result.getMessage());
-            return "redirect:/playlists/" + result.getPlaylistId();
-        }
-        redirectAttributes.addFlashAttribute("error", result.getMessage());
-        redirectAttributes.addFlashAttribute("videoIds", videoIds);
-        return "redirect:/bilibili";
     }
 
     private String redirectTo(String returnTo, String fallback) {

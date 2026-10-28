@@ -1,0 +1,36 @@
+@import "D:/dsh-render/folia-sekai-build/node_modules/tailwindcss/theme.css";
+@import "D:/dsh-render/folia-sekai-build/node_modules/tailwindcss/preflight.css";
+@import "D:/dsh-render/folia-sekai-build/node_modules/tailwindcss/utilities.css";
+@source "./gallery-upstream/src";
+@source "./gallery.tsx";
+/* CSS @property registrations do not cross a shadow boundary. */
+@layer properties {
+    *, ::before, ::after {
+        --tw-translate-x: 0; --tw-translate-y: 0; --tw-translate-z: 0;
+        --tw-scale-x: 1; --tw-scale-y: 1; --tw-scale-z: 1;
+        --tw-rotate-x: rotateX(0); --tw-rotate-y: rotateY(0); --tw-rotate-z: rotateZ(0);
+        --tw-skew-x: skewX(0); --tw-skew-y: skewY(0);
+    }
+}
+:host { display: block; width: 100%; height: 100%; color: #f4f4f5; font-family: system-ui, sans-serif; --text-primary: #f4f4f5; --text-secondary: #a1a1aa; }
+:host { --spacing: .25rem; }
+*, *::before, *::after { box-sizing: border-box; border-width: 0; border-style: solid; }
+.folia-root { position: relative; width: 100%; height: 100%; }
+[data-paper-shader] > canvas { display: block; width: 100%; height: 100%; }
+.folia-root .flex.flex-wrap.content-center { row-gap: 2.5rem; }
+button, input, select { font: inherit; }
+button, select { cursor: pointer; }
+button { color: inherit; background: transparent; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #ffbb95; outline-offset: 3px; }
+select { color: inherit; background: #25232e; border: 1px solid #ffffff26; border-radius: 9px; padding: 8px; max-width: 100%; }
+input[type=range] { accent-color: #ffb990; }
+.settings-content { padding: 18px; line-height: 1.6; }
+.settings-intro { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 20px; }
+.settings-intro button { border: 1px solid #ffffff26; border-radius: 10px; padding: 7px 10px; font-size: 12px; }
+.settings-common { display: grid; gap: 14px; margin-bottom: 20px; }
+.settings-common label, details>label { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+details { border-top: 1px solid #ffffff20; margin-top: 18px; padding-top: 16px; }
+summary { cursor: pointer; margin-bottom: 16px; }
+.settings-note { color: #b6afbd; font-size: 12px; margin-top: 20px; }
+a { color: #ffc79e; }
+.loading { position: absolute; inset: 45% 0 auto; text-align: center; }

@@ -2,10 +2,14 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Sekai Song - 选择歌曲</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=20260830b)}" href="/css/app.css?v=20260830b">
-    <link rel="stylesheet" th:href="@{/css/songs-selection.css(v=20261009c)}" href="/css/songs-selection.css?v=20261009c">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20261016b)}" href="/css/app.css?v=20261016b">
+    <link rel="stylesheet" th:href="@{/css/songs-selection.css(v=20261025cover)}" href="/css/songs-selection.css?v=20261025cover">
+    <link rel="stylesheet" th:href="@{/css/circular-selection.css(v=20261025cover)}" href="/css/circular-selection.css?v=20261025cover">
+    <script src="/js/site-theme.js?v=20261028"></script>
+    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
+    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
 </head>
 <body class="song-selection-page selection-carousel-page song-library-page">
 <div class="app-shell song-selection-shell">
@@ -14,9 +18,10 @@
     <main class="content song-selection-content">
         <div class="selection-background" aria-hidden="true">
             <img data-selection-background
-                 th:if="${!#lists.isEmpty(songs) && #strings.isEmpty(songs[0].bilibiliEmbedParam)}"
-                 th:src="${#strings.isEmpty(songs[0].coverUrl) ? '/images/login-music-room.png' : songs[0].coverUrl}"
-                 alt="">
+                 th:if="${!#lists.isEmpty(songs) && !#strings.isEmpty(songs[0].coverUrl)}"
+                 th:src="${#strings.startsWith(songs[0].coverUrl,'/') or #strings.startsWith(songs[0].coverUrl,'http') ? songs[0].coverUrl : '/images/login-music-room.png'}" th:attr="data-local-cover=${songs[0].coverUrl}"
+                 alt=""
+                 onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.hidden=true;}">
             <span class="selection-background-wash"></span>
             <span class="selection-background-glow selection-background-glow-one"></span>
             <span class="selection-background-glow selection-background-glow-two"></span>
@@ -30,23 +35,47 @@
             </div>
             <div class="selection-toolbar-meta">
                 <span th:text="${totalCount + ' 首歌曲'}">0 首歌曲</span>
-                <a class="selection-toolbar-play" data-selection-play
+                <a th:if="${!#lists.isEmpty(songs)}" class="selection-toolbar-play" data-selection-play
                    th:href="@{/player/{id}(id=${songs[0].id}, autoplay=1)}">
                     <span class="selection-play-icon">▶</span>
                     <span>播放当前</span>
                 </a>
                 <form class="selection-search" action="/songs" method="get">
                     <label class="sr-only" for="songSearch">搜索歌曲</label>
+                    <input type="hidden" name="view" th:value="${libraryView}">
                     <input id="songSearch" name="keyword" th:value="${keyword}" placeholder="搜索歌名、歌手或动漫">
                     <button type="submit" aria-label="搜索">⌕</button>
                 </form>
             </div>
         </header>
 
+        <nav class="library-view-switch" aria-label="歌曲库视图">
+            <a th:href="@{/songs(keyword=${keyword},view='cover')}" th:attr="aria-current=${libraryView == 'cover' ? 'page' : null}">封面展示</a>
+            <a th:href="@{/songs(keyword=${keyword},view='list')}" th:attr="aria-current=${libraryView == 'list' ? 'page' : null}">紧凑列表</a>
+            <a href="/library-tools">智能歌单与整理</a>
+        </nav>
+        <section class="library-rows" th:if="${libraryView == 'list' && !#lists.isEmpty(songs)}" aria-label="歌曲列表">
+            <article th:each="song : ${songs}" class="library-row">
+                <a th:href="@{/player/{id}(id=${song.id},autoplay=1)}">
+                    <img th:src="${#strings.isEmpty(song.coverUrl) or !(#strings.startsWith(song.coverUrl,'/') or #strings.startsWith(song.coverUrl,'http')) ? '/images/login-music-room.png' : song.coverUrl}" alt="" loading="lazy">
+                    <span><strong th:text="${song.title}"></strong><small th:text="${song.artist}"></small></span>
+                </a>
+                <details class="song-more"><summary aria-label="更多歌曲操作">更多</summary><div>
+                    <a th:href="@{/songs/{id}/edit(id=${song.id})}">编辑封面</a>
+                    <a th:href="@{/songs/{id}/assets(id=${song.id})}">补充素材</a>
+                    <form th:action="@{/songs/favorite/{id}(id=${song.id})}" method="post"><input type="hidden" name="returnTo" value="/songs?view=list"><button th:text="${song.favorite ? '取消收藏' : '收藏'}"></button></form>
+                </div></details>
+            </article>
+            <nav aria-label="歌曲分页" class="library-pagination">
+                <a th:if="${currentPage > 1}" th:href="@{/songs(keyword=${keyword},page=${currentPage - 1},view='list')}">上一页</a>
+                <span th:text="${currentPage + ' / ' + totalPages}"></span>
+                <a th:if="${currentPage < totalPages}" th:href="@{/songs(keyword=${keyword},page=${currentPage + 1},view='list')}">下一页</a>
+            </nav>
+        </section>
         <div class="message success selection-message" th:if="${message}" th:text="${message}"></div>
         <div class="message error selection-message" th:if="${error}" th:text="${error}"></div>
 
-        <section class="selection-stage" th:if="${!#lists.isEmpty(songs)}">
+        <section class="selection-stage" th:if="${libraryView != 'list' && !#lists.isEmpty(songs)}">
             <section class="selection-feature" data-selection-feature>
                 <div class="selection-feature-copy">
                     <p class="selection-feature-label">NOW SELECTING</p>
@@ -70,7 +99,7 @@
                     <span class="selection-art-shadow"></span>
                     <div class="selection-cover-frame">
                         <img data-selection-feature-cover
-                             th:src="${#strings.isEmpty(songs[0].coverUrl) ? '/images/login-music-room.png' : songs[0].coverUrl}"
+                             th:src="${#strings.isEmpty(songs[0].coverUrl) or not (#strings.startsWith(songs[0].coverUrl,'/') or #strings.startsWith(songs[0].coverUrl,'http')) ? '/images/login-music-room.png' : songs[0].coverUrl}" th:attr="data-local-cover=${songs[0].coverUrl}"
                              alt="">
                     </div>
                     <span class="selection-art-sheen"></span>
@@ -88,7 +117,7 @@
                     <span th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
                 </div>
 
-                <div class="selection-track-list" data-selection-track-list>
+                <div class="selection-track-list" data-selection-track-list data-circular-selection data-circular-selection-label="歌曲选择">
                     <div class="selection-track"
                          th:each="song, songStat : ${songs}"
                          th:classappend="${songStat.first} ? ' is-active'"
@@ -101,21 +130,24 @@
                                 th:data-artist="${song.artist}"
                                 th:data-anime="${song.animeTitle}"
                                 th:data-album="${song.albumName}"
-                                th:data-cover="${!#strings.isEmpty(song.bilibiliEmbedParam) ? '/images/login-music-room.png' : (#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl)}"
+                                th:data-cover="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}"
                                 th:data-local-audio="${song.localAudioUrl}"
                                 th:data-player-url="@{/player/{id}(id=${song.id}, autoplay=1)}">
                             <span class="selection-track-index" th:text="${songStat.index + 1 < 10 ? '0' + (songStat.index + 1) : songStat.index + 1}">01</span>
-                            <img th:if="${#strings.isEmpty(song.bilibiliEmbedParam)}"
-                                 th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
-                            <span class="selection-track-video-art" th:unless="${#strings.isEmpty(song.bilibiliEmbedParam)}">
-                                <span>▶ B站视频</span>
-                            </span>
+                            <img class="selection-track-cover"
+                                 referrerpolicy="no-referrer"
+                                 th:src="${#strings.isEmpty(song.coverUrl) or not (#strings.startsWith(song.coverUrl,'/') or #strings.startsWith(song.coverUrl,'http')) ? '/images/login-music-room.png' : song.coverUrl}" th:attr="data-local-cover=${song.coverUrl}"
+                                 alt="" loading="lazy"
+                                 onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='/images/login-music-room.png';}">
+                            <span class="selection-track-video-art" th:unless="${#strings.isEmpty(song.bilibiliEmbedParam)}"
+                                  aria-hidden="true">▶ B站视频</span>
                             <span class="selection-track-copy">
                                 <strong th:text="${song.title}">Song</strong>
                                 <small th:text="${song.artist + ' · ' + song.animeTitle}">Artist · Anime</small>
                             </span>
                             <span class="selection-track-arrow">↗</span>
                         </a>
+                        <details class="song-more"><summary>更多</summary><div><a th:href="@{/songs/{id}/edit(id=${song.id})}">编辑封面</a><a th:href="@{/songs/{id}/assets(id=${song.id})}">补充素材</a></div></details>
                         <form class="selection-track-action" th:action="@{/songs/favorite/{id}(id=${song.id})}" method="post">
                             <input type="hidden" name="returnTo" value="/songs">
                             <button type="submit" th:classappend="${song.favorite} ? ' is-favorite'" th:title="${song.favorite} ? '取消收藏' : '收藏'">
@@ -169,8 +201,8 @@
 
         <section class="selection-empty" th:if="${#lists.isEmpty(songs)}">
             <div class="selection-empty-mark">♪</div>
-            <h2>歌库还没有歌曲</h2>
-            <p>先添加一首动漫歌曲，再从这里开始选择。</p>
+            <h2 th:text="${#strings.isEmpty(keyword) ? '歌库还没有歌曲' : '没有找到匹配的歌曲'}">歌库还没有歌曲</h2>
+            <p th:text="${#strings.isEmpty(keyword) ? '从本机导入第一首音乐，开始你的歌库。' : '试试更短的关键词，或返回全部歌曲。'}"></p><a href="/local-player" th:if="${#strings.isEmpty(keyword)}">导入本地音乐</a><a href="/songs" th:unless="${#strings.isEmpty(keyword)}">查看全部歌曲</a>
         </section>
 
         <details class="selection-add-panel">
@@ -191,12 +223,13 @@
         </details>
 
         <div class="selection-footer-row">
-            <div class="selection-page-note">每页 30 首歌曲，左右滑动浏览；点击封面进入播放页。</div>
+            <div class="selection-page-note">每页 30 首歌曲，点击歌曲即可进入播放页。</div>
         </div>
 
         <audio class="selection-audio" data-selection-audio preload="metadata"></audio>
     </main>
 </div>
-<script th:src="@{/js/songs-selection.js(v=20261009c)}" src="/js/songs-selection.js?v=20261009c"></script>
+<script th:src="@{/js/circular-selection.js(v=20261016b)}" src="/js/circular-selection.js?v=20261016b"></script>
+<script th:src="@{/js/songs-selection.js(v=20261016b)}" src="/js/songs-selection.js?v=20261016b"></script>
 </body>
 </html>

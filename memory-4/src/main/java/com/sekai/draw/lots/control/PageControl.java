@@ -16,6 +16,11 @@ public class PageControl {
     @Resource
     private DrawLotsService drawLotsService;
 
+    @Resource
+    private com.sekai.draw.lots.service.BrowseService browseService;
+    @Resource
+    private com.sekai.draw.lots.service.JournalService journalService;
+
     @GetMapping({"/", "/login"})
     public String login() {
         return "login";
@@ -37,11 +42,16 @@ public class PageControl {
         model.addAttribute("achievements", drawLotsService.getAchievements(user));
         model.addAttribute("recentRecords", drawLotsService.recentRecords(user, 6));
         model.addAttribute("topCharacters", drawLotsService.topCharacters(8));
+        model.addAttribute("wishes", journalService.wishes(user.getId()));
+        model.addAttribute("todayRecord", drawLotsService.todayRecord(user));
         return "home";
     }
 
     @GetMapping("/characters")
     public String characters(@RequestParam(value = "keyword", required = false) String keyword,
+                             @RequestParam(value = "role", required = false) String role,
+                             @RequestParam(value = "energy", required = false) String energy,
+                             @RequestParam(defaultValue = "1") int page,
                              HttpSession session,
                              Model model) {
         User user = requireLogin(session);
@@ -50,7 +60,13 @@ public class PageControl {
         }
         model.addAttribute("loginUser", user);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("characters", drawLotsService.searchCharacters(keyword, 120));
+        var result = browseService.characters(keyword, role, energy, page);
+        model.addAttribute("characters", result.getItems());
+        model.addAttribute("pagination", result);
+        model.addAttribute("role", role);
+        model.addAttribute("energy", energy);
+        model.addAttribute("roles", browseService.roles());
+        model.addAttribute("energies", browseService.energies());
         return "characters";
     }
 
@@ -59,13 +75,29 @@ public class PageControl {
                           Model model,
                           @RequestParam(value = "keyword", required = false) String keyword,
                           @RequestParam(value = "mood", required = false) String mood,
-                          @RequestParam(value = "minScore", required = false) Integer minScore) {
+                          @RequestParam(value = "minScore", required = false) Integer minScore,
+                          @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate start,
+                          @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate end,
+                          @RequestParam(required = false) String month,
+                          @RequestParam(required = false) Long wishId,
+                          @RequestParam(defaultValue = "1") int page) {
         User user = requireLogin(session);
         if (user == null) {
             return "redirect:/login";
         }
         model.addAttribute("loginUser", user);
-        model.addAttribute("records", drawLotsService.filteredRecords(user, keyword, mood, minScore, 120));
+        var selectedMonth = month == null || month.isBlank() ? java.time.YearMonth.now(java.time.ZoneId.of("Asia/Shanghai")) : java.time.YearMonth.parse(month);
+        if (wishId != null) model.addAttribute("wish", journalService.get(user.getId(), wishId));
+        var result = browseService.history(user.getId(), keyword, mood, minScore, start, end, wishId, page);
+        model.addAttribute("records", result.getItems());
+        model.addAttribute("pagination", result);
+        model.addAttribute("calendar", browseService.calendar(user.getId(), selectedMonth));
+        model.addAttribute("month", selectedMonth.toString());
+        model.addAttribute("previousMonth", selectedMonth.minusMonths(1).toString());
+        model.addAttribute("nextMonth", selectedMonth.plusMonths(1).toString());
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("wishId", wishId);
         model.addAttribute("keyword", keyword == null ? "" : keyword);
         model.addAttribute("mood", mood == null ? "" : mood);
         model.addAttribute("minScore", minScore);

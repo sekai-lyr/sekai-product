@@ -1,50 +1,25 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>抽签历史 - 灵感伙伴签</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=202605082245)}" href="/css/app.css?v=202605082245">
-</head>
-<body>
-<header class="topbar">
-    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
-    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a th:href="@{/characters}">伙伴库</a><a class="active" th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a></nav>
-</header>
-<main class="dashboard">
-    <section class="list-head"><div><p class="eyebrow">历史记录</p><h1>抽签历史</h1></div></section>
-    <form class="history-filter" th:action="@{/history}" method="get">
-        <input name="keyword" th:value="${keyword}" placeholder="搜伙伴、系列、愿望">
-        <select name="mood">
-            <option value="">全部心情</option>
-            <option value="平静" th:selected="${mood == '平静'}">平静</option>
-            <option value="燃" th:selected="${mood == '燃'}">燃</option>
-            <option value="想摆烂" th:selected="${mood == '想摆烂'}">想摆烂</option>
-            <option value="需要灵感" th:selected="${mood == '需要灵感'}">需要灵感</option>
-        </select>
-        <select name="minScore">
-            <option value="">全部分数</option>
-            <option value="60" th:selected="${minScore == 60}">60 分以上</option>
-            <option value="80" th:selected="${minScore == 80}">80 分以上</option>
-            <option value="90" th:selected="${minScore == 90}">90 分以上</option>
-        </select>
-        <button type="submit">筛选</button>
-        <a th:href="@{/history}">重置</a>
-    </form>
-    <section class="history-list">
-        <article class="history-row" th:each="record : ${records}">
-            <img th:src="@{/character/image/{id}(id=${record.character.id},v=202605082230)}" alt="">
-            <div>
-                <h2 th:text="${record.character.displayName}">伙伴</h2>
-                <p th:text="${record.fortune.advice}">Advice</p>
-                <p class="record-message" th:text="${record.message}">message</p>
-                <span th:text="${record.drawTime}">time</span>
-            </div>
-            <strong th:text="${record.luckScore}">88</strong>
-        </article>
-        <p class="muted" th:if="${#lists.isEmpty(records)}">暂无抽签历史。</p>
-    </section>
-</main>
-<script th:src="@{/js/app.js(v=2026083001)}" src="/js/app.js?v=2026083001"></script>
-</body>
-</html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('相遇日历')}"></head>
+<body><header th:replace="~{fragments :: header('history')}"></header>
+<main class="dashboard"><div th:replace="~{fragments :: messages}"></div>
+
+<div class="page-heading"><div><h1>相遇日历</h1><p>翻回某一天，看看那时的心情与伙伴。</p></div><a th:href="@{/wishes}">我的愿望</a></div>
+<section class="panel calendar-panel"><div class="calendar-head"><a th:href="@{/history(month=${previousMonth})}" aria-label="上个月">上个月</a><h2 th:text="${month}"></h2><a th:href="@{/history(month=${nextMonth})}" aria-label="下个月">下个月</a></div>
+ <div class="calendar-grid"><span class="calendar-weekday" th:each="d : ${ {'一','二','三','四','五','六','日'} }" th:text="${d}"></span>
+ <a th:each="day : ${calendar}" class="calendar-day" th:classappend="${(!day.inMonth ? 'outside ' : '') + (day.today ? 'today ' : '') + (day.daily ? 'daily' : '')}" th:href="@{/history(start=${day.date},end=${day.date},month=${month})}" th:attr="aria-label=${day.date + '，' + day.total + ' 次抽签'}"><span th:text="${day.number}"></span><small th:if="${day.total != 0}" th:text="${day.total + ' 次相遇'}"></small></a></div>
+ <p class="form-hint">点击日期查看记录；右上角的小点表示这一天已有固定签。</p>
+</section>
+<p th:if="${wishId != null}" class="notice" th:text="'正在查看愿望：' + ${wish.title}"></p>
+<form class="filter-form history-filter" th:action="@{/history}" method="get"><input type="hidden" name="month" th:value="${month}"><input th:if="${wishId != null}" type="hidden" name="wishId" th:value="${wishId}">
+ <label>搜索记录<input name="keyword" th:value="${keyword}" placeholder="伙伴、系列、愿望"></label>
+ <label>心情<select name="mood"><option value="">全部心情</option><option th:each="m : ${ {'平静','燃','想摆烂','需要灵感','有点焦虑','有点孤单'} }" th:value="${m}" th:text="${m}" th:selected="${mood == m}"></option></select></label>
+ <label>运势<select name="minScore"><option value="">全部分数</option><option th:each="score : ${ {60,80,90} }" th:value="${score}" th:text="${score + ' 分以上'}" th:selected="${minScore == score}"></option></select></label>
+ <label>开始日期<input type="date" name="start" th:value="${start}"></label><label>结束日期<input type="date" name="end" th:value="${end}"></label><div class="button-row"><button>筛选</button><a th:href="@{/history}">重置</a></div>
+</form>
+<section class="history-list"><article class="history-row" th:each="record : ${records}"><img th:src="@{/character/image/{id}(id=${record.character.id})}" alt="" loading="lazy"><div><h2 th:text="${record.character.displayName}"></h2><p class="record-message" th:text="${record.message}"></p><p th:text="${record.fortune.advice}"></p><time th:text="${#temporals.format(record.drawTime,'yyyy-MM-dd HH:mm')}"></time><div class="button-row"><a class="button secondary" th:href="@{/share/records/{id}(id=${record.id})}">制作分享卡</a><a th:href="@{/characters/{id}(id=${record.character.id})}">伙伴详情</a><span th:if="${record.drawType == 'DAILY'}" class="daily-badge">今日固定签</span></div></div><strong th:text="${record.luckScore}"></strong></article>
+<div class="empty-panel" th:if="${#lists.isEmpty(records)}"><h2>这段时间还没有相遇</h2><p>调整筛选，或为今天抽一张签。</p><a class="button" th:href="@{/home}">去抽今日签</a></div></section>
+<nav class="pagination" aria-label="记录分页"><a th:if="${pagination.previous}" th:href="@{/history(keyword=${keyword},mood=${mood},minScore=${minScore},start=${start},end=${end},month=${month},wishId=${wishId},page=${pagination.page - 1})}">上一页</a><span th:text="${'共 ' + pagination.total + ' 条 · ' + pagination.page + ' / ' + pagination.pages + ' 页'}"></span><a th:if="${pagination.next}" th:href="@{/history(keyword=${keyword},mood=${mood},minScore=${minScore},start=${start},end=${end},month=${month},wishId=${wishId},page=${pagination.page + 1})}">下一页</a></nav>
+
+</main><footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/app.js(v=20261028)}"></script></body></html>

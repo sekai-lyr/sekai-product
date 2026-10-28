@@ -3,6 +3,14 @@ package com.sekai.draw.lots.model;
 import java.time.LocalDateTime;
 
 public class DrawRecord {
+    private boolean favorited;
+    public boolean isFavorited() { return favorited; }
+    public void setFavorited(boolean favorited) { this.favorited = favorited; }
+    private String drawType = "RANDOM";
+    private String ritualId;
+    private Long wishId;
+    private java.time.LocalDate dailyDate;
+
     private Long id;
     private Long userId;
     private Long characterId;
@@ -37,4 +45,12 @@ public class DrawRecord {
     public void setCharacter(AnimeCharacter character) { this.character = character; }
     public Fortune getFortune() { return fortune; }
     public void setFortune(Fortune fortune) { this.fortune = fortune; }
+    public String getDrawType() { return drawType; }
+    public void setDrawType(String drawType) { this.drawType = drawType; }
+    public String getRitualId() { return ritualId; }
+    public void setRitualId(String ritualId) { this.ritualId = ritualId; }
+    public Long getWishId() { return wishId; }
+    public void setWishId(Long wishId) { this.wishId = wishId; }
+    public java.time.LocalDate getDailyDate() { return dailyDate; }
+    public void setDailyDate(java.time.LocalDate dailyDate) { this.dailyDate = dailyDate; }
 }

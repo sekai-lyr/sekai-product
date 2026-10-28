@@ -189,7 +189,7 @@ public class SpringAiTools {
         if (page < 1) page = 1; if (limit < 1 || limit > 25) limit = 5;
         String r = animeService.searchCharacter(query, page, limit);
         if (r != null) return "[Jikan] " + r;
-        try { return "[AI Knowledge] " + chatService.chat(query, "Describe anime character: " + query + ". Include name, anime, role, personality. Under 200 words."); }
+        try { return "[AI Knowledge] " + chatService.chatWithTools(query, "Describe anime character: " + query + ". Include name, anime, role, personality. Under 200 words.", null, null); }
         catch (Exception e) { return "Character not found."; }
     }
 

@@ -6,6 +6,7 @@ import com.example.demo.chat.ChatMemoryService;
 import com.example.demo.chat.VectorStoreService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "spring.ai.enabled", havingValue = "true", matchIfMissing = false)
 public class AiController {
 
     private final SpringAiChatService springAiChatService;
@@ -46,13 +48,13 @@ public class AiController {
                     return ResponseEntity.ok(response);
                 }
             }
-            ToolCallResponse toolResponse = springAiChatService.chatWithTools(
+            String result = springAiChatService.chatWithTools(
                     message,
                     systemPrompt == null || systemPrompt.isBlank() ? null : systemPrompt,
                     null,
                     request.get("conversationId"));
-            String result = toolResponse.getText();
-            result = sanitizeUnannouncedEventAnswer(result, toolResponse);
+            
+            result = sanitizeUnannouncedEventAnswer(result, null);
             response.put("success", true);
             response.put("content", result);
         } catch (Exception e) {
@@ -131,23 +133,23 @@ public class AiController {
                     ? Set.of("searchAnimeEventsChina")
                     : (allowedTools == null || allowedTools.isEmpty()
                     ? null : new HashSet<>(validatedTools));
-            ToolCallResponse toolResponse = springAiChatService.chatWithTools(message, systemPrompt, allowedToolSet, conversationId);
+            String result = springAiChatService.chatWithTools(message, systemPrompt, allowedToolSet, conversationId);
             response.put("success", true);
-            response.put("content", sanitizeUnannouncedEventAnswer(toolResponse.getText(), toolResponse));
-            response.put("traceId", toolResponse.getTraceId());
-            response.put("totalIterations", toolResponse.getTotalIterations());
-            response.put("totalTokens", toolResponse.getTotalTokens());
-            if (toolResponse.hasToolCalls()) {
-                response.put("toolCallHistory", toolResponse.getToolCallHistory().stream()
-                        .map(this::convertToolCallResult).collect(Collectors.toList()));
+            response.put("content", sanitizeUnannouncedEventAnswer(result, null));
+            // response.put("traceId", toolResponse.getTraceId());
+            // response.put("totalIterations", toolResponse.getTotalIterations());
+            // response.put("totalTokens", toolResponse.getTotalTokens());
+            if (false) {
+                response.put("toolCallHistory", List.of());
+                        
             }
-            if (toolResponse.hasGeneratedFiles())
-                response.put("generatedFiles", toolResponse.getGeneratedFiles());
-            if (toolResponse.getToolCallHistory() != null) {
-                long successCount = toolResponse.getToolCallHistory().stream()
-                        .filter(ToolCallResult::isSuccess).count();
-                response.put("toolsUsed", toolResponse.getToolCallHistory().size());
-                response.put("toolsSucceeded", successCount);
+            if (false)
+                // response.put("generatedFiles", toolResponse.getGeneratedFiles());
+            if (false) {
+                // long successCount = toolResponse.getToolCallHistory().stream()
+                        
+                // response.put("toolsUsed", toolResponse.getToolCallHistory().size());
+                // response.put("toolsSucceeded", 0);
             }
         } catch (Exception e) {
             log.error("AI tool chat failed", e);

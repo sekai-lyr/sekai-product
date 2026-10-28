@@ -1,0 +1,16 @@
+import { mkdtempSync, cpSync, mkdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+const stage=mkdtempSync('D:/dsh-render/stage-source-');
+const copy=(source,target)=>{mkdirSync(join(stage,target,'..'),{recursive:true});cpSync(resolve(source),join(stage,target),{recursive:true});};
+for(const name of ['upstream','entry.ts','build.mjs','README.md','package-lock.json'])copy(`tools/folia/${name}`,`tools/folia/${name}`);
+for(const name of ['metadata-entry.mjs','build.mjs','package.json','package-lock.json'])copy(`tools/local-player/${name}`,`tools/local-player/${name}`);
+for(const name of ['player.html','local-player.html','fragments.html','website-feedback.html','website-overview.html'])copy(`src/main/resources/templates/${name}`,`templates/${name}`);
+cpSync(resolve('src/main/resources/static/js'),join(stage,'static/js'),{recursive:true,filter:path=>!path.endsWith('folia-sekai-source.zip')});
+cpSync(resolve('src/main/resources/static/css'),join(stage,'static/css'),{recursive:true});
+copy('src/main/resources/static/images/login-music-room.png','static/images/login-music-room.png');
+writeFileSync(join(stage,'README.md'),'# Sekai Song 演出前端对应源码\n\n本包包含已部署的四种演出、本地音频播放器和文件关联前端，以及原版Folia Sonnet编译器/运行时、构建脚本和依赖锁定文件。没有包含用户数据、音乐、数据库密码或服务器私钥。\n\nFolia相关代码遵循AGPL-3.0，许可证见tools/folia/upstream/LICENSE；原项目 https://github.com/chthollyphile/folia-major 。第三方标签解析器及其依赖许可证见static/js/vendor/LOCAL-METADATA-NOTICES.txt。\n\nFolia构建方法见tools/folia/README.md；标签解析器安装music-metadata@12.1.0和esbuild@0.28.2后使用tools/local-player/build.mjs。两个构建脚本使用D:/dsh-render中的依赖目录，其他环境可将导入路径和nodePaths替换为相应安装目录。预构建JS也包含在static/js/vendor中。页面数据由Thymeleaf变量提供，本地舞台的数据替换由local-stage.js负责；音频读取与动画均在浏览器执行。\n');
+const output='D:/dsh-render/deploy-20261011/folia-sekai-source.zip';
+execFileSync('tar',['-a','-cf',output,'-C',stage,'.']);
+cpSync(output,resolve('src/main/resources/static/js/vendor/folia-sekai-source.zip'));
+console.log(output);

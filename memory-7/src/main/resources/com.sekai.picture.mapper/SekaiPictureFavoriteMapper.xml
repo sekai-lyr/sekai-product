@@ -15,7 +15,7 @@
         DELETE FROM sekai_picture_favorite WHERE user_id = #{userId} AND wallpaper_id = #{wallpaperId}
     </delete>
     <select id="countByUserId" resultType="int">
-        SELECT COUNT(1) FROM sekai_picture_favorite WHERE user_id = #{userId}
+        SELECT COUNT(1) FROM sekai_picture_favorite f JOIN sekai_picture_wallpaper w ON w.id = f.wallpaper_id AND w.user_id = f.user_id WHERE f.user_id = #{userId} AND w.deleted_at IS NULL
     </select>
     <select id="selectByUserIdAndWallpaperId" resultMap="BaseResultMap">
         SELECT id, user_id, wallpaper_id, create_time

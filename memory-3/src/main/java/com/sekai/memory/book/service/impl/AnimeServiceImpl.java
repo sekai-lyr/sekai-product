@@ -33,14 +33,19 @@ public class AnimeServiceImpl implements AnimeService {
         int safePage = Math.max(page, 1);
         int safePageSize = Math.min(Math.max(pageSize, 1), 50);
         int offset = (safePage - 1) * safePageSize;
-        List<Anime> sortedAnime = AnimeArchiveSorter.sortForArchive(animeMapper
-                .selectFilteredByUserId(userId, trimToNull(keyword))
-                .stream()
-                .map(SekaiMemoryBookAnimeDO::convertToAnime)
-                .toList());
+        List<Anime> sortedAnime = listByUserId(userId, keyword);
         int fromIndex = Math.min(offset, sortedAnime.size());
         int toIndex = Math.min(fromIndex + safePageSize, sortedAnime.size());
         return sortedAnime.subList(fromIndex, toIndex);
+    }
+
+    @Override
+    public List<Anime> listByUserId(Long userId, String keyword) {
+        if (userId == null) {
+            return List.of();
+        }
+        return AnimeArchiveSorter.sortForArchive(animeMapper.selectFilteredByUserId(userId, trimToNull(keyword))
+                .stream().map(SekaiMemoryBookAnimeDO::convertToAnime).toList());
     }
 
     @Override

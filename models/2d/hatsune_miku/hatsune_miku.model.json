@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "format": "divastage-cutout-rig-2d",
+  "displayName": "初音未来",
+  "description": "DivaStage 项目自建动态 2D 舞台角色，使用透明立绘切片和参数驱动动画，不依赖外部 Cubism 二进制模型。",
+  "canvas": { "width": 881, "height": 1589 },
+  "assets": {
+    "body": "hatsune_miku.png",
+    "rig": {
+      "type": "pixi-cutout",
+      "layers": ["bodyMesh", "leftTwinTail", "rightTwinTail", "frontHair", "torso", "leftSleeve", "rightSleeve", "skirt", "tie", "faceFx"],
+      "parameters": ["AngleX", "AngleY", "AngleZ", "EyeLOpen", "EyeROpen", "EyeBallX", "EyeBallY", "MouthForm", "MouthOpenY", "BodyAngleX", "BodyAngleY", "BodyAngleZ", "Breath", "BustY", "HairFront", "HairSide", "HairBack", "Ribbon", "Skirt"]
+    },
+    "expressionStates": ["Normal", "Smile", "Sad", "Angry", "Surprised"]
+  },
+  "motions": ["Idle", "Tap", "Flick", "Shake"],
+  "interaction": {
+    "headCenter": { "x": 440, "y": 230 },
+    "hitArea": { "x": 0, "y": 0, "width": 881, "height": 1589 }
+  }
+}

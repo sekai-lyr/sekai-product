@@ -2453,6 +2453,9 @@ body.render-mode .stage-drawer {
 .stage-mode-folia .lyric-stage[data-folia-shot="8"] .folia-axis-b { opacity: .72; }
 
 /* Folia v4: Fume-inspired article canvas and camera tracking. */
+.performance-atmosphere { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.stage-mode-lyrics .immersive-line-prev,
+.stage-mode-lyrics .immersive-line-next { display: none; }
 .folia-article { display: none; }
 
 .stage-mode-folia .folia-article {
@@ -2461,10 +2464,22 @@ body.render-mode .stage-drawer {
     left: 0;
     z-index: 4;
     display: block;
-    width: 3500px;
-    height: 12000px;
+    width: 100%;
+    height: 100%;
     transform-origin: 0 0;
     will-change: transform;
+}
+
+.stage-mode-folia:not(.stage-mode-folia-classic) .lyric-scene {
+    inset: 5% 3% 16%;
+    min-height: 0;
+}
+.stage-mode-folia:not(.stage-mode-folia-classic) .folia-geometry { display: none; }
+.stage-mode-folia:not(.stage-mode-folia-classic) .folia-subtitle {
+    position: absolute; left: 5%; right: 5%; bottom: 1%; z-index: 6;
+    text-align: center; font-size: clamp(14px, 1.6vw, 26px);
+    opacity: 1; color: #fff7ee; white-space: normal;
+    text-shadow: 0 2px 8px #000; line-height: 1.6;
 }
 
 .stage-mode-folia .immersive-line-active,
@@ -2590,5 +2605,207 @@ body.render-mode .stage-drawer {
     .stage-mode-folia .folia-meter {
         bottom: 3%;
         width: 42vw;
+    }
+}
+
+/* ==========================================================================
+   2026-10-10 手机端适配层（播放页舞台，authoritative mobile layer）
+   --------------------------------------------------------------------------
+   放在文件末尾，压过前面所有同选择器规则。桌面（≥981px）桌面布局不变。
+   手机端主题：
+   1) 两个进度条命中区 ≥44px（视觉轨道粗细不变）；
+   2) 队列抽屉不再把「播放队列」挤成 0 高，且盖住右下角切换器；
+   3) 唱片舞台的封面 + 圆盘整体收进舞台盒，不再左右被裁；
+   4) 歌词 / Folia 舞台贴合可视高度，底部控件条不再被 body overflow 裁掉；
+   5) 触控目标 ≥44px。
+   ========================================================================== */
+
+/* ---------- 1. 进度条命中区：只在手机/平板放大，桌面保持原有像素 ---------- */
+@media (max-width: 980px) {
+    .stage-seek,
+    .lyric-seek {
+        height: 44px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 100% 6px;
+        touch-action: manipulation;
+    }
+
+    .lyric-seek {
+        background-size: 100% 4px;
+    }
+
+    .stage-seek::-webkit-slider-thumb {
+        width: 22px;
+        height: 22px;
+    }
+
+    .stage-seek::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+    }
+
+    .lyric-seek::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+    }
+
+    .lyric-seek::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* ---------- 2. 抽屉：视口单位 + 盖住右下角切换器 ---------- */
+.stage-drawer {
+    height: 100dvh;
+    max-height: 100dvh;
+    z-index: 90;
+}
+
+/* 切换器在 DOM 中位于抽屉之前，用 :has() 兜底隐藏（抽屉本身已由 z-index 覆盖它） */
+.stage-view-switcher:has(~ .stage-drawer.open) {
+    visibility: hidden;
+}
+
+/* ---------- 3. 手机 / 小屏平板 ---------- */
+@media (max-width: 980px) {
+    /* 顶部导航条由 app-motion.js 写入 --sekai-topbar，避免舞台被顶栏顶出屏幕 */
+    .player-bg .player-stage {
+        min-height: calc(100dvh - var(--sekai-topbar, 64px));
+    }
+
+    .lyric-stage {
+        height: calc(100dvh - var(--sekai-topbar, 64px));
+        min-height: 0;
+    }
+
+    /* 3.1 B 站视频：保持 16:9，不再被 min-height 拉出黑边 */
+    .now-playing.bilibili-video-mode .bilibili-player {
+        min-height: auto;
+    }
+
+    /* 3.2 上传/工具表单：手机上单列，按钮 44px */
+    .audio-upload {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .audio-upload button,
+    .player-tools select,
+    .loop-tools button,
+    .stage-tools .pill-btn {
+        min-height: 44px;
+        font-size: 14px;
+    }
+
+    /* 3.3 控件条与右下角切换器互不遮挡 */
+    .player-bg .stage-controls {
+        padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .stage-view-switcher {
+        right: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .stage-view-menu {
+        max-height: min(60dvh, 420px);
+        overflow-y: auto;
+    }
+
+    /* 3.4 抽屉行高：队列最少 120px，书签/历史区限高并在内部滚动 */
+    .stage-drawer {
+        grid-template-rows: auto auto minmax(120px, 1fr) minmax(0, 44dvh);
+        padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .stage-drawer-body {
+        max-height: 44dvh;
+    }
+
+    .stage-drawer .queue-search,
+    .stage-drawer .text-action,
+    .stage-drawer-close {
+        min-height: 44px;
+        font-size: 14px;
+    }
+
+    .stage-drawer .queue-list a {
+        min-height: 52px;
+    }
+
+    /* 3.5 唱片舞台：封面 + 圆盘整体放进舞台盒（原来是左侧封面被裁、圆盘右侧出界） */
+    .player-bg .stage-art {
+        padding: 104px 14px 18px;
+    }
+
+    .player-bg .cover-large {
+        width: min(48vw, 250px);
+    }
+
+    .player-bg .stage-disc {
+        width: min(46vw, 240px);
+        margin-left: -14%;
+    }
+
+    /* 3.6 压缩歌词窗与频谱，把播放控件拉近首屏（控件条本身在 ≤700 会吸底） */
+    .player-bg .lyrics {
+        height: 262px;
+        padding: 88px 0;
+    }
+
+    .player-bg .stage-spectrum {
+        height: 64px;
+    }
+
+    .player-bg .stage-controls {
+        padding-top: 12px;
+    }
+
+    /* 3.7 字阵 / Folia 舞台：底部控件条与按钮 */
+    .lyric-bar-actions button,
+    .lyric-queue-button {
+        min-width: 44px;
+        height: 44px;
+        touch-action: manipulation;
+    }
+
+    .lyric-queue-button {
+        bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .lyric-progress,
+    .lyric-scene-caption {
+        font-size: 12px;
+    }
+
+    /* 3.8 轨道圆环居中修正：min() 取的是更负的值，导致圆环整体跑到屏幕外 */
+    .lyric-orbit-a,
+    .lyric-orbit-b {
+        margin: calc(min(54vw, 820px) / -2) 0 0 calc(min(54vw, 820px) / -2);
+    }
+}
+
+/* ---------- 4. 窄屏手机：控件条常驻，播放键始终可点 ---------- */
+@media (max-width: 700px) {
+    .player-bg .stage-controls {
+        position: sticky;
+        bottom: 0;
+        z-index: 6;
+        background: linear-gradient(180deg, rgba(8, 13, 26, 0) 0%, rgba(8, 13, 26, 0.72) 34%, rgba(8, 13, 26, 0.92) 100%);
+        backdrop-filter: blur(6px);
+    }
+
+    .player-bg .lyrics {
+        height: 200px;
+        padding: 66px 0;
+    }
+
+    .player-bg .stage-art {
+        min-height: min(78vw, 380px);
+    }
+
+    .lyric-player-bar {
+        bottom: calc(48px + env(safe-area-inset-bottom, 0px));
     }
 }

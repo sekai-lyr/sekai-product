@@ -87,7 +87,7 @@
             return;
         }
 
-        const targets = document.querySelectorAll(".wallpaper-card, .hero-art, .dashboard-art, .upload-visual");
+        const targets = document.querySelectorAll(".wallpaper-card");
         targets.forEach((target) => {
             const reset = () => {
                 target.classList.remove("is-pointer-active");
@@ -120,6 +120,134 @@
             });
 
             target.addEventListener("pointerleave", reset);
+        });
+    };
+
+    const init2DLoops = () => {
+        if (reduceMotion || !canAnimate) {
+            return;
+        }
+
+        document.querySelectorAll("[data-float]").forEach((element, index) => {
+            const distance = element.classList.contains("particle-two") ? "0 24px" : "0 -18px";
+            play(element, [
+                { translate: "0 0", opacity: 0.48 },
+                { translate: distance, opacity: 1 },
+                { translate: "0 0", opacity: 0.48 }
+            ], {
+                delay: 300 + index * 140,
+                duration: element.dataset.float === "fast" ? 2200 : 3600,
+                iterations: Infinity,
+                easing: "ease-in-out"
+            });
+        });
+
+        document.querySelectorAll('[data-orbit="slow"], [data-orbit="constellation"]').forEach((element, index) => {
+            play(element, [
+                { rotate: "-10deg" },
+                { rotate: "10deg" }
+            ], {
+                delay: 260 + index * 180,
+                duration: element.dataset.orbit === "constellation" ? 5200 : 3800,
+                direction: "alternate",
+                iterations: Infinity,
+                easing: "ease-in-out"
+            });
+        });
+
+        document.querySelectorAll("[data-scan-line]").forEach((element) => {
+            play(element, [
+                { translate: "0 -18%", opacity: 0 },
+                { translate: "0 48%", opacity: 0.9 },
+                { translate: "0 118%", opacity: 0 }
+            ], {
+                duration: 4800,
+                iterations: Infinity,
+                easing: "ease-in-out"
+            });
+        });
+    };
+
+    const initDepthScenes = () => {
+        const scenes = [...document.querySelectorAll("[data-depth-scene]")];
+        if (!scenes.length) {
+            return;
+        }
+
+        const pointerFine = window.matchMedia("(pointer: fine)").matches;
+        scenes.forEach((scene) => {
+            const layers = [...scene.querySelectorAll("[data-depth-layer]")];
+            const image = scene.querySelector(".depth-image");
+            layers.forEach((layer) => {
+                const depth = Number.parseFloat(layer.dataset.depthLayer || "0");
+                layer.style.setProperty("--layer-depth", `${depth * 44}px`);
+            });
+
+            const reset = () => {
+                scene.classList.remove("is-depth-active");
+                scene.style.setProperty("--tilt-x", "0deg");
+                scene.style.setProperty("--tilt-y", "0deg");
+                scene.style.setProperty("--pointer-x", "50%");
+                scene.style.setProperty("--pointer-y", "50%");
+                image?.style.setProperty("--image-shift-x", "0px");
+                image?.style.setProperty("--image-shift-y", "0px");
+                image?.style.setProperty("--image-scale", "1");
+                layers.forEach((layer) => {
+                    layer.style.setProperty("--layer-shift-x", "0px");
+                    layer.style.setProperty("--layer-shift-y", "0px");
+                    layer.style.setProperty("--layer-tilt-x", "0deg");
+                    layer.style.setProperty("--layer-tilt-y", "0deg");
+                });
+            };
+
+            reset();
+            if (reduceMotion || !pointerFine) {
+                return;
+            }
+
+            let frame = 0;
+            scene.addEventListener("pointerenter", (event) => {
+                if (event.pointerType !== "touch") {
+                    scene.classList.add("is-depth-active");
+                }
+            });
+            scene.addEventListener("pointermove", (event) => {
+                if (event.pointerType === "touch" || frame) {
+                    return;
+                }
+
+                frame = window.requestAnimationFrame(() => {
+                    frame = 0;
+                    const bounds = scene.getBoundingClientRect();
+                    const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+                    const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+                    const xOffset = x - 0.5;
+                    const yOffset = y - 0.5;
+
+                    scene.style.setProperty("--pointer-x", `${x * 100}%`);
+                    scene.style.setProperty("--pointer-y", `${y * 100}%`);
+                    scene.style.setProperty("--tilt-x", `${(-yOffset * 7).toFixed(2)}deg`);
+                    scene.style.setProperty("--tilt-y", `${(xOffset * 8).toFixed(2)}deg`);
+                    image?.style.setProperty("--image-shift-x", `${(xOffset * 12).toFixed(2)}px`);
+                    image?.style.setProperty("--image-shift-y", `${(yOffset * 10).toFixed(2)}px`);
+                    image?.style.setProperty("--image-scale", "1.045");
+
+                    layers.forEach((layer) => {
+                        const depth = Number.parseFloat(layer.dataset.depthLayer || "1");
+                        layer.style.setProperty("--layer-shift-x", `${(xOffset * depth * 34).toFixed(2)}px`);
+                        layer.style.setProperty("--layer-shift-y", `${(yOffset * depth * 28).toFixed(2)}px`);
+                        layer.style.setProperty("--layer-tilt-x", `${(-yOffset * depth * 6).toFixed(2)}deg`);
+                        layer.style.setProperty("--layer-tilt-y", `${(xOffset * depth * 7).toFixed(2)}deg`);
+                    });
+                });
+            });
+            scene.addEventListener("pointerleave", () => {
+                if (frame) {
+                    window.cancelAnimationFrame(frame);
+                    frame = 0;
+                }
+                reset();
+            });
         });
     };
 
@@ -265,9 +393,12 @@
 
     initReveals();
     initVisualEntrances();
+    init2DLoops();
     initPointerDepth();
+    initDepthScenes();
     initBatchSelection();
-    initFileDrop();
+    if (!document.querySelector("#uploadForm")) initFileDrop();
+
     initSubmitStates();
 
     window.addEventListener("pagehide", () => {

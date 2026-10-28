@@ -14,7 +14,9 @@
 
     const audio = stage.querySelector("audio.stage-audio");
     const lyricsBox = stage.querySelector("#lyrics");
-    const requestedStageMode = ["folia", "folia-classic"].includes(stage.dataset.stageMode)
+    const galleryMode = window.SekaiStages?.find(item => item.id === stage.dataset.stageMode && item.engine);
+    if (galleryMode) document.body.classList.add('immersive-lyrics-page', 'stage-mode-gallery');
+    const requestedStageMode = galleryMode || ["folia", "folia-classic"].includes(stage.dataset.stageMode)
         ? stage.dataset.stageMode
         : "lyrics";
     const rows = Array.from(stage.querySelectorAll("#lyrics p[data-time]"))
@@ -24,7 +26,7 @@
             return text
                 && !/^\[(?:offset|by|ti|ar|al|re|ve):.*\]$/i.test(text)
                 && !(["folia", "folia-classic"].includes(requestedStageMode) && Number(row.dataset.time || 0) < 12 && staffLine);
-        });
+        }).sort((a, b) => Number(a.dataset.time) - Number(b.dataset.time));
     const slots = {
         prev: stage.querySelector('[data-lyric-slot="prev"]'),
         active: stage.querySelector('[data-lyric-slot="active"]'),
@@ -49,8 +51,7 @@
     const renderMode = params.has("render");
     const stageMode = requestedStageMode;
     const foliaMode = ["folia", "folia-classic"].includes(stageMode);
-    const foliaArticleMode = stageMode === "folia";
-    const foliaBlocks = [];
+    const foliaArticleMode = stageMode === "folia" || Boolean(galleryMode);
     const fps = 60;
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
     const renderDuration = rows.length
@@ -61,6 +62,124 @@
     let activeIndex = -1;
     let lastNow = performance.now();
     let seekDragging = false;
+    let foliaDirector = null;
+    let layoutWidth = 0;
+    let layoutHeight = 0;
+    const scene = stage.querySelector('.lyric-scene');
+    const atmosphere = document.createElement('canvas');
+    atmosphere.className = 'performance-atmosphere';
+    atmosphere.setAttribute('aria-hidden', 'true');
+    stage.querySelector('.lyric-backdrop')?.appendChild(atmosphere);
+    const atmosphereContext = atmosphere.getContext('2d');
+
+    function paintAtmosphere(t) {
+        if (!atmosphereContext || foliaArticleMode) return;
+        const width = stage.clientWidth;
+        const height = stage.clientHeight;
+        if (atmosphere.width !== width || atmosphere.height !== height) {
+            atmosphere.width = width;
+            atmosphere.height = height;
+        }
+        const ctx = atmosphereContext;
+        ctx.clearRect(0, 0, width, height);
+        const clock = reducedMotion ? 0 : t;
+        const shot = Math.max(0, activeIndex);
+        const hue = 22 + 24 * Math.sin(shot * 0.41);
+        const x = width * (0.5 + Math.sin(clock * 0.08) * 0.28);
+        const y = height * (0.45 + Math.cos(clock * 0.1) * 0.18);
+        const light = ctx.createRadialGradient(x, y, 0, x, y, width * 0.58);
+        light.addColorStop(0, `hsla(${hue},85%,65%,.17)`);
+        light.addColorStop(1, 'transparent');
+        ctx.fillStyle = light;
+        ctx.fillRect(0, 0, width, height);
+        ctx.strokeStyle = 'rgba(255,220,187,.07)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) {
+            const phase = clock * 0.045 + i * 0.61;
+            ctx.beginPath();
+            ctx.ellipse(width * .5, height * .48, width * (.16 + i * .055), height * (.13 + i * .045), phase, 0, Math.PI * 1.5);
+            ctx.stroke();
+        }
+        if (reducedMotion) return;
+        for (let i = 0; i < 36; i++) {
+            const px = (seededValue(i * 47 + 8) * width + Math.sin(clock * .12 + i) * 24);
+            const py = (seededValue(i * 31 + 5) * height - clock * (2 + i % 4)) % height;
+            ctx.fillStyle = `rgba(255,221,194,${.08 + .12 * (1 + Math.sin(clock * .4 + i))})`;
+            ctx.fillRect(px, (py + height) % height, i % 5 === 0 ? 3 : 1, i % 5 === 0 ? 3 : 1);
+        }
+    }
+
+    function packSlot(slot) {
+        if (!slot || slot.hidden || foliaArticleMode || !scene) return;
+        const units = Array.from(slot.children);
+        const columns = stage.clientWidth < 700 ? 2 : Math.min(4, Math.ceil(Math.sqrt(units.length * 1.6)));
+        const rowCount = Math.ceil(units.length / columns);
+        const cellWidth = scene.clientWidth * .9 / columns;
+        const cellHeight = scene.clientHeight * .8 / rowCount;
+        units.forEach((unit, index) => {
+            const sourceColumn = index % columns;
+            const column = Number(slot.dataset.rowIndex) % 2 ? columns - 1 - sourceColumn : sourceColumn;
+            const row = Math.floor(index / columns);
+            const jitter = seededValue(Number(slot.dataset.rowIndex) * 31 + index * 13);
+            unit.style.setProperty('--glyph-x', `${5 + (column + .5) * 90 / columns + (jitter - .5) * 3}%`);
+            unit.style.setProperty('--glyph-y', `${10 + (row + .5) * 80 / rowCount + (jitter - .5) * 12}%`);
+            const fit = Math.min(Math.max(4, cellWidth - 64) / Math.max(1, unit.offsetWidth), Math.max(4, cellHeight - 64) / Math.max(1, unit.offsetHeight));
+            const desired = foliaMode ? Number(unit.style.getPropertyValue('--glyph-scale')) || 1 : .9 + jitter * .3;
+            unit.style.setProperty('--glyph-scale', String(Math.max(.005, Math.min(desired, fit / 1.2))));
+            unit.style.setProperty('--glyph-rotation', `${(jitter - .5) * 5}deg`);
+        });
+    }
+
+    async function loadFoliaDirector() {
+        if (!foliaArticleMode || !foliaArticle) return;
+        if (!rows.length) {
+            stage.dataset.foliaEngine = 'empty';
+            window.__stageReady = true;
+            if (foliaSubtitle) foliaSubtitle.textContent = '没有同步歌词，请选择本地 LRC 或匹配云端歌词';
+            return;
+        }
+        window.__stageReady = false;
+        try {
+            if (galleryMode) {
+                const { mount } = await import(galleryMode.derived
+                    ? '/js/derived-performances.js?v=20261027-area'
+                    : '/js/vendor/folia-gallery/gallery.js?v=20261024-mobile');
+                document.querySelector('[data-performance-default-note]').hidden = true;
+                foliaDirector = await mount({ host: foliaArticle, settingsHost: document.querySelector('[data-folia-settings-host]'),
+                    rows, audio, seed: stage.dataset.songId, title: stage.dataset.songTitle, artist: stage.dataset.songArtist,
+                    cover: backdrop?.src, reducedMotion, mode: galleryMode.engine, renderMode });
+                stage.dataset.foliaEngine = (galleryMode.derived ? 'derived-' : 'upstream-') + galleryMode.engine;
+                window.__foliaProgram = foliaDirector.program;
+                foliaDirector.apply(stageTime());
+                return;
+            }
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = '/js/vendor/folia-sonnet.js?v=20261024-mobile';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+            foliaDirector = await window.__createSekaiFolia({ host: foliaArticle, rows,
+                seed: stage.dataset.songId, reducedMotion, title: stage.dataset.songTitle, artist: stage.dataset.songArtist });
+            stage.dataset.foliaEngine = 'sonnet';
+            window.__foliaProgram = foliaDirector.program;
+            foliaDirector.apply(stageTime());
+        } catch (error) {
+            stage.dataset.foliaEngine = 'failed';
+            if (foliaSubtitle) foliaSubtitle.textContent = 'Folia 渲染加载失败，请刷新页面';
+            console.error('Folia Sonnet initialization failed', error);
+        } finally {
+            window.__stageReady = stage.dataset.foliaEngine === 'sonnet' || /^(upstream|derived)-/.test(stage.dataset.foliaEngine || '');
+        }
+    }
+
+    // 没有歌词时，字阵 / Folia 舞台以前是一块空的黑屏：这里给出可读提示，
+    // 用户至少知道发生了什么、以及去哪里补歌词（获取歌词表单在唱片舞台）。
+    if (!rows.length && slots.active) {
+        slots.active.hidden = false;
+        slots.active.textContent = "还没有歌词 · 切到「唱片舞台」用「更多 ▾」获取同步歌词";
+    }
 
     function clamp(value, min = 0, max = 1) {
         return Math.min(max, Math.max(min, value));
@@ -93,7 +212,7 @@
                 found = i;
             }
         }
-        return found < 0 && rows.length ? 0 : found;
+        return found;
     }
 
     function seededValue(seed) {
@@ -111,7 +230,9 @@
         if (!clean) {
             return ["♪"];
         }
-        const chars = Array.from(clean);
+        const chars = typeof Intl.Segmenter === 'function'
+            ? Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(clean), item => item.segment)
+            : Array.from(clean);
         const chunkSize = Math.max(1, Math.ceil(chars.length / maxUnits));
         const units = [];
         for (let i = 0; i < chars.length; i += chunkSize) {
@@ -134,100 +255,6 @@
         return clamp((t - (start - lead)) / lead);
     }
 
-    function buildFoliaArticle() {
-        if (!foliaArticleMode || !foliaArticle || foliaBlocks.length) return;
-        const columns = [260, 1260, 2260];
-        const columnY = [260, 120, 420];
-        rows.forEach((row, index) => {
-            const text = (row.querySelector("b")?.textContent || "").trim();
-            if (!text) return;
-            const glyphs = Array.from(text.replace(/\s+/g, " "));
-            const hero = (index + 1) % 6 === 0
-                || (glyphs.length >= 4 && glyphs.length <= 12 && seededValue(index * 71 + glyphs.length) > 0.82);
-            const column = hero ? index % 2 : index % 3;
-            const width = hero ? 1420 : 920;
-            const height = hero ? 430 : Math.max(230, Math.ceil(glyphs.length / 10) * 150);
-            const x = hero ? (column === 0 ? 220 : 1560) : columns[column];
-            const y = columnY[column];
-            columnY[column] += height + 110 + seededValue(index * 43 + 9) * 170;
-            const block = document.createElement("div");
-            block.className = `folia-article-block${hero ? " is-hero" : ""}`;
-            block.style.left = `${x}px`;
-            block.style.top = `${y}px`;
-            block.style.width = `${width}px`;
-            block.style.minHeight = `${height}px`;
-            block.dataset.index = String(index);
-            block.dataset.start = row.dataset.time || "0";
-            block.dataset.end = rows[index + 1]?.dataset.time || String(Number(row.dataset.time || 0) + 6);
-            glyphs.forEach((glyph, glyphIndex) => {
-                const span = document.createElement("span");
-                span.textContent = glyph;
-                span.style.setProperty("--article-glyph", String(glyphIndex));
-                span.dataset.weight = String(/[、。，！？!?]/.test(glyph) ? 0.36 : /[ぁ-んァ-ン]/.test(glyph) ? 0.82 : 1);
-                block.appendChild(span);
-            });
-            const stamp = document.createElement("i");
-            stamp.textContent = String(index + 1).padStart(2, "0");
-            block.appendChild(stamp);
-            const cursor = document.createElement("b");
-            cursor.className = "folia-print-cursor";
-            cursor.textContent = "✦";
-            block.appendChild(cursor);
-            foliaArticle.appendChild(block);
-            foliaBlocks.push({ block, x, y, width, height, hero });
-        });
-    }
-
-    function updateFoliaArticle(t) {
-        if (!foliaArticleMode || !foliaArticle || !foliaBlocks.length || activeIndex < 0) return;
-        const active = foliaBlocks.find((item) => Number(item.block.dataset.index) === activeIndex) || foliaBlocks[0];
-        const start = Number(active.block.dataset.start || 0);
-        const end = Number(active.block.dataset.end || start + 6);
-        const progress = clamp((t - start) / Math.max(0.18, end - start));
-        const responsiveScale = clamp(stage.clientWidth / 1280, 0.42, 1);
-        const scale = (active.hero ? 0.92 : 1.18) * responsiveScale;
-        let focusX = active.x + active.width * (0.18 + progress * 0.64);
-        let focusY = active.y + active.height * 0.5;
-        const cameraScale = scale;
-        const viewportCenterX = stage.clientWidth * 0.5;
-        const viewportCenterY = stage.clientHeight * 0.47;
-        foliaArticle.style.transform = `translate3d(${(viewportCenterX - focusX * cameraScale).toFixed(2)}px, ${(viewportCenterY - focusY * cameraScale).toFixed(2)}px, 0) scale(${cameraScale.toFixed(4)})`;
-        foliaBlocks.forEach((item) => {
-            const index = Number(item.block.dataset.index);
-            const lineStart = Number(item.block.dataset.start || 0);
-            const lineEnd = Number(item.block.dataset.end || lineStart + 6);
-            const lineProgress = entranceProgress(t, lineStart, lineEnd);
-            const state = index === activeIndex ? "active" : index < activeIndex ? "passed" : "waiting";
-            item.block.dataset.state = state;
-            const glyphs = Array.from(item.block.querySelectorAll("span"));
-            const totalWeight = glyphs.reduce((sum, glyph) => sum + Number(glyph.dataset.weight || 1), 0);
-            const printedWeight = state === "passed"
-                ? totalWeight
-                : (state === "active" || lineProgress > 0 ? lineProgress * totalWeight : 0);
-            let weightCursor = 0;
-            let lastPrintedGlyph = null;
-            glyphs.forEach((glyph, glyphIndex) => {
-                const weight = Number(glyph.dataset.weight || 1);
-                const reveal = clamp((printedWeight - weightCursor) / Math.max(weight, 0.01));
-                weightCursor += weight;
-                glyph.style.opacity = String(0.08 + reveal * 0.92);
-                glyph.style.transform = `translateY(${((1 - reveal) * -18).toFixed(2)}px) scale(${(0.92 + reveal * 0.08).toFixed(3)})`;
-                glyph.style.filter = `blur(${((1 - reveal) * 2).toFixed(2)}px)`;
-                glyph.style.textShadow = `-3px 0 rgba(89,221,218,${(reveal * 0.24).toFixed(3)}), 3px 0 rgba(241,80,56,${(reveal * 0.2).toFixed(3)}), 0 0 ${(7 + reveal * 13).toFixed(2)}px rgba(255,246,235,${(reveal * 0.55).toFixed(3)})`;
-                const ink = state === "active" ? 1 - reveal : 0;
-                glyph.style.color = `rgba(255,${Math.round(250 - ink * 118)},${Math.round(244 - ink * 179)},${(0.08 + reveal * 0.92).toFixed(3)})`;
-                if (reveal > 0) lastPrintedGlyph = glyph;
-            });
-            const cursor = item.block.querySelector(".folia-print-cursor");
-            if (cursor) {
-                const showCursor = state === "active" && lineProgress > 0 && lineProgress < 0.985 && lastPrintedGlyph;
-                cursor.style.opacity = showCursor ? "1" : "0";
-                if (showCursor) {
-                    cursor.style.transform = `translate3d(${lastPrintedGlyph.offsetLeft + lastPrintedGlyph.offsetWidth + 8}px, ${lastPrintedGlyph.offsetTop + lastPrintedGlyph.offsetHeight * 0.35}px, 0)`;
-                }
-            }
-        });
-    }
 
     function setGlyphLayout(span, lineIndex, characterIndex, characterCount, text) {
         const seed = (lineIndex + 17) * 41 + (characterIndex + 3) * 19 + text.length * 7;
@@ -370,14 +397,17 @@
             } else {
                 setGlyphLayout(span, index, characterIndex, units.length, text);
             }
-            if (/\s/.test(character)) {
+            if (/^\s+$/.test(character)) {
                 span.classList.add("is-space");
             }
             slot.appendChild(span);
         });
+        packSlot(slot);
     }
 
     function updateLyrics(t) {
+        // Directors must receive seeks into the intro too, otherwise the previous scene remains.
+        foliaDirector?.apply(t);
         const nextIndex = lyricIndexAt(t);
         if (nextIndex !== activeIndex) {
             activeIndex = nextIndex;
@@ -435,7 +465,9 @@
                 const cameraScale = 1.055 - groupIn * 0.055 + lineProgress * 0.018;
                 slot.style.transform = `translate3d(${cameraX.toFixed(2)}px, ${cameraY.toFixed(2)}px, 0) scale(${cameraScale.toFixed(4)})`;
             } else {
-                slot.style.transform = "";
+                const cameraX = reducedMotion ? 0 : Math.sin(lineProgress * Math.PI) * (activeIndex % 2 ? -8 : 8);
+                const cameraScale = reducedMotion ? 1 : 1.025 - groupIn * .025 + lineProgress * .012;
+                slot.style.transform = `translate3d(${cameraX.toFixed(2)}px, 0, 0) scale(${cameraScale.toFixed(4)})`;
             }
             Array.from(slot.children).forEach((character, index) => {
                 if (character.classList.contains("is-space")) {
@@ -473,7 +505,6 @@
         animateSlot(slots.prev, "prev");
         animateSlot(slots.active, "active");
         animateSlot(slots.next, "next");
-        updateFoliaArticle(t);
         if (progressLabel) {
             progressLabel.textContent = Math.max(0, t - start).toFixed(2).padStart(5, "0");
         }
@@ -499,13 +530,20 @@
     }
 
     function applyStage(t, dt) {
+        if (layoutWidth !== stage.clientWidth || layoutHeight !== stage.clientHeight) {
+            layoutWidth = stage.clientWidth;
+            layoutHeight = stage.clientHeight;
+            Object.values(slots).forEach(packSlot);
+        }
+        paintAtmosphere(t);
         const motionT = reducedMotion ? 0 : t;
         const beat = 0.5 + 0.5 * Math.sin(motionT * Math.PI * 2);
         stage.style.setProperty("--lyric-beat", (0.75 + beat * 0.25).toFixed(3));
         stage.style.setProperty("--lyric-drift", `${(Math.sin(motionT * 0.13) * 12).toFixed(2)}px`);
         stage.style.setProperty("--lyric-drift-y", `${(Math.cos(motionT * 0.11) * 8).toFixed(2)}px`);
         if (backdrop) {
-            backdrop.style.transform = `scale(${foliaMode ? "1.045" : "1.07"}) translate3d(var(--lyric-drift), var(--lyric-drift-y), 0)`;
+            const zoom = (foliaMode ? 1.055 : 1.08) + Math.sin(motionT * .055) * .018;
+            backdrop.style.transform = `scale(${zoom.toFixed(4)}) translate3d(var(--lyric-drift), var(--lyric-drift-y), 0) rotate(${(Math.sin(motionT * .035) * .45).toFixed(3)}deg)`;
         }
         orbits.forEach((orbit, index) => {
             const rotation = motionT * (index ? -3.5 : 5.5) + index * 42;
@@ -623,7 +661,9 @@
         requestAnimationFrame(tick);
     }
 
-    buildFoliaArticle();
+    loadFoliaDirector();
+    document.fonts?.ready.then(() => Object.values(slots).forEach(packSlot));
+    window.addEventListener('pagehide', () => foliaDirector?.destroy(), { once: true });
     updatePlayIcon();
     window.__stageTimeline = { now: stageTime, apply: applyStage };
 })();

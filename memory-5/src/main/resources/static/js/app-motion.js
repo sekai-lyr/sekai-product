@@ -64,6 +64,8 @@
     if (reduceMotionQuery.matches || !("IntersectionObserver" in window)) {
         revealImmediately();
     } else {
+        // threshold 必须为 0：长列表容器（收藏卡片网格、首页双栏）在手机上可以
+        // 高达上万像素，永远到不了 10% 的交叉比例，整块内容会一直停在 opacity:0。
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (!entry.isIntersecting) {
@@ -72,12 +74,17 @@
                 entry.target.classList.add("is-visible");
                 observer.unobserve(entry.target);
             });
-        }, {threshold: 0.1, rootMargin: "0px 0px -8% 0px"});
+        }, {threshold: 0, rootMargin: "0px 0px -8% 0px"});
 
         revealTargets.forEach((element) => observer.observe(element));
     }
 
-    const pointerTargets = document.querySelectorAll(pointerGlowSelectors.join(","));
+    // 指针光晕只在鼠标设备上启用：触屏没有 hover，pointermove 只会造成无意义的
+    // 每帧 getBoundingClientRect 回流（拖动滚动时尤其明显）。
+    const finePointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const pointerTargets = finePointerQuery.matches
+        ? document.querySelectorAll(pointerGlowSelectors.join(","))
+        : [];
     pointerTargets.forEach((element) => {
         element.classList.add("pointer-glow");
         element.addEventListener("pointermove", (event) => {
@@ -143,6 +150,66 @@
             window.requestAnimationFrame(tick);
         });
     };
+
+    // 手机端导航：≤980px 时侧栏变成顶栏，导航项折叠进 .sidebar-panel。
+    const navToggle = document.querySelector("[data-sidebar-toggle]");
+    const sidebarRoot = navToggle ? navToggle.closest(".sidebar") : null;
+    const mobileLayoutQuery = window.matchMedia("(max-width: 980px)");
+    if (navToggle && sidebarRoot) {
+        const panel = sidebarRoot.querySelector("[data-sidebar-panel]");
+        const scrim = sidebarRoot.querySelector("[data-sidebar-scrim]");
+        const desktopQuery = window.matchMedia("(min-width: 981px)");
+        const isOpen = () => sidebarRoot.classList.contains("nav-open");
+        const setOpen = (open) => {
+            sidebarRoot.classList.toggle("nav-open", open);
+            navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+            navToggle.setAttribute("aria-label", open ? "关闭导航菜单" : "打开导航菜单");
+            if (scrim) {
+                scrim.hidden = !open;
+            }
+            document.body.classList.toggle("nav-scroll-lock", open);
+        };
+        navToggle.addEventListener("click", () => setOpen(!isOpen()));
+        scrim?.addEventListener("click", () => setOpen(false));
+        panel?.addEventListener("click", (event) => {
+            if (event.target instanceof Element && event.target.closest("a")) {
+                setOpen(false);
+            }
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && isOpen()) {
+                setOpen(false);
+                navToggle.focus();
+            }
+        });
+        const syncToViewport = (event) => {
+            if (event.matches) {
+                setOpen(false);
+            }
+        };
+        if (desktopQuery.addEventListener) {
+            desktopQuery.addEventListener("change", syncToViewport);
+        }
+        setOpen(false);
+    }
+
+    // 把手机顶栏的真实高度写进 CSS 变量，供播放页舞台 / 歌曲库舞台计算可视高度。
+    if (sidebarRoot) {
+        const publishTopbarHeight = () => {
+            if (mobileLayoutQuery.matches) {
+                const height = Math.round(sidebarRoot.getBoundingClientRect().height);
+                document.documentElement.style.setProperty("--sekai-topbar", height + "px");
+            } else {
+                document.documentElement.style.removeProperty("--sekai-topbar");
+            }
+        };
+        publishTopbarHeight();
+        window.addEventListener("resize", publishTopbarHeight);
+        window.addEventListener("orientationchange", publishTopbarHeight);
+        if ("ResizeObserver" in window) {
+            new ResizeObserver(publishTopbarHeight).observe(sidebarRoot);
+        }
+    }
 
     const stage = document.querySelector(".player-stage");
     const audio = document.querySelector("audio.stage-audio");

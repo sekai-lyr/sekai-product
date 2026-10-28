@@ -2,11 +2,15 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Sekai Song - 歌单</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=20260830b)}" href="/css/app.css?v=20260830b">
-    <link rel="stylesheet" th:href="@{/css/songs-selection.css(v=20261009c)}" href="/css/songs-selection.css?v=20261009c">
-    <link rel="stylesheet" th:href="@{/css/playlists-selection.css(v=20261009c)}" href="/css/playlists-selection.css?v=20261009c">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20261016b)}" href="/css/app.css?v=20261016b">
+    <link rel="stylesheet" th:href="@{/css/songs-selection.css(v=20261025cover)}" href="/css/songs-selection.css?v=20261025cover">
+    <link rel="stylesheet" th:href="@{/css/playlists-selection.css(v=20261016b)}" href="/css/playlists-selection.css?v=20261016b">
+    <link rel="stylesheet" th:href="@{/css/circular-selection.css(v=20261025cover)}" href="/css/circular-selection.css?v=20261025cover">
+    <script src="/js/site-theme.js?v=20261028"></script>
+    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
+    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
 </head>
 <body class="song-selection-page playlist-index-page">
 <div class="app-shell song-selection-shell">
@@ -82,7 +86,7 @@
                     <span th:text="${#lists.size(playlists) + ' 个'}">0 个</span>
                 </div>
 
-                <div class="selection-track-list playlist-index-list">
+                <div class="selection-track-list playlist-index-list" data-circular-selection data-circular-selection-label="歌单选择">
                     <div class="selection-track playlist-index-track"
                          th:each="playlist, playlistStat : ${playlists}"
                          th:classappend="${playlistStat.first} ? ' is-active'">
@@ -109,7 +113,8 @@
                         <div class="playlist-index-actions">
                             <a th:href="@{/playlists/{id}(id=${playlist.id})}" title="进入歌单">进入</a>
                             <a th:href="@{/playlists/{id}/edit(id=${playlist.id})}" title="编辑歌单">编辑</a>
-                            <form th:action="@{/playlists/delete/{id}(id=${playlist.id})}" method="post">
+                            <form th:action="@{/playlists/delete/{id}(id=${playlist.id})}" method="post"
+                                  onsubmit="return confirm('删除歌单「' + this.closest('.playlist-index-track').querySelector('.selection-track-copy strong').textContent.trim() + '」？歌单里的歌曲不会被删除。');">
                                 <button type="submit" title="删除歌单">删除</button>
                             </form>
                         </div>
@@ -124,7 +129,7 @@
             <p>先创建一个歌单，再用封面进入你的音乐世界。</p>
         </section>
 
-        <details class="selection-add-panel playlist-tools-panel">
+        <details class="selection-add-panel playlist-tools-panel" open>
             <summary>歌单管理与本地导入</summary>
             <section class="playlist-create-block">
                 <h2>新建歌单</h2>
@@ -137,68 +142,9 @@
             </section>
 
             <section class="bulk-audio-panel playlist-import-block">
-                <div class="playlist-tools-heading">
-                    <h2>本地音频导入</h2>
-                    <span>文件夹上传 / 路径扫描</span>
-                </div>
-                <div class="bulk-audio-actions">
-                    <form class="bulk-audio-card local-audio-upload-form"
-                          action="/playlists/local-audio-folder"
-                          method="post"
-                          enctype="multipart/form-data">
-                        <div class="bulk-audio-copy">
-                            <strong>选择本地音乐文件夹</strong>
-                            <span>直接把 FLAC / MP3 / M4A 做成歌单；导入后可使用唱片、字阵、Folia 经典和 Folia 最新四种演出。</span>
-                        </div>
-                        <select name="playlistId">
-                            <option value="">新建歌单</option>
-                            <option th:each="playlist : ${playlists}"
-                                    th:value="${playlist.id}"
-                                    th:text="${'加入：' + playlist.name}">加入已有歌单</option>
-                        </select>
-                        <input name="playlistName" placeholder="新歌单名称，例如 客户本地歌单">
-                        <input name="coverUrl" placeholder="封面 URL，可不填">
-                        <div class="local-audio-picker">
-                            <input id="localAudioFolderInput"
-                                   class="visually-hidden-file"
-                                   name="audioFiles"
-                                   type="file"
-                                   accept=".mp3,.flac,.m4a,.wav,.ogg,.aac,.lrc,.txt,audio/*,text/plain"
-                                   multiple
-                                   webkitdirectory
-                                   directory>
-                            <input id="localAudioFilesInput"
-                                   class="visually-hidden-file"
-                                   name="audioFiles"
-                                   type="file"
-                                   accept=".mp3,.flac,.m4a,.wav,.ogg,.aac,.lrc,.txt,audio/*,text/plain"
-                                   multiple>
-                            <label class="file-picker-button" for="localAudioFolderInput">选择整个文件夹</label>
-                            <label class="file-picker-button secondary" for="localAudioFilesInput">选择多个音频</label>
-                            <span class="file-picker-summary" data-file-summary>文件夹窗口可能不显示歌曲，选定后这里会显示数量</span>
-                        </div>
-                        <button type="submit">导入文件夹为歌单</button>
-                    </form>
-                    <form class="bulk-audio-card"
-                          action="/playlists/local-audio-folder-path"
-                          method="post">
-                        <div class="bulk-audio-copy">
-                            <strong>填写本机文件夹路径</strong>
-                            <span>客户电脑本地部署时推荐用这个，速度更快，也不受浏览器上传大小影响。</span>
-                        </div>
-                        <select name="playlistId">
-                            <option value="">新建歌单</option>
-                            <option th:each="playlist : ${playlists}"
-                                    th:value="${playlist.id}"
-                                    th:text="${'加入：' + playlist.name}">加入已有歌单</option>
-                        </select>
-                        <input name="playlistName" placeholder="新歌单名称，例如 本地 FLAC 收藏">
-                        <input name="coverUrl" placeholder="封面 URL，可不填">
-                        <input name="folderPath" placeholder="例如 D:\Music\Anime 或 E:\客户音乐">
-                        <button type="submit">扫描路径并导入</button>
-                    </form>
-                </div>
-                <small>系统优先读取音频内的标题、歌手、专辑和歌词标签；缺少歌词时依次匹配网易云、QQ 音乐与 LRCLIB。没有标签时建议文件名使用“歌手 - 歌名.flac”。</small>
+                <h2>导入本机音视频</h2>
+                <p>选择本机文件、检查歌曲信息，再决定加入歌曲库或哪个歌单。</p>
+                <a href="/local-player">打开本机音视频导入</a>
             </section>
         </details>
 
@@ -207,6 +153,7 @@
         </div>
     </main>
 </div>
-<script th:src="@{/js/playlists-selection.js(v=20261009c)}" src="/js/playlists-selection.js?v=20261009c"></script>
+<script th:src="@{/js/circular-selection.js(v=20261016-compact)}" src="/js/circular-selection.js?v=20261016-compact"></script>
+<script th:src="@{/js/playlists-selection.js(v=20261016b)}" src="/js/playlists-selection.js?v=20261016b"></script>
 </body>
 </html>

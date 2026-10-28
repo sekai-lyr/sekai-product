@@ -1,0 +1,8 @@
+[Unit]
+Description=Expire Sekai private preview invitation
+[Timer]
+OnCalendar=2026-10-18 04:10:00 UTC
+Persistent=true
+Unit=sekai-preview-expire.service
+[Install]
+WantedBy=timers.target

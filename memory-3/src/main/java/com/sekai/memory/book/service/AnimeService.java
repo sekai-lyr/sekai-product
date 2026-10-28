@@ -8,6 +8,8 @@ public interface AnimeService {
 
     List<Anime> listByUserId(Long userId);
 
+    List<Anime> listByUserId(Long userId, String keyword);
+
     List<Anime> listByUserId(Long userId, String keyword, int page, int pageSize);
 
     int countByUserId(Long userId, String keyword);

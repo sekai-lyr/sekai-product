@@ -1,35 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>伙伴库 - 灵感伙伴签</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=202605082245)}" href="/css/app.css?v=202605082245">
-</head>
-<body>
-<header class="topbar">
-    <a class="logo" th:href="@{/home}">灵感伙伴签</a>
-    <nav><a th:href="@{/home}">抽签</a><a th:href="@{/wheel}">转盘</a><a class="active" th:href="@{/characters}">伙伴库</a><a th:href="@{/history}">历史</a><a th:href="@{/favorites}">收藏</a></nav>
-</header>
-<main class="dashboard">
-    <section class="list-head">
-        <div><p class="eyebrow">原创伙伴图鉴</p><h1>伙伴库</h1></div>
-        <form class="search-form" th:action="@{/characters}" method="get">
-            <input name="keyword" th:value="${keyword}" placeholder="搜索名字、系列、属性">
-            <button type="submit">搜索</button>
-        </form>
-    </section>
-    <section class="character-grid">
-        <a class="character-card" th:each="character : ${characters}" th:href="@{/characters/{id}(id=${character.id})}">
-            <img th:src="@{/character/image/{id}(id=${character.id},v=202605091650)}" alt="">
-            <div>
-                <h2 th:text="${character.displayName}">名字</h2>
-                <p th:text="${character.displayAnimeTitle}">作品</p>
-                <span th:text="${character.displayArchetype + ' / ' + character.displayElement}">类型</span>
-            </div>
-        </a>
-    </section>
-</main>
-<script th:src="@{/js/app.js(v=2026083001)}" src="/js/app.js?v=2026083001"></script>
-</body>
-</html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('伙伴库')}"></head>
+<body><header th:replace="~{fragments :: header('characters')}"></header>
+<main class="dashboard"><div th:replace="~{fragments :: messages}"></div>
+
+<div class="page-heading"><div><h1>伙伴图鉴</h1><p>从熟悉的名字，到意料之外的相遇。</p></div><a th:href="@{/favorites}">我的收藏</a></div>
+<form class="filter-form" th:action="@{/characters}" method="get">
+ <label>搜索伙伴<input name="keyword" th:value="${keyword}" maxlength="120" placeholder="名字、系列或标签"></label>
+ <label>角色类型<select name="role"><option value="">全部类型</option><option th:each="r : ${roles}" th:value="${r.value}" th:text="${r.label}" th:selected="${role == r.value}"></option></select></label>
+ <label>能量标签<select name="energy"><option value="">全部能量</option><option th:each="e : ${energies}" th:value="${e.value}" th:text="${e.label}" th:selected="${energy == e.value}"></option></select></label><button>筛选伙伴</button>
+</form>
+<section class="character-grid"><a class="character-card" th:each="c : ${characters}" th:href="@{/characters/{id}(id=${c.id})}"><img th:src="@{/character/image/{id}(id=${c.id})}" alt="" loading="lazy" width="300" height="240"><div><h2 th:text="${c.displayName}"></h2><p th:text="${c.displayAnimeTitle}"></p><span th:text="${c.displayArchetype + ' · ' + c.displayElement}"></span></div></a>
+<div th:if="${#lists.isEmpty(characters)}" class="empty-panel"><h2>暂时没有匹配的伙伴</h2><p>换一个关键词，或清空筛选重新看看。</p><a class="button secondary" th:href="@{/characters}">清空筛选</a></div></section>
+<nav class="pagination" aria-label="伙伴分页"><a th:if="${pagination.previous}" th:href="@{/characters(keyword=${keyword},role=${role},energy=${energy},page=${pagination.page - 1})}">上一页</a><span th:text="${'共 ' + pagination.total + ' 位 · ' + pagination.page + ' / ' + pagination.pages + ' 页'}"></span><a th:if="${pagination.next}" th:href="@{/characters(keyword=${keyword},role=${role},energy=${energy},page=${pagination.page + 1})}">下一页</a></nav>
+
+</main><footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/app.js(v=20261028)}"></script></body></html>

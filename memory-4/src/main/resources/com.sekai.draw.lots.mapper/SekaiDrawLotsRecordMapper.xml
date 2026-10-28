@@ -11,6 +11,10 @@
         <result property="wishTopic" column="wish_topic"/>
         <result property="message" column="message"/>
         <result property="drawTime" column="draw_time"/>
+        <result property="drawType" column="draw_type"/>
+        <result property="ritualId" column="ritual_id"/>
+        <result property="dailyDate" column="daily_date"/>
+        <result property="wishId" column="wish_id"/>
         <association property="character" javaType="com.sekai.draw.lots.model.AnimeCharacter">
             <id property="id" column="c_id"/>
             <result property="englishName" column="english_name"/>
@@ -33,8 +37,8 @@
     </resultMap>
 
     <insert id="insert" parameterType="com.sekai.draw.lots.dataobject.SekaiDrawLotsRecordDO" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sekai_Draw_lots_record (user_id, character_id, fortune_id, mood, wish_topic, fortune_score, message)
-        VALUES (#{userId}, #{characterId}, #{fortuneId}, COALESCE(#{mood}, '平静'), #{wishTopic}, #{luckScore}, #{message})
+        INSERT INTO sekai_Draw_lots_record (user_id, character_id, fortune_id, mood, wish_topic, fortune_score, message, draw_type, ritual_id, daily_date, wish_id)
+        VALUES (#{userId}, #{characterId}, #{fortuneId}, COALESCE(#{mood}, '平静'), #{wishTopic}, #{luckScore}, #{message}, #{drawType}, #{ritualId}, #{dailyDate}, #{wishId})
     </insert>
 
     <select id="countByUserId" resultType="int">
@@ -66,7 +70,7 @@
 
     <select id="selectRecentByUserId" resultMap="RecordResultMap">
         SELECT r.id, r.user_id, r.character_id, r.fortune_id, r.fortune_score AS luck_score,
-               r.mood, r.wish_topic, r.message, r.draw_time,
+               r.mood, r.wish_topic, r.message, r.draw_time, r.draw_type, r.ritual_id, r.daily_date, r.wish_id,
                c.id AS c_id, c.english_name, NULL AS japanese_name, c.anime_title, c.role_type AS archetype,
                c.energy AS element, c.image_url, c.tags AS quote, c.popularity_score AS popularity,
                f.id AS f_id, f.summary AS title, f.level_name, f.advice, f.lucky_color, f.lucky_item
@@ -80,7 +84,7 @@
 
     <select id="selectByIdForUser" resultMap="RecordResultMap">
         SELECT r.id, r.user_id, r.character_id, r.fortune_id, r.fortune_score AS luck_score,
-               r.mood, r.wish_topic, r.message, r.draw_time,
+               r.mood, r.wish_topic, r.message, r.draw_time, r.draw_type, r.ritual_id, r.daily_date, r.wish_id,
                c.id AS c_id, c.english_name, NULL AS japanese_name, c.anime_title, c.role_type AS archetype,
                c.energy AS element, c.image_url, c.tags AS quote, c.popularity_score AS popularity,
                f.id AS f_id, f.summary AS title, f.level_name, f.advice, f.lucky_color, f.lucky_item
@@ -94,7 +98,7 @@
 
     <select id="selectTodayDaily" resultMap="RecordResultMap">
         SELECT r.id, r.user_id, r.character_id, r.fortune_id, r.fortune_score AS luck_score,
-               r.mood, r.wish_topic, r.message, r.draw_time,
+               r.mood, r.wish_topic, r.message, r.draw_time, r.draw_type, r.ritual_id, r.daily_date, r.wish_id,
                c.id AS c_id, c.english_name, NULL AS japanese_name, c.anime_title, c.role_type AS archetype,
                c.energy AS element, c.image_url, c.tags AS quote, c.popularity_score AS popularity,
                f.id AS f_id, f.summary AS title, f.level_name, f.advice, f.lucky_color, f.lucky_item
@@ -102,15 +106,15 @@
         JOIN sekai_Draw_lots_character c ON r.character_id = c.id
         JOIN sekai_Draw_lots_fortune f ON r.fortune_id = f.id
         WHERE r.user_id = #{userId}
-          AND r.wish_topic = '每日固定签'
-          AND DATE(r.draw_time) = CURDATE()
+          AND r.draw_type = 'DAILY'
+          AND r.daily_date = CURDATE()
         ORDER BY r.id DESC
         LIMIT 1
     </select>
 
     <select id="selectByFilter" resultMap="RecordResultMap">
         SELECT r.id, r.user_id, r.character_id, r.fortune_id, r.fortune_score AS luck_score,
-               r.mood, r.wish_topic, r.message, r.draw_time,
+               r.mood, r.wish_topic, r.message, r.draw_time, r.draw_type, r.ritual_id, r.daily_date, r.wish_id,
                c.id AS c_id, c.english_name, NULL AS japanese_name, c.anime_title, c.role_type AS archetype,
                c.energy AS element, c.image_url, c.tags AS quote, c.popularity_score AS popularity,
                f.id AS f_id, f.summary AS title, f.level_name, f.advice, f.lucky_color, f.lucky_item

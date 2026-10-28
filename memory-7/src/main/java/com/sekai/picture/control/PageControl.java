@@ -20,6 +20,9 @@ import java.util.List;
 public class PageControl {
 
     @Resource
+    private com.sekai.picture.mapper.SekaiPictureWallpaperMapper wallpaperMapper;
+
+    @Resource
     private CategoryService categoryService;
 
     @Resource
@@ -48,24 +51,30 @@ public class PageControl {
                        @RequestParam(value = "orientation", required = false) String orientation,
                        @RequestParam(value = "colorTone", required = false) String colorTone,
                        @RequestParam(value = "sort", defaultValue = "latest") String sort,
-                       @RequestParam(value = "page", defaultValue = "1") int page) {
+                       @RequestParam(value = "page", defaultValue = "1") int page,
+                       @RequestParam(value = "needs", required = false) String needs) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
         }
-        int pageSize = 9;
+        if (!java.util.Set.of("uncategorized", "untagged").contains(needs == null ? "" : needs)) needs = null;
+        int pageSize = 12;
         int total = wallpaperService.countByUserId(user.getId(), categoryId, keyword, favorite, original, orientation, colorTone);
+        if (needs != null) total = wallpaperMapper.countNeeds(user.getId(), needs);
         int totalPages = Math.max((int) Math.ceil(total / (double) pageSize), 1);
         int currentPage = Math.min(Math.max(page, 1), totalPages);
         List<Wallpaper> wallpapers = wallpaperService.listByUserId(user.getId(), categoryId, keyword, favorite,
                 original, orientation, colorTone, sort, currentPage, pageSize);
 
+        if (needs != null) wallpapers = wallpaperMapper.listNeeds(user.getId(), needs, (currentPage - 1) * pageSize, pageSize).stream().map(com.sekai.picture.dataobject.SekaiPictureWallpaperDO::convertToWallpaper).toList();
+        model.addAttribute("needs", needs);
         model.addAttribute("loginUser", user);
         model.addAttribute("categories", categoryService.listByUserId(user.getId()));
         model.addAttribute("colorTones", wallpaperService.listColorTonesByUserId(user.getId()));
         model.addAttribute("wallpapers", wallpapers);
         model.addAttribute("hotWallpapers", wallpaperService.listHotByUserId(user.getId(), 4));
         model.addAttribute("stats", buildStats(user.getId()));
+        model.addAttribute("health", wallpaperMapper.health(user.getId()));
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("keyword", keyword == null ? "" : keyword);
         model.addAttribute("favorite", favorite);
@@ -101,6 +110,7 @@ public class PageControl {
         model.addAttribute("hotWallpapers", wallpaperService.listHotByUserId(user.getId(), 8));
         model.addAttribute("colorTones", wallpaperService.listColorTonesByUserId(user.getId()));
         model.addAttribute("stats", buildStats(user.getId()));
+        model.addAttribute("health", wallpaperMapper.health(user.getId()));
         return "dashboard";
     }
 

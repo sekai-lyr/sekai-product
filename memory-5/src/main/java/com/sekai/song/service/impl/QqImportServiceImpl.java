@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 public class QqImportServiceImpl implements QqImportService {
 
     private static final String SONG_DETAIL_API = "https://u.y.qq.com/cgi-bin/musicu.fcg?data=";
+    private static final String PLAYLIST_DETAIL_API = "https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg";
     private static final int QQ_PLAYLIST_PAGE_SIZE = 100;
     private static final int QQ_IMPORT_RETRY_TIMES = 3;
     private static final int QQ_IMPORT_MAX_PLAYLIST_SONGS = 5000;
@@ -79,7 +80,7 @@ public class QqImportServiceImpl implements QqImportService {
             return fail(result, "请先登录后再导入歌曲");
         }
         String expandedText = expandShareLinks(songIds);
-        List<QqSongKey> keys = extractSongKeys(expandedText);
+        List<QqSongKey> keys = extractSongKeys(songIds);
         List<String> playlistIds = extractPlaylistIds(expandedText);
         if (keys.isEmpty() && playlistIds.isEmpty()) {
             return fail(result, "请粘贴 QQ 音乐 songmid、songid、单曲链接，或网络检查里复制出来的歌曲字段");
@@ -92,31 +93,47 @@ public class QqImportServiceImpl implements QqImportService {
 
         List<JsonNode> directTrackNodes = fetchSongDetails(keys);
         List<JsonNode> trackNodes = new ArrayList<>(directTrackNodes);
+        for (QqSongKey key : keys) {
+            boolean found = directTrackNodes.stream().anyMatch(t -> key.mid() != null
+                    ? key.mid().equals(t.path("mid").asText(t.path("songmid").asText()))
+                    : key.songId() == t.path("id").asLong(t.path("songid").asLong()));
+            if (!found) result.getFailedInputs().add(key.mid() == null ? String.valueOf(key.songId()) : key.mid());
+        }
         int failedPlaylists = 0;
+        int missingPlaylistSongs = 0;
         for (String remotePlaylistId : playlistIds) {
-            List<JsonNode> playlistTracks = fetchPlaylistTracks(remotePlaylistId);
-            if (playlistTracks.isEmpty()) {
+            PlaylistTracks playlistTracks = fetchPlaylistTracks(remotePlaylistId);
+            if (playlistTracks.tracks().isEmpty()) {
                 failedPlaylists++;
             }
-            trackNodes.addAll(playlistTracks);
+            if (playlistTracks.tracks().isEmpty() || playlistTracks.missing() > 0)
+                result.getFailedInputs().add("https://y.qq.com/n/ryqq/playlist/" + remotePlaylistId);
+            missingPlaylistSongs += playlistTracks.missing();
+            trackNodes.addAll(playlistTracks.tracks());
         }
         List<JsonNode> uniqueTracks = deduplicateTracks(trackNodes);
+        if (uniqueTracks.isEmpty() && !playlistIds.isEmpty()) {
+            return fail(result, "未能从 QQ 音乐歌单读取歌曲。请确认歌单公开，稍后重试；无需手动提取歌曲 ID。");
+        }
         if (!keys.isEmpty() && uniqueTracks.isEmpty()) {
             return fail(result, "QQ 音乐这次没有返回歌曲数据。已识别 " + keys.size()
                     + " 个歌曲标识，可能是接口限流或网络波动，请稍后重试，或把一次导入数量减少到 100 首以内。");
         }
 
         ImportCount count = importTracks(uniqueTracks, playlist.getId(), userId);
-        int failed = Math.max(keys.size() - directTrackNodes.size(), 0) + failedPlaylists;
+        int failed = Math.max(keys.size() - directTrackNodes.size(), 0) + missingPlaylistSongs;
         result.setSuccess(true);
         result.setPlaylistId(playlist.getId());
         result.setPlaylistName(playlist.getName());
         result.setImportedCount(count.imported);
         result.setSkippedCount(count.existing + count.skipped);
-        String message = "QQ 音乐导入完成：识别 " + keys.size() + " 个歌曲标识，读取 " + uniqueTracks.size()
+        String message = "QQ 音乐导入完成：" + (playlistIds.isEmpty() ? "识别 " + keys.size() + " 个歌曲标识，" : "识别 " + playlistIds.size() + " 个歌单链接，自动分页读取歌曲，") + "读取 " + uniqueTracks.size()
                 + " 首，新增 " + count.imported + " 首，已存在 " + count.existing
                 + " 首，加入当前歌单 " + count.addedToPlaylist + " 首，未读取 "
                 + Math.max(failed, 0) + " 首，无效/跳过 " + count.skipped + " 首";
+        if (failedPlaylists > 0) {
+            message += "，另有 " + failedPlaylists + " 个歌单读取失败";
+        }
         if (count.imported == 0 && count.addedToPlaylist == 0 && count.existing > 0) {
             message += "。这些歌曲之前已经导入过，所以第二次不会重复新增。";
         }
@@ -231,9 +248,11 @@ public class QqImportServiceImpl implements QqImportService {
         }
     }
 
-    private List<JsonNode> fetchPlaylistTracks(String playlistId) {
+    private PlaylistTracks fetchPlaylistTracks(String playlistId) {
         List<JsonNode> songs = new ArrayList<>();
-        for (int begin = 0; begin < QQ_IMPORT_MAX_PLAYLIST_SONGS; begin += QQ_PLAYLIST_PAGE_SIZE) {
+        Set<String> seen = new LinkedHashSet<>();
+        int expected = 0;
+        for (int begin = 0; begin < QQ_IMPORT_MAX_PLAYLIST_SONGS;) {
             JsonNode data = fetchPlaylistData(playlistId, begin, QQ_PLAYLIST_PAGE_SIZE);
             if (data == null) {
                 break;
@@ -242,18 +261,27 @@ public class QqImportServiceImpl implements QqImportService {
             if (!songList.isArray() || songList.isEmpty()) {
                 break;
             }
+            int seenBefore = songs.size();
             for (JsonNode songNode : songList) {
                 JsonNode trackNode = normalizePlaylistSongNode(songNode);
-                if (trackNode != null && !trackNode.isMissingNode() && !trackNode.isNull()) {
+                String key = trackNode == null ? null : qqTrackKey(trackNode);
+                if (key != null && seen.add(key)) {
                     songs.add(trackNode);
                 }
             }
+            if (songs.size() == seenBefore) break;
+            begin += songList.size();
             int total = firstPositiveInt(data, "total_song_num", "total", "song_count");
-            if (songList.size() < QQ_PLAYLIST_PAGE_SIZE || (total > 0 && songs.size() >= total)) {
+            expected = Math.max(expected, total);
+            if (!hasMorePlaylistSongs(begin, songList.size(), total)) {
                 break;
             }
         }
-        return songs;
+        return new PlaylistTracks(songs, Math.max(0, expected - songs.size()));
+    }
+
+    static boolean hasMorePlaylistSongs(int nextBegin, int returned, int total) {
+        return total > 0 ? nextBegin < total : returned >= QQ_PLAYLIST_PAGE_SIZE;
     }
 
     private JsonNode fetchPlaylistData(String playlistId, int begin, int size) {
@@ -268,6 +296,8 @@ public class QqImportServiceImpl implements QqImportService {
     }
 
     private JsonNode fetchPlaylistDataOnce(String playlistId, int begin, int size) {
+        JsonNode legacy = fetchLegacyPlaylistData(playlistId, begin, size);
+        if (legacy != null) return legacy;
         try {
             HttpResponse<String> response = httpClient().send(
                     request(SONG_DETAIL_API + URLEncoder.encode(playlistDetailPayload(playlistId, begin, size), StandardCharsets.UTF_8)),
@@ -285,6 +315,45 @@ public class QqImportServiceImpl implements QqImportService {
             }
             return null;
         }
+    }
+
+    private JsonNode fetchLegacyPlaylistData(String playlistId, int begin, int size) {
+        String url = PLAYLIST_DETAIL_API + "?type=1&json=1&utf8=1&onlysong=0&format=json&disstid="
+                + URLEncoder.encode(playlistId, StandardCharsets.UTF_8)
+                + "&song_begin=" + begin + "&song_num=" + size;
+        try {
+            HttpResponse<String> response = httpClient().send(request(url),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() != 200) return null;
+            return normalizeLegacyPlaylist(objectMapper.readTree(response.body()));
+        } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+            return null;
+        }
+    }
+
+    JsonNode normalizeLegacyPlaylist(JsonNode root) {
+        if (root.path("code").asInt(-1) != 0) return null;
+        JsonNode cdlist = root.path("cdlist");
+        if (!cdlist.isArray() || cdlist.isEmpty()) return null;
+        JsonNode playlist = cdlist.path(0);
+        JsonNode songlist = playlist.path("songlist");
+        if (!songlist.isArray()) return null;
+        ObjectNode data = objectMapper.createObjectNode();
+        data.put("total_song_num", playlist.path("songnum").asInt(0));
+        var songs = data.putArray("songlist");
+        for (JsonNode source : songlist) {
+            ObjectNode song = songs.addObject();
+            song.put("id", source.path("songid").asLong(0));
+            song.put("mid", source.path("songmid").asText(""));
+            song.put("title", source.path("songname").asText(""));
+            song.put("interval", source.path("interval").asInt(0));
+            song.set("singer", source.path("singer"));
+            ObjectNode album = song.putObject("album");
+            album.put("title", source.path("albumname").asText(""));
+            album.put("pmid", source.path("albummid").asText(""));
+        }
+        return data;
     }
 
     private void sleepBeforeRetry(int attempt) {
@@ -497,10 +566,10 @@ public class QqImportServiceImpl implements QqImportService {
         JsonNode albumNode = trackNode.path("album");
         Song song = new Song();
         song.setUserId(userId);
-        song.setTitle(title);
-        song.setArtist(artists(trackNode));
+        song.setTitle(SongImportText.fit(title, 160));
+        song.setArtist(SongImportText.fit(artists(trackNode), 160));
         song.setAnimeTitle("QQ音乐导入");
-        song.setAlbumName(firstText(albumNode, "title", "name"));
+        song.setAlbumName(SongImportText.fit(firstText(albumNode, "title", "name"), 160));
         song.setCoverUrl(albumCover(albumNode));
         song.setSkinUrl(song.getCoverUrl());
         song.setAudioUrl("https://y.qq.com/n/ryqq/songDetail/" + (isBlank(songMid) ? songId : songMid));
@@ -582,6 +651,8 @@ public class QqImportServiceImpl implements QqImportService {
             return mid == null ? "id:" + songId : "mid:" + mid;
         }
     }
+
+    private record PlaylistTracks(List<JsonNode> tracks, int missing) {}
 
     private static class ImportCount {
         private int read;

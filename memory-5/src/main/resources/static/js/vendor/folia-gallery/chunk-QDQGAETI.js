@@ -1,0 +1,1 @@
+var u=t=>{let e=2166136261;for(let n=0;n<t.length;n+=1)e^=t.charCodeAt(n),e=Math.imul(e,16777619);return e>>>0},m=(t,e)=>Math.imul((Math.trunc(t)^e)>>>0,2654435761)>>>0,h=(t,e,n)=>m(t+Math.imul(e+1,97),n)/4294967296,l=(t,e,n)=>{let a=u(e)%t.length;for(let r=0;r<t.length;r+=1){let o=t[(a+r)%t.length];if(o!==n)return o}return t[a]};export{u as a,m as b,h as c,l as d};

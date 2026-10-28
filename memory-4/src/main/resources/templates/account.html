@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('账号与恢复码')}"></head>
+<body><header th:replace="~{fragments :: header('account')}"></header>
+<main class="dashboard"><div th:replace="~{fragments :: messages}"></div>
+
+<div class="page-heading narrow"><div><h1>账号与恢复码</h1><p th:text="'你好，' + ${loginUser.nickName}"></p></div></div>
+<section class="panel narrow"><h2>给账号留一把备用钥匙</h2><p class="form-hint">忘记密码时，用用户名和恢复码验证身份。恢复码只显示一次，请保存在密码管理器等安全位置。重新生成后，旧恢复码立即失效。</p>
+ <div th:if="${recoveryCode}" class="notice" role="status"><strong>请现在保存恢复码</strong><code class="recovery-code" th:text="${recoveryCode}"></code><p>离开页面后无法再次查看。使用后需要登录重新生成。</p></div>
+ <form class="form-stack" th:action="@{/user/recovery-code}" method="post"><label>验证当前密码<input type="password" name="currentPassword" autocomplete="current-password" required></label><button>生成新的恢复码</button></form>
+</section>
+
+</main><footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/app.js(v=20261028)}"></script></body></html>

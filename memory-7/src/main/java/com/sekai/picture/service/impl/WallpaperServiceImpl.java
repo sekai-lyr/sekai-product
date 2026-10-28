@@ -13,22 +13,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
 @Service
 public class WallpaperServiceImpl implements WallpaperService {
 
-    private static final Path UPLOAD_DIR = Path.of("uploads", "wallpapers");
+    @Resource
+    private com.sekai.picture.service.ImageStorage storage;
     private static final DateTimeFormatter DATE_PATH = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     @Resource
@@ -43,43 +41,93 @@ public class WallpaperServiceImpl implements WallpaperService {
     @Override
     @Transactional
     public Result<Wallpaper> upload(Wallpaper wallpaper, MultipartFile file) {
-        if (wallpaper == null || trimToNull(wallpaper.getTitle()) == null) {
-            return Result.fail("壁纸标题不能为空");
-        }
-        if (!canUseCategory(wallpaper.getUserId(), wallpaper.getCategoryId())) {
-            return Result.fail("请选择自己的分类");
-        }
-        if (file == null || file.isEmpty()) {
-            return Result.fail("请选择要上传的图片");
-        }
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.toLowerCase(Locale.ROOT).startsWith("image/")) {
-            return Result.fail("只能上传图片文件");
-        }
+        String invalid = validateMetadata(wallpaper);
+        if (invalid != null) return Result.fail(invalid);
+        if (!canUseCategory(wallpaper.getUserId(), wallpaper.getCategoryId())) return Result.fail("请选择自己的分类");
+        if (file == null || file.isEmpty()) return Result.fail("请选择图片");
+        if (file.getSize() > com.sekai.picture.service.ImageStorage.MAX_BYTES) return Result.fail("每张图片不能超过 20 MB");
+        Path staged = null;
+        Path target = null;
+        Long savedId = null;
+        boolean saved = false;
         try {
-            String originalName = file.getOriginalFilename() == null ? "wallpaper" : file.getOriginalFilename();
-            String ext = findExtension(originalName);
-            Path dayDir = UPLOAD_DIR.resolve(LocalDateTime.now().format(DATE_PATH));
+            Files.createDirectories(storage.root().resolve(".incoming"));
+            staged = Files.createTempFile(storage.root().resolve(".incoming"), "upload-", ".tmp");
+            file.transferTo(staged);
+            var decoded = storage.decode(staged);
+            String hash = storage.hash(staged);
+            // Backfill fingerprints for this user's older local images without changing their URLs.
+            for (var old : wallpaperMapper.listUnhashed(wallpaper.getUserId())) {
+                Path oldFile = storage.resolve(old.getImageUrl());
+                if (oldFile == null || !Files.isRegularFile(oldFile)) continue;
+                String oldHash = storage.hash(oldFile);
+                if (wallpaperMapper.findHash(wallpaper.getUserId(), oldHash) == null) {
+                    wallpaperMapper.setHash(old.getId(), oldHash);
+                }
+            }
+            var duplicate = wallpaperMapper.findHash(wallpaper.getUserId(), hash);
+            if (duplicate != null) return Result.fail(duplicate.getDeletedAt() == null
+                    ? "这张图片已在图库中：" + duplicate.getTitle() : "这张图片已在回收站，请先恢复或彻底删除");
+            Path dayDir = storage.root().resolve(LocalDateTime.now().format(DATE_PATH));
             Files.createDirectories(dayDir);
-            String storedName = UUID.randomUUID() + ext;
-            Path target = dayDir.resolve(storedName);
-            file.transferTo(target);
-            fillImageMeta(wallpaper, target);
+            String storedName = UUID.randomUUID() + "." + decoded.extension();
+            target = dayDir.resolve(storedName);
+            Files.move(staged, target);
+            wallpaper.setWidth(decoded.image().getWidth());
+            wallpaper.setHeight(decoded.image().getHeight());
             wallpaper.setTitle(wallpaper.getTitle().trim());
             wallpaper.setImageUrl("/wallpaper-image/" + dayDir.getFileName() + "/" + storedName);
-            wallpaper.setFileName(originalName);
+            String originalName = file.getOriginalFilename() == null ? "wallpaper." + decoded.extension() : file.getOriginalFilename();
+            originalName = originalName.replace('\\', '/');
+            originalName = originalName.substring(originalName.lastIndexOf('/') + 1);
+            wallpaper.setFileName(originalName.length() > 255 ? storedName : originalName);
             wallpaper.setFileSize(file.getSize());
+            wallpaper.setContentHash(hash);
+            wallpaper.setDeletedAt(null);
             wallpaper.setDownloadCount(0);
-            if (wallpaper.getOriginal() == null) {
-                wallpaper.setOriginal(false);
-            }
-            SekaiPictureWallpaperDO wallpaperDO = new SekaiPictureWallpaperDO(wallpaper);
-            wallpaperMapper.insert(wallpaperDO);
-            Wallpaper saved = wallpaperMapper.selectByIdAndUserId(wallpaperDO.getId(), wallpaper.getUserId()).convertToWallpaper();
-            return Result.ok(saved, "上传成功");
+            wallpaper.setOriginal(Boolean.TRUE.equals(wallpaper.getOriginal()));
+            var record = new SekaiPictureWallpaperDO(wallpaper);
+            wallpaperMapper.insert(record);
+            savedId = record.getId();
+            storage.thumbnail(savedId, target);
+            Path committedFile = target;
+            Long committedId = savedId;
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                        @Override public void afterCompletion(int status) {
+                            if (status != STATUS_COMMITTED) cleanUpload(committedFile, committedId);
+                        }
+                    });
+            saved = true;
+            return Result.ok(wallpaperMapper.selectByIdAndUserId(savedId, wallpaper.getUserId()).convertToWallpaper(), "上传成功");
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            return Result.fail("这张图片已经上传，请刷新图库查看");
         } catch (IOException e) {
-            return Result.fail("图片保存失败：" + e.getMessage());
+            if (savedId != null) org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.fail("图片处理失败，请检查格式、大小和图片内容后重试");
+        } finally {
+            cleanUpload(staged, null);
+            if (!saved) cleanUpload(target, savedId);
         }
+    }
+
+    private void cleanUpload(Path path, Long id) {
+        try {
+            if (path != null) Files.deleteIfExists(path);
+            if (id != null) Files.deleteIfExists(storage.thumbnailPath(id));
+        } catch (IOException e) {
+            org.slf4j.LoggerFactory.getLogger(getClass()).warn("Unable to clean temporary image", e);
+        }
+    }
+
+    private String validateMetadata(Wallpaper wallpaper) {
+        if (wallpaper == null || trimToNull(wallpaper.getTitle()) == null) return "壁纸标题不能为空";
+        if (wallpaper.getTitle().length() > 120) return "标题最多 120 字";
+        if (wallpaper.getCharacterName() != null && wallpaper.getCharacterName().length() > 120) return "角色名最多 120 字";
+        if (wallpaper.getSourceName() != null && wallpaper.getSourceName().length() > 120) return "来源最多 120 字";
+        if (wallpaper.getTags() != null && wallpaper.getTags().length() > 255) return "标签最多 255 字";
+        if (wallpaper.getColorTone() != null && wallpaper.getColorTone().length() > 40) return "色调最多 40 字";
+        return null;
     }
 
     @Override
@@ -136,9 +184,8 @@ public class WallpaperServiceImpl implements WallpaperService {
         if (wallpaper == null || wallpaper.getId() == null) {
             return Result.fail("壁纸不存在");
         }
-        if (trimToNull(wallpaper.getTitle()) == null) {
-            return Result.fail("壁纸标题不能为空");
-        }
+        String invalid = validateMetadata(wallpaper);
+        if (invalid != null) return Result.fail(invalid);
         if (!canUseCategory(userId, wallpaper.getCategoryId())) {
             return Result.fail("请选择自己的分类");
         }
@@ -164,12 +211,11 @@ public class WallpaperServiceImpl implements WallpaperService {
         if (wallpaperId == null) {
             return Result.fail("请选择要删除的壁纸");
         }
-        favoriteMapper.deleteByUserIdAndWallpaperId(userId, wallpaperId);
         int affected = wallpaperMapper.deleteByIdAndUserId(wallpaperId, userId);
         if (affected == 0) {
             return Result.fail("壁纸不存在或没有权限");
         }
-        return Result.ok(null, "已删除壁纸记录");
+        return Result.ok(null, "已移入回收站，可以随时恢复");
     }
 
     @Override
@@ -208,28 +254,12 @@ public class WallpaperServiceImpl implements WallpaperService {
         wallpaperMapper.increaseDownloadCount(id, userId);
     }
 
-    private void fillImageMeta(Wallpaper wallpaper, Path target) throws IOException {
-        BufferedImage image = ImageIO.read(target.toFile());
-        if (image != null) {
-            wallpaper.setWidth(image.getWidth());
-            wallpaper.setHeight(image.getHeight());
-        }
-    }
-
     private boolean canUseCategory(Long userId, Long categoryId) {
         if (categoryId == null) {
             return true;
         }
         SekaiPictureCategoryDO categoryDO = categoryMapper.selectByPrimaryKey(categoryId);
         return categoryDO != null && Objects.equals(categoryDO.getUserId(), userId);
-    }
-
-    private String findExtension(String fileName) {
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex < 0 || dotIndex == fileName.length() - 1) {
-            return ".jpg";
-        }
-        return fileName.substring(dotIndex).toLowerCase(Locale.ROOT);
     }
 
     private String trimToNull(String value) {

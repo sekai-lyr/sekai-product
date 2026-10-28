@@ -3,241 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sekai Picture | 壁纸档案</title>
+    <title>Sekai Picture | 图库</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" href="/css/gallery.css">
 </head>
-<body class="app-shell gallery-page">
+<body class="app-shell app-home">
 <!--
-THESIS: 让真实壁纸成为第一视觉，拒绝把图库藏在一组普通后台卡片里。
-OWN-WORLD: 暗色数字画廊、单一粉色交互色、软边框和真实动漫壁纸舞台。
-STORY: 用户先看到一张值得收藏的图，再搜索、筛选、整理和下载自己的档案。
-FIRST VIEWPORT: 左侧是档案主张与操作，右侧是热门壁纸舞台，统计紧随其后。
-FORM: 真实图片画廊，保留原有图库、上传、看板和批量整理路径。
+THESIS: Sekai turns a personal wallpaper archive into a content-first listening-room-like library; it refuses a generic admin grid with a decorative image pasted behind it.
+OWN-WORLD: Near-black archive shell, compact white typography, real wallpaper art, pill controls, and green reserved for action and active state.
+STORY: The visitor sees one meaningful image, scans the archive signal, then searches, filters, opens, saves, downloads, or uploads.
+FIRST VIEWPORT: Sidebar left, archive title and featured image split across the main stage, stats immediately below, with the primary upload action beside the hero copy.
+FORM: Experience-mode app shell, refined from the existing dark media-library direction; seed key local-refinement-20261016.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 -->
-<header class="site-header">
-    <div class="site-header-inner">
-        <a class="brand-lockup" href="/home" aria-label="回到 Sekai Picture 图库">
+<div class="app-layout">
+    <aside class="app-sidebar" aria-label="图库导航">
+        <a class="app-brand" href="/home" aria-label="回到 Sekai Picture 图库">
             <span class="brand-mark" aria-hidden="true"></span>
-            <span>
-                <strong>Sekai Picture</strong>
-                <small>私人壁纸档案</small>
-            </span>
+            <span>Sekai Picture<small>private archive</small></span>
         </a>
-        <nav class="site-nav" aria-label="主导航">
-            <span class="user-chip" th:text="${loginUser.nickName != null ? loginUser.nickName : loginUser.userName}">sekai</span>
-            <a class="is-current" href="/home">图库</a>
-            <a href="/dashboard">看板</a>
-            <a href="/upload">上传</a>
-            <a href="/logout">退出</a>
+        <nav class="sidebar-nav" aria-label="主导航">
+            <span class="sidebar-section-label">Your library</span>
+            <a class="nav-link is-current" aria-current="page" data-icon="library" aria-label="图库" href="/home"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span><span>图库</span></a>
+            <a class="nav-link" data-icon="dashboard" aria-label="看板" href="/dashboard"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg></span><span>看板</span></a>
+            <a class="nav-link" data-icon="upload" aria-label="上传壁纸" href="/upload"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v11"></path><path d="m8 8 4-4 4 4"></path><path d="M5 15v4h14v-4"></path></svg></span><span>上传壁纸</span></a>
+            <a class="nav-link" href="/trash" aria-label="回收站"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/></svg></span><span>回收站</span></a>
         </nav>
-    </div>
-</header>
+        <div class="sidebar-foot">
+            <div class="account-chip">
+                <span class="account-avatar" aria-hidden="true">S</span>
+                <span th:text="${loginUser.nickName != null ? loginUser.nickName : loginUser.userName}">sekai</span>
+            </div>
+            <a class="logout-link" href="/logout"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m10 17 5-5-5-5"></path><path d="M15 12H3"></path><path d="M14 4h5v16h-5"></path></svg></span><span>退出登录</span></a>
+        </div>
+    </aside>
 
-<main class="site-main gallery-main">
-    <section class="gallery-hero" data-reveal>
-        <div class="hero-copy">
+    <main class="app-main">
+        <header class="app-topbar">
             <div>
-                <p class="section-kicker">SEKAI PICTURE / WALLPAPER ARCHIVE</p>
-                <h1>收藏你会反复打开的每一张壁纸。</h1>
-                <p class="hero-description">把搜索、收藏、分类和下载，变成一间真正顺手的私人画廊。</p>
-                <div class="hero-actions">
-                    <a class="button-primary" href="/upload">上传新壁纸</a>
-                    <a class="button-secondary" href="/dashboard">查看看板</a>
+                <p class="archive-subtitle">找到喜欢的画面，留在手边。</p>
+                <h1>图库</h1>
+            </div>
+            <div class="topbar-actions"><a class="button-primary" href="/upload">上传壁纸</a>
+                <a class="round-action" href="/random" aria-label="随机抽取一张壁纸"><svg class="icon-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5"></path><path d="M9 5h10v10"></path></svg></a>
+                <div class="topbar-user">
+                    <span class="account-avatar" aria-hidden="true">S</span>
+                    <span th:text="${loginUser.nickName != null ? loginUser.nickName : loginUser.userName}">sekai</span>
                 </div>
             </div>
-            <p class="hero-signal">从一张图开始，慢慢整理出自己的世界</p>
-        </div>
-        <figure class="hero-art">
-            <img th:src="${!#lists.isEmpty(hotWallpapers) ? hotWallpapers[0].imageUrl : '/uploads/wallpapers/sekai-import/sekai_import_0004_0e47b1fc.jpg'}"
-                 th:alt="${!#lists.isEmpty(hotWallpapers) ? hotWallpapers[0].title : 'Sekai Picture 主视觉壁纸'}">
-            <figcaption class="hero-caption">
-                <span>精选壁纸</span>
-                <strong th:text="${!#lists.isEmpty(hotWallpapers) ? hotWallpapers[0].title : '把喜欢的画面留在手边'}">把喜欢的画面留在手边</strong>
-            </figcaption>
-        </figure>
-    </section>
+        </header>
 
-    <section class="stats-row" aria-label="图库统计" data-reveal>
-        <div class="stat-item">
-            <strong th:text="${stats.wallpaperCount}">0</strong>
-            <span>壁纸资产</span>
-        </div>
-        <div class="stat-item">
-            <strong th:text="${stats.categoryCount}">0</strong>
-            <span>分类频道</span>
-        </div>
-        <div class="stat-item">
-            <strong th:text="${stats.favoriteCount}">0</strong>
-            <span>收藏热度</span>
-        </div>
-        <div class="stat-item">
-            <strong th:text="${stats.originalCount}">0</strong>
-            <span>自制作品</span>
-        </div>
-    </section>
-
-    <section class="content-section" th:if="${!#lists.isEmpty(hotWallpapers)}" data-reveal>
-        <div class="section-heading">
-            <div>
-                <h2>热门壁纸，先从这里开始</h2>
-                <p>按下载热度整理出的近期高光，适合快速找一张今天想看的图。</p>
+        <section class="library-panel" data-reveal>
+            <div class="controls-topline">
+                <div>
+                    <span class="control-label">Your archive</span>
+                    <strong th:text="${totalCount + ' 张壁纸匹配当前条件'}">0 张壁纸匹配当前条件</strong>
+                </div>
+                <a class="inline-action" href="/home?favorite=true">我的收藏</a>
             </div>
-            <a class="inline-action" th:href="@{/random(keyword=${keyword}, categoryId=${categoryId}, favorite=${favorite}, original=${original}, orientation=${orientation}, colorTone=${colorTone})}">
-                随机抽一张 <span aria-hidden="true">↗</span>
-            </a>
-        </div>
-        <div class="hot-list">
-            <a class="hot-item" th:each="item : ${hotWallpapers}" th:href="@{'/download/' + ${item.id}}">
-                <img th:src="${item.imageUrl}" th:alt="${item.title}" loading="lazy">
-                <span th:text="${item.title}">壁纸标题</span>
-                <strong th:text="${(item.downloadCount != null ? item.downloadCount : 0) + ' 次下载'}">0 次下载</strong>
-            </a>
-        </div>
-    </section>
+            <div class="maintenance-filter" th:if="${needs != null}"><strong th:text="${needs == 'uncategorized' ? '正在整理未分类图片' : '正在整理缺少标签的图片'}"></strong><a href="/home">返回全部图片</a></div>
+            <form action="/home" method="get" class="search-form advanced-search" th:if="${needs == null}">
+                <label class="sr-only" for="keyword">搜索壁纸</label>
+                <input id="keyword" type="search" name="keyword" placeholder="标题、角色、作品或标签" th:value="${keyword}">
+                <label class="sr-only" for="categoryId">分类</label>
+                <select id="categoryId" name="categoryId">
+                    <option value="">全部分类</option>
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}" th:selected="${category.id == categoryId}"></option>
+                </select>
+                <label class="sr-only" for="sort">排序</label>
+                <select id="sort" name="sort">
+                    <option value="latest" th:selected="${sort == 'latest'}">最新上传</option>
+                    <option value="popular" th:selected="${sort == 'popular'}">下载最多</option>
+                    <option value="resolution" th:selected="${sort == 'resolution'}">分辨率最高</option>
+                    <option value="title" th:selected="${sort == 'title'}">标题排序</option>
+                </select>
+                <label class="filter-toggle"><input type="checkbox" name="favorite" value="true" th:checked="${favorite}"><span>只看收藏</span></label>
+                <button type="submit">查找壁纸</button>
+                <a href="/home" class="filter-reset">重置</a>
+                <details class="more-filters" th:open="${orientation != '' or colorTone != '' or original != null}"><summary>更多筛选</summary><div class="extra-filters">                <label class="sr-only" for="orientation">比例</label>
+                <select id="orientation" name="orientation">
+                    <option value="">全部比例</option>
+                    <option value="portrait" th:selected="${orientation == 'portrait'}">竖屏</option>
+                    <option value="landscape" th:selected="${orientation == 'landscape'}">横屏</option>
+                    <option value="square" th:selected="${orientation == 'square'}">近似方图</option>
+                </select>
+                <label class="sr-only" for="original">来源</label>
+                <select id="original" name="original">
+                    <option value="">全部来源</option>
+                    <option value="true" th:selected="${original != null and original}">只看自制</option>
+                    <option value="false" th:selected="${original != null and !original}">只看导入</option>
+                </select>
+                <label class="sr-only" for="colorTone">色调</label>
+                <select id="colorTone" name="colorTone">
+                    <option value="">全部色调</option>
+                    <option th:each="tone : ${colorTones}" th:value="${tone}" th:text="${tone}" th:selected="${tone == colorTone}"></option>
+                </select>
+</div></details>
+            </form>
+            <form id="batchForm" method="post" class="batch-actions"><input type="hidden" name="returnTo" th:value="@{/home(page=${currentPage},keyword=${keyword},categoryId=${categoryId},favorite=${favorite},original=${original},orientation=${orientation},colorTone=${colorTone},sort=${sort},needs=${needs})}">
+                <span class="batch-status" data-selection-status aria-live="polite">选择图片后可批量整理</span>
+                <select name="categoryId" aria-label="批量移动到分类">
+                    <option value="">移动到未分类</option>
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                </select>
+                <button type="submit" name="action" value="favorite" formaction="/favorite/batch">批量收藏</button>
+                <button type="submit" name="action" value="unfavorite" formaction="/favorite/batch">取消收藏</button>
+                <button type="submit" formaction="/wallpaper/batch/category">移动分类</button>
+            </form>
+        </section>
 
-    <section class="library-controls" data-reveal>
-        <div class="controls-topline">
-            <div>
-                <span class="control-label">图库索引</span>
-                <strong th:text="${totalCount + ' 张壁纸匹配当前条件'}">0 张壁纸匹配当前条件</strong>
-            </div>
-            <span class="control-label">搜索 / 筛选 / 排序</span>
-        </div>
-        <form action="/home" method="get" class="search-form advanced-search">
-            <label class="sr-only" for="keyword">搜索壁纸</label>
-            <input id="keyword" type="search" name="keyword" placeholder="标题、角色、作品或标签" th:value="${keyword}">
-            <label class="sr-only" for="categoryId">分类</label>
-            <select id="categoryId" name="categoryId">
-                <option value="">全部分类</option>
-                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}" th:selected="${category.id == categoryId}"></option>
-            </select>
-            <label class="sr-only" for="orientation">比例</label>
-            <select id="orientation" name="orientation">
-                <option value="">全部比例</option>
-                <option value="portrait" th:selected="${orientation == 'portrait'}">竖屏</option>
-                <option value="landscape" th:selected="${orientation == 'landscape'}">横屏</option>
-                <option value="square" th:selected="${orientation == 'square'}">近似方图</option>
-            </select>
-            <label class="sr-only" for="original">来源</label>
-            <select id="original" name="original">
-                <option value="">全部来源</option>
-                <option value="true" th:selected="${original != null and original}">只看自制</option>
-                <option value="false" th:selected="${original != null and !original}">只看导入</option>
-            </select>
-            <label class="sr-only" for="colorTone">色调</label>
-            <select id="colorTone" name="colorTone">
-                <option value="">全部色调</option>
-                <option th:each="tone : ${colorTones}" th:value="${tone}" th:text="${tone}" th:selected="${tone == colorTone}"></option>
-            </select>
-            <label class="sr-only" for="sort">排序</label>
-            <select id="sort" name="sort">
-                <option value="latest" th:selected="${sort == 'latest'}">最新上传</option>
-                <option value="popular" th:selected="${sort == 'popular'}">下载最多</option>
-                <option value="resolution" th:selected="${sort == 'resolution'}">分辨率最高</option>
-                <option value="title" th:selected="${sort == 'title'}">标题排序</option>
-            </select>
-            <label class="filter-toggle">
-                <input type="checkbox" name="favorite" value="true" th:checked="${favorite}">
-                <span>只看收藏</span>
-            </label>
-            <button type="submit">应用筛选</button>
-        </form>
-        <form id="batchForm" method="post" class="batch-actions">
-            <span class="batch-status" data-selection-status aria-live="polite">选择图片后可批量整理</span>
-            <select name="categoryId" aria-label="批量移动到分类">
-                <option value="">移动到未分类</option>
-                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
-            </select>
-            <button type="submit" name="action" value="favorite" formaction="/favorite/batch">批量收藏</button>
-            <button type="submit" name="action" value="unfavorite" formaction="/favorite/batch" class="secondary-button">取消收藏</button>
-            <button type="submit" formaction="/wallpaper/batch/category" class="secondary-button">移动分类</button>
-        </form>
-    </section>
+        <div class="server-message success" th:if="${message}" th:text="${message}"></div>
+        <div class="server-message error" th:if="${error}" th:text="${error}"></div>
 
-    <div class="server-message success" th:if="${message}" th:text="${message}"></div>
-    <div class="server-message error" th:if="${error}" th:text="${error}"></div>
-
-    <section class="wallpaper-grid" th:if="${!#lists.isEmpty(wallpapers)}">
-        <article class="wallpaper-card" th:each="wallpaper, stat : ${wallpapers}" th:classappend="${(stat.index == 0 ? ' featured-wallpaper' : '') + (spotlightId != null and spotlightId == wallpaper.id ? ' is-spotlight' : '')}" data-reveal>
-            <figure class="wallpaper-preview">
-                <label class="select-box" th:for="${'wallpaper-' + wallpaper.id}">
-                    <span class="sr-only">选择这张壁纸</span>
-                    <input th:id="${'wallpaper-' + wallpaper.id}" type="checkbox" name="wallpaperIds" th:value="${wallpaper.id}" form="batchForm">
-                </label>
-                <img th:src="${wallpaper.imageUrl}" th:alt="${wallpaper.title}" loading="lazy">
-                <a class="image-download" th:href="@{'/download/' + ${wallpaper.id}}">下载</a>
-                <figcaption>
-                    <span th:text="${wallpaper.width != null ? wallpaper.width + ' x ' + wallpaper.height : '未知尺寸'}">1920 x 1080</span>
-                    <span th:text="${wallpaper.colorTone != null ? wallpaper.colorTone : '未标注色调'}">梦幻色</span>
-                </figcaption>
-            </figure>
-            <div class="card-body">
-                <div class="card-title-row">
-                    <div>
-                        <h2 th:text="${wallpaper.title}">壁纸标题</h2>
-                        <p class="character-name" th:text="${wallpaper.characterName != null ? wallpaper.characterName : '未填写角色'}">角色</p>
+        <section class="wallpaper-grid" th:if="${!#lists.isEmpty(wallpapers)}">
+            <article class="wallpaper-card" th:each="wallpaper, stat : ${wallpapers}" th:classappend="${spotlightId != null and spotlightId == wallpaper.id ? ' is-spotlight' : ''}" data-reveal>
+                <figure class="wallpaper-preview">
+                    <label class="select-box" th:for="${'wallpaper-' + wallpaper.id}">
+                        <span class="sr-only">选择这张壁纸</span>
+                        <input th:id="${'wallpaper-' + wallpaper.id}" type="checkbox" name="wallpaperIds" th:value="${wallpaper.id}" form="batchForm">
+                    </label>
+                    <img th:src="@{/media/{id}/thumbnail(id=${wallpaper.id})}" th:alt="${wallpaper.title}" loading="lazy">
+                    <button class="image-open" type="button" th:attr="data-lightbox-src=@{/media/{id}(id=${wallpaper.id})},data-lightbox-alt=${wallpaper.title},data-lightbox-download=@{/download/{id}(id=${wallpaper.id})}" aria-label="查看壁纸大图"><span class="image-open-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"></circle><path d="m15 15 4 4"></path></svg></span><span class="sr-only">查看大图</span></button>
+                    <a class="image-download" th:href="@{'/download/' + ${wallpaper.id}}">下载</a>
+                    <figcaption>
+                        <span th:text="${wallpaper.width != null ? wallpaper.width + ' x ' + wallpaper.height : '未知尺寸'}">1920 x 1080</span>
+                        <span th:text="${wallpaper.colorTone != null ? wallpaper.colorTone : '未标注色调'}">梦幻色</span>
+                    </figcaption>
+                </figure>
+                <div class="card-body">
+                    <div class="card-title-row">
+                        <div>
+                            <h2 th:text="${wallpaper.title}">壁纸标题</h2>
+                            <p class="character-name" th:text="${wallpaper.characterName != null ? wallpaper.characterName : '未填写角色'}">角色</p>
+                        </div>
+                        <span class="original-tag" th:if="${wallpaper.original}">自制</span>
                     </div>
-                    <span class="original-tag" th:if="${wallpaper.original}">自制</span>
+                    <div class="meta-line">
+                        <span th:text="${wallpaper.categoryName != null ? wallpaper.categoryName : '未分类'}">分类</span>
+                        <span th:text="${wallpaper.sourceName != null ? wallpaper.sourceName : 'Sekai Picture'}">来源</span>
+                        <span th:text="${(wallpaper.downloadCount != null ? wallpaper.downloadCount : 0) + ' 次下载'}">0 次下载</span>
+                    </div>
+                    <p class="tags" th:text="${wallpaper.tags != null ? wallpaper.tags : '还没有标签'}">标签</p>
+                    <details class="edit-panel">
+                        <summary>编辑这张图的信息</summary>
+                        <form th:action="@{'/wallpaper/' + ${wallpaper.id} + '/update'}" method="post" class="mini-edit-form"><input type="hidden" name="returnTo" th:value="@{/home(page=${currentPage},keyword=${keyword},categoryId=${categoryId},favorite=${favorite},original=${original},orientation=${orientation},colorTone=${colorTone},sort=${sort},needs=${needs})}">
+                            <label class="sr-only" th:for="${'title-' + wallpaper.id}">标题</label>
+                            <input th:id="${'title-' + wallpaper.id}" type="text" name="title" th:value="${wallpaper.title}" placeholder="标题" required>
+                            <label class="sr-only" th:for="${'character-' + wallpaper.id}">角色名</label>
+                            <input th:id="${'character-' + wallpaper.id}" type="text" name="characterName" th:value="${wallpaper.characterName}" placeholder="角色名">
+                            <label class="sr-only" th:for="${'source-' + wallpaper.id}">作品或来源</label>
+                            <input th:id="${'source-' + wallpaper.id}" type="text" name="sourceName" th:value="${wallpaper.sourceName}" placeholder="作品 / 来源">
+                            <label class="sr-only" th:for="${'tags-' + wallpaper.id}">标签</label>
+                            <input th:id="${'tags-' + wallpaper.id}" type="text" name="tags" th:value="${wallpaper.tags}" placeholder="标签">
+                            <label class="sr-only" th:for="${'tone-' + wallpaper.id}">色调</label>
+                            <input th:id="${'tone-' + wallpaper.id}" type="text" name="colorTone" th:value="${wallpaper.colorTone}" placeholder="色调">
+                            <label class="sr-only" th:for="${'category-' + wallpaper.id}">分类</label>
+                            <select th:id="${'category-' + wallpaper.id}" name="categoryId">
+                                <option value="">未分类</option>
+                                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}" th:selected="${category.id == wallpaper.categoryId}"></option>
+                            </select>
+                            <label class="check-pill"><input type="checkbox" name="original" value="true" th:checked="${wallpaper.original}">自制</label>
+                            <button type="submit">保存信息</button>
+                        </form>
+                    </details>
+                    <div class="actions">
+                        <form th:action="@{'/favorite/' + ${wallpaper.id}}" method="post"><input type="hidden" name="returnTo" th:value="@{/home(page=${currentPage},keyword=${keyword},categoryId=${categoryId},favorite=${favorite},original=${original},orientation=${orientation},colorTone=${colorTone},sort=${sort},needs=${needs})}"><button type="submit" th:text="${wallpaper.favorite ? '取消收藏' : '收藏'}">收藏</button></form>
+                        <a th:href="@{'/download/' + ${wallpaper.id}}">一键下载</a>
+                        <form th:action="@{'/wallpaper/' + ${wallpaper.id} + '/delete'}" method="post"><input type="hidden" name="returnTo" th:value="@{/home(page=${currentPage},keyword=${keyword},categoryId=${categoryId},favorite=${favorite},original=${original},orientation=${orientation},colorTone=${colorTone},sort=${sort},needs=${needs})}"><button type="submit" class="danger-button" data-confirm="移入回收站？之后可以恢复。">移入回收站</button></form>
+                    </div>
                 </div>
-                <div class="meta-line">
-                    <span th:text="${wallpaper.categoryName != null ? wallpaper.categoryName : '未分类'}">分类</span>
-                    <span th:text="${wallpaper.sourceName != null ? wallpaper.sourceName : 'Picture-memory'}">来源</span>
-                    <span th:text="${(wallpaper.downloadCount != null ? wallpaper.downloadCount : 0) + ' 次下载'}">0 次下载</span>
-                </div>
-                <p class="tags" th:text="${wallpaper.tags != null ? wallpaper.tags : '还没有标签'}">标签</p>
+            </article>
+        </section>
 
-                <details class="edit-panel">
-                    <summary>编辑这张图的信息</summary>
-                    <form th:action="@{'/wallpaper/' + ${wallpaper.id} + '/update'}" method="post" class="mini-edit-form">
-                        <label class="sr-only" th:for="${'title-' + wallpaper.id}">标题</label>
-                        <input th:id="${'title-' + wallpaper.id}" type="text" name="title" th:value="${wallpaper.title}" placeholder="标题" required>
-                        <label class="sr-only" th:for="${'character-' + wallpaper.id}">角色名</label>
-                        <input th:id="${'character-' + wallpaper.id}" type="text" name="characterName" th:value="${wallpaper.characterName}" placeholder="角色名">
-                        <label class="sr-only" th:for="${'source-' + wallpaper.id}">作品或来源</label>
-                        <input th:id="${'source-' + wallpaper.id}" type="text" name="sourceName" th:value="${wallpaper.sourceName}" placeholder="作品 / 来源">
-                        <label class="sr-only" th:for="${'tags-' + wallpaper.id}">标签</label>
-                        <input th:id="${'tags-' + wallpaper.id}" type="text" name="tags" th:value="${wallpaper.tags}" placeholder="标签">
-                        <label class="sr-only" th:for="${'tone-' + wallpaper.id}">色调</label>
-                        <input th:id="${'tone-' + wallpaper.id}" type="text" name="colorTone" th:value="${wallpaper.colorTone}" placeholder="色调">
-                        <label class="sr-only" th:for="${'category-' + wallpaper.id}">分类</label>
-                        <select th:id="${'category-' + wallpaper.id}" name="categoryId">
-                            <option value="">未分类</option>
-                            <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}" th:selected="${category.id == wallpaper.categoryId}"></option>
-                        </select>
-                        <label class="check-pill">
-                            <input type="checkbox" name="original" value="true" th:checked="${wallpaper.original}">
-                            自制
-                        </label>
-                        <button type="submit">保存信息</button>
-                    </form>
-                </details>
+        <section class="empty-state" th:if="${#lists.isEmpty(wallpapers)}" data-reveal>
+            <h2>还没有找到壁纸</h2>
+            <p>换个关键词或筛选条件试试，也可以先上传一张自己的作品。</p>
+            <a href="/upload">去上传</a>
+        </section>
 
-                <div class="actions">
-                    <form th:action="@{'/favorite/' + ${wallpaper.id}}" method="post">
-                        <button type="submit" th:text="${wallpaper.favorite ? '取消收藏' : '收藏'}">收藏</button>
-                    </form>
-                    <a th:href="@{'/download/' + ${wallpaper.id}}">一键下载</a>
-                    <form th:action="@{'/wallpaper/' + ${wallpaper.id} + '/delete'}" method="post">
-                        <button type="submit" class="danger-button" onclick="return confirm('确认删除这张壁纸记录？')">删除</button>
-                    </form>
-                </div>
-            </div>
-        </article>
-    </section>
-
-    <section class="empty-state" th:if="${#lists.isEmpty(wallpapers)}" data-reveal>
-        <h2>还没有找到壁纸</h2>
-        <p>换个关键词或筛选条件试试，也可以先上传一张自己的作品。</p>
-        <a href="/upload">去上传</a>
-    </section>
-
-    <section class="pagination" th:if="${totalPages > 1}" data-reveal>
-        <a th:classappend="${currentPage <= 1} ? 'disabled'" th:href="@{/home(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, favorite=${favorite}, original=${original}, orientation=${orientation}, colorTone=${colorTone}, sort=${sort})}">上一页</a>
-        <span th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
-        <a th:classappend="${currentPage >= totalPages} ? 'disabled'" th:href="@{/home(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, favorite=${favorite}, original=${original}, orientation=${orientation}, colorTone=${colorTone}, sort=${sort})}">下一页</a>
-    </section>
-</main>
+        <section class="pagination" th:if="${totalPages > 1}" data-reveal>
+            <a th:classappend="${currentPage <= 1} ? 'disabled'" th:href="@{/home(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, favorite=${favorite}, original=${original}, orientation=${orientation}, colorTone=${colorTone}, sort=${sort}, needs=${needs})}">上一页</a>
+            <span th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
+            <a th:classappend="${currentPage >= totalPages} ? 'disabled'" th:href="@{/home(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, favorite=${favorite}, original=${original}, orientation=${orientation}, colorTone=${colorTone}, sort=${sort}, needs=${needs})}">下一页</a>
+        </section>
+    </main>
+</div>
 <script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
+<script src="/js/gallery.js" defer></script>
 </body>
 </html>

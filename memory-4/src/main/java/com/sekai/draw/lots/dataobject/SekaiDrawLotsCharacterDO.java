@@ -6,6 +6,8 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDateTime;
 
 public class SekaiDrawLotsCharacterDO {
+    private boolean enabled = true;
+
     private Long id;
     private String englishName;
     private String japaneseName;
@@ -43,4 +45,6 @@ public class SekaiDrawLotsCharacterDO {
     public void setPopularity(Integer popularity) { this.popularity = popularity; }
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }

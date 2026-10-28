@@ -23,21 +23,25 @@ public class UserServiceImpl implements UserService {
             return Result.fail("User info cannot be null");
         }
         user.setUserName(trimToNull(user.getUserName()));
-        user.setPassword(trimToNull(user.getPassword()));
         user.setNickName(trimToNull(user.getNickName()));
 
-        if (user.getUserName() == null) {
-            return Result.fail("Username cannot be empty");
+        if (user.getUserName() == null || !user.getUserName().matches("[a-zA-Z0-9_@.-]{3,64}")) {
+            return Result.fail("用户名需为 3–64 位字母、数字或 _ @ . -");
         }
-        if (user.getPassword() == null || user.getPassword().length() < 6) {
-            return Result.fail("Password must be at least 6 characters");
+        if (!PasswordHashUtil.validNewPassword(user.getPassword())) {
+            return Result.fail("密码至少 8 个字符，UTF-8 编码不超过 72 字节");
         }
         if (userMapper.selectByUserName(user.getUserName()) != null) {
-            return Result.fail("Username already exists");
+            return Result.fail("这个用户名已被使用");
         }
         if (user.getNickName() == null) {
             user.setNickName(user.getUserName());
         }
+        if (user.getNickName().length() > 64) {
+            return Result.fail("昵称不能超过 64 个字符");
+        }
+        user.setAdmin(false);
+        user.setSessionVersion(0);
         user.setAvatar("https://api.dicebear.com/8.x/thumbs/svg?seed=" + user.getUserName());
         user.setPassword(PasswordHashUtil.hash(user.getPassword()));
 
@@ -53,43 +57,64 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Result<User> login(String userName, String password) {
         userName = trimToNull(userName);
-        password = trimToNull(password);
         if (userName == null || password == null) {
-            return Result.fail("Username and password cannot be empty");
+            return Result.fail("请输入用户名和密码");
         }
 
         SekaiDrawLotsUserDO dbUser = userMapper.selectByLoginName(userName);
         if (dbUser == null) {
-            return Result.fail("User not found, please register first");
+            return Result.fail("用户名或密码不正确");
         }
+        if (!PasswordHashUtil.isCurrentHash(dbUser.getPassword())) password = password.trim();
         if (!PasswordHashUtil.matches(password, dbUser.getPassword())) {
-            return Result.fail("Incorrect password");
+            return Result.fail("用户名或密码不正确");
         }
-        if (!PasswordHashUtil.isHashed(dbUser.getPassword())) {
+        if (!PasswordHashUtil.isCurrentHash(dbUser.getPassword())) {
             dbUser.setPassword(PasswordHashUtil.hash(password));
             userMapper.updateByPrimaryKeySelective(dbUser);
         }
-        return Result.ok(dbUser.convertToUser());
+        User loginUser = dbUser.convertToUser();
+        loginUser.setPassword(null);
+        return Result.ok(loginUser);
     }
 
     @Override
     @Transactional
-    public Result<User> resetPassword(String userName, String newPassword) {
-        userName = trimToNull(userName);
-        newPassword = trimToNull(newPassword);
-        if (userName == null || newPassword == null) {
-            return Result.fail("Username and password cannot be empty");
+    public Result<String> rotateRecoveryCode(User user, String currentPassword) {
+        SekaiDrawLotsUserDO dbUser = userMapper.lockById(user.getId());
+        if (dbUser == null || dbUser.getSessionVersion() != user.getSessionVersion()
+                || !PasswordHashUtil.matches(currentPassword, dbUser.getPassword())) {
+            return Result.fail("当前密码不正确，请重试");
         }
-        if (newPassword.length() < 6) {
-            return Result.fail("Password must be at least 6 characters");
+        String code = PasswordHashUtil.newToken();
+        userMapper.setRecovery(user.getId(), PasswordHashUtil.tokenHash(code));
+        return Result.ok(code);
+    }
+
+    @Override
+    @Transactional
+    public Result<String> beginReset(String userName, String recoveryCode) {
+        if (trimToNull(userName) == null || recoveryCode == null || recoveryCode.length() > 100) {
+            return Result.fail("用户名或恢复码不正确，或恢复码已使用");
         }
-        SekaiDrawLotsUserDO dbUser = userMapper.selectByUserName(userName);
+        String token = PasswordHashUtil.newToken();
+        int changed = userMapper.exchangeRecovery(userName.trim(), PasswordHashUtil.tokenHash(recoveryCode.trim()), PasswordHashUtil.tokenHash(token));
+        return changed == 1 ? Result.ok(token) : Result.fail("用户名或恢复码不正确，或恢复码已使用");
+    }
+
+    @Override
+    @Transactional
+    public Result<Boolean> resetPassword(String token, String newPassword) {
+        if (!PasswordHashUtil.validNewPassword(newPassword)) {
+            return Result.fail("密码至少 8 个字符，UTF-8 编码不超过 72 字节");
+        }
+        if (token == null || token.length() > 100) return Result.fail("重置凭证无效或已过期");
+        SekaiDrawLotsUserDO dbUser = userMapper.lockByResetToken(PasswordHashUtil.tokenHash(token));
         if (dbUser == null) {
-            return Result.fail("User not found");
+            return Result.fail("重置凭证无效或已过期，请重新验证身份");
         }
-        dbUser.setPassword(PasswordHashUtil.hash(newPassword));
-        userMapper.updateByPrimaryKeySelective(dbUser);
-        return Result.ok(dbUser.convertToUser());
+        userMapper.resetPassword(dbUser.getId(), PasswordHashUtil.hash(newPassword));
+        return Result.ok(true);
     }
 
     private String trimToNull(String value) {

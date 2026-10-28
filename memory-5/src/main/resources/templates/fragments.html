@@ -1,30 +1,49 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <body>
+<!--
+  侧边导航（桌面左侧栏 / 手机顶部导航条 + 折叠菜单）。
+  手机端：≤980px 时 .sidebar 变成 sticky 顶栏，导航项收进 .sidebar-panel，
+  由 .sidebar-toggle 展开；避免旧版把整块 635px 导航堆在正文上方。
+-->
 <aside class="sidebar" th:fragment="sidebar(active)">
-    <a class="logo" href="/home">Sekai Song</a>
-    <nav>
-        <a th:classappend="${active == 'home'} ? 'active'" href="/home">主页</a>
-        <a th:classappend="${active == 'songs'} ? 'active'" href="/songs">歌曲库</a>
-        <a th:classappend="${active == 'playlists'} ? 'active'" href="/playlists">歌单</a>
-        <a th:classappend="${active == 'favorites'} ? 'active'" href="/favorites">收藏</a>
-        <a th:classappend="${active == 'netease'} ? 'active'" href="/netease">网易云</a>
-        <a th:classappend="${active == 'qq'} ? 'active'" href="/qq">QQ 音乐</a>
-        <a th:classappend="${active == 'bilibili'} ? 'active'" href="/bilibili">B 站</a>
-    </nav>
-    <nav class="sidebar-bottom">
-        <a th:classappend="${active == 'search'} ? 'active'" href="/search">搜索</a>
-    </nav>
-    <div class="user-box">
-        <strong th:text="${loginUser.nickName}">Sekai</strong>
-        <span class="account-mode">本地音乐库</span>
-        <a href="/logout">退出</a>
+    <div class="sidebar-bar">
+        <a class="logo" href="/home">Sekai Song</a>
+        <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-expanded="false"
+                aria-controls="sidebar-nav" aria-label="打开导航菜单">
+            <span class="sidebar-toggle-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="sidebar-toggle-label" aria-hidden="true">菜单</span>
+        </button>
     </div>
-    <script th:src="@{/js/app-motion.js(v=20260830a)}" src="/js/app-motion.js?v=20260830a" defer></script>
+    <div class="sidebar-panel" id="sidebar-nav" data-sidebar-panel>
+        <nav>
+            <a th:classappend="${active == 'home'} ? 'active'" href="/home">主页</a>
+            <a th:classappend="${active == 'local-player'} ? 'active'" href="/local-player">导入本地音视频</a>
+            <a th:if="${deviceSharingEnabled}" th:classappend="${active == 'device-sharing'} ? 'active'" href="/device-sharing">设备共享</a>
+            <a th:classappend="${active == 'songs'} ? 'active'" href="/songs">歌曲库</a>
+            <a th:classappend="${active == 'playlists'} ? 'active'" href="/playlists">歌单</a>
+            <a th:classappend="${active == 'library-tools'} ? 'active'" href="/library-tools">歌库整理</a>
+            <a th:classappend="${active == 'favorites'} ? 'active'" href="/favorites">收藏</a>
+            <a th:classappend="${active == 'netease'} ? 'active'" href="/netease">网易云 · 信息导入</a>
+            <a th:classappend="${active == 'qq'} ? 'active'" href="/qq">QQ 音乐 · 信息导入</a>
+        </nav>
+        <nav class="sidebar-bottom">
+            <a th:classappend="${active == 'feedback'} ? 'active'" href="/feedback">听友广场</a>
+            <a th:if="${websiteAdmin}" th:classappend="${active == 'overview'} ? 'active'" href="/admin/overview">管理 · 数据概览</a>
+            <a th:classappend="${active == 'search'} ? 'active'" href="/search">搜索</a>
+        </nav>
+        <div class="user-box">
+            <strong th:text="${loginUser != null ? loginUser.nickName : '访客'}">Sekai</strong>
+            <span class="account-mode">本地音乐库</span>
+            <a th:if="${loginUser != null}" href="/logout">退出</a>
+            <a th:if="${loginUser == null}" href="/login">登录</a>
+        </div>
+    </div>
+    <button class="sidebar-scrim" type="button" data-sidebar-scrim aria-label="关闭导航菜单" hidden></button>
+    <script th:src="@{/js/app-motion.js(v=20261010m)}" src="/js/app-motion.js?v=20261010m" defer></script>
+    <script src="/js/local-upload-links.js?v=20261016-video-link" defer></script>
+    <script src="/js/local-library-covers.js?v=20261026cover-edit" defer></script>
+    <script src="/js/library-experience.js?v=20261028" defer></script>
 </aside>
 </body>
 </html>
-
-
-
-

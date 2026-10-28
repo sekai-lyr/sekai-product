@@ -92,7 +92,7 @@ async function spinWheel() {
     document.body.classList.add("wheel-spinning");
     wheelResult?.setAttribute("aria-busy", "true");
     try {
-        const response = await fetch("/wheel/spin", { method: "POST" });
+        const response = await apiFetch("/wheel/spin", { method: "POST", body: new URLSearchParams({ deckId: window.sekaiDeckId }) });
         const result = await response.json();
         if (!result.success) {
             renderFailure(result.message || "转盘失败");
@@ -103,7 +103,9 @@ async function spinWheel() {
         const slice = wheelState.slices.find((item) => item.id === Number(option.id));
         const centerDeg = slice ? slice.centerDeg : -90;
         const turns = 6 + Math.floor(Math.random() * 3);
-        const targetRotation = turns * 360 + (-90 - centerDeg);
+        const currentRotation = ((wheelState.rotation % 360) + 360) % 360;
+        const finalRotation = ((-90 - centerDeg) % 360 + 360) % 360;
+        const targetRotation = turns * 360 + ((finalRotation - currentRotation + 360) % 360);
         if (!wheelReduceMotion.matches) {
             wheelState.rotation += targetRotation;
             wheelCanvas.style.transform = `rotate(${wheelState.rotation}deg)`;
@@ -113,7 +115,7 @@ async function spinWheel() {
             finishSpin("再转一次");
         }, wheelReduceMotion.matches ? 80 : 4300);
     } catch (error) {
-        renderFailure("转盘连接失败，请稍后再试");
+        renderFailure(error.message || "转盘连接失败，请稍后再试");
         finishSpin("转动命运");
     }
 }

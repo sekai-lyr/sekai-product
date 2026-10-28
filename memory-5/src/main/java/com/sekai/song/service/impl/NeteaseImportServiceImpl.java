@@ -147,7 +147,10 @@ public class NeteaseImportServiceImpl implements NeteaseImportService {
 
         List<JsonNode> directTracks = fetchSongDetails(ids);
         List<JsonNode> trackNodes = new ArrayList<>(directTracks);
+        Set<String> returnedIds = directTracks.stream().map(t -> t.path("id").asText()).collect(Collectors.toSet());
+        ids.stream().filter(id -> !returnedIds.contains(id)).forEach(result.getFailedInputs()::add);
         int failedPlaylists = 0;
+        int missingPlaylistSongs = 0;
         for (String remotePlaylistId : playlistIds) {
             JsonNode playlistNode;
             try {
@@ -157,32 +160,44 @@ public class NeteaseImportServiceImpl implements NeteaseImportService {
                     Thread.currentThread().interrupt();
                 }
                 failedPlaylists++;
+                result.getFailedInputs().add("https://music.163.com/playlist?id=" + remotePlaylistId);
                 continue;
             }
             List<JsonNode> remoteTracks = playlistNode == null ? List.of() : tracksOf(playlistNode);
             if (remoteTracks.isEmpty()) {
+                result.getFailedInputs().add("https://music.163.com/playlist?id=" + remotePlaylistId);
                 failedPlaylists++;
+            } else {
+                List<String> missing = missingTrackIds(playlistNode, remoteTracks);
+                result.getFailedInputs().addAll(missing);
+                missingPlaylistSongs += missing.size();
             }
             trackNodes.addAll(remoteTracks);
         }
 
         List<JsonNode> uniqueTracks = deduplicateTracks(trackNodes);
+        if (uniqueTracks.isEmpty() && !playlistIds.isEmpty()) {
+            return fail(result, "未能从网易云歌单读取歌曲。请确认歌单公开，稍后重试；无需手动提取歌曲 ID。");
+        }
         if (!ids.isEmpty() && uniqueTracks.isEmpty()) {
             return fail(result, "网易云这次没有返回歌曲数据。已识别 " + ids.size()
                     + " 个 ID，可能是接口限流或网络波动，请稍后重试，或把一次导入数量减少到 50 首以内。");
         }
 
         ImportCount count = importTracks(uniqueTracks, playlist.getId(), userId);
-        int failed = Math.max(ids.size() - directTracks.size(), 0) + failedPlaylists;
+        int failed = Math.max(ids.size() - directTracks.size(), 0) + missingPlaylistSongs;
         result.setSuccess(true);
         result.setPlaylistId(playlist.getId());
         result.setPlaylistName(playlist.getName());
         result.setImportedCount(count.imported);
         result.setSkippedCount(count.existing + count.skipped);
-        String message = "歌曲导入完成：识别 " + ids.size() + " 个 ID，读取 " + uniqueTracks.size()
+        String message = "歌曲导入完成：" + (playlistIds.isEmpty() ? "识别 " + ids.size() + " 首歌曲，" : "识别 " + playlistIds.size() + " 个歌单链接，") + "读取 " + uniqueTracks.size()
                 + " 首，新增 " + count.imported + " 首，已存在 " + count.existing
                 + " 首，加入当前歌单 " + count.addedToPlaylist + " 首，未读取 "
                 + Math.max(failed, 0) + " 首，无效/跳过 " + count.skipped + " 首";
+        if (failedPlaylists > 0) {
+            message += "，另有 " + failedPlaylists + " 个歌单读取失败";
+        }
         if (count.imported == 0 && count.addedToPlaylist == 0 && count.existing > 0) {
             message += "。这些歌曲之前已经导入过，所以第二次不会重复新增。";
         }
@@ -270,6 +285,14 @@ public class NeteaseImportServiceImpl implements NeteaseImportService {
             trackArray.forEach(tracks::add);
         }
 
+        List<String> missingIds = missingTrackIds(playlistNode, tracks);
+        if (!missingIds.isEmpty()) {
+            tracks.addAll(fetchSongDetails(missingIds));
+        }
+        return tracks;
+    }
+
+    static List<String> missingTrackIds(JsonNode playlistNode, List<JsonNode> tracks) {
         Set<String> existingIds = tracks.stream()
                 .map(track -> String.valueOf(track.path("id").asLong(0)))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -283,10 +306,7 @@ public class NeteaseImportServiceImpl implements NeteaseImportService {
                 }
             }
         }
-        if (!missingIds.isEmpty()) {
-            tracks.addAll(fetchSongDetails(missingIds));
-        }
-        return tracks;
+        return missingIds;
     }
 
     private List<JsonNode> fetchSongDetails(List<String> songIds) {
@@ -427,10 +447,10 @@ public class NeteaseImportServiceImpl implements NeteaseImportService {
 
         Song song = new Song();
         song.setUserId(userId);
-        song.setTitle(title);
-        song.setArtist(artists(trackNode));
+        song.setTitle(SongImportText.fit(title, 160));
+        song.setArtist(SongImportText.fit(artists(trackNode), 160));
         song.setAnimeTitle("网易云导入");
-        song.setAlbumName(text(albumNode, "name", ""));
+        song.setAlbumName(SongImportText.fit(text(albumNode, "name", ""), 160));
         song.setCoverUrl(firstText(albumNode, "picUrl", "blurPicUrl"));
         song.setSkinUrl(song.getCoverUrl());
         song.setAudioUrl("https://music.163.com/song?id=" + songId);

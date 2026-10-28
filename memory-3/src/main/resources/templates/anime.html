@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai Memory Book - 番剧</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20261027-matching3)}" href="/css/app.css?v=20261027-matching3">
+    <link rel="stylesheet" th:href="@{/css/anime-controls.css(v=20261027-matching3)}" href="/css/anime-controls.css?v=20261027-matching3">
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#9b3ee8">
 </head>
@@ -36,33 +37,70 @@
 
         <div class="content-grid">
             <form class="form-card" action="/anime/add" method="post">
-                <input type="hidden" name="returnTo" th:value="@{/anime(keyword=${keyword}, page=${currentPage})}">
+                <input type="hidden" name="returnTo" th:value="@{/anime(keyword=${keyword}, page=${currentPage}, mode=${viewMode}, sort=${sortOrder})}">
                 <h3>快速添加番剧</h3>
-                <p class="form-hint">只填名称和星级，封面、类型、标签、日期与集数将自动补全。</p>
+                <p class="form-hint">输入番剧名称或季数（例如“排球少年 第一季”），点击“匹配资料”，核对候选的封面、日期和集数后保存。</p>
                 <div class="server-message success" th:if="${message}" th:text="${message}"></div>
                 <div class="server-message error" th:if="${error}" th:text="${error}"></div>
                 <div class="form-group"><label for="title">番剧标题</label><input id="title" name="title" type="text" placeholder="例如 Lycoris Recoil" required></div>
+                <button class="secondary-btn" type="button" data-match-anime>匹配资料</button>
+                <p class="form-hint" data-match-message role="status" aria-live="polite"></p>
+                <img data-match-cover alt="匹配的番剧封面" hidden style="max-width:160px;max-height:220px" referrerpolicy="no-referrer">
+                <div class="form-group"><label for="add-cover">封面 URL</label><input id="add-cover" name="coverUrl" type="url"></div>
+                <div class="form-group"><label for="add-type">类型</label><input id="add-type" name="type" type="text"></div>
+                <div class="form-group"><label for="add-tags">标签</label><input id="add-tags" name="tags" type="text"></div>
+                <div class="form-group"><label for="add-release">上映/开播日期</label><input id="add-release" name="releaseDate" type="date"></div>
+                <div class="form-group"><label for="add-total">总集数</label><input id="add-total" name="totalEpisodes" type="number" min="0"></div>
                 <div class="form-group"><label for="score">我的评价</label><select id="score" name="score" required><option value="10">5 星</option><option value="8">4 星</option><option value="6">3 星</option><option value="4">2 星</option><option value="2">1 星</option></select></div>
                 <button class="primary-btn" type="submit">保存番剧</button>
             </form>
 
             <section class="list-panel">
-                <form class="toolbar glass-panel" action="/anime" method="get">
+                <nav class="archive-mode-switch" aria-label="番剧浏览模式">
+                    <a class="secondary-btn" th:classappend="${!continuous} ? ' active'" th:attr="aria-current=${!continuous ? 'page' : null}" th:href="@{/anime(keyword=${keyword},mode='paged',sort=${sortOrder})}">页码模式</a>
+                    <a class="secondary-btn" th:classappend="${continuous} ? ' active'" th:attr="aria-current=${continuous ? 'page' : null}" th:href="@{/anime(keyword=${keyword},mode='continuous',sort=${sortOrder})}">无页码模式</a>
+                </nav>
+                <form class="toolbar glass-panel archive-toolbar" action="/anime" method="get">
+                    <input type="hidden" name="mode" th:value="${viewMode}">
                     <input name="keyword" type="search" th:value="${keyword}" placeholder="搜索标题、类型、标签或观后感">
                     <button class="secondary-btn" type="submit">搜索</button>
-                    <button class="secondary-btn" type="submit" name="autoSort" value="true">自动排序</button>
-                    <a class="secondary-btn" href="/anime">清空</a>
+                    <div class="archive-sort-group">
+                    <label for="anime-sort">排序方式</label>
+                    <div class="archive-sort-picker">
+                    <select id="anime-sort" name="sort">
+                        <option value="default" th:selected="${sortOrder == 'default'}" th:text="${continuous ? '自定义顺序' : '默认顺序'}">默认顺序</option>
+                        <option value="release-asc" th:selected="${sortOrder == 'release-asc'}">放映日期：从早到晚</option>
+                        <option value="release-desc" th:selected="${sortOrder == 'release-desc'}">放映日期：从晚到早</option>
+                        <option value="added-asc" th:selected="${sortOrder == 'added-asc'}">加入时间：从早到晚</option>
+                        <option value="added-desc" th:selected="${sortOrder == 'added-desc'}">加入时间：从晚到早</option>
+                    </select>
+                    </div>
+                    <button class="secondary-btn" type="submit">应用排序</button>
+                    </div>
+                    <a class="secondary-btn" th:href="@{/anime(mode=${viewMode}, sort=${sortOrder})}">清空</a>
                     <span class="toolbar-count" th:text="'共 ' + ${totalCount} + ' 条'">共 0 条</span>
                 </form>
-                <div class="server-message success" th:if="${autoSortActive}">已按上映/开播日期重新排序，后续新增番剧也会按这个规则归位。</div>
+                <div class="server-message success" th:if="${autoSortActive}" th:text="${'已按' + sortLabel + '排列。' + (continuous ? '可点击保存顺序，将此结果保存为自定义顺序。' : '')}"></div>
+                <div class="archive-order-toolbar glass-panel" th:if="${continuous}">
+                    <p th:if="${canReorder}">滚轮连续浏览全部番剧。拖动“拖动排序”，或输入目标位置后点击“移动”；调整后点击“保存顺序”。新增番剧排在自定义顺序末尾。</p>
+                    <p th:unless="${canReorder}">当前为搜索结果，可连续浏览；<a th:href="@{/anime(mode='continuous',sort=${sortOrder})}">清空搜索</a>后可调整全部番剧的顺序。</p>
+                    <button th:if="${canReorder}" id="save-anime-order" class="primary-btn" type="button" th:disabled="${!autoSortActive}">保存顺序</button>
+                    <span id="anime-order-message" role="status" aria-live="polite"></span>
+                </div>
 
                 <div class="empty-state glass-panel" th:if="${#lists.isEmpty(animeList)}">还没有番剧记录，先添加一部吧。</div>
 
-                <article class="timeline-card archive-card" th:each="anime : ${animeList}">
+                <div id="anime-archive-list" th:attr="data-reorder=${canReorder}">
+                <article class="timeline-card archive-card" th:each="anime, item : ${animeList}" th:attr="data-anime-id=${anime.id}">
                     <div class="timeline-image archive-image">
                         <img th:if="${anime.coverUrl != null && !#strings.isEmpty(anime.coverUrl)}" th:src="${anime.coverUrl}" alt="番剧封面" onerror="this.remove()">
                     </div>
                     <div class="timeline-copy archive-copy">
+                        <div class="archive-move-controls" th:if="${canReorder}">
+                            <button class="secondary-btn archive-drag-handle" type="button" draggable="true" data-drag-handle aria-label="拖动番剧调整顺序">拖动排序</button>
+                            <label>位置 <input data-order-position type="number" min="1" th:max="${totalCount}" th:value="${item.index + 1}" aria-label="番剧目标位置"></label>
+                            <button class="secondary-btn" type="button" data-move-anime>移动</button>
+                        </div>
                         <div class="timeline-topline"><span class="tag">番剧</span><time th:if="${anime.releaseDate}" th:text="${anime.releaseDate}">日期</time></div>
                         <h3 th:text="${anime.title}">番剧标题</h3>
                         <div class="meta-row">
@@ -72,7 +110,7 @@
                             <span class="tag" th:if="${anime.watchDate}" th:text="${anime.watchDate}">观看日期</span>
                         </div>
                         <div class="meta-row" th:if="${anime.tags}">
-                            <a class="tag tag-link" th:each="tag : ${#strings.arraySplit(anime.tags, ',')}" th:href="@{/anime(keyword=${#strings.trim(tag)})}" th:text="${#strings.trim(tag)}">标签</a>
+                            <a class="tag tag-link" th:each="tag : ${#strings.arraySplit(anime.tags, ',')}" th:href="@{/anime(keyword=${#strings.trim(tag)}, mode=${viewMode}, sort=${sortOrder})}" th:text="${#strings.trim(tag)}">标签</a>
                         </div>
                         <p th:if="${anime.memoryText}" th:text="${anime.memoryText}">回忆笔记</p>
                         <div class="progress-card" th:if="${anime.totalEpisodes != null && anime.totalEpisodes > 0}">
@@ -87,8 +125,11 @@
                         <details class="edit-panel">
                             <summary>编辑</summary>
                             <form th:action="@{'/anime/update/' + ${anime.id}}" method="post">
-                                <input type="hidden" name="returnTo" th:value="@{/anime(keyword=${keyword}, page=${currentPage})}">
+                                <input type="hidden" name="returnTo" th:value="@{/anime(keyword=${keyword}, page=${currentPage}, mode=${viewMode}, sort=${sortOrder})}">
                                 <div class="form-group"><label th:for="'edit-title-' + ${anime.id}">番剧标题</label><input th:id="'edit-title-' + ${anime.id}" name="title" type="text" th:value="${anime.title}" required></div>
+                                <button class="secondary-btn" type="button" data-match-anime>匹配资料（补充空白字段）</button>
+                                <p class="form-hint" data-match-message role="status" aria-live="polite"></p>
+                                <img data-match-cover alt="匹配的番剧封面" hidden style="max-width:160px;max-height:220px" referrerpolicy="no-referrer">
                                 <div class="form-group"><label th:for="'edit-type-' + ${anime.id}">类型</label><input th:id="'edit-type-' + ${anime.id}" name="type" type="text" th:value="${anime.type}"></div>
                                 <div class="form-group"><label th:for="'edit-tags-' + ${anime.id}">标签</label><input th:id="'edit-tags-' + ${anime.id}" name="tags" type="text" th:value="${anime.tags}"></div>
                                 <div class="form-group">
@@ -117,18 +158,22 @@
                         <div class="card-actions">
                             <a class="secondary-btn" th:href="@{'/anime/' + ${anime.id}}">详情</a>
                             <form th:action="@{'/anime/delete/' + ${anime.id}}" method="post">
-                                <input type="hidden" name="returnTo" th:value="@{/anime(keyword=${keyword}, page=${currentPage})}">
+                                <input type="hidden" name="returnTo" th:value="@{/anime(keyword=${keyword}, page=${currentPage}, mode=${viewMode}, sort=${sortOrder})}">
                                 <button class="danger-btn" type="submit">删除</button>
                             </form>
                         </div>
                     </div>
                 </article>
 
-                <nav class="pagination" th:if="${totalPages > 1}">
-                    <a class="secondary-btn" th:classappend="${currentPage == 1} ? ' disabled'" th:href="@{/anime(keyword=${keyword}, page=${currentPage - 1})}">上一页</a>
+                </div>
+
+                <nav class="pagination" th:if="${!continuous and totalPages > 1}">
+                    <a class="secondary-btn" th:classappend="${currentPage == 1} ? ' disabled'" th:href="@{/anime(keyword=${keyword}, page=${currentPage - 1}, mode=${viewMode}, sort=${sortOrder})}">上一页</a>
                     <span th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
                     <form class="page-jump-form" action="/anime" method="get">
                         <input type="hidden" name="keyword" th:value="${keyword}">
+                        <input type="hidden" name="sort" th:value="${sortOrder}">
+                        <input type="hidden" name="mode" th:value="${viewMode}">
                         <label for="animePageJump">跳到</label>
                         <select id="animePageJump" name="page" onchange="this.form.submit()">
                             <option th:each="pageNumber : ${#numbers.sequence(1, totalPages)}"
@@ -137,12 +182,15 @@
                                     th:text="${pageNumber + ' 页'}">1 页</option>
                         </select>
                     </form>
-                    <a class="secondary-btn" th:classappend="${currentPage == totalPages} ? ' disabled'" th:href="@{/anime(keyword=${keyword}, page=${currentPage + 1})}">下一页</a>
+                    <a class="secondary-btn" th:classappend="${currentPage == totalPages} ? ' disabled'" th:href="@{/anime(keyword=${keyword}, page=${currentPage + 1}, mode=${viewMode}, sort=${sortOrder})}">下一页</a>
                 </nav>
             </section>
         </div>
     </main>
 </div>
+<script src="/js/anime-metadata.js?v=20261027-matching3"></script>
+<script src="/js/anime-sort-picker.js?v=20261027-matching3"></script>
+<script src="/js/anime-order.js?v=20261027-matching3"></script>
 <script src="/js/pwa.js"></script>
 </body>
 </html>

@@ -1,122 +1,43 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>灵感伙伴签</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=202605271520)}" href="/css/app.css?v=202605271520">
-</head>
-<body>
-<header class="topbar">
-    <a class="logo" th:href="@{/home}" href="/home">灵感伙伴签</a>
-    <nav>
-        <a class="active" th:href="@{/home}">抽签</a>
-        <a th:href="@{/wheel}">转盘</a>
-        <a th:href="@{/characters}">伙伴库</a>
-        <a th:href="@{/history}">历史</a>
-        <a th:href="@{/favorites}">收藏</a>
-    </nav>
-    <form th:action="@{/user/logout}" action="/user/logout" method="post">
-        <button class="icon-btn" type="submit">退出</button>
-    </form>
-</header>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('今日相遇')}"></head>
+<body><header th:replace="~{fragments :: header('home')}"></header>
+<main class="dashboard"><div th:replace="~{fragments :: messages}"></div>
 
-<main class="dashboard">
-    <section class="draw-panel">
-        <div class="draw-copy">
-            <p class="eyebrow">今日抽签</p>
-            <h1 th:text="'你好，' + ${loginUser.nickName}">你好，Sekai</h1>
-            <p>从原创伙伴库里抽取今日守护伙伴，给今天一个带有故事感的开场。每日固定签会在当天保持同一结果，适合当作今日运势。</p>
-            <div class="mood-row">
-                <button class="mood active" data-mood="平静">平静</button>
-                <button class="mood" data-mood="燃">燃</button>
-                <button class="mood" data-mood="想摆烂">想摆烂</button>
-                <button class="mood" data-mood="需要灵感">需要灵感</button>
-            </div>
-            <div class="wish-grid">
-                <label>
-                    <span>许愿主题</span>
-                    <input id="wishTopic" maxlength="40" placeholder="例如：考试、代码、告白、睡眠">
-                </label>
-                <label>
-                    <span>伙伴偏好</span>
-                    <select id="focusSelect">
-                        <option value="">随机相遇</option>
-                        <option value="bright">明亮系</option>
-                        <option value="calm">冷静系</option>
-                        <option value="power">爆发系</option>
-                        <option value="healing">治愈系</option>
-                        <option value="main">主角感</option>
-                    </select>
-                </label>
-            </div>
-            <div class="draw-actions">
-                <button class="draw-btn" id="dailyButton" type="button">今日固定签</button>
-                <button class="draw-btn secondary-draw" id="drawButton" type="button">随机再抽</button>
-                <button class="draw-btn ritual-draw" id="ritualButton" type="button">三连签仪式</button>
-            </div>
-        </div>
-        <div class="result-stage" id="resultStage">
-            <div class="empty-state">
-                <span>?</span>
-                <p>今天会是谁来替你开局？</p>
-            </div>
-        </div>
-    </section>
+<section class="draw-panel">
+ <div class="draw-copy">
+  <p class="welcome" th:text="'你好，' + ${loginUser.nickName}">你好，Sekai</p>
+  <h1>今天，也有一位<br>伙伴与你同行。</h1>
+  <p>留一点时间给自己。抽出今日守护伙伴，带走一句签文，和一个小小的行动方向。</p>
+  <div class="mood-row" aria-label="此刻的心情">
+   <button th:each="m,stat : ${ {'平静','燃','想摆烂','需要灵感','有点焦虑','有点孤单'} }" class="mood" th:classappend="${stat.first} ? 'active'" th:attr="aria-pressed=${stat.first},data-mood=${m}" th:text="${m}" type="button"></button>
+  </div>
+  <div class="draw-actions"><button id="dailyButton" class="draw-btn" type="button" th:text="${todayRecord == null ? '抽取今日固定签' : '查看今日固定签'}">抽取今日固定签</button>
+   <button id="drawButton" class="draw-btn secondary-draw" type="button">随机再抽</button><button id="ritualButton" class="draw-btn ritual-draw" type="button">三连签仪式</button></div>
+  <details class="draw-preferences"><summary>带着一个愿望来相遇</summary>
+   <div class="wish-grid"><label for="wishTopic">许愿主题<input id="wishTopic" maxlength="40" list="savedWishes" placeholder="例如：考试、代码、睡眠"></label>
+    <datalist id="savedWishes"><option th:each="wish : ${wishes}" th:value="${wish.title}"></option></datalist>
+    <label for="focusSelect">伙伴偏好<select id="focusSelect"><option value="">随机相遇</option><option value="bright">明亮系</option><option value="calm">冷静系</option><option value="power">爆发系</option><option value="healing">治愈系</option><option value="main">主角感</option></select></label></div>
+   <p class="form-hint">随机签和三连签会关联这个愿望。今日固定签每天保持同一结果，不重复创建；三连签依次对应阻力、助力和行动。</p>
+  </details>
+ </div>
+ <div><div id="resultStage" class="result-stage" aria-busy="false" aria-label="抽签结果">
+  <div class="empty-state"><span class="empty-orbit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 14.5 9.5 22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z"/></svg></span><h2>把相遇留给今天</h2><p>点击“抽取今日固定签”，看看今天会是谁，陪你迈出下一步。</p></div>
+ </div><p id="drawStatus" class="inline-status" role="status" aria-live="polite" aria-atomic="true"></p></div>
+</section>
+<section class="stats-grid" aria-label="我的记录">
+ <div><strong data-stat="totalCharacters" th:text="${stats.totalCharacters}">0</strong><span>可相遇伙伴</span></div>
+ <div><strong data-stat="totalDraws" th:text="${stats.totalDraws}">0</strong><span>累计相遇</span></div>
+ <div><strong data-stat="todayDraws" th:text="${stats.todayDraws}">0</strong><span>今日抽签</span></div>
+ <div><strong data-stat="bestScore" th:text="${stats.bestScore}">0</strong><span>最高运势</span></div>
+ <div><strong data-stat="favoriteCharacters" th:text="${stats.favoriteCharacters}">0</strong><span>收藏伙伴</span></div>
+</section>
+<details class="panel achievement-panel"><summary>收藏路上的小成就</summary><div class="achievement-grid" id="achievementGrid">
+ <article th:each="a : ${achievements}" class="achievement-card" th:classappend="${a.unlocked} ? 'unlocked'"><div class="achievement-topline"><span th:text="${a.unlocked ? '已点亮' : '正在靠近'}"></span><strong th:text="${a.progress + '/' + a.target}"></strong></div><h3 th:text="${a.title}"></h3><p th:text="${a.description}"></p><div class="achievement-progress"><span th:style="'width:' + ${a.progressPercent} + '%'"></span></div><small th:text="${a.unlocked ? '这次相遇已被记住' : a.hint}"></small></article>
+</div></details>
+<section class="split-grid"><div class="panel"><div class="section-title"><h2>最近相遇</h2><a th:href="@{/history}">翻阅日历</a></div><div class="record-list" id="recentRecords">
+ <article class="record" th:each="record : ${recentRecords}"><img th:src="@{/character/image/{id}(id=${record.character.id})}" alt="" loading="lazy"><div><strong th:text="${record.character.displayName}"></strong><span th:text="${record.fortune.title + ' · ' + record.luckScore}"></span></div></article><p th:if="${#lists.isEmpty(recentRecords)}" class="muted">第一段故事，从今天开始。</p>
+ </div></div><div class="panel"><div class="section-title"><h2>也许你会喜欢</h2><a th:href="@{/characters}">探索伙伴</a></div><div class="character-strip"><a th:each="c : ${topCharacters}" th:href="@{/characters/{id}(id=${c.id})}"><img th:src="@{/character/image/{id}(id=${c.id})}" alt="" loading="lazy"><span th:text="${c.displayName}"></span></a></div></div></section>
 
-    <section class="stats-grid">
-        <div><strong th:text="${stats.totalCharacters}">0</strong><span>伙伴数</span></div>
-        <div><strong th:text="${stats.totalDraws}">0</strong><span>累计抽签</span></div>
-        <div><strong th:text="${stats.todayDraws}">0</strong><span>今日抽签</span></div>
-        <div><strong th:text="${stats.bestScore}">0</strong><span>最高运势</span></div>
-        <div><strong th:text="${stats.favoriteCharacters}">0</strong><span>收藏伙伴</span></div>
-    </section>
-
-    <section class="panel achievement-panel">
-        <div class="section-title"><h2>成就徽章</h2></div>
-        <div class="achievement-grid">
-            <article class="achievement-card"
-                     th:each="achievement : ${achievements}"
-                     th:classappend="${achievement.unlocked} ? ' unlocked' : ''">
-                <div class="achievement-topline">
-                    <span th:text="${achievement.tier}">gold</span>
-                    <strong th:text="${achievement.unlocked} ? '已解锁' : (${achievement.progress} + '/' + ${achievement.target})">0/1</strong>
-                </div>
-                <h3 th:text="${achievement.title}">初次相遇</h3>
-                <p th:text="${achievement.description}">完成第一次抽签</p>
-                <div class="achievement-progress">
-                    <span th:style="'width:' + ${achievement.progressPercent} + '%'"></span>
-                </div>
-                <small th:text="${achievement.unlocked} ? '徽章已点亮' : ${achievement.hint}">下一步提示</small>
-            </article>
-        </div>
-    </section>
-
-    <section class="split-grid">
-        <div class="panel">
-            <div class="section-title"><h2>最近抽签</h2><a th:href="@{/history}">全部</a></div>
-            <div class="record-list">
-                <article class="record" th:each="record : ${recentRecords}">
-                    <img th:src="@{/character/image/{id}(id=${record.character.id},v=202605082230)}" alt="">
-                    <div>
-                        <strong th:text="${record.character.displayName}">伙伴</strong>
-                        <span th:text="${record.fortune.title + ' / ' + record.luckScore}">fortune</span>
-                    </div>
-                </article>
-                <p class="muted" th:if="${#lists.isEmpty(recentRecords)}">还没有历史记录。</p>
-            </div>
-        </div>
-        <div class="panel">
-            <div class="section-title"><h2>高热度伙伴</h2><a th:href="@{/characters}">查看</a></div>
-            <div class="character-strip">
-                <article th:each="character : ${topCharacters}">
-                    <img th:src="@{/character/image/{id}(id=${character.id},v=202605082230)}" alt="">
-                    <span th:text="${character.displayName}">名字</span>
-                </article>
-            </div>
-        </div>
-    </section>
-</main>
-<script th:src="@{/js/app.js(v=2026083001)}" src="/js/app.js?v=2026083001"></script>
-</body>
-</html>
+</main><footer th:replace="~{fragments :: footer}"></footer>
+<script th:inline="javascript">window.sekaiTodayRecord = /*[[${todayRecord}]]*/ null;</script><script th:src="@{/js/app.js(v=20261028)}"></script></body></html>

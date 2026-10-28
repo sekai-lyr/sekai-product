@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${song.title + ' · 查找素材'}">查找素材</title>
+    <link rel="stylesheet" href="/css/app.css?v=20261010m">
+    <script src="/js/site-theme.js?v=20261028"></script>
+    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
+    <style>
+        .asset-content{max-width:960px;margin:0 auto;padding:32px 24px 64px}
+        .asset-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+        .asset-head h1{font-size:1.7rem;margin:4px 0}.asset-head p{margin:0}
+        .asset-status{width:100%;border-collapse:collapse;margin:28px 0}
+        .asset-status th,.asset-status td{padding:13px 8px;border-bottom:1px solid #8885;text-align:left}
+        .asset-status a,.asset-candidates a{color:inherit;text-decoration:underline}
+        .asset-candidates{list-style:none;padding:0;margin:0}
+        .asset-candidates li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #8885}
+        .asset-candidates span:first-child{width:58px;flex:none}
+        .asset-candidates a{min-width:0;overflow-wrap:anywhere}
+        .asset-candidates form{margin-left:auto;flex:none}
+        .asset-candidates button{cursor:pointer}
+        .asset-note{margin:18px 0;line-height:1.5}
+        @media(max-width:640px){.asset-head,.asset-candidates li{flex-wrap:wrap}.asset-candidates form{margin-left:0}}
+    </style>
+    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{fragments :: sidebar('songs')}"></div>
+    <main class="content asset-content">
+        <header class="asset-head">
+            <div><h1 th:text="${song.title}">歌曲</h1><p th:text="${song.artist}">歌手</p></div>
+            <a th:href="@{/player/{id}(id=${song.id})}">返回播放器</a>
+        </header>
+        <p class="message success" th:if="${message}" th:text="${message}"></p>
+        <p class="message error" th:if="${error}" th:text="${error}"></p>
+        <h2>基础资料</h2>
+        <p th:text="${hasTitle and hasCover and hasLrc ? '歌名、封面、LRC 已齐全' : '基础资料待补齐：需要歌名、封面和 LRC'}">基础资料待补齐</p>
+        <table class="asset-status">
+            <thead><tr><th>素材</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+            <tr><th>歌名</th><td th:text="${hasTitle ? '已提供' : '待补齐'}">已提供</td><td></td></tr>
+            <tr><th>封面</th><td th:text="${hasCover ? '已提供' : '待补齐'}">待补齐</td><td></td></tr>
+            <tr><th>FLAC 音频</th><td th:text="${hasFlac ? '已关联' : '待补齐'}">待补齐</td><td></td></tr>
+            <tr><th>MP4 视频</th><td th:text="${hasMp4 ? '已关联' : '待补齐'}">待补齐</td><td></td></tr>
+            <tr><th>PNG 封面</th><td th:text="${hasPng ? '已关联' : '待补齐'}">待补齐</td><td></td></tr>
+            <tr><th>LRC 歌词</th><td th:text="${hasLrc ? 'LRC 已就绪' : '待补齐'}">待补齐</td>
+                <td><a th:if="${hasLrc}" th:href="@{/songs/{id}/assets/lyrics.lrc(id=${song.id})}">下载 LRC</a>
+                    <span th:unless="${hasLrc}">请在歌曲库导入有使用许可的 LRC</span></td></tr>
+            </tbody>
+        </table>
+        <form th:unless="${hasLrc}" th:action="@{/songs/{id}/assets/lyrics(id=${song.id})}" method="post">
+            <input type="hidden" name="token" th:value="${assetCsrf}">
+            <label for="asset-lyrics">提供有权使用的 LRC 歌词</label>
+            <textarea id="asset-lyrics" name="lyricText" rows="6" maxlength="100000" required placeholder="[00:12.00]第一行歌词" style="display:block;width:100%;margin:8px 0"></textarea>
+            <button type="submit">保存 LRC</button>
+        </form>
+        <p class="asset-note" th:if="${sourceUrl != null}">已导入的第三方来源：<a th:href="${sourceUrl}" target="_blank" rel="noopener noreferrer">查看原始歌曲或视频</a>。此来源暂不自动保存媒体文件。</p>
+        <h2>开放素材候选</h2>
+        <p class="asset-note">这里只检查站内可识别的文件；浏览器本地文件不计入状态。候选来自 Wikimedia Commons，只有标注 CC0、与歌名及歌手匹配的原始 FLAC、MP4、PNG 才能保存。请先打开来源核对版本。LRC 暂无可自动保存的授权来源。</p>
+        <p class="message error" th:if="${sourceError}" th:text="${sourceError}"></p>
+        <p th:if="${#lists.isEmpty(candidates) and sourceError == null}">暂未找到可自动保存的候选素材。</p>
+        <ul class="asset-candidates">
+            <li th:each="candidate : ${candidates}">
+                <span th:text="${#strings.toUpperCase(candidate.type)}">FLAC</span>
+                <a th:href="${candidate.pageUrl}" target="_blank" rel="noopener noreferrer" th:text="${candidate.title}">来源</a>
+                <span th:text="${candidate.license}">CC0</span>
+                <form th:action="@{/songs/{id}/assets/attach(id=${song.id})}" method="post">
+                    <input type="hidden" name="token" th:value="${assetCsrf}">
+                    <input type="hidden" name="title" th:value="${candidate.title}">
+                    <input type="hidden" name="type" th:value="${candidate.type}">
+                    <button type="submit">保存并关联</button>
+                </form>
+            </li>
+        </ul>
+    </main>
+</div>
+</body>
+</html>

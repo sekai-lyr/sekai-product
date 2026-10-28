@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="180" viewBox="0 0 240 180">
+  <title>初音未来正常表情</title>
+  <path d="M31 78 Q61 53 91 78 Q61 102 31 78Z" fill="#fffdfb" stroke="#19304a" stroke-width="4"/>
+  <ellipse cx="62" cy="78" rx="12" ry="17" fill="#20bfc0"/><ellipse cx="62" cy="80" rx="5" ry="10" fill="#07152a"/><circle cx="58" cy="73" r="4" fill="#fff"/>
+  <path d="M209 78 Q179 53 149 78 Q179 102 209 78Z" fill="#fffdfb" stroke="#19304a" stroke-width="4"/>
+  <ellipse cx="178" cy="78" rx="12" ry="17" fill="#20bfc0"/><ellipse cx="178" cy="80" rx="5" ry="10" fill="#07152a"/><circle cx="182" cy="73" r="4" fill="#fff"/>
+  <path d="M34 59 Q61 43 89 57 M206 59 Q179 43 151 57" fill="none" stroke="#17314b" stroke-width="6" stroke-linecap="round"/>
+  <path d="M110 103 Q120 109 130 103" fill="none" stroke="#b75b72" stroke-width="4" stroke-linecap="round"/>
+  <path d="M43 111 Q56 104 69 111 M171 111 Q184 104 197 111" fill="none" stroke="#f2879c" stroke-width="7" opacity=".6" stroke-linecap="round"/>
+</svg>
+

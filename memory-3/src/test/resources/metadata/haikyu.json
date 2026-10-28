@@ -1,0 +1,220 @@
+{
+  "data": [
+    {
+      "id": 84171,
+      "name_cn": "排球少年",
+      "name": "ハイキュー!!",
+      "platform": "TV",
+      "date": "2014-04-06",
+      "eps": 25,
+      "type": 2,
+      "images": {
+        "small": "https://lain.bgm.tv/r/200/pic/cover/l/91/d8/84171_5KpYZ.jpg",
+        "grid": "https://lain.bgm.tv/r/100/pic/cover/l/91/d8/84171_5KpYZ.jpg",
+        "large": "https://lain.bgm.tv/pic/cover/l/91/d8/84171_5KpYZ.jpg",
+        "medium": "https://lain.bgm.tv/r/800/pic/cover/l/91/d8/84171_5KpYZ.jpg",
+        "common": "https://lain.bgm.tv/r/400/pic/cover/l/91/d8/84171_5KpYZ.jpg"
+      },
+      "infobox": [
+        {
+          "key": "中文名",
+          "value": "排球少年"
+        },
+        {
+          "key": "别名",
+          "value": [
+            {
+              "v": "Haikyuu!!"
+            },
+            {
+              "v": "Haikyu!!"
+            },
+            {
+              "v": "排球！！"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 118107,
+      "name_cn": "排球少年 列夫参上",
+      "name": "ハイキュー!! リエーフ見参!",
+      "platform": "OVA",
+      "date": "2015-03-04",
+      "eps": 1,
+      "type": 2,
+      "images": {
+        "small": "https://lain.bgm.tv/r/200/pic/cover/l/30/24/118107_I1X4t.jpg",
+        "grid": "https://lain.bgm.tv/r/100/pic/cover/l/30/24/118107_I1X4t.jpg",
+        "large": "https://lain.bgm.tv/pic/cover/l/30/24/118107_I1X4t.jpg",
+        "medium": "https://lain.bgm.tv/r/800/pic/cover/l/30/24/118107_I1X4t.jpg",
+        "common": "https://lain.bgm.tv/r/400/pic/cover/l/30/24/118107_I1X4t.jpg"
+      },
+      "infobox": [
+        {
+          "key": "中文名",
+          "value": "排球少年 列夫参上"
+        },
+        {
+          "key": "别名",
+          "value": [
+            {
+              "v": "排球少年 OAD"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 120236,
+      "name_cn": "排球少年 第二季",
+      "name": "ハイキュー!! セカンドシーズン",
+      "platform": "TV",
+      "date": "2015-10-03",
+      "eps": 25,
+      "type": 2,
+      "images": {
+        "small": "https://lain.bgm.tv/r/200/pic/cover/l/04/3d/120236_AffBR.jpg",
+        "grid": "https://lain.bgm.tv/r/100/pic/cover/l/04/3d/120236_AffBR.jpg",
+        "large": "https://lain.bgm.tv/pic/cover/l/04/3d/120236_AffBR.jpg",
+        "medium": "https://lain.bgm.tv/r/800/pic/cover/l/04/3d/120236_AffBR.jpg",
+        "common": "https://lain.bgm.tv/r/400/pic/cover/l/04/3d/120236_AffBR.jpg"
+      },
+      "infobox": [
+        {
+          "key": "中文名",
+          "value": "排球少年 第二季"
+        },
+        {
+          "key": "别名",
+          "value": [
+            {
+              "v": "Haikyuu!! 2nd Season"
+            },
+            {
+              "v": "Haikyuu!! Second Season"
+            },
+            {
+              "v": "Haikyu!! 2nd Season"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 173849,
+      "name_cn": "排球少年 乌野高校 VS 白鸟泽学园高校",
+      "name": "ハイキュー!! 烏野高校 VS 白鳥沢学園高校",
+      "platform": "TV",
+      "date": "2016-10-07",
+      "eps": 10,
+      "type": 2,
+      "images": {
+        "small": "https://lain.bgm.tv/r/200/pic/cover/l/1c/c6/173849_R21bS.jpg",
+        "grid": "https://lain.bgm.tv/r/100/pic/cover/l/1c/c6/173849_R21bS.jpg",
+        "large": "https://lain.bgm.tv/pic/cover/l/1c/c6/173849_R21bS.jpg",
+        "medium": "https://lain.bgm.tv/r/800/pic/cover/l/1c/c6/173849_R21bS.jpg",
+        "common": "https://lain.bgm.tv/r/400/pic/cover/l/1c/c6/173849_R21bS.jpg"
+      },
+      "infobox": [
+        {
+          "key": "中文名",
+          "value": "排球少年 乌野高校 VS 白鸟泽学园高校"
+        },
+        {
+          "key": "别名",
+          "value": [
+            {
+              "v": "Haikyuu!! Karasuno Koukou vs Shiratorizawa Gakuen Koukou"
+            },
+            {
+              "v": "Haikyu!! Karasuno High School vs Shiratorizawa Academy"
+            },
+            {
+              "v": "排球少年 第三季"
+            },
+            {
+              "v": "ハイキュー!! 第3期"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 269918,
+      "name_cn": "排球少年 TO THE TOP",
+      "name": "ハイキュー!! TO THE TOP",
+      "platform": "TV",
+      "date": "2020-01-10",
+      "eps": 13,
+      "type": 2,
+      "images": {
+        "small": "https://lain.bgm.tv/r/200/pic/cover/l/32/2c/269918_A60Ia.jpg",
+        "grid": "https://lain.bgm.tv/r/100/pic/cover/l/32/2c/269918_A60Ia.jpg",
+        "large": "https://lain.bgm.tv/pic/cover/l/32/2c/269918_A60Ia.jpg",
+        "medium": "https://lain.bgm.tv/r/800/pic/cover/l/32/2c/269918_A60Ia.jpg",
+        "common": "https://lain.bgm.tv/r/400/pic/cover/l/32/2c/269918_A60Ia.jpg"
+      },
+      "infobox": [
+        {
+          "key": "中文名",
+          "value": "排球少年 TO THE TOP"
+        },
+        {
+          "key": "别名",
+          "value": [
+            {
+              "v": "Haikyuu!! To the Top"
+            },
+            {
+              "v": "Haikyu!! To the Top"
+            },
+            {
+              "v": "排球少年 第四季"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 394621,
+      "name_cn": "排球少年！！垃圾场决战",
+      "name": "劇場版ハイキュー!! ゴミ捨て場の決戦",
+      "platform": "剧场版",
+      "date": "2024-02-16",
+      "eps": 1,
+      "type": 2,
+      "images": {
+        "small": "https://lain.bgm.tv/r/200/pic/cover/l/e9/65/394621_Tl4ZX.jpg",
+        "grid": "https://lain.bgm.tv/r/100/pic/cover/l/e9/65/394621_Tl4ZX.jpg",
+        "large": "https://lain.bgm.tv/pic/cover/l/e9/65/394621_Tl4ZX.jpg",
+        "medium": "https://lain.bgm.tv/r/800/pic/cover/l/e9/65/394621_Tl4ZX.jpg",
+        "common": "https://lain.bgm.tv/r/400/pic/cover/l/e9/65/394621_Tl4ZX.jpg"
+      },
+      "infobox": [
+        {
+          "key": "中文名",
+          "value": "排球少年！！垃圾场决战"
+        },
+        {
+          "key": "别名",
+          "value": [
+            {
+              "v": "剧场版排球!! 垃圾场的决战"
+            },
+            {
+              "v": "Haikyuu!!: Gomi Suteba no Kessen"
+            },
+            {
+              "v": "Gekijouban Haikyuu!! Final"
+            },
+            {
+              "v": "ハイキュー!! FINAL 第一部"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+@Column(name = \\" "pending_image_base64\) 

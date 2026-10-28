@@ -6,6 +6,12 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDateTime;
 
 public class SekaiPictureWallpaperDO {
+    private String contentHash;
+    private LocalDateTime deletedAt;
+    public String getContentHash() { return contentHash; }
+    public void setContentHash(String value) { contentHash = value; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime value) { deletedAt = value; }
     private Long id;
     private Long userId;
     private Long categoryId;
