@@ -17,13 +17,9 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Resource
     private SekaiPictureFavoriteMapper favoriteMapper;
 
-    @Resource
-    private com.sekai.picture.mapper.SekaiPictureWallpaperMapper wallpaperMapper;
-
     @Override
     @Transactional
     public Result<Void> toggle(Long userId, Long wallpaperId) {
-        if (wallpaperMapper.selectByIdAndUserId(wallpaperId, userId) == null) return Result.fail("壁纸不存在或没有权限");
         if (favoriteMapper.selectByUserIdAndWallpaperId(userId, wallpaperId) != null) {
             favoriteMapper.deleteByUserIdAndWallpaperId(userId, wallpaperId);
             return Result.ok(null, "已取消收藏");
@@ -40,11 +36,6 @@ public class FavoriteServiceImpl implements FavoriteService {
     public Result<Void> batchSet(Long userId, List<Long> wallpaperIds, boolean favorite) {
         if (wallpaperIds == null || wallpaperIds.isEmpty()) {
             return Result.fail("请先选择壁纸");
-        }
-        wallpaperIds = wallpaperIds.stream().filter(java.util.Objects::nonNull).distinct().toList();
-        if (wallpaperIds.size() > 100) return Result.fail("每次最多处理 100 张图片");
-        for (Long id : wallpaperIds) {
-            if (wallpaperMapper.selectByIdAndUserId(id, userId) == null) return Result.fail("所选图片不存在或没有权限");
         }
         int changed = 0;
         for (Long wallpaperId : wallpaperIds) {

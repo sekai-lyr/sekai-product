@@ -7,11 +7,9 @@
         <result property="password" column="password"/>
         <result property="nickName" column="nickname"/>
         <result property="avatar" column="avatar"/>
-        <result property="admin" column="is_admin"/>
-        <result property="sessionVersion" column="session_version"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
-    <sql id="BaseColumns">id, username, password, nickname, avatar, create_time, is_admin, session_version</sql>
+    <sql id="BaseColumns">id, username, password, nickname, avatar, create_time</sql>
 
     <insert id="insert" parameterType="com.sekai.draw.lots.dataobject.SekaiDrawLotsUserDO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sekai_Draw_lots_user (username, password, nickname, avatar)
@@ -43,23 +41,5 @@
             <if test="avatar != null">avatar = #{avatar},</if>
         </set>
         WHERE id = #{id}
-    </update>
-    <select id="lockById" resultMap="BaseResultMap">
-        SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_user WHERE id = #{id} FOR UPDATE
-    </select>
-    <update id="setRecovery">
-        UPDATE sekai_Draw_lots_user SET recovery_hash = #{hash}, reset_hash = NULL, reset_expires = NULL WHERE id = #{id}
-    </update>
-    <update id="exchangeRecovery">
-        UPDATE sekai_Draw_lots_user SET recovery_hash = NULL, reset_hash = #{token}, reset_expires = DATE_ADD(NOW(), INTERVAL 10 MINUTE)
-        WHERE username = #{name} AND recovery_hash = #{recovery}
-    </update>
-    <select id="lockByResetToken" resultMap="BaseResultMap">
-        SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_user
-        WHERE reset_hash = #{token} AND reset_expires &gt; NOW() FOR UPDATE
-    </select>
-    <update id="resetPassword">
-        UPDATE sekai_Draw_lots_user SET password = #{password}, reset_hash = NULL, reset_expires = NULL,
-            recovery_hash = NULL, session_version = session_version + 1 WHERE id = #{id}
     </update>
 </mapper>

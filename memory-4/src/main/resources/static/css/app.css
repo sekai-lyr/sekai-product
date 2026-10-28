@@ -1720,5 +1720,3 @@ body:not(.motion-reduced).wheel-spinning .wheel-spin-button {
         display: none;
     }
 }
-.healing-note { margin: 16px 0; padding: 16px; border-left: 3px solid #b9a1d8; background: #f5f0fa; border-radius: 0 12px 12px 0; color: #554266; }
-.healing-note p { margin: 8px 0 0; line-height: 1.8; }

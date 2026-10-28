@@ -10,5 +10,5 @@ import java.util.List;
 public interface SekaiDrawLotsWheelSpinMapper {
     int insert(SekaiDrawLotsWheelSpinDO record);
     SekaiDrawLotsWheelSpinDO selectByPrimaryKey(Long id);
-    List<SekaiDrawLotsWheelSpinDO> selectRecentByUserId(@Param("userId") Long userId, @Param("deckId") Long deckId, @Param("limit") int limit);
+    List<SekaiDrawLotsWheelSpinDO> selectRecentByUserId(@Param("userId") Long userId, @Param("limit") int limit);
 }

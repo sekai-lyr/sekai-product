@@ -6,8 +6,6 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDateTime;
 
 public class SekaiDrawLotsWheelSpinDO {
-    private Long deckId;
-
     private Long id;
     private Long userId;
     private Long optionId;
@@ -39,6 +37,4 @@ public class SekaiDrawLotsWheelSpinDO {
     public void setMoodLine(String moodLine) { this.moodLine = moodLine; }
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
-    public Long getDeckId() { return deckId; }
-    public void setDeckId(Long deckId) { this.deckId = deckId; }
 }

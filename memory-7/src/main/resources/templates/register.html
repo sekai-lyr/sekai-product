@@ -5,34 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai Picture | 注册</title>
     <link rel="stylesheet" th:href="@{/css/login.css}" href="/css/login.css">
-    <link rel="stylesheet" href="/css/gallery.css">
 </head>
 <body class="auth-page register-page">
 <main class="auth-layout">
-    <section class="auth-art depth-scene auth-depth-scene" data-depth-scene data-scene="auth-register" data-reveal>
-        <span class="auth-depth-glow depth-layer" data-depth-layer="0.18" aria-hidden="true"></span>
-        <span class="auth-scan-line depth-layer" data-depth-layer="0.54" data-scan-line aria-hidden="true"></span>
-        <span class="auth-depth-particle auth-particle-one depth-layer" data-depth-layer="0.88" data-float="slow" aria-hidden="true"></span>
-        <span class="auth-depth-particle auth-particle-two depth-layer" data-depth-layer="1.1" data-float="fast" aria-hidden="true"></span>
-        <svg class="auth-orbit depth-layer" data-depth-layer="0.68" data-orbit="constellation" viewBox="0 0 160 160" aria-hidden="true">
-            <ellipse cx="80" cy="80" rx="59" ry="25"></ellipse>
-            <circle cx="139" cy="80" r="3"></circle>
-        </svg>
-        <img class="depth-image" src="/images/archive-0007.jpg" alt="公园长椅上的动漫角色壁纸">
+    <section class="auth-art" data-reveal>
+        <img src="/uploads/wallpapers/sekai-import/sekai_import_0007_337d34a4.jpg" alt="公园长椅上的动漫角色壁纸">
         <div class="auth-art-copy">
-            <span class="auth-mark">Make your archive</span>
-            <h1>给收藏一个<br>真正的入口。</h1>
+            <span class="auth-mark">MAKE YOUR ARCHIVE</span>
+            <h1>给收藏一个真正属于你的入口。</h1>
             <p>创建账号后，你可以上传自制壁纸、建立分类、收藏灵感图，让图库慢慢变成自己的小宇宙。</p>
-            <div class="auth-art-meta"><span>Upload</span><span>Organize</span><span>Remember</span></div>
         </div>
     </section>
 
-    <section class="auth-form-panel">
-        <div class="auth-form-shell" data-reveal>
-            <a class="auth-brand" href="/login" aria-label="返回 Sekai Picture 登录页">
-                <span class="auth-brand-mark" aria-hidden="true"></span>
-                <span>Sekai Picture<small>private wallpaper archive</small></span>
-            </a>
+    <section class="auth-form-panel" data-reveal>
+        <div class="auth-form-shell">
+            <a class="auth-brand" href="/login">Sekai Picture</a>
             <h2>创建账号</h2>
             <p class="auth-lead">从一座干净的私人图库开始。</p>
             <div class="server-message error" th:if="${error}" th:text="${error}"></div>
@@ -43,7 +30,10 @@
                 <input id="nickName" name="nickName" type="text" placeholder="你的展示昵称">
                 <label for="password">密码</label>
                 <input id="password" name="password" type="password" placeholder="至少 6 位" autocomplete="new-password" required>
-                <div class="password-meter" id="passwordMeter" aria-live="polite"><span class="password-meter-track" aria-hidden="true"><span></span></span><small id="passwordHint">建议使用 6 位以上并混合字母与数字</small></div>
+                <div class="password-meter" id="passwordMeter" aria-live="polite">
+                    <span class="password-meter-track" aria-hidden="true"><span></span></span>
+                    <small id="passwordHint">建议使用 6 位以上并混合字母与数字</small>
+                </div>
                 <label for="confirmPassword">确认密码</label>
                 <input id="confirmPassword" name="confirmPassword" type="password" placeholder="再输入一次密码" autocomplete="new-password" required>
                 <button class="primary-btn" type="submit">创建图库账号</button>
@@ -54,7 +44,6 @@
     </section>
 </main>
 <script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
-<script src="/js/gallery.js" defer></script>
 <script th:src="@{/js/register.js}" src="/js/register.js"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import com.sekai.song.model.Result;
 import com.sekai.song.model.User;
 import com.sekai.song.service.UserService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ public class SekaiUserControl {
 
     @Resource
     private UserService userService;
+    @Resource
+    private com.sekai.song.service.WebsiteFeedbackService websiteFeedback;
 
     @PostMapping("/user/register")
     public String register(@ModelAttribute User user,
@@ -48,6 +51,7 @@ public class SekaiUserControl {
     @PostMapping("/user/login")
     public String login(@RequestParam("userName") String userName,
                         @RequestParam("password") String password,
+                        HttpServletRequest request,
                         HttpSession session,
                         RedirectAttributes redirectAttributes) {
         Result<User> result = userService.login(userName, password);
@@ -55,7 +59,16 @@ public class SekaiUserControl {
             redirectAttributes.addFlashAttribute("error", result.getMessage());
             return "redirect:/login";
         }
+        try {
+            request.changeSessionId();
+        } catch (IllegalStateException ignored) {
+        }
         session.setAttribute("loginUser", result.getData());
+        try {
+            websiteFeedback.login(result.getData().getId());
+        } catch (org.springframework.dao.DataAccessException error) {
+            org.slf4j.LoggerFactory.getLogger(SekaiUserControl.class).warn("登录统计暂不可用，登录流程继续");
+        }
         return "redirect:/home";
     }
 }

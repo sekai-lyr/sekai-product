@@ -1,0 +1,11 @@
+import { mkdirSync,existsSync,copyFileSync,writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
+const root='D:/dsh-render/sekai-private-test-20261012';
+const folder=join(root,'Sekai-Friend-Test');
+if(existsSync(root))throw new Error('Existing invitation folder; refusing to overwrite');
+mkdirSync(folder,{recursive:true});
+execFileSync('ssh-keygen.exe',['-q','-t','ed25519','-N','','-C','sekai-preview-20261012','-f',join(folder,'preview_key')]);
+for(const [source,target] of [['preview-client-start.ps1','start-test.ps1'],['preview-client-stop.ps1','stop-test.ps1'],['preview-start.cmd','start-test.cmd'],['preview-stop.cmd','stop-test.cmd'],['preview-readme.txt','README.txt']])copyFileSync(join('tools/deploy',source),join(folder,target));
+writeFileSync(join(folder,'known_hosts'),'101.37.89.111 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOuGjppgglZFtiMtste9JNpuHkwx0fgsRJ+UwxUU47KQ\n');
+console.log(JSON.stringify({root,folder,publicKey:join(folder,'preview_key.pub')}));

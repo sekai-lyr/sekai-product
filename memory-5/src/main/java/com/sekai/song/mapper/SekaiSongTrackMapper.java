@@ -2,10 +2,17 @@ package com.sekai.song.mapper;
 
 import com.sekai.song.model.Song;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 public interface SekaiSongTrackMapper {
+    @Select("SELECT COUNT(*) FROM sekai_song_track WHERE user_id = #{userId} AND local_audio_url = #{url}")
+    int countOwnedAudio(@Param("userId") Long userId, @Param("url") String url);
+
+    @Select("SELECT COUNT(*) FROM sekai_song_track WHERE user_id = #{userId} AND local_video_url = #{url}")
+    int countOwnedVideo(@Param("userId") Long userId, @Param("url") String url);
+
     int insert(Song song);
 
     int update(Song song);

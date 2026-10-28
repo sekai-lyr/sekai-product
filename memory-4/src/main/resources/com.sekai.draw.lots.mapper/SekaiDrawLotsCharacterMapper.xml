@@ -11,16 +11,16 @@
         <result property="imageUrl" column="image_url"/>
         <result property="quote" column="quote"/>
         <result property="popularity" column="popularity"/>
-        <result property="createTime" column="create_time"/><result property="enabled" column="enabled"/>
+        <result property="createTime" column="create_time"/>
     </resultMap>
     <sql id="BaseColumns">
         id, english_name, NULL AS japanese_name, anime_title, role_type AS archetype, energy AS element,
-        image_url, tags AS quote, popularity_score AS popularity, create_time, enabled
+        image_url, tags AS quote, popularity_score AS popularity, create_time
     </sql>
 
     <select id="countAll" resultType="int">
         SELECT COUNT(*) FROM sekai_Draw_lots_character
-        WHERE enabled = TRUE AND role_type &lt;&gt; 'archived'
+        WHERE role_type &lt;&gt; 'archived'
     </select>
 
     <select id="selectByPrimaryKey" resultMap="BaseResultMap">
@@ -30,14 +30,14 @@
 
     <select id="selectRandom" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
-        WHERE enabled = TRUE AND role_type &lt;&gt; 'archived'
+        WHERE role_type &lt;&gt; 'archived'
         ORDER BY RAND()
         LIMIT 1
     </select>
 
     <select id="selectRandomByFocus" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
-        WHERE enabled = TRUE AND role_type &lt;&gt; 'archived'
+        WHERE role_type &lt;&gt; 'archived'
           AND (
               energy LIKE CONCAT('%', #{focus}, '%')
               OR tags LIKE CONCAT('%', #{focus}, '%')
@@ -50,7 +50,7 @@
 
     <select id="selectTop" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
-        WHERE enabled = TRUE AND role_type &lt;&gt; 'archived'
+        WHERE role_type &lt;&gt; 'archived'
         ORDER BY popularity_score DESC, id
         LIMIT #{limit}
     </select>
@@ -58,7 +58,7 @@
     <select id="search" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/> FROM sekai_Draw_lots_character
         <where>
-            enabled = TRUE AND role_type &lt;&gt; 'archived'
+            role_type &lt;&gt; 'archived'
             <if test="keyword != null">
                 AND (
                     english_name LIKE CONCAT('%', #{keyword}, '%')
@@ -88,7 +88,7 @@
         FROM sekai_Draw_lots_character c
         JOIN sekai_Draw_lots_character base ON base.id = #{baseId}
         WHERE c.id != base.id
-          AND c.enabled = TRUE AND c.role_type &lt;&gt; 'archived'
+          AND c.role_type &lt;&gt; 'archived'
         ORDER BY
             CASE WHEN c.anime_title = base.anime_title THEN 50 ELSE 0 END
             + CASE WHEN c.role_type = base.role_type THEN 24 ELSE 0 END

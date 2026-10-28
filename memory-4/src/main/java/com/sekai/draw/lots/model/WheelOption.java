@@ -3,8 +3,6 @@ package com.sekai.draw.lots.model;
 import java.time.LocalDateTime;
 
 public class WheelOption {
-    private Long deckId;
-
     private Long id;
     private Long userId;
     private String title;
@@ -36,6 +34,4 @@ public class WheelOption {
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
     public LocalDateTime getUpdateTime() { return updateTime; }
     public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
-    public Long getDeckId() { return deckId; }
-    public void setDeckId(Long deckId) { this.deckId = deckId; }
 }

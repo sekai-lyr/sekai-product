@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>歌库整理 · Sekai Song</title>
+    <link rel="stylesheet" href="/css/app.css?v=20261010m"><script src="/js/site-theme.js?v=20261028"></script>
+    <link rel="stylesheet" href="/css/site-theme.css?v=20261025"><link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+</head>
+<body th:attr="data-library-csrf=${libraryCsrf}"><div class="app-shell">
+    <div th:replace="~{fragments :: sidebar('library-tools')}"></div>
+    <main class="content library-tools">
+        <h1>让歌库更好听，也更好找。</h1><p>发现最近的旋律，整理重复歌曲，留一份自己的备份。</p>
+        <section aria-labelledby="smart-heading"><h2 id="smart-heading">智能歌单</h2>
+            <label>筛选 <select id="smart-rule"><option value="recent">最近 30 天导入</option><option value="frequent">最近 30 天常听</option><option value="missing-lyrics">待补充歌词</option><option value="unlinked">尚无文件关联记录</option></select></label>
+            <p>关联记录不代表当前设备已授权；播放时会检查本机文件。</p>
+            <div id="smart-results" class="library-rows" aria-live="polite"></div>
+            <nav class="library-pagination" aria-label="智能歌单分页"><button id="smart-prev" disabled>上一页</button><span id="smart-page">1</span><button id="smart-next" disabled>下一页</button></nav>
+        </section>
+        <section aria-labelledby="duplicate-heading"><h2 id="duplicate-heading">重复歌曲检查</h2>
+            <p>同名、同歌手只是候选，可能是不同版本。预览后选择保留哪首；合并会保留收藏和歌单关系，冲突资料以保留歌曲为准。本机文件可能需要重新关联。</p>
+            <button id="scan-duplicates">查找候选</button><ul id="duplicate-results"></ul>
+            <button id="duplicates-more" hidden>下一批候选</button>
+            <div id="merge-preview" hidden><pre id="merge-description"></pre><button id="merge-confirm">确认合并这两首</button><button id="merge-cancel">取消</button></div>
+            <p id="merge-status" role="status"></p>
+        </section>
+        <section aria-labelledby="backup-heading"><h2 id="backup-heading">备份与恢复</h2>
+            <p>包含歌曲资料、歌词、收藏、歌单和播放偏好。音视频、本机封面及文件授权留在设备上，恢复后请重新关联。</p>
+            <a class="primary-btn" href="/api/library-tools/backup">下载资料备份</a>
+            <p><label>选择 JSON 备份 <input id="backup-file" type="file" accept=".json,application/json"></label></p>
+            <div id="restore-preview" hidden><p id="restore-description"></p><ul id="restore-conflicts"></ul>
+                <label>已有歌曲 <select id="restore-mode"><option value="skip">保留原资料，跳过已有歌曲</option><option value="fill">补充空白字段并保留收藏</option></select></label>
+                <p>歌单按名称合并，重复导入不会重复添加成员。</p><button id="restore-confirm">确认恢复</button>
+            </div><p id="backup-status" role="status"></p>
+        </section>
+        <section aria-labelledby="tasks-heading"><h2 id="tasks-heading">导入任务</h2><p><a href="/netease">网易云信息导入</a> · <a href="/qq">QQ 音乐信息导入</a></p>
+            <p>显示最近 20 个任务。失败重试只处理未完成输入；平台未返回缺失歌曲编号时，会重新读取该失败歌单并跳过已导入歌曲。</p>
+            <button id="refresh-tasks">刷新任务</button><div id="import-tasks" aria-live="polite"></div>
+        </section>
+    </main></div><script src="/js/library-tools.js?v=20261028" defer></script>
+</body></html>

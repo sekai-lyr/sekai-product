@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 public class AnimeCharacterProfile {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

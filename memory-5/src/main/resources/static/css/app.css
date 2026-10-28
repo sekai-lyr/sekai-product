@@ -2951,3 +2951,382 @@ html {
         display: none;
     }
 }
+
+/* ==========================================================================
+   2026-10-10 手机端适配层（authoritative mobile layer）
+   --------------------------------------------------------------------------
+   本层放在 app.css 最末尾，用更高特异性（.app-shell > .sidebar 等）与更靠后的
+   顺序压过文件前面所有同选择器规则，包括 player-stage.css 里的 .sidebar。
+   桌面（≥981px）行为完全不变：侧栏仍是 224px 固定左栏，导航常驻可见。
+   ========================================================================== */
+
+/* ---------- 1. 侧栏三段式结构：桌面保持原样 ---------- */
+.sidebar-bar {
+    display: block;
+}
+
+.sidebar-toggle {
+    display: none;
+}
+
+.sidebar-scrim {
+    display: none;
+}
+
+.sidebar-panel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* ---------- 2. 触屏通用修正（不影响桌面鼠标） ---------- */
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+img,
+video,
+iframe,
+canvas,
+svg {
+    max-width: 100%;
+}
+
+/* 触屏上没有 hover，取消只靠 hover 才可见的效果，避免状态卡死 */
+@media (hover: none) {
+    .motion-item.is-visible:hover,
+    .home-action-list a:hover,
+    .song-row:hover,
+    .playlist-card:hover,
+    .song-card:hover {
+        transform: none;
+    }
+}
+
+/* ==========================================================================
+   3. 手机 / 小屏平板：≤980px
+   ========================================================================== */
+@media (max-width: 980px) {
+    /* 3.1 外壳：单列，侧栏不再占据正文上方 635px */
+    .app-shell {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .app-shell > .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        height: auto;
+        max-height: none;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        padding-top: calc(10px + env(safe-area-inset-top, 0px));
+        overflow: visible;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 12px 32px rgba(12, 24, 48, 0.32);
+    }
+
+    .app-shell > .sidebar .sidebar-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .app-shell > .sidebar .logo {
+        margin: 0;
+        padding: 0;
+        font-size: 19px;
+        line-height: 1.2;
+    }
+
+    /* 3.2 汉堡按钮：44px 触控目标 */
+    .app-shell > .sidebar .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: #eef8ff;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 900;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+
+    .app-shell > .sidebar .sidebar-toggle[aria-expanded="true"] {
+        background: linear-gradient(135deg, #9ff8ec, #ffd6e8 58%, #ffe681);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: #081b34;
+    }
+
+    .app-shell > .sidebar .sidebar-toggle-bars {
+        display: grid;
+        gap: 3px;
+        width: 17px;
+    }
+
+    .app-shell > .sidebar .sidebar-toggle-bars i {
+        display: block;
+        height: 2px;
+        border-radius: 2px;
+        background: currentColor;
+    }
+
+    /* 3.3 折叠菜单面板 */
+    .app-shell > .sidebar .sidebar-panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 10px;
+        left: 10px;
+        z-index: 2;
+        display: none;
+        gap: 12px;
+        max-height: min(72vh, 620px);
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(11, 22, 42, 0.99), rgba(19, 36, 64, 0.99));
+        box-shadow: 0 26px 64px rgba(6, 14, 30, 0.5);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .app-shell > .sidebar.nav-open .sidebar-panel {
+        display: flex;
+    }
+
+    .app-shell > .sidebar .sidebar-panel nav {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .app-shell > .sidebar .sidebar-bottom {
+        margin: 0;
+    }
+
+    /* 3.4 导航项：44px 高，触摸友好 */
+    .app-shell > .sidebar nav a {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 10px 14px;
+        font-size: 15px;
+        touch-action: manipulation;
+    }
+
+    .app-shell > .sidebar .user-box {
+        gap: 6px;
+        padding: 12px 14px;
+    }
+
+    .app-shell > .sidebar .user-box a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+    }
+
+    .app-shell > .sidebar .account-mode {
+        font-size: 12px;
+    }
+
+    /* 3.5 遮罩：只在菜单展开时存在 */
+    .app-shell > .sidebar .sidebar-scrim {
+        display: none;
+    }
+
+    .app-shell > .sidebar .sidebar-scrim:not([hidden]) {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        display: block;
+        padding: 0;
+        border: 0;
+        background: rgba(7, 14, 28, 0.5);
+        cursor: pointer;
+    }
+
+    body.nav-scroll-lock {
+        overflow: hidden;
+    }
+
+    /* 3.6 正文留白收紧，把宽度还给内容 */
+    .content {
+        padding: 18px 14px 44px;
+    }
+
+    .content > .section-title {
+        margin: 0 0 14px;
+        padding-bottom: 12px;
+    }
+
+    /* 3.7 表单：16px 字号避免 iOS 聚焦自动缩放，输入框至少 44px 高 */
+    .grid-form input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+    .grid-form select,
+    .grid-form textarea,
+    .search-bar input,
+    .search-bar select,
+    .queue-search,
+    input[type="search"],
+    input[type="text"],
+    input[type="url"],
+    input[type="password"],
+    select,
+    textarea {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    textarea {
+        line-height: 1.5;
+    }
+
+    /* 3.8 按钮与链接：最小 44px 触控高度 */
+    .pill-btn,
+    .hero-action,
+    .search-bar button,
+    .grid-form button,
+    .row-actions button,
+    .playlist-card button,
+    .song-row button,
+    .file-picker-button,
+    .text-action,
+    .playlist-edit-link {
+        min-height: 44px;
+        padding: 11px 16px;
+        font-size: 14px;
+        touch-action: manipulation;
+    }
+
+    .row-actions,
+    .playlist-track-actions,
+    .selection-toolbar,
+    .section-title {
+        flex-wrap: wrap;
+    }
+
+    /* 3.9 行内小字统一抬高下限，10~11px 在手机上不可读 */
+    .home-action-list span,
+    .song-row span,
+    .compact-list small,
+    .stats-grid small {
+        font-size: 12px;
+    }
+
+    /* 3.10 统计卡：手机上改自适应列宽，320px 下不再裁掉「常听作品」 */
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    }
+
+    .stats-grid article {
+        overflow: visible;
+    }
+
+    /* 3.11 云音乐外链：原来是 inline，行盒 21px 会互相压住 */
+    .open-cloud,
+    .section-title a,
+    .user-box a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+    }
+
+    /* 3.12 长消息 / 长链接不再被 body 的 overflow-x:hidden 裁掉 */
+    .empty,
+    .message,
+    .server-message,
+    .import-help span,
+    .section-title span,
+    .result-list em {
+        overflow-wrap: anywhere;
+    }
+
+    /* 3.13 上传表单（本地音频 / 封面 / 视频）：手机上单列，
+       否则固定的三列网格会把 file input 压到约 120px，文件名被裁掉 */
+    .audio-upload {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .audio-upload label,
+    .audio-upload input {
+        min-width: 0;
+        font-size: 12px;
+    }
+
+    .audio-upload button {
+        min-height: 44px;
+        font-size: 14px;
+    }
+
+    /* 3.14 B 站视频：保持 16:9，不被 min-height 拉出上下黑边 */
+    .now-playing.bilibili-video-mode .bilibili-player,
+    .bilibili-player {
+        min-height: auto;
+    }
+}
+
+/* ==========================================================================
+   4. 窄屏手机：≤520px
+   ========================================================================== */
+@media (max-width: 520px) {
+    .content {
+        padding: 14px 12px 40px;
+    }
+
+    .hero-panel {
+        min-height: 0;
+        padding: 20px 16px;
+        gap: 12px;
+        border-radius: 16px;
+    }
+
+    .hero-panel h1 {
+        font-size: 26px;
+    }
+
+    /* 320px 宽时两列只剩 ~137px，单列更可读 */
+    .stats-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .stats-grid article {
+        padding: 14px;
+    }
+
+    /* 收藏 / 卡片网格：两列比单列更省滚动 */
+    .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .section-title {
+        gap: 8px;
+    }
+
+    .section-title h1,
+    .section-title h2 {
+        font-size: 20px;
+    }
+
+    /* 长标题 / 长链接不撑破卡片 */
+    .song-row strong,
+    .compact-list a,
+    .home-action-list strong,
+    .queue-list a strong {
+        overflow-wrap: anywhere;
+    }
+}

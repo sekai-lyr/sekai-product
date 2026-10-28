@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sekai Song · 打开本地音乐</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="/js/site-theme.js?v=20261028"></script>
+    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
+    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{fragments :: sidebar('songs')}"></div>
+    <main class="content">
+        <div class="section-title"><h1 th:text="${song.title}">歌曲</h1><span>等待本地音频</span></div>
+        <section class="editor-panel">
+            <p th:text="${song.artist}">歌手</p>
+            <div class="server-message success" th:if="${message}" th:text="${message}"></div>
+            <div class="server-message error" th:if="${error}" th:text="${error}"></div>
+            <h2>打开本地音乐，开启四种演出</h2>
+            <p>音频保留在你的设备上，浏览器直接播放，不上传服务器。</p>
+            <a class="pill-btn" href="/local-player">打开本地音乐播放器</a>
+            <p>本地播放器读取内嵌封面和歌词；缺少同步歌词时可选择 LRC 或匹配云端歌词。</p>
+            <a href="/songs">返回歌曲库</a>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -81,8 +81,10 @@ function keepSessionAlive() {
     });
 }
 
-keepSessionAlive();
-setInterval(keepSessionAlive, sessionKeepAliveIntervalMs);
+if (!window.__sekaiBrowserLocal) {
+    keepSessionAlive();
+    setInterval(keepSessionAlive, sessionKeepAliveIntervalMs);
+}
 
 function syncLyric(seconds) {
     let active = null;
@@ -522,7 +524,7 @@ function saveProgress() {
 }
 
 function restoreProgress() {
-    if (bilibiliEmbed || !audio) {
+    if (window.__sekaiBrowserLocal || bilibiliEmbed || !audio) {
         return;
     }
     const key = progressKey();
@@ -760,6 +762,19 @@ function setupAudioGraph() {
         return null;
     }
 }
+
+const foliaSpectrumData = new Uint8Array(64);
+window.__sekaiAudioSpectrum = () => {
+    if (!audioGraph || !audio || audio.paused) return null;
+    audioGraph.analyser.getByteFrequencyData(foliaSpectrumData);
+    const binHz = audioGraph.context.sampleRate / audioGraph.analyser.fftSize;
+    const band = (low, high) => {
+        const start = Math.min(63, Math.floor(low / binHz)), end = Math.min(64, Math.max(start + 1, Math.ceil(high / binHz)));
+        let sum = 0; for (let i = start; i < end; i++) sum += foliaSpectrumData[i];
+        return sum / ((end - start) * 255);
+    };
+    return { power: band(20, 10000), bass: band(20, 150), lowMid: band(150, 400), mid: band(400, 1200), vocal: band(1000, 3500), treble: band(3500, 12000) };
+};
 
 function applyEqPreset(presetName) {
     const preset = {
@@ -1172,7 +1187,7 @@ if (audio) {
         clearProgress();
         playNext();
     });
-    if (autoPlayEnabled()) {
+    if (!window.__sekaiBrowserLocal && autoPlayEnabled()) {
         audio.autoplay = true;
         audio.play().catch(() => {
             // Browsers may still require one manual click before allowing sound.

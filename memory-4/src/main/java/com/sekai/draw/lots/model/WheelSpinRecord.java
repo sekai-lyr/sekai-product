@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class WheelSpinRecord {
-    private Long deckId;
-
     private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm");
 
     private Long id;
@@ -37,6 +35,4 @@ public class WheelSpinRecord {
     public void setMoodLine(String moodLine) { this.moodLine = moodLine; }
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
-    public Long getDeckId() { return deckId; }
-    public void setDeckId(Long deckId) { this.deckId = deckId; }
 }

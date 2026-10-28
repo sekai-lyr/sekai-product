@@ -1,0 +1,5 @@
+[Unit]
+Description=Revoke Sekai private preview access
+[Service]
+Type=oneshot
+ExecStart=/opt/sekai-preview/preview-revoke.sh

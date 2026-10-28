@@ -5,8 +5,6 @@ import com.sekai.draw.lots.util.CharacterLocalizationUtil;
 import java.time.LocalDateTime;
 
 public class AnimeCharacter {
-    private boolean enabled = true;
-
     private Long id;
     private String englishName;
     private String japaneseName;
@@ -58,6 +56,4 @@ public class AnimeCharacter {
     public String getDisplayQuote() {
         return CharacterLocalizationUtil.displayTags(quote, archetype, element);
     }
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }

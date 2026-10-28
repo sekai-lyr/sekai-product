@@ -1,13 +1,10 @@
 package com.sekai.song.control;
 
-import com.sekai.song.model.DashboardStats;
 import com.sekai.song.model.Playlist;
-import com.sekai.song.model.SearchResult;
 import com.sekai.song.model.Song;
 import com.sekai.song.model.User;
 import com.sekai.song.service.PlaylistService;
 import com.sekai.song.service.SongService;
-import com.sekai.song.util.BilibiliVideoLinkUtil;
 import com.sekai.song.util.NeteaseMusicLinkUtil;
 import com.sekai.song.util.QqMusicLinkUtil;
 import jakarta.annotation.Resource;
@@ -18,12 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Controller
 public class PageControl {
@@ -33,6 +25,9 @@ public class PageControl {
 
     @Resource
     private PlaylistService playlistService;
+
+    @Resource
+    private com.sekai.song.service.LibraryQueryService libraryQueries;
 
     @GetMapping({"/", "/login"})
     public String login() {
@@ -60,13 +55,11 @@ public class PageControl {
         if (user == null) {
             return "redirect:/login";
         }
-        List<Song> songs = songService.listLibraryByUserId(user.getId());
-        List<Playlist> playlists = playlistService.listByUserId(user.getId());
         model.addAttribute("loginUser", user);
-        model.addAttribute("stats", buildStats(songs, playlists));
-        model.addAttribute("recentSongs", songs.stream().limit(6).toList());
-        model.addAttribute("favoriteSongs", songService.listFavoritesByUserId(user.getId()).stream().limit(5).toList());
-        model.addAttribute("playlists", playlists.stream().limit(4).toList());
+        model.addAttribute("stats", libraryQueries.stats(user.getId()));
+        model.addAttribute("recentSongs", libraryQueries.recent(user.getId()));
+        model.addAttribute("favoriteSongs", libraryQueries.favorites(user.getId()));
+        model.addAttribute("playlists", libraryQueries.playlists(user.getId()));
         return "home";
     }
 
@@ -74,7 +67,8 @@ public class PageControl {
     public String songs(HttpSession session,
                         Model model,
                         @RequestParam(value = "keyword", required = false) String keyword,
-                        @RequestParam(value = "page", defaultValue = "1") int page) {
+                        @RequestParam(value = "page", defaultValue = "1") int page,
+                        @RequestParam(value = "view", defaultValue = "cover") String view) {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -86,6 +80,7 @@ public class PageControl {
         model.addAttribute("loginUser", user);
         model.addAttribute("songs", songService.listLibraryByUserId(user.getId(), keyword, currentPage, pageSize));
         model.addAttribute("playlists", playlistService.listByUserId(user.getId()));
+        model.addAttribute("libraryView", "list".equals(view) ? "list" : "cover");
         model.addAttribute("keyword", keyword == null ? "" : keyword);
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalPages", totalPages);
@@ -118,14 +113,12 @@ public class PageControl {
         if (playlist == null) {
             return "redirect:/playlists";
         }
-        List<Song> allPlaylistSongs = playlistService.listSongs(id, user.getId());
         int pageSize = 30;
-        int total = allPlaylistSongs.size();
+        int total = libraryQueries.playlistCount(id, user.getId());
         int totalPages = Math.max((int) Math.ceil(total / (double) pageSize), 1);
         int currentPage = Math.min(Math.max(page, 1), totalPages);
         int pageOffset = Math.min((currentPage - 1) * pageSize, total);
-        int pageEnd = Math.min(pageOffset + pageSize, total);
-        List<Song> playlistSongs = allPlaylistSongs.subList(pageOffset, pageEnd);
+        List<Song> playlistSongs = libraryQueries.playlistSongs(id, user.getId(), pageOffset, pageSize);
         model.addAttribute("loginUser", user);
         model.addAttribute("playlist", playlist);
         model.addAttribute("playlistSongs", playlistSongs);
@@ -133,7 +126,6 @@ public class PageControl {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("pageOffset", pageOffset);
-        model.addAttribute("songs", songService.listLibraryByUserId(user.getId()));
         return "playlist-detail";
     }
 
@@ -184,35 +176,16 @@ public class PageControl {
         if (song == null) {
             return "redirect:/songs";
         }
-        Playlist playlist = null;
-        List<Song> queue = songService.listByUserId(user.getId());
-        if (playlistId != null) {
-            playlist = playlistService.getByIdAndUserId(playlistId, user.getId());
-            if (playlist != null) {
-                List<Song> playlistSongs = playlistService.listSongs(playlistId, user.getId());
-                if (playlistSongs.stream().anyMatch(item -> Objects.equals(item.getId(), id))) {
-                    queue = playlistSongs;
-                }
-            }
-        }
+        String stageMode = com.sekai.song.model.StageModes.normalize(mode);
         model.addAttribute("loginUser", user);
-        model.addAttribute("song", song);
-        model.addAttribute("playlist", playlist);
-        model.addAttribute("playlistId", playlist == null ? null : playlist.getId());
-        model.addAttribute("playableAudio", isPlayableAudio(song));
-        model.addAttribute("isBilibiliVideo", isBilibiliVideoMusic(song));
-        model.addAttribute("playableLocalVideo", isPlayableLocalVideo(song));
-        model.addAttribute("startAutoplay", "1".equals(autoplay));
-        String stageMode = "folia".equalsIgnoreCase(mode)
-                ? "folia"
-                : ("folia-classic".equalsIgnoreCase(mode)
-                        ? "folia-classic"
-                        : ("lyrics".equalsIgnoreCase(mode) ? "lyrics" : "disc"));
+        model.addAttribute("playbackPage", true);
+        model.addAttribute("requestedSongId", id);
         model.addAttribute("stageMode", stageMode);
-        model.addAttribute("lyricMode", !"disc".equals(stageMode));
-        model.addAttribute("lyricLines", songService.parseLyrics(song.getLyricText()));
-        model.addAttribute("queue", queue);
-        return "player";
+        model.addAttribute("startAutoplay", "1".equals(autoplay));
+        if (playlistId != null && playlistService.getByIdAndUserId(playlistId, user.getId()) != null) {
+            model.addAttribute("requestedPlaylistId", playlistId);
+        }
+        return "local-player";
     }
 
     @GetMapping("/favorites")
@@ -227,14 +200,36 @@ public class PageControl {
     }
 
     @GetMapping("/search")
-    public String search(HttpSession session, Model model, @RequestParam(value = "q", required = false) String q) {
+    public String search(HttpSession session, Model model,
+                         @RequestParam(value = "q", required = false) String q,
+                         @RequestParam(value = "type", defaultValue = "all") String type,
+                         @RequestParam(value = "page", defaultValue = "1") int page) {
         User user = requireUser(session);
         if (user == null) {
             return "redirect:/login";
         }
+        String query = q == null ? "" : q.strip();
+        String filter = "song".equals(type) || "playlist".equals(type) ? type : "all";
+        boolean tooLong = query.length() > 160;
+        boolean searched = !query.isBlank() && !tooLong;
+        int songCount = searched ? libraryQueries.searchCount(user.getId(), query, "song") : 0;
+        int playlistCount = searched ? libraryQueries.searchCount(user.getId(), query, "playlist") : 0;
+        int total = "all".equals(filter) ? songCount + playlistCount : "song".equals(filter) ? songCount : playlistCount;
+        int totalPages = Math.max(1, (total + 19) / 20);
+        int currentPage = Math.min(Math.max(page, 1), totalPages);
+        int offset = (currentPage - 1) * 20;
         model.addAttribute("loginUser", user);
-        model.addAttribute("q", q == null ? "" : q);
-        model.addAttribute("results", buildSearchResults(q, songService.listLibraryByUserId(user.getId()), playlistService.listByUserId(user.getId())));
+        model.addAttribute("q", query);
+        model.addAttribute("type", filter);
+        model.addAttribute("searchError", tooLong ? "关键词最多 160 个字符，请缩短后再搜索。" : "");
+        model.addAttribute("searched", !query.isBlank() && !tooLong);
+        model.addAttribute("allCount", songCount + playlistCount);
+        model.addAttribute("songCount", songCount);
+        model.addAttribute("playlistCount", playlistCount);
+        model.addAttribute("totalCount", total);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("results", searched ? libraryQueries.search(user.getId(), query, filter, offset, 20) : List.of());
         return "search";
     }
 
@@ -274,99 +269,10 @@ public class PageControl {
         return "qq";
     }
 
-    @GetMapping("/bilibili")
-    public String bilibili(HttpSession session,
-                           Model model,
-                           @RequestParam(value = "link", required = false) String link) {
-        User user = requireUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("loginUser", user);
-        model.addAttribute("link", link == null ? "" : link);
-        if (!model.containsAttribute("videoIds")) {
-            model.addAttribute("videoIds", "");
-        }
-        model.addAttribute("playlists", playlistService.listByUserId(user.getId()));
-        model.addAttribute("bilibiliLink", BilibiliVideoLinkUtil.parse(link));
-        return "bilibili";
-    }
-
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/login";
-    }
-
-    private DashboardStats buildStats(List<Song> songs, List<Playlist> playlists) {
-        DashboardStats stats = new DashboardStats();
-        stats.setSongCount(songs.size());
-        stats.setPlaylistCount(playlists.size());
-        stats.setFavoriteCount((int) songs.stream().filter(song -> Boolean.TRUE.equals(song.getFavorite())).count());
-        stats.setTopAnime(findTop(songs.stream().map(Song::getAnimeTitle).toList()));
-        stats.setTopMood(findTop(songs.stream().map(Song::getMood).toList()));
-        return stats;
-    }
-
-    private List<SearchResult> buildSearchResults(String q, List<Song> songs, List<Playlist> playlists) {
-        String keyword = q == null ? "" : q.trim().toLowerCase();
-        if (keyword.isEmpty()) {
-            return List.of();
-        }
-        List<SearchResult> results = new ArrayList<>();
-        songs.stream()
-                .filter(song -> contains(keyword, song.getTitle(), song.getArtist(), song.getAnimeTitle(), song.getTags(), song.getMood()))
-                .forEach(song -> results.add(new SearchResult("歌曲", song.getTitle(),
-                        compact(song.getArtist(), song.getAnimeTitle(), song.getMood()), "/player/" + song.getId())));
-        playlists.stream()
-                .filter(playlist -> contains(keyword, playlist.getName(), playlist.getDescription()))
-                .forEach(playlist -> results.add(new SearchResult("歌单", playlist.getName(),
-                        playlist.getDescription(), "/playlists/" + playlist.getId())));
-        return results;
-    }
-
-    private String findTop(List<String> values) {
-        Map<String, Integer> counts = new LinkedHashMap<>();
-        values.stream()
-                .filter(value -> value != null && !value.isBlank())
-                .map(String::trim)
-                .forEach(value -> counts.merge(value, 1, Integer::sum));
-        return counts.entrySet().stream()
-                .max(Comparator.comparingInt(Map.Entry::getValue))
-                .map(Map.Entry::getKey)
-                .orElse("暂无");
-    }
-
-    private boolean contains(String keyword, String... values) {
-        for (String value : values) {
-            if (value != null && value.toLowerCase().contains(keyword)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String compact(String... values) {
-        return String.join(" · ", java.util.Arrays.stream(values)
-                .filter(Objects::nonNull)
-                .filter(value -> !value.isBlank())
-                .toList());
-    }
-
-    private boolean isPlayableAudio(Song song) {
-        return song != null && song.getLocalAudioUrl() != null && !song.getLocalAudioUrl().isBlank();
-    }
-
-    private boolean isPlayableLocalVideo(Song song) {
-        return isBilibiliVideoMusic(song)
-                && song.getLocalVideoUrl() != null
-                && !song.getLocalVideoUrl().isBlank();
-    }
-
-    private boolean isBilibiliVideoMusic(Song song) {
-        return song != null
-                && song.getAudioUrl() != null
-                && song.getAudioUrl().contains("bilibili.com");
     }
 
     private User requireUser(HttpSession session) {

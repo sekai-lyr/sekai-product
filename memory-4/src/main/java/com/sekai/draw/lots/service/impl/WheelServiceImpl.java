@@ -42,29 +42,26 @@ public class WheelServiceImpl implements WheelService {
     @Resource
     private DrawLotsService drawLotsService;
 
-    @Resource
-    private com.sekai.draw.lots.mapper.WheelDeckMapper deckMapper;
-    @Resource
-    private com.sekai.draw.lots.mapper.SekaiDrawLotsUserMapper userMapper;
-
     @Override
     @Transactional
-    public List<WheelOption> options(User user, Long deckId) {
+    public List<WheelOption> options(User user) {
         if (user == null || user.getId() == null) {
             return List.of();
         }
-        resolveDeck(user, deckId);
-        List<SekaiDrawLotsWheelOptionDO> options = optionMapper.selectByUserId(user.getId(), deckId);
+        List<SekaiDrawLotsWheelOptionDO> options = optionMapper.selectByUserId(user.getId());
+        if (options.isEmpty()) {
+            seedDefaultOptions(user.getId());
+            options = optionMapper.selectByUserId(user.getId());
+        }
         return options.stream().map(SekaiDrawLotsWheelOptionDO::convertToOption).toList();
     }
 
     @Override
-    public List<WheelSpinRecord> recentSpins(User user, Long deckId, int limit) {
+    public List<WheelSpinRecord> recentSpins(User user, int limit) {
         if (user == null || user.getId() == null) {
             return List.of();
         }
-        resolveDeck(user, deckId);
-        return spinMapper.selectRecentByUserId(user.getId(), deckId, Math.max(1, Math.min(limit, 20))).stream()
+        return spinMapper.selectRecentByUserId(user.getId(), Math.max(1, Math.min(limit, 20))).stream()
                 .map(SekaiDrawLotsWheelSpinDO::convertToRecord)
                 .toList();
     }
@@ -79,12 +76,11 @@ public class WheelServiceImpl implements WheelService {
 
     @Override
     @Transactional
-    public Result<Integer> importSuggestions(User user, Long deckId) {
+    public Result<Integer> importSuggestions(User user) {
         if (user == null || user.getId() == null) {
             return Result.fail("请先登录");
         }
-        resolveDeck(user, deckId);
-        List<SekaiDrawLotsWheelOptionDO> existingOptions = optionMapper.selectByUserId(user.getId(), deckId);
+        List<SekaiDrawLotsWheelOptionDO> existingOptions = optionMapper.selectByUserId(user.getId());
         Set<String> existingTitles = new LinkedHashSet<>();
         for (SekaiDrawLotsWheelOptionDO option : existingOptions) {
             String key = normalizeTitle(option.getTitle());
@@ -100,7 +96,7 @@ public class WheelServiceImpl implements WheelService {
             if (key == null || existingTitles.contains(key)) {
                 continue;
             }
-            insertSuggestion(user.getId(), deckId, suggestion, sortOrder++);
+            insertSuggestion(user.getId(), suggestion, sortOrder++);
             existingTitles.add(key);
             added++;
         }
@@ -112,11 +108,10 @@ public class WheelServiceImpl implements WheelService {
 
     @Override
     @Transactional
-    public Result<WheelOption> addOption(User user, Long deckId, String title, String detail, Integer weight, String color) {
+    public Result<WheelOption> addOption(User user, String title, String detail, Integer weight, String color) {
         if (user == null || user.getId() == null) {
             return Result.fail("请先登录");
         }
-        resolveDeck(user, deckId);
         String normalizedTitle = trimToNull(title);
         if (normalizedTitle == null) {
             return Result.fail("分区名称不能为空");
@@ -131,12 +126,11 @@ public class WheelServiceImpl implements WheelService {
 
         SekaiDrawLotsWheelOptionDO optionDO = new SekaiDrawLotsWheelOptionDO();
         optionDO.setUserId(user.getId());
-        optionDO.setDeckId(deckId);
         optionDO.setTitle(normalizedTitle);
         optionDO.setDetail(normalizedDetail);
         optionDO.setWeight(Math.max(1, Math.min(weight == null ? 1 : weight, 10)));
-        optionDO.setColor(resolveColor(color, optionMapper.selectByUserId(user.getId(), deckId).size()));
-        optionDO.setSortOrder(optionMapper.selectByUserId(user.getId(), deckId).size() + 1);
+        optionDO.setColor(resolveColor(color, optionMapper.selectByUserId(user.getId()).size()));
+        optionDO.setSortOrder(optionMapper.selectByUserId(user.getId()).size() + 1);
         optionDO.setEnabled(true);
         optionMapper.insert(optionDO);
 
@@ -147,15 +141,13 @@ public class WheelServiceImpl implements WheelService {
 
     @Override
     @Transactional
-    public Result<Boolean> deleteOption(User user, Long deckId, Long optionId) {
+    public Result<Boolean> deleteOption(User user, Long optionId) {
         if (user == null || user.getId() == null) {
             return Result.fail("请先登录");
         }
-        resolveDeck(user, deckId);
         if (optionId == null || optionMapper.selectByIdForUser(optionId, user.getId()) == null) {
             return Result.fail("分区不存在");
         }
-        if (!deckId.equals(optionMapper.selectByIdForUser(optionId, user.getId()).getDeckId())) return Result.fail("分区不属于这个转盘");
         optionMapper.deleteForUser(optionId, user.getId());
         Result<Boolean> result = Result.ok(true);
         result.setMessage("转盘分区已删除。");
@@ -164,14 +156,19 @@ public class WheelServiceImpl implements WheelService {
 
     @Override
     @Transactional
-    public Result<WheelSpinResult> spin(User user, Long deckId) {
+    public Result<WheelSpinResult> spin(User user) {
         if (user == null || user.getId() == null) {
             return Result.fail("请先登录");
         }
-        resolveDeck(user, deckId);
-        List<WheelOption> enabledOptions = optionMapper.selectEnabledByUserId(user.getId(), deckId).stream()
+        List<WheelOption> enabledOptions = optionMapper.selectEnabledByUserId(user.getId()).stream()
                 .map(SekaiDrawLotsWheelOptionDO::convertToOption)
                 .toList();
+        if (enabledOptions.isEmpty()) {
+            seedDefaultOptions(user.getId());
+            enabledOptions = optionMapper.selectEnabledByUserId(user.getId()).stream()
+                    .map(SekaiDrawLotsWheelOptionDO::convertToOption)
+                    .toList();
+        }
         if (enabledOptions.isEmpty()) {
             return Result.fail("请先添加至少一个转盘分区");
         }
@@ -181,7 +178,6 @@ public class WheelServiceImpl implements WheelService {
 
         SekaiDrawLotsWheelSpinDO spinDO = new SekaiDrawLotsWheelSpinDO();
         spinDO.setUserId(user.getId());
-        spinDO.setDeckId(deckId);
         spinDO.setOptionId(chosen.getId());
         spinDO.setResultTitle(chosen.getTitle());
         spinDO.setResultDetail(chosen.getDetail());
@@ -195,78 +191,18 @@ public class WheelServiceImpl implements WheelService {
         return result;
     }
 
-    @Override
-    @Transactional
-    public List<com.sekai.draw.lots.model.WheelDeck> decks(User user) {
-        resolveDeck(user, null);
-        return deckMapper.list(user.getId());
+    private void seedDefaultOptions(Long userId) {
+        addSeed(userId, "补番 1 集", "把想看的番推进一集，允许自己认真快乐一下。", 2, "#ff8fc7", 1);
+        addSeed(userId, "写 15 分钟代码", "只开一个小任务，先提交一个能跑的小改动。", 3, "#78d5ff", 2);
+        addSeed(userId, "整理桌面", "清掉一个角落，给下一段状态腾位置。", 1, "#78e08f", 3);
+        addSeed(userId, "背 20 个词", "开计时器，像刷副本一样打一小关。", 2, "#ffe08a", 4);
+        addSeed(userId, "画一张设定草图", "随便画一个角色设定，不追求完成度。", 1, "#a7a3ff", 5);
+        addSeed(userId, "喝水休息 10 分钟", "恢复也是主线任务，不算偷懒。", 1, "#ffb86b", 6);
     }
 
-    @Override
-    @Transactional
-    public com.sekai.draw.lots.model.WheelDeck resolveDeck(User user, Long deckId) {
-        if (deckId != null) {
-            var deck = deckMapper.get(user.getId(), deckId);
-            if (deck == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "转盘不存在");
-            return deck;
-        }
-        userMapper.lockById(user.getId());
-        var decks = deckMapper.list(user.getId());
-        if (!decks.isEmpty()) return decks.get(0);
-        var deck = new com.sekai.draw.lots.model.WheelDeck();
-        deck.setUserId(user.getId()); deck.setName("我的转盘");
-        deckMapper.insert(deck);
-        seedDefaultOptions(user.getId(), deck.getId());
-        return deck;
-    }
-
-    @Override
-    @Transactional
-    public Result<com.sekai.draw.lots.model.WheelDeck> createDeck(User user, String name) {
-        if (name == null || name.isBlank() || name.trim().length() > 40) return Result.fail("转盘名称需为 1–40 个字符");
-        var deck = new com.sekai.draw.lots.model.WheelDeck();
-        deck.setUserId(user.getId()); deck.setName(name.trim());
-        try { deckMapper.insert(deck); } catch (org.springframework.dao.DuplicateKeyException e) { return Result.fail("已有同名转盘"); }
-        return Result.ok(deck);
-    }
-
-    @Override
-    @Transactional
-    public Result<Boolean> renameDeck(User user, Long deckId, String name) {
-        resolveDeck(user, deckId);
-        if (name == null || name.isBlank() || name.trim().length() > 40) return Result.fail("转盘名称需为 1–40 个字符");
-        try { deckMapper.rename(user.getId(), deckId, name.trim()); } catch (org.springframework.dao.DuplicateKeyException e) { return Result.fail("已有同名转盘"); }
-        return Result.ok(true);
-    }
-
-    @Override
-    @Transactional
-    public Result<Boolean> updateOption(User user, Long deckId, Long optionId, String title, String detail, Integer weight, String color, int sortOrder, boolean enabled) {
-        resolveDeck(user, deckId);
-        var option = optionMapper.selectByIdForUser(optionId, user.getId());
-        if (option == null || !deckId.equals(option.getDeckId())) return Result.fail("分区不存在");
-        if (title == null || title.isBlank() || title.trim().length() > 80) return Result.fail("名称需为 1–80 个字符");
-        if (detail != null && detail.length() > 180) return Result.fail("说明不能超过 180 个字符");
-        if (weight == null || weight < 1 || weight > 10 || sortOrder < 0 || sortOrder > 10000) return Result.fail("权重需为 1–10，顺序需为 0–10000");
-        option.setTitle(title.trim()); option.setDetail(detail); option.setWeight(weight); option.setColor(resolveColor(color, 0));
-        option.setSortOrder(sortOrder); option.setEnabled(enabled);
-        optionMapper.updateForUser(option);
-        return Result.ok(true);
-    }
-
-    private void seedDefaultOptions(Long userId, Long deckId) {
-        addSeed(userId, deckId, "补番 1 集", "把想看的番推进一集，允许自己认真快乐一下。", 2, "#ff8fc7", 1);
-        addSeed(userId, deckId, "写 15 分钟代码", "只开一个小任务，先提交一个能跑的小改动。", 3, "#78d5ff", 2);
-        addSeed(userId, deckId, "整理桌面", "清掉一个角落，给下一段状态腾位置。", 1, "#78e08f", 3);
-        addSeed(userId, deckId, "背 20 个词", "开计时器，像刷副本一样打一小关。", 2, "#ffe08a", 4);
-        addSeed(userId, deckId, "画一张设定草图", "随便画一个角色设定，不追求完成度。", 1, "#a7a3ff", 5);
-        addSeed(userId, deckId, "喝水休息 10 分钟", "恢复也是主线任务，不算偷懒。", 1, "#ffb86b", 6);
-    }
-
-    private void addSeed(Long userId, Long deckId, String title, String detail, int weight, String color, int sortOrder) {
+    private void addSeed(Long userId, String title, String detail, int weight, String color, int sortOrder) {
         SekaiDrawLotsWheelOptionDO optionDO = new SekaiDrawLotsWheelOptionDO();
         optionDO.setUserId(userId);
-        optionDO.setDeckId(deckId);
         optionDO.setTitle(title);
         optionDO.setDetail(detail);
         optionDO.setWeight(weight);
@@ -276,10 +212,9 @@ public class WheelServiceImpl implements WheelService {
         optionMapper.insert(optionDO);
     }
 
-    private void insertSuggestion(Long userId, Long deckId, WheelSuggestion suggestion, int sortOrder) {
+    private void insertSuggestion(Long userId, WheelSuggestion suggestion, int sortOrder) {
         SekaiDrawLotsWheelOptionDO optionDO = new SekaiDrawLotsWheelOptionDO();
         optionDO.setUserId(userId);
-        optionDO.setDeckId(deckId);
         optionDO.setTitle(suggestion.getTitle());
         optionDO.setDetail(suggestion.getDetail());
         optionDO.setWeight(Math.max(1, Math.min(suggestion.getWeight() == null ? 1 : suggestion.getWeight(), 10)));

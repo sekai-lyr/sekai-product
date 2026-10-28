@@ -14,7 +14,7 @@
     <select id="selectRandom" resultMap="BaseResultMap">
         SELECT id, summary AS title, level_name, FLOOR((score_min + score_max) / 2) AS luck_score,
                advice, lucky_color, lucky_item
-        FROM sekai_Draw_lots_fortune WHERE enabled = TRUE
+        FROM sekai_Draw_lots_fortune
         ORDER BY RAND()
         LIMIT 1
     </select>

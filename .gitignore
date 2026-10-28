@@ -49,15 +49,3 @@ tmp/
 
 # 本地上传目录
 uploads/wallpapers/
-
-# local-only junk (added 2026-10-28)
-.playwright-mcp/
-node_modules/
-temp_restore/
-/memory-16/
-
-# build artifacts & toolchain junk (2026-10-28)
-memory-11/SekaiGame/android-app/build/
-memory-13/*-dists/
-memory-3/.tools/
-**/*.apk

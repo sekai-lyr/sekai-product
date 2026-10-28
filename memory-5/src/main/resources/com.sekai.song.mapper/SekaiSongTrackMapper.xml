@@ -4,7 +4,8 @@
 <mapper namespace="com.sekai.song.mapper.SekaiSongTrackMapper">
     <sql id="libraryFilter">
         AND ((local_audio_url IS NOT NULL AND TRIM(local_audio_url) &lt;&gt; '')
-        OR (local_video_url IS NOT NULL AND TRIM(local_video_url) &lt;&gt; ''))
+        OR (local_video_url IS NOT NULL AND TRIM(local_video_url) &lt;&gt; '')
+        OR EXISTS (SELECT 1 FROM sekai_song_local_binding lb WHERE lb.song_id=sekai_song_track.id AND lb.user_id=sekai_song_track.user_id AND lb.file_name IS NOT NULL))
     </sql>
 
     <insert id="insert" parameterType="com.sekai.song.model.Song" useGeneratedKeys="true" keyProperty="id">

@@ -10,4 +10,6 @@ public interface SekaiSongUserMapper {
 
     User findById(@Param("id") Long id);
 
+    int updatePassword(@Param("id") Long id, @Param("password") String password);
+
 }

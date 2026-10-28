@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sekai Song · 管理数据概览</title><link rel="stylesheet" href="/css/app.css?v=20261010m"><link rel="stylesheet" href="/css/website-feedback.css?v=20261012-comments">    <script src="/js/site-theme.js?v=20261028"></script>
+    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
+    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+</head>
+<body><div class="app-shell"><div th:replace="~{fragments :: sidebar('overview')}"></div>
+<main class="content website-portal" data-website-page="overview">
+    <div class="section-title"><h1>管理 · 数据概览</h1><button id="overview-refresh" type="button">刷新数据</button></div>
+    <p>仅站长可见。查看真实登录、听歌和评论数据，帮助决定下一轮优化。</p>
+    <p id="website-status" role="status">正在读取数据…</p>
+    <section id="overview-cards" class="website-stats-grid" aria-label="网站统计指标"></section>
+    <div class="website-charts-grid">
+        <section class="website-panel"><h2>近7天登录人数</h2><div id="login-trend" class="website-trend"></div></section>
+        <section class="website-panel"><h2>近7天听歌时长</h2><div id="listening-trend" class="website-trend"></div></section>
+    </div>
+    <section class="website-panel"><h2>四种演出 · 累计使用时长</h2><div id="stage-distribution"></div></section>
+    <section class="website-panel"><div class="website-panel-heading"><h2>评论审核</h2><a class="pill-btn" href="/api/admin/feedback/export">导出最近1万条评论 CSV</a></div>
+        <label for="moderation-status">查看状态 <select id="moderation-status"><option value="pending">待审核</option><option value="approved">已公开</option><option value="rejected">未公开</option></select></label>
+        <div id="moderation-reviews"></div><div class="website-pagination"><button id="review-prev" type="button">上一页</button><span id="review-page">第1页</span><button id="review-next" type="button">下一页</button></div>
+    </section>
+    <details class="website-panel"><summary>统计口径与隐私说明</summary><ul>
+        <li>注册人数来自现有账户；登录和听歌统计从新功能启用后开始累计，不补造历史记录。自然日按北京时间计算。</li>
+        <li>今日登录和近7天活跃人数按账户去重；“近5分钟活跃”是最近登录或上报播放的账户数，不是精确在线人数。</li>
+        <li>每次播放会话累计至少5秒，计一次播放；暂停再继续、切换演出不重复计次。循环重新播放一首计新会话。</li>
+        <li>听歌时长按实际播放的墙钟时间计算，暂停、缓冲和拖动进度不计入；倍速播放不把时长翻倍。断网或异常关闭可能漏报，不作为计费或精确审计数据。</li>
+        <li>听过的歌曲数按账户歌曲记录去重；同一首歌由不同账户导入，可能分别计数。评论统计包含待审核、已公开和未公开评论，不要求用户评分。</li>
+        <li>只上报账户与歌曲编号、演出类型和累计播放时长，不上传音频、封面或本地路径。未登录播放不计入账户统计。</li>
+    </ul></details>
+</main></div><script src="/js/website-feedback.js?v=20261012-comments" defer></script></body></html>

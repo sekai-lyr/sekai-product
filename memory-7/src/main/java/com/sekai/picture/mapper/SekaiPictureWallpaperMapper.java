@@ -8,17 +8,6 @@ import java.util.List;
 
 @Mapper
 public interface SekaiPictureWallpaperMapper {
-    SekaiPictureWallpaperDO findOwned(@Param("id") Long id, @Param("userId") Long userId);
-    SekaiPictureWallpaperDO findHash(@Param("userId") Long userId, @Param("hash") String hash);
-    List<SekaiPictureWallpaperDO> listTrash(@Param("userId") Long userId);
-    List<SekaiPictureWallpaperDO> listUnhashed(@Param("userId") Long userId);
-    int setHash(@Param("id") Long id, @Param("hash") String hash);
-    int restore(@Param("id") Long id, @Param("userId") Long userId);
-    int purge(@Param("id") Long id, @Param("userId") Long userId);
-    List<String> listImageUrls();
-    com.sekai.picture.model.ArchiveHealth health(@Param("userId") Long userId);
-    int countNeeds(@Param("userId") Long userId, @Param("needs") String needs);
-    List<SekaiPictureWallpaperDO> listNeeds(@Param("userId") Long userId, @Param("needs") String needs, @Param("offset") int offset, @Param("limit") int limit);
     int insert(SekaiPictureWallpaperDO record);
 
     SekaiPictureWallpaperDO selectByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);

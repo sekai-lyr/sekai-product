@@ -6,11 +6,6 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDateTime;
 
 public class SekaiDrawLotsRecordDO {
-    private String drawType = "RANDOM";
-    private String ritualId;
-    private Long wishId;
-    private java.time.LocalDate dailyDate;
-
     private Long id;
     private Long userId;
     private Long characterId;
@@ -45,12 +40,4 @@ public class SekaiDrawLotsRecordDO {
     public void setMessage(String message) { this.message = message; }
     public LocalDateTime getDrawTime() { return drawTime; }
     public void setDrawTime(LocalDateTime drawTime) { this.drawTime = drawTime; }
-    public String getDrawType() { return drawType; }
-    public void setDrawType(String drawType) { this.drawType = drawType; }
-    public String getRitualId() { return ritualId; }
-    public void setRitualId(String ritualId) { this.ritualId = ritualId; }
-    public Long getWishId() { return wishId; }
-    public void setWishId(Long wishId) { this.wishId = wishId; }
-    public java.time.LocalDate getDailyDate() { return dailyDate; }
-    public void setDailyDate(java.time.LocalDate dailyDate) { this.dailyDate = dailyDate; }
 }

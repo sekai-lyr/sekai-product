@@ -180,16 +180,3 @@ Caused by: org.h2.mvstore.MVStoreException: The file is locked: D:/Sekai_two/mem
 	at org.h2.mvstore.SingleFileStore.open(SingleFileStore.java:81)
 	at org.h2.mvstore.MVStore.<init>(MVStore.java:286)
 	... 72 more
-2026-09-22 19:57:36.148696+08:00 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-232]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
-	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.message.DbException.get(DbException.java:199)
-	at org.h2.message.DbException.get(DbException.java:188)
-	at org.h2.jdbc.JdbcConnection.checkClosed(JdbcConnection.java:1423)
-	at org.h2.jdbc.JdbcStatement.checkClosed(JdbcStatement.java:1302)
-	at org.h2.jdbc.JdbcStatement.getLargeUpdateCount(JdbcStatement.java:339)
-	at org.h2.tools.Shell.execute(Shell.java:483)
-	at org.h2.tools.Shell.runTool(Shell.java:158)
-	at org.h2.tools.Shell.main(Shell.java:80)

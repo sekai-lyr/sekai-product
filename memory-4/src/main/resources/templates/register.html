@@ -1,1 +1,44 @@
-<!DOCTYPE html><html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('开启你的相遇手账')}"></head><body><main class="auth-shell"><section class="auth-story"><a class="logo" th:href="@{/login}">灵感伙伴签</a><h1>与一位伙伴相遇，<br>为今天留一点光。</h1><div class="auth-line"></div><p>一张签，一句鼓励，一个小小的行动。把日常的心情和愿望，慢慢收进自己的手账。</p></section><section class="auth-card"><h2>开启你的相遇手账</h2><p>每次相遇，都值得被记住。</p><div th:replace="~{fragments :: messages}"></div><form id="registerForm" th:action="@{/user/register}" method="post"><label for="userName">用户名</label><input id="userName" name="userName" autocomplete="username" pattern="[a-zA-Z0-9_@.\-]{3,64}" maxlength="64" required placeholder="3–64 位字母、数字或 _ @ . -" aria-describedby="userNameError"><span class="error-text" id="userNameError"></span><label>昵称<input name="nickName" maxlength="64" autocomplete="nickname" placeholder="希望伙伴怎样称呼你"></label><label for="password">密码</label><input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required aria-describedby="passwordError"><span class="error-text" id="passwordError"></span><label for="confirmPassword">再输入一次密码</label><input id="confirmPassword" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required aria-describedby="confirmPasswordError"><span class="error-text" id="confirmPasswordError"></span><p class="auth-note">密码至少 8 个字符，不超过 72 字节。注册后请保存你的账号恢复码。</p><button class="button">创建账号</button></form><div class="auth-links"><a th:href="@{/login}">已有账号，去登录</a></div></section></main><script th:src="@{/js/register.js(v=20261028)}"></script></body></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵感伙伴签 - 注册</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}" href="/css/login.css">
+</head>
+<body>
+<main class="auth-page register-page">
+    <section class="brand-area">
+        <p class="eyebrow">New Fortune</p>
+        <h1>把好运存档</h1>
+        <p class="brand-copy">每一次抽签都会记录下来，慢慢变成属于你的灵感伙伴图鉴。</p>
+    </section>
+    <section class="form-area">
+        <div class="auth-card">
+            <div class="card-header">
+                <span class="seal">START</span>
+                <h2>创建账号</h2>
+                <p>准备好抽今天的第一签</p>
+            </div>
+            <div class="server-message error" th:if="${error}" th:text="${error}"></div>
+            <form id="registerForm" th:action="@{/user/register}" action="/user/register" method="post">
+                <label>用户名</label>
+                <div class="input-box"><span>ID</span><input id="userName" name="userName" required placeholder="6-20 位更好记"></div>
+                <div class="error-text" id="userNameError"></div>
+                <label>昵称</label>
+                <div class="input-box"><span>NM</span><input id="nickName" name="nickName" placeholder="显示在首页的名字"></div>
+                <label>密码</label>
+                <div class="input-box"><span>PW</span><input id="password" type="password" name="password" required placeholder="至少 6 位"></div>
+                <div class="error-text" id="passwordError"></div>
+                <label>确认密码</label>
+                <div class="input-box"><span>OK</span><input id="confirmPassword" type="password" name="confirmPassword" required placeholder="再输入一次"></div>
+                <div class="error-text" id="confirmPasswordError"></div>
+                <button class="primary-btn" type="submit">注册</button>
+                <a class="secondary-btn" th:href="@{/login}" href="/login">返回登录</a>
+            </form>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/register.js}" src="/js/register.js"></script>
+</body>
+</html>

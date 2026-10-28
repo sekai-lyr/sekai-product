@@ -6,9 +6,6 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDateTime;
 
 public class SekaiDrawLotsUserDO {
-    private boolean admin = false;
-    private int sessionVersion = 0;
-
     private Long id;
     private String userName;
     private String password;
@@ -41,8 +38,4 @@ public class SekaiDrawLotsUserDO {
     public void setAvatar(String avatar) { this.avatar = avatar; }
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
-    public boolean isAdmin() { return admin; }
-    public void setAdmin(boolean admin) { this.admin = admin; }
-    public int getSessionVersion() { return sessionVersion; }
-    public void setSessionVersion(int sessionVersion) { this.sessionVersion = sessionVersion; }
 }

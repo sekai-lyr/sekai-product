@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sekai.draw.lots.mapper.WheelDeckMapper">
-    <select id="list" resultType="com.sekai.draw.lots.model.WheelDeck">SELECT * FROM sekai_Draw_lots_wheel_deck WHERE user_id = #{userId} ORDER BY id</select>
-    <select id="get" resultType="com.sekai.draw.lots.model.WheelDeck">SELECT * FROM sekai_Draw_lots_wheel_deck WHERE user_id = #{userId} AND id = #{id}</select>
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">INSERT INTO sekai_Draw_lots_wheel_deck (user_id, name) VALUES (#{userId}, #{name})</insert>
-    <update id="rename">UPDATE sekai_Draw_lots_wheel_deck SET name = #{name} WHERE id = #{id} AND user_id = #{userId}</update>
-</mapper>

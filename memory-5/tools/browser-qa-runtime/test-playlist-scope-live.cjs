@@ -1,0 +1,64 @@
+const {chromium}=require('playwright-core');
+const {randomUUID}=require('crypto');
+const fs=require('fs');
+const assert=require('assert/strict');
+const base='https://sekaisong.com';
+const user='codex_smoke_'+randomUUID().replace(/-/g,'').slice(0,16);
+const pass='QAtest!'+randomUUID().replace(/-/g,'');
+fs.writeFileSync('../../target/playlist-scope-smoke-user.txt',user);
+(async()=>{
+ const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true});
+ const context=await browser.newContext({viewport:{width:1365,height:900}});
+ try{
+  const register=await context.request.post(base+'/user/register',{form:{userName:user,nickName:'QA',password:pass,confirmPassword:pass},maxRedirects:0});
+  assert.equal(register.status(),302,'register');
+  const login=await context.request.post(base+'/user/login',{form:{userName:user,password:pass},maxRedirects:0});
+  assert.equal(login.status(),302,'login');assert.match(login.headers().location,/home/);
+  const get=await context.request.get(base+'/local-player/library');assert.equal(get.status(),200);
+  const {csrf}=await get.json();
+  const post=async(path,data)=>{const r=await context.request.post(base+'/local-player/library'+path,{data,headers:{'X-Local-Library-CSRF':csrf}});assert.equal(r.status(),200,`${path}: ${await r.text()}`);return r.json();};
+  const a=await post('/playlists',{name:'QA playlist A'}),b=await post('/playlists',{name:'QA playlist B'});
+  const song=await post('/songs',{title:'qa-song',artist:'',album:'',file:{fileName:'qa-song.flac',fileSize:128,lastModified:1}});
+  await post(`/playlists/${a.id}/songs/${song.id}`);
+  await post(`/playlists/${b.id}/songs/${song.id}`);
+  const page=await context.newPage();
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(base+`/local-player?playlistId=${a.id}`,{waitUntil:'networkidle'});
+  assert.equal(await page.locator('#local-link-playlist').inputValue(),String(a.id));
+  await page.evaluate(async()=>{const root=await navigator.storage.getDirectory();const file=await root.getFileHandle('qa-song.flac',{create:true});const stream=await file.createWritable();await stream.write(new Uint8Array(128).fill(1));await stream.close();window.showDirectoryPicker=async()=>root;});
+  await page.click('#local-link-existing');await page.locator('#local-link-preview:not([hidden])').waitFor();
+  assert.equal(await page.locator('#local-link-preview-rows select').inputValue(),String(song.id));
+  await page.click('#local-link-confirm');
+  await page.waitForFunction(()=>document.querySelector('#local-status').textContent.includes('已为'));
+  const first=await page.evaluate(async({uid,aid,sid})=>{const db=await new Promise((ok,no)=>{const r=indexedDB.open('sekai-local-file-handles',1);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});return await new Promise((ok,no)=>{const r=db.transaction('references').objectStore('references').get(`user:${uid}:playlist:${aid}:song:${sid}`);r.onsuccess=()=>ok(!!r.result?.audio);r.onerror=()=>no(r.error)});},{uid:(await (await context.request.get(base+'/local-player/library')).json()).user.id,aid:a.id,sid:song.id});
+  assert.equal(first,true,'A binding saved');
+  await page.goto(base+`/local-player?playlistId=${b.id}`,{waitUntil:'networkidle'});
+  assert.match(await page.locator('#local-track').innerText(),/待关联/,'B must remain unlinked');
+  await page.evaluate(async()=>{window.showDirectoryPicker=async()=>navigator.storage.getDirectory();});
+  await page.click('#local-link-existing');await page.locator('#local-link-preview:not([hidden])').waitFor();
+  assert.equal(await page.locator('#local-link-preview-rows input[type=checkbox]').count(),1,'duplicate flagged');
+  await page.click('#local-link-confirm');
+  assert.match(await page.locator('#local-status').innerText(),/疑似已用于其他歌单/,'reuse blocked until approval');
+  await page.evaluate(async()=>{const root=await navigator.storage.getDirectory(),file=await root.getFileHandle('other.flac',{create:true}),stream=await file.createWritable();await stream.write(new Uint8Array(129).fill(2));await stream.close();const copy=await root.getDirectoryHandle('copy',{create:true}),duplicate=await copy.getFileHandle('qa-song.flac',{create:true}),out=await duplicate.createWritable();await out.write(new Uint8Array(128).fill(1));await out.close();});
+  await page.click('#local-link-existing');await page.locator('#local-link-preview-rows tr').nth(2).waitFor();
+  assert.match(await page.locator('#local-link-preview').innerText(),/本次文件夹有 2 份同名候选/);
+  const rows=page.locator('#local-link-preview-rows tr');
+  for(let i=0;i<await rows.count();i++){
+    const row=rows.nth(i),name=await row.locator('td').first().innerText();
+    await row.locator('select').selectOption(name.includes('other.flac')?String(song.id):'');
+  }
+  await page.click('#local-link-confirm');await page.waitForFunction(()=>document.querySelector('#local-status').textContent.includes('已为'));
+  const result=await page.evaluate(async({aid,bid,sid})=>{const user=(await (await fetch('/local-player/library')).json()).user.id;const db=await new Promise((ok,no)=>{const r=indexedDB.open('sekai-local-file-handles',1);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});const get=key=>new Promise((ok,no)=>{const r=db.transaction('references').objectStore('references').get(key);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});const x=await get(`user:${user}:playlist:${aid}:song:${sid}`),y=await get(`user:${user}:playlist:${bid}:song:${sid}`);return {a:x.fileName,b:y.fileName,same:await x.audio.isSameEntry(y.audio)};},{aid:a.id,bid:b.id,sid:song.id});
+  assert.deepEqual(result,{a:'qa-song.flac',b:'other.flac',same:false});
+  await page.goto(base+`/songs/${song.id}/edit`,{waitUntil:'networkidle'});
+  const png=Buffer.from(await page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=16;canvas.height=16;canvas.getContext('2d').fillRect(0,0,16,16);return canvas.toDataURL('image/png').split(',')[1];}),'base64');
+  await page.locator('#cover-file').setInputFiles({name:'cover.png',mimeType:'image/png',buffer:png});
+  await page.locator('#cover-save:not([disabled])').waitFor();await page.click('#cover-save');
+  await page.waitForFunction(()=>document.querySelector('#cover-status').textContent.includes('已保存'));
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.querySelector('#cover-preview').src.startsWith('blob:'));
+  assert.deepEqual(errors,[]);
+  const old=await context.request.post(base+'/bilibili/import',{form:{videoIds:'BV1GJ411x7h7'},maxRedirects:0});assert.equal(old.status(),404);
+  console.log(JSON.stringify({user,a:a.id,b:b.id,song:song.id,binding:result,cover:'saved and restored',bilibiliImport:404,pageErrors:errors.length}));
+ }finally{await browser.close();}
+})().catch(e=>{console.error('SMOKE FAILED',e.message);process.exit(1)});

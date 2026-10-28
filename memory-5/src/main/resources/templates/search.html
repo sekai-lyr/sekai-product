@@ -2,27 +2,62 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Sekai Song - 搜索</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=20260830b)}" href="/css/app.css?v=20260830b">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20261010m)}" href="/css/app.css?v=20261010m">
+    <script src="/js/site-theme.js?v=20261028"></script>
+    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
+    <link rel="stylesheet" href="/css/search.css?v=20261028">
+    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
 </head>
 <body>
 <div class="app-shell">
     <div th:replace="~{fragments :: sidebar('search')}"></div>
-    <main class="content">
-        <div class="section-title"><h1>搜索</h1><span>歌曲 / 歌单</span></div>
-        <form class="search-bar" action="/search" method="get">
-            <input name="q" th:value="${q}" placeholder="输入关键词">
+    <main class="content search-content">
+        <header class="search-heading">
+            <h1>搜索你的音乐</h1>
+            <p>从歌名、歌手、动漫、标签或歌单里，找到想听的那一首。</p>
+        </header>
+        <form class="search-bar" action="/search" method="get" role="search" aria-label="搜索音乐库">
+            <label class="search-label" for="library-query">搜索关键词</label>
+            <input id="library-query" type="search" name="q" th:value="${q}" maxlength="160"
+                   placeholder="歌名、歌手、动漫或歌单" aria-describedby="search-help" enterkeyhint="search">
+            <input type="hidden" name="type" th:value="${type}">
             <button type="submit">搜索</button>
         </form>
-        <div class="result-list">
+        <p id="search-help" class="search-help">在当前账号的歌曲和歌单中查找。</p>
+        <p class="search-error" role="alert" th:if="${!#strings.isEmpty(searchError)}" th:text="${searchError}"></p>
+        <nav class="search-filters" aria-label="搜索结果类型" th:if="${searched}">
+            <a th:href="@{/search(q=${q},type='all')}" th:attr="aria-current=${type == 'all' ? 'page' : null}">全部 <span th:text="${allCount}">0</span></a>
+            <a th:href="@{/search(q=${q},type='song')}" th:attr="aria-current=${type == 'song' ? 'page' : null}">歌曲 <span th:text="${songCount}">0</span></a>
+            <a th:href="@{/search(q=${q},type='playlist')}" th:attr="aria-current=${type == 'playlist' ? 'page' : null}">歌单 <span th:text="${playlistCount}">0</span></a>
+        </nav>
+        <section aria-label="搜索结果">
+        <p class="search-summary" th:if="${searched && totalCount > 0}">找到 <strong th:text="${totalCount}">0</strong> 个结果<span th:if="${totalPages > 1}" th:text="${' · 第 ' + currentPage + ' / ' + totalPages + ' 页'}"></span></p>
+        <div class="result-list search-results" th:if="${!#lists.isEmpty(results)}">
             <a th:each="result : ${results}" th:href="${result.href}">
                 <em th:text="${result.type}">类型</em>
                 <strong th:text="${result.title}">标题</strong>
-                <span th:text="${result.subtitle}">说明</span>
+                <span th:text="${#strings.isEmpty(result.subtitle) ? (result.type == '歌曲' ? '查看歌曲并播放' : '查看歌单') : result.subtitle}">说明</span>
             </a>
-            <p class="empty" th:if="${#lists.isEmpty(results)}">输入关键词后会显示匹配结果。</p>
         </div>
+        <div class="search-empty" th:if="${!searched && #strings.isEmpty(searchError)}">
+            <h2>想听什么？从一个关键词开始。</h2>
+            <p>试试一位歌手的名字、一部动漫，或你为歌曲添加的标签。</p>
+            <a href="/songs">浏览歌曲库</a>
+        </div>
+        <div class="search-empty" th:if="${searched && totalCount == 0}">
+            <h2>没有找到匹配的<span th:text="${type == 'song' ? '歌曲' : (type == 'playlist' ? '歌单' : '结果')}">结果</span></h2>
+            <p>试试更短的关键词，或检查歌名和歌手是否拼写正确。</p>
+            <a th:if="${type != 'all' && allCount > 0}" th:href="@{/search(q=${q})}">查看全部类型的结果</a>
+            <a href="/songs">浏览歌曲库</a>
+        </div>
+        <nav class="search-pagination" aria-label="搜索结果分页" th:if="${totalPages > 1}">
+            <a rel="prev" th:if="${currentPage > 1}" th:href="@{/search(q=${q},type=${type},page=${currentPage - 1})}">上一页</a>
+            <span th:text="${currentPage + ' / ' + totalPages}">1 / 1</span>
+            <a rel="next" th:if="${currentPage < totalPages}" th:href="@{/search(q=${q},type=${type},page=${currentPage + 1})}">下一页</a>
+        </nav>
+        </section>
     </main>
 </div>
 </body>

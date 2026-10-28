@@ -30,9 +30,6 @@ import java.util.List;
 public class WallpaperControl {
 
     @Resource
-    private com.sekai.picture.service.ImageStorage storage;
-
-    @Resource
     private WallpaperService wallpaperService;
 
     @Resource
@@ -45,8 +42,7 @@ public class WallpaperControl {
     public String upload(@ModelAttribute Wallpaper wallpaper,
                          @RequestParam("file") MultipartFile file,
                          HttpSession session,
-                         RedirectAttributes redirectAttributes,
-                         @RequestParam(value="returnTo", required=false) String returnTo) {
+                         RedirectAttributes redirectAttributes) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -60,8 +56,7 @@ public class WallpaperControl {
     @PostMapping("/category/create")
     public String createCategory(@ModelAttribute Category category,
                                  HttpSession session,
-                                 RedirectAttributes redirectAttributes,
-                         @RequestParam(value="returnTo", required=false) String returnTo) {
+                                 RedirectAttributes redirectAttributes) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -75,23 +70,21 @@ public class WallpaperControl {
     @PostMapping("/favorite/{wallpaperId}")
     public String favorite(@PathVariable Long wallpaperId,
                            HttpSession session,
-                           RedirectAttributes redirectAttributes,
-                         @RequestParam(value="returnTo", required=false) String returnTo) {
+                           RedirectAttributes redirectAttributes) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
         }
         Result<Void> result = favoriteService.toggle(user.getId(), wallpaperId);
-        redirectAttributes.addFlashAttribute(result.isSuccess() ? "message" : "error", result.getMessage());
-        return "redirect:" + safeReturn(returnTo);
+        redirectAttributes.addFlashAttribute("message", result.getMessage());
+        return "redirect:/home";
     }
 
     @PostMapping("/favorite/batch")
     public String batchFavorite(@RequestParam(value = "wallpaperIds", required = false) List<Long> wallpaperIds,
                                 @RequestParam("action") String action,
                                 HttpSession session,
-                                RedirectAttributes redirectAttributes,
-                         @RequestParam(value="returnTo", required=false) String returnTo) {
+                                RedirectAttributes redirectAttributes) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -99,15 +92,14 @@ public class WallpaperControl {
         boolean favorite = "favorite".equals(action);
         Result<Void> result = favoriteService.batchSet(user.getId(), wallpaperIds, favorite);
         redirectAttributes.addFlashAttribute(result.isSuccess() ? "message" : "error", result.getMessage());
-        return "redirect:" + safeReturn(returnTo);
+        return "redirect:/home";
     }
 
     @PostMapping("/wallpaper/{wallpaperId}/update")
     public String updateMeta(@PathVariable Long wallpaperId,
                              @ModelAttribute Wallpaper wallpaper,
                              HttpSession session,
-                             RedirectAttributes redirectAttributes,
-                         @RequestParam(value="returnTo", required=false) String returnTo) {
+                             RedirectAttributes redirectAttributes) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -115,36 +107,34 @@ public class WallpaperControl {
         wallpaper.setId(wallpaperId);
         Result<Wallpaper> result = wallpaperService.updateMeta(user.getId(), wallpaper);
         redirectAttributes.addFlashAttribute(result.isSuccess() ? "message" : "error", result.getMessage());
-        return "redirect:" + safeReturn(returnTo);
+        return "redirect:/home";
     }
 
     @PostMapping("/wallpaper/{wallpaperId}/delete")
     public String delete(@PathVariable Long wallpaperId,
                          HttpSession session,
-                         RedirectAttributes redirectAttributes,
-                         @RequestParam(value="returnTo", required=false) String returnTo) {
+                         RedirectAttributes redirectAttributes) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
         }
         Result<Void> result = wallpaperService.delete(user.getId(), wallpaperId);
         redirectAttributes.addFlashAttribute(result.isSuccess() ? "message" : "error", result.getMessage());
-        return "redirect:" + safeReturn(returnTo);
+        return "redirect:/home";
     }
 
     @PostMapping("/wallpaper/batch/category")
     public String batchMoveCategory(@RequestParam(value = "wallpaperIds", required = false) List<Long> wallpaperIds,
                                     @RequestParam(value = "categoryId", required = false) Long categoryId,
                                     HttpSession session,
-                                    RedirectAttributes redirectAttributes,
-                         @RequestParam(value="returnTo", required=false) String returnTo) {
+                                    RedirectAttributes redirectAttributes) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
         }
         Result<Void> result = wallpaperService.batchMoveCategory(user.getId(), wallpaperIds, categoryId);
         redirectAttributes.addFlashAttribute(result.isSuccess() ? "message" : "error", result.getMessage());
-        return "redirect:" + safeReturn(returnTo);
+        return "redirect:/home";
     }
 
     @GetMapping("/download/{wallpaperId}")
@@ -161,38 +151,30 @@ public class WallpaperControl {
             response.sendRedirect("/home");
             return;
         }
-        Path localFile = storage.resolve(wallpaper.getImageUrl());
-        if (localFile == null || !Files.isRegularFile(localFile)) {
-            response.sendError(404, "原图文件不存在，无法下载");
-            return;
-        }
-        String fileName = wallpaper.getFileName() == null ? "wallpaper-" + wallpaperId + ".jpg" : wallpaper.getFileName();
+        wallpaperService.increaseDownloadCount(wallpaperId, user.getId());
+        String fileName = wallpaper.getFileName() == null ? wallpaper.getTitle() + ".jpg" : wallpaper.getFileName();
         String encodedName = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
         response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encodedName);
-        response.setHeader("Cache-Control", "private, no-store");
-        response.setHeader("X-Content-Type-Options", "nosniff");
-        response.setContentType("application/octet-stream");
-        response.setContentLengthLong(Files.size(localFile));
-        Files.copy(localFile, response.getOutputStream());
-        response.flushBuffer();
-        wallpaperService.increaseDownloadCount(wallpaperId, user.getId());
-    }
-
-    static String safeReturn(String target) {
-        if (target == null || target.length() > 2048) return "/home";
-        if (target.equals("/home")) return target;
-        if (!target.startsWith("/home?")) return "/home";
-        try {
-            java.net.URI uri = java.net.URI.create(target);
-            if (uri.getFragment() != null || uri.getRawAuthority() != null || !"/home".equals(uri.getPath())) return "/home";
-            var allowed = java.util.Set.of("keyword", "categoryId", "orientation", "original", "colorTone", "sort", "favorite", "page", "needs");
-            for (String pair : uri.getRawQuery().split("&")) {
-                String key = java.net.URLDecoder.decode(pair.split("=", 2)[0], StandardCharsets.UTF_8);
-                if (!allowed.contains(key)) return "/home";
+        if (wallpaper.getImageUrl() != null && wallpaper.getImageUrl().startsWith("/wallpaper-image/")) {
+            Path localFile = Path.of("uploads", "wallpapers",
+                    wallpaper.getImageUrl().substring("/wallpaper-image/".length())).normalize();
+            if (Files.exists(localFile)) {
+                String contentType = Files.probeContentType(localFile);
+                response.setContentType(contentType == null ? "application/octet-stream" : contentType);
+                Files.copy(localFile, response.getOutputStream());
+                return;
             }
-            if (target.contains("\r") || target.contains("\n")) return "/home";
-            return target;
-        } catch (IllegalArgumentException e) { return "/home"; }
+        }
+        if (wallpaper.getImageUrl() != null && wallpaper.getImageUrl().startsWith("/uploads/wallpapers/")) {
+            Path localFile = Path.of(wallpaper.getImageUrl().substring(1)).normalize();
+            if (Files.exists(localFile)) {
+                String contentType = Files.probeContentType(localFile);
+                response.setContentType(contentType == null ? "application/octet-stream" : contentType);
+                Files.copy(localFile, response.getOutputStream());
+                return;
+            }
+        }
+        response.sendRedirect(wallpaper.getImageUrl());
     }
 
     private User getLoginUser(HttpSession session) {

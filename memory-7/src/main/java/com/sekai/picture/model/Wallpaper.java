@@ -3,12 +3,6 @@ package com.sekai.picture.model;
 import java.time.LocalDateTime;
 
 public class Wallpaper {
-    private String contentHash;
-    private LocalDateTime deletedAt;
-    public String getContentHash() { return contentHash; }
-    public void setContentHash(String value) { contentHash = value; }
-    public LocalDateTime getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(LocalDateTime value) { deletedAt = value; }
     private Long id;
     private Long userId;
     private Long categoryId;

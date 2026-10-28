@@ -5,9 +5,6 @@ import com.sekai.memory.book.model.CharacterFavorite;
 import com.sekai.memory.book.model.Quote;
 import com.sekai.memory.book.model.User;
 import com.sekai.memory.book.service.AnimeService;
-import com.sekai.memory.book.service.AnimeOrderService;
-import org.springframework.web.bind.annotation.RequestBody;
-import java.util.List;
 import com.sekai.memory.book.service.CharacterFavoriteService;
 import com.sekai.memory.book.service.MetadataEnrichmentService;
 import com.sekai.memory.book.service.QuoteService;
@@ -16,10 +13,6 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
-import java.util.Map;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,9 +35,6 @@ public class MemoryControl {
     private AnimeService animeService;
 
     @Resource
-    private AnimeOrderService animeOrderService;
-
-    @Resource
     private CharacterFavoriteService characterFavoriteService;
 
     @Resource
@@ -53,42 +43,11 @@ public class MemoryControl {
     @Resource
     private MetadataEnrichmentService metadataEnrichmentService;
 
-    @PostMapping("/anime/order")
-    @ResponseBody
-    public ResponseEntity<?> saveAnimeOrder(@RequestBody List<Long> ids, HttpSession session) {
-        User user = getLoginUser(session);
-        if (user == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "请先登录"));
-        }
-        if (!animeOrderService.save(user.getId(), ids)) {
-            return ResponseEntity.badRequest().body(Map.of("message", "列表已变化，请刷新页面后重新排序。"));
-        }
-        return ResponseEntity.ok(Map.of("message", "自定义顺序已保存"));
-    }
-
-    @PostMapping("/anime/metadata")
-    @ResponseBody
-    public ResponseEntity<?> animeMetadata(@RequestParam String title, HttpSession session) {
-        if (getLoginUser(session) == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "请先登录"));
-        }
-        try {
-            var result = metadataEnrichmentService.searchAnime(title);
-            if (result.candidates().isEmpty()) {
-                return ResponseEntity.status(422).body(Map.of("message", "没有找到相关番剧，试试去掉副标题、缩短关键词，或使用中文／日文原名。"));
-            }
-            return ResponseEntity.ok(result);
-        } catch (RestClientException ex) {
-            return ResponseEntity.status(503).body(Map.of("message", "资料源连接失败或响应超时，已自动重试；请稍后重试。当前填写的内容不会丢失。"));
-        }
-    }
-
     @PostMapping("/anime/add")
     public String addAnime(Anime anime,
                            HttpSession session,
                            RedirectAttributes redirectAttributes,
-                           @RequestParam(value = "returnTo", required = false) String returnTo,
-                           @RequestParam(value = "metadataSubjectId", required = false) Long metadataSubjectId) {
+                           @RequestParam(value = "returnTo", required = false) String returnTo) {
         User user = getLoginUser(session);
         if (user == null) {
             return "redirect:/login";
@@ -98,7 +57,7 @@ public class MemoryControl {
             return "redirect:/pro";
         }
         anime.setUserId(user.getId());
-        boolean enriched = metadataEnrichmentService.enrichAnime(anime, metadataSubjectId);
+        boolean enriched = metadataEnrichmentService.enrichAnime(anime);
         boolean success = animeService.add(anime);
         redirectAttributes.addFlashAttribute(success ? "message" : "error",
                 success ? (enriched ? "番剧已加入，资料已自动补全" : "番剧已加入，暂未查到可补全的资料") : "番剧名称不能为空");

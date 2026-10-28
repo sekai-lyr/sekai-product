@@ -3,104 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sekai Picture | 看板</title>
+    <title>Sekai Picture | 运营看板</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
-    <link rel="stylesheet" href="/css/gallery.css">
 </head>
-<body class="app-shell app-dashboard">
-<div class="app-layout">
-    <aside class="app-sidebar" aria-label="图库导航">
-        <a class="app-brand" href="/home" aria-label="回到 Sekai Picture 图库">
+<body class="app-shell dashboard-page">
+<header class="site-header">
+    <div class="site-header-inner">
+        <a class="brand-lockup" href="/home" aria-label="回到 Sekai Picture 图库">
             <span class="brand-mark" aria-hidden="true"></span>
-            <span>Sekai Picture<small>private archive</small></span>
+            <span>
+                <strong>Sekai Picture</strong>
+                <small>私人壁纸档案</small>
+            </span>
         </a>
-        <nav class="sidebar-nav" aria-label="主导航">
-            <span class="sidebar-section-label">Your library</span>
-            <a class="nav-link" data-icon="library" aria-label="图库" href="/home"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span><span>图库</span></a>
-            <a class="nav-link is-current" aria-current="page" data-icon="dashboard" aria-label="看板" href="/dashboard"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg></span><span>看板</span></a>
-            <a class="nav-link" data-icon="upload" aria-label="上传壁纸" href="/upload"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v11"></path><path d="m8 8 4-4 4 4"></path><path d="M5 15v4h14v-4"></path></svg></span><span>上传壁纸</span></a>
-            <a class="nav-link" href="/trash" aria-label="回收站"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/></svg></span><span>回收站</span></a>
+        <nav class="site-nav" aria-label="主导航">
+            <span class="user-chip" th:text="${loginUser.nickName != null ? loginUser.nickName : loginUser.userName}">sekai</span>
+            <a href="/home">图库</a>
+            <a class="is-current" href="/dashboard">看板</a>
+            <a href="/upload">上传</a>
+            <a href="/logout">退出</a>
         </nav>
-        <div class="sidebar-foot">
-            <div class="account-chip"><span class="account-avatar" aria-hidden="true">S</span><span th:text="${loginUser.nickName != null ? loginUser.nickName : loginUser.userName}">sekai</span></div>
-            <a class="logout-link" href="/logout"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m10 17 5-5-5-5"></path><path d="M15 12H3"></path><path d="M14 4h5v16h-5"></path></svg></span><span>退出登录</span></a>
+    </div>
+</header>
+
+<main class="site-main dashboard-main">
+    <section class="dashboard-hero" data-reveal>
+        <div class="dashboard-copy">
+            <p class="section-kicker">COLLECTION SIGNALS / OPERATIONS</p>
+            <h1>看见这座图库正在长大。</h1>
+            <p>从收藏、分类到下载，每一个数字都在提醒你下一张该整理什么。</p>
+            <a class="button-primary" href="/home?sort=popular">打开热门图库</a>
         </div>
-    </aside>
+        <figure class="dashboard-art">
+            <img th:src="${!#lists.isEmpty(hotWallpapers) ? hotWallpapers[0].imageUrl : '/uploads/wallpapers/sekai-import/sekai_import_0005_9f1472cd.jpg'}"
+                 th:alt="${!#lists.isEmpty(hotWallpapers) ? hotWallpapers[0].title : 'Sekai Picture 深蓝夜景壁纸'}">
+            <figcaption class="visual-caption">
+                <span>Most downloaded now</span>
+                <strong th:text="${!#lists.isEmpty(hotWallpapers) ? hotWallpapers[0].title : '还没有热门壁纸'}">还没有热门壁纸</strong>
+            </figcaption>
+        </figure>
+    </section>
 
-    <main class="app-main dashboard-main">
-        <header class="app-topbar">
-            <div><span class="eyebrow">Collection signals</span><h1>看板</h1></div>
-            <div class="topbar-actions">
-                <a class="round-action" href="/home?sort=popular" aria-label="打开热门图库"><svg class="icon-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5"></path><path d="M9 5h10v10"></path></svg></a>
-                <div class="topbar-user"><span class="account-avatar" aria-hidden="true">S</span><span th:text="${loginUser.nickName != null ? loginUser.nickName : loginUser.userName}">sekai</span></div>
+    <section class="metric-grid" aria-label="运营数据" data-reveal>
+        <article class="metric-card">
+            <strong th:text="${stats.wallpaperCount}">0</strong>
+            <span>壁纸数量</span>
+            <p>当前档案里的全部壁纸。</p>
+        </article>
+        <article class="metric-card">
+            <strong th:text="${stats.categoryCount}">0</strong>
+            <span>分类数量</span>
+            <p>让搜索结果更容易被找到。</p>
+        </article>
+        <article class="metric-card">
+            <strong th:text="${stats.favoriteCount}">0</strong>
+            <span>收藏热度</span>
+            <p>被你标记为值得回看的图片。</p>
+        </article>
+        <article class="metric-card">
+            <strong th:text="${stats.originalCount}">0</strong>
+            <span>自制作品</span>
+            <p>属于你的原创壁纸和草稿。</p>
+        </article>
+    </section>
+
+    <section class="dashboard-layout">
+        <article class="panel" data-reveal>
+            <div class="section-heading">
+                <div>
+                    <h2>最热门的壁纸</h2>
+                    <p>下载次数把那些最常被打开的画面推到这里。</p>
+                </div>
+                <a class="inline-action" href="/home?sort=popular">查看图库 <span aria-hidden="true">↗</span></a>
             </div>
-        </header>
-
-        <section class="dashboard-hero" data-reveal>
-            <div class="dashboard-copy">
-                <span class="section-kicker">Your archive / performance</span>
-                <h2>看见这座图库正在长大。</h2>
-                <p>从收藏、分类到下载，每一个数字都在提醒你下一张该整理什么。</p>
-                <a class="button-primary" href="/home?sort=popular">打开热门图库</a>
+            <div class="rank-list" th:if="${!#lists.isEmpty(hotWallpapers)}">
+                <a th:each="item, stat : ${hotWallpapers}" th:href="@{'/download/' + ${item.id}}">
+                    <span th:text="${stat.count}">1</span>
+                    <img th:src="${item.imageUrl}" th:alt="${item.title}" loading="lazy">
+                    <strong th:text="${item.title}">壁纸标题</strong>
+                    <small th:text="${(item.downloadCount != null ? item.downloadCount : 0) + ' 次下载'}">0 次下载</small>
+                </a>
             </div>
-            <figure class="dashboard-art depth-scene" data-depth-scene data-scene="dashboard-hero">
-                <span class="depth-glow depth-layer" data-depth-layer="0.2" aria-hidden="true"></span>
-                <span class="depth-particle particle-one depth-layer" data-depth-layer="0.9" data-float="slow" aria-hidden="true"></span>
-                <span class="depth-particle particle-two depth-layer" data-depth-layer="1.15" data-float="fast" aria-hidden="true"></span>
-                <svg class="depth-constellation depth-layer" data-depth-layer="0.76" data-orbit="constellation" viewBox="0 0 160 160" aria-hidden="true">
-                    <ellipse cx="80" cy="80" rx="59" ry="25"></ellipse>
-                    <circle cx="139" cy="80" r="3"></circle>
-                    <circle cx="50" cy="103" r="2"></circle>
-                </svg>
-                <span class="depth-stamp depth-layer" data-depth-layer="1" aria-hidden="true">SIGNAL / 02</span>
-                <img class="depth-image" th:src="${!#lists.isEmpty(hotWallpapers) ? '/media/' + hotWallpapers[0].id + '/thumbnail' : '/images/archive-0005.jpg'}"
-                     th:alt="${!#lists.isEmpty(hotWallpapers) ? hotWallpapers[0].title : 'Sekai Picture 深蓝夜景壁纸'}">
-                <figcaption class="visual-caption"><span>Most downloaded now</span><strong th:text="${!#lists.isEmpty(hotWallpapers) ? hotWallpapers[0].title : '还没有热门壁纸'}">还没有热门壁纸</strong></figcaption>
-            </figure>
-        </section>
+            <p th:if="${#lists.isEmpty(hotWallpapers)}">暂无热门数据，先去上传或下载几张壁纸。</p>
+        </article>
 
-        <section class="metric-grid" aria-label="运营数据" data-reveal>
-            <article class="metric-card"><strong th:text="${stats.wallpaperCount}">0</strong><span>壁纸数量</span><p>当前档案里的全部壁纸。</p></article>
-            <article class="metric-card"><strong th:text="${stats.categoryCount}">0</strong><span>分类数量</span><p>让搜索结果更容易被找到。</p></article>
-            <article class="metric-card"><strong th:text="${stats.favoriteCount}">0</strong><span>收藏图片</span><p>被你标记为值得回看的图片。</p></article>
-            <article class="metric-card"><strong th:text="${stats.originalCount}">0</strong><span>自制作品</span><p>属于你的原创壁纸和草稿。</p></article>
-        </section>
-
-        <section class="dashboard-layout">
-            <article class="panel" data-reveal>
-                <div class="section-heading">
-                    <div><span class="section-kicker">Top signals</span><h2>最热门的壁纸</h2><p>下载次数把那些最常被打开的画面推到这里。</p></div>
-                    <a class="inline-action" href="/home?sort=popular">查看图库 <svg class="icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5"></path><path d="M9 5h10v10"></path></svg></a>
+        <aside class="panel" data-reveal>
+            <div class="section-heading">
+                <div>
+                    <h2>下一步整理什么</h2>
+                    <p>用几个轻量目标，保持图库继续变得好用。</p>
                 </div>
-                <div class="rank-list" th:if="${!#lists.isEmpty(hotWallpapers)}">
-                    <button type="button" class="rank-preview" th:each="item, stat : ${hotWallpapers}" th:attr="data-lightbox-src=@{/media/{id}(id=${item.id})},data-lightbox-alt=${item.title},data-lightbox-download=@{/download/{id}(id=${item.id})}">
-                        <span th:text="${stat.count}">1</span>
-                        <img th:src="@{/media/{id}/thumbnail(id=${item.id})}" th:alt="${item.title}" loading="lazy">
-                        <strong th:text="${item.title}">壁纸标题</strong>
-                        <small th:text="${(item.downloadCount != null ? item.downloadCount : 0) + ' 次下载'}">0 次下载</small>
-                    </button>
-                </div>
-                <p th:if="${#lists.isEmpty(hotWallpapers)}">暂无热门数据，先去上传或下载几张壁纸。</p>
-            </article>
-
-            <aside class="panel" data-reveal>
-                <div class="section-heading"><div><span class="section-kicker">Keep it moving</span><h2>下一步整理什么</h2><p>用几个轻量目标，保持图库继续变得好用。</p></div></div>
-                <div class="archive-tasks">
-                    <a href="/home?needs=uncategorized"><span>未分类图片</span><strong th:text="${health.uncategorized + ' 张 · 去整理'}"></strong></a>
-                    <a href="/home?needs=untagged"><span>缺少标签</span><strong th:text="${health.untagged + ' 张 · 去补充'}"></strong></a>
-                    <a href="/trash"><span>回收站</span><strong th:text="${health.trashCount + ' 张 · 管理'}"></strong></a>
-                    <p><span>原图记录容量（含回收站）</span><strong th:text="${health.storageLabel}"></strong></p>
-                    <p><span>已完成传输的下载请求</span><strong th:text="${health.downloads}"></strong></p>
-                </div>
-                <div class="tag-cloud">
-                    <span th:each="tone : ${colorTones}" th:text="${tone}">blue</span>
-                    <span th:if="${#lists.isEmpty(colorTones)}">暂无色调标签</span>
-                </div>
-            </aside>
-        </section>
-    </main>
-</div>
+            </div>
+            <div class="task-list">
+                <label><input type="checkbox" checked> 完成壁纸导入</label>
+                <label><input type="checkbox" th:checked="${stats.categoryCount >= 12}"> 分类达到 12 个以上</label>
+                <label><input type="checkbox" th:checked="${stats.favoriteCount >= 20}"> 收藏数超过 20 次</label>
+            </div>
+            <div class="tag-cloud">
+                <span th:each="tone : ${colorTones}" th:text="${tone}">blue</span>
+                <span th:if="${#lists.isEmpty(colorTones)}">暂无色调标签</span>
+            </div>
+        </aside>
+    </section>
+</main>
 <script th:src="@{/js/ui.js}" src="/js/ui.js"></script>
-<script src="/js/gallery.js" defer></script>
 </body>
 </html>

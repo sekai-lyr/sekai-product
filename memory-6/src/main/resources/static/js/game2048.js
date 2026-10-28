@@ -1,16 +1,16 @@
 const characters = {
-    2: { name: "蕾姆", color: "#74b9eb", image: "/images/characters/rem.webp" },
-    4: { name: "拉姆", color: "#e99fb9", image: "/images/characters/ram.webp" },
-    8: { name: "爱蜜莉雅", color: "#b7a1e6", image: "/images/characters/emilia.webp" },
-    16: { name: "碧翠丝", color: "#efb8c9", image: "/images/characters/beatrice.webp" },
-    32: { name: "菲鲁特", color: "#e8bf6c", image: "/images/characters/felt.webp" },
-    64: { name: "菲利克斯", color: "#83cbd4", image: "/images/characters/ferris.webp" },
-    128: { name: "库珥修", color: "#82b599", image: "/images/characters/crusch.webp" },
-    256: { name: "安娜塔西亚", color: "#afa4dc", image: "/images/characters/anastasia.webp" },
-    512: { name: "普莉希拉", color: "#dc866c", image: "/images/characters/priscilla.webp" },
-    1024: { name: "艾姬多娜", color: "#c0c4d9", image: "/images/characters/echidna.webp" },
-    2048: { name: "莱因哈鲁特", color: "#db797d", image: "/images/characters/reinhard.webp" },
-    4096: { name: "菜月昴", color: "#d9a467", image: "/images/characters/subaru.webp" }
+    2: { name: "流光脉冲", color: "#35c7bd", hair: "#34d5c8", hair2: "#129a98", eyes: "#17f4e8", aura: "#b7fff8", type: "twin" },
+    4: { name: "皮可火花", color: "#f28ab2", hair: "#ff9fbe", hair2: "#f06d9f", eyes: "#72da75", aura: "#ffe0ec", type: "horn" },
+    8: { name: "奈拉余烬", color: "#dc6a5f", hair: "#24151a", hair2: "#f37b62", eyes: "#f7a2b4", aura: "#ffd0c9", type: "ribbon" },
+    16: { name: "希艾尔星铃", color: "#4c85e8", hair: "#f5d56a", hair2: "#d99e31", eyes: "#7ee0ff", aura: "#e6f4ff", type: "crown" },
+    32: { name: "鲁米潮汐", color: "#64a7ff", hair: "#9fd0ff", hair2: "#4d8ee0", eyes: "#2c6dff", aura: "#d8ecff", type: "crest" },
+    64: { name: "索拉溪谷", color: "#f19c4b", hair: "#df8a37", hair2: "#ffe0a3", eyes: "#8fd86d", aura: "#fff0c2", type: "blade" },
+    128: { name: "绮拉灰羽", color: "#6e7688", hair: "#181b25", hair2: "#4b5363", eyes: "#7f8ca8", aura: "#d5d9e2", type: "scarf" },
+    256: { name: "奥里恩流光", color: "#7890ff", hair: "#f5f7ff", hair2: "#b7c1ff", eyes: "#69f1ff", aura: "#e6eaff", type: "visor" },
+    512: { name: "艾拉叶影", color: "#72bf91", hair: "#dfe9d8", hair2: "#a8c59e", eyes: "#70d18c", aura: "#e4ffec", type: "wing" },
+    1024: { name: "诺瓦螺旋", color: "#7552b8", hair: "#1b1727", hair2: "#49306f", eyes: "#d94cff", aura: "#f1dcff", type: "sigil" },
+    2048: { name: "金辉花影", color: "#a98bef", hair: "#f1d36b", hair2: "#b88732", eyes: "#77b7ff", aura: "#fff0b7", type: "flower" },
+    4096: { name: "奇迹世界", color: "#d6a629", hair: "#fff4b0", hair2: "#f27f45", eyes: "#ffffff", aura: "#fff8d2", type: "star" }
 };
 
 const $ = (id) => document.getElementById(id);
@@ -100,7 +100,6 @@ let pendingRender = "reset";
 let lastScoreGain = 0;
 let lastSpawnIndex = null;
 let motionObserver = null;
-let pvPauseStartedAt = null;
 
 document.documentElement.dataset.motion = prefersReducedMotion ? "reduced" : "full";
 
@@ -210,15 +209,20 @@ function animateRenderedTiles() {
 }
 
 function showScoreGain(gain) {
-    if (!gain) return;
+    if (prefersReducedMotion || !gain) {
+        return;
+    }
     const boardWrap = boardEl.parentElement;
-    boardWrap.querySelectorAll(".score-float").forEach((item) => item.remove());
     const scoreFloat = document.createElement("span");
-    scoreFloat.className = "score-float score-celebration";
-    scoreFloat.setAttribute("role", "status");
-    scoreFloat.innerHTML = `<strong>+${gain.toLocaleString()}</strong>${combo >= 3 ? `<small>连击 ×${combo}</small>` : ""}`;
+    scoreFloat.className = "score-float";
+    scoreFloat.textContent = "+" + gain;
     boardWrap.appendChild(scoreFloat);
-    window.setTimeout(() => scoreFloat.remove(), prefersReducedMotion ? 1000 : 1100);
+    const animation = animateElement(scoreFloat, [
+        { opacity: 0, transform: "translateY(8px) scale(0.82)" },
+        { opacity: 1, transform: "translateY(0) scale(1)" },
+        { opacity: 0, transform: "translateY(-26px) scale(1.04)" }
+    ], { duration: 720, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+    animation?.finished.then(() => scoreFloat.remove()).catch(() => scoreFloat.remove());
 }
 
 function pulseValue(element) {
@@ -325,7 +329,6 @@ function addRandomTile() {
 }
 
 function render() {
-    const pvEligible = pendingRender === "move" || pendingRender === "skill";
     const previousValues = previousBoardSnapshot ? previousBoardSnapshot.flat() : [];
     boardEl.innerHTML = "";
     boardEl.style.setProperty("--board-size", String(boardSize));
@@ -345,10 +348,25 @@ function render() {
             }
             const character = getCharacter(value);
             tile.style.setProperty("--tile-color", character.color);
-            tile.setAttribute("aria-label", `${value} · ${character.name}`);
+            tile.style.setProperty("--hair", character.hair);
+            tile.style.setProperty("--hair2", character.hair2);
+            tile.style.setProperty("--eyes", character.eyes);
+            tile.style.setProperty("--aura", character.aura);
+            tile.dataset.type = character.type;
             tile.innerHTML = `
                 <span class="tile-value">${value}</span>
-                <img class="tile-portrait" src="${character.image}" alt="" width="300" height="300" draggable="false">
+                <span class="character-portrait" aria-hidden="true">
+                    <span class="aura"></span>
+                    <span class="hair back"></span>
+                    <span class="face">
+                        <span class="eye left"></span>
+                        <span class="eye right"></span>
+                        <span class="mouth"></span>
+                    </span>
+                    <span class="bang bang-one"></span>
+                    <span class="bang bang-two"></span>
+                    <span class="accessory"></span>
+                </span>
                 <span class="tile-name">${character.name}</span>
             `;
         }
@@ -366,11 +384,7 @@ function render() {
     }
     renderTrack();
     renderMissions();
-    const newAchievement = checkAchievements();
-    const highest = maxTile();
-    const unlockKey = `pv-unlock-${highest}`;
-    const newHighCharacter = pvEligible && highest >= 512 && !achieved.has(unlockKey);
-    if (highest >= 512) achieved.add(unlockKey);
+    checkAchievements();
     animateRenderedTiles();
     if (lastScoreGain > 0) {
         showScoreGain(lastScoreGain);
@@ -384,9 +398,6 @@ function render() {
         showOverlay(`已达成 ${targetTile}`, "可以保存成绩，也可以继续挑战更高分。", false);
     } else if (mode !== "zen" && isGameOver() && !paused) {
         showOverlay("游戏结束", "已经没有可移动方向了。保存成绩后再来一局吧。", false);
-    }
-    if (pvEligible && (newAchievement || newHighCharacter)) {
-        playCharacterPV(highest, newHighCharacter ? "角色觉醒" : "成就解锁");
     }
 }
 
@@ -934,7 +945,7 @@ function maxTile() {
 }
 
 function elapsedSeconds() {
-    return Math.round(((pvPauseStartedAt ?? Date.now()) - startedAt) / 1000);
+    return Math.round((Date.now() - startedAt) / 1000);
 }
 
 function formatTime(totalSeconds) {
@@ -1007,102 +1018,20 @@ function renderMissions() {
 }
 
 function checkAchievements() {
-    let newlyUnlocked = false;
     missions.forEach((mission) => {
         if (mission.done() && !achieved.has(mission.id)) {
             achieved.add(mission.id);
-            newlyUnlocked = true;
             showAchievement(mission.title, mission.text);
         }
     });
-    return newlyUnlocked;
 }
-
-const achievementQueue = [];
-let achievementShowing = false;
 
 function showAchievement(title, text) {
-    achievementQueue.push({ title, text });
-    if (!achievementShowing) showNextAchievement();
-}
-
-function showNextAchievement() {
-    if (!achievementQueue.length) {
-        achievementShowing = false;
-        return;
-    }
-    achievementShowing = true;
-    const { title, text } = achievementQueue.shift();
     const toast = document.createElement("div");
-    toast.className = "achievement-toast achievement-unlock";
-    toast.setAttribute("role", "status");
-    toast.innerHTML = `<span class="achievement-medal" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M10 5h12v9a6 6 0 0 1-12 0V5ZM10 8H5v4a5 5 0 0 0 5 5M22 8h5v4a5 5 0 0 1-5 5M16 20v6M11 27h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="achievement-copy"><small>成就解锁</small><strong></strong><span></span></div><span class="achievement-timer" aria-hidden="true"></span>`;
-    toast.querySelector("strong").textContent = title;
-    toast.querySelector(".achievement-copy > span").textContent = text;
-    if (!prefersReducedMotion) {
-        for (let i = 0; i < 8; i++) {
-            const spark = document.createElement("i");
-            spark.className = "achievement-spark";
-            const angle = (Math.PI * 2 * i) / 8;
-            spark.style.setProperty("--spark-x", `${Math.cos(angle) * 65}px`);
-            spark.style.setProperty("--spark-y", `${Math.sin(angle) * 65}px`);
-            spark.style.setProperty("--spark-delay", `${i * 25}ms`);
-            toast.appendChild(spark);
-        }
-    }
+    toast.className = "achievement-toast";
+    toast.innerHTML = `<strong>任务完成：${title}</strong><span>${text}</span>`;
     document.body.appendChild(toast);
-    window.setTimeout(() => {
-        toast.classList.add("achievement-leaving");
-        window.setTimeout(() => {
-            toast.remove();
-            showNextAchievement();
-        }, prefersReducedMotion ? 0 : 240);
-    }, 3200);
-}
-
-function playCharacterPV(value, reason) {
-    const source = window.CHARACTER_PV_SOURCES?.[value];
-    // Only completed, reviewed video files belong in the source manifest.
-    if (!source || pvPauseStartedAt !== null || prefersReducedMotion) return;
-    const character = getCharacter(value);
-    const dialog = document.createElement("dialog");
-    dialog.className = "character-pv-dialog";
-    dialog.setAttribute("aria-label", `${reason}：${character.name}`);
-    dialog.innerHTML = `<header><div><small></small><h2></h2></div><button type="button" class="secondary-btn">跳过演出</button></header><video controls autoplay muted playsinline preload="auto"></video>`;
-    dialog.querySelector("small").textContent = reason;
-    dialog.querySelector("h2").textContent = character.name;
-    const video = dialog.querySelector("video");
-    video.poster = character.image;
-    video.src = source;
-    const wasPaused = paused;
-    const previousFocus = document.activeElement;
-    let finished = false;
-    let watchdog;
-    const finish = () => {
-        if (finished) return;
-        finished = true;
-        window.clearTimeout(watchdog);
-        video.pause();
-        video.removeAttribute("src");
-        video.load();
-        startedAt += Date.now() - pvPauseStartedAt;
-        pvPauseStartedAt = null;
-        paused = wasPaused;
-        dialog.close();
-        dialog.remove();
-        previousFocus?.focus();
-    };
-    dialog.querySelector("button").addEventListener("click", finish);
-    dialog.addEventListener("cancel", (event) => { event.preventDefault(); finish(); });
-    video.addEventListener("ended", finish, { once: true });
-    video.addEventListener("error", finish, { once: true });
-    document.body.appendChild(dialog);
-    pvPauseStartedAt = Date.now();
-    paused = true;
-    dialog.showModal();
-    // Bound loading/stalling so an unavailable video cannot strand the game.
-    watchdog = window.setTimeout(finish, 15000);
-    video.play().catch(finish);
+    window.setTimeout(() => toast.remove(), 2600);
 }
 
 function saveProgress() {
@@ -1494,7 +1423,6 @@ function setTrack(delta) {
 }
 
 document.addEventListener("keydown", (event) => {
-    if (pvPauseStartedAt !== null) return;
     const keys = { ArrowLeft: "left", a: "left", A: "left", ArrowRight: "right", d: "right", D: "right", ArrowUp: "up", w: "up", W: "up", ArrowDown: "down", s: "down", S: "down" };
     if (keys[event.key]) {
         event.preventDefault();

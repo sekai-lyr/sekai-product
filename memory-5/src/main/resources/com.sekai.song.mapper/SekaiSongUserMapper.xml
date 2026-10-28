@@ -15,4 +15,8 @@
         SELECT * FROM sekai_song_user WHERE id = #{id} LIMIT 1
     </select>
 
+    <update id="updatePassword">
+        UPDATE sekai_song_user SET password = #{password} WHERE id = #{id}
+    </update>
+
 </mapper>

@@ -18,12 +18,6 @@ public class DrawLotsControl {
     @Resource
     private DrawLotsService drawLotsService;
 
-    @org.springframework.web.bind.annotation.GetMapping("/api/dashboard")
-    public java.util.Map<String, Object> dashboard(HttpSession session) {
-        User user = (User) session.getAttribute("loginUser");
-        return java.util.Map.of("stats", drawLotsService.getStats(user), "achievements", drawLotsService.getAchievements(user), "recentRecords", drawLotsService.recentRecords(user, 6));
-    }
-
     @PostMapping("/draw/roll")
     public Result<DrawRecord> roll(@RequestParam(value = "mood", required = false) String mood,
                                    @RequestParam(value = "wishTopic", required = false) String wishTopic,
