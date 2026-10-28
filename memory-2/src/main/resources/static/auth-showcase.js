@@ -106,7 +106,6 @@
 
     function render(time) {
         const spread = getSpread(time);
-        const activeIndex = getActiveIndex(time);
         layerData.forEach(({ layer, panel, fragments }, index) => {
             const depth = pageCount - index;
             const x = width * 0.032 * index * spread;
@@ -116,9 +115,6 @@
             layer.style.zIndex = String(pageCount - index);
 
             const exitProgress = reducedMotion ? 0 : clamp((time - EXIT_START - index * STEP) / EXIT);
-            const isActive = index === activeIndex;
-            const isExiting = index === activeIndex - 1 && exitProgress > 0;
-            layer.style.opacity = isActive || isExiting ? '1' : '0';
             if (exitProgress > 0) {
                 panel.style.clipPath = dissolveClip(exitProgress);
                 layer.style.visibility = exitProgress >= 1 ? 'hidden' : 'visible';

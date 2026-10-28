@@ -6,8 +6,8 @@ import { Player, GameState, createCardInstance } from "./model.js";
 import { GameEngine } from "./engine.js?v=1.8.1-strategy";
 import { GameUI } from "./ui.js?v=1.9.2-card-atlas-4x4";
 import { GameController } from "./controller.js?v=1.8.2-card-atlas-4x4";
-import { CardGameApp } from "./app.js?v=3.8.2-card-atlas-4x4";
-import { ALL_CARDS, getCardById, hydrateCardArt } from "./catalog.js?v=1.8.6-original";
+import { CardGameApp } from "./app.js?v=3.8.3-art-ratings";
+import { ALL_CARDS, getCardById, hydrateCardArt } from "./catalog.js?v=1.9.0-art-ratings";
 import { getAIDeck, getStarterDeck } from "./decks.js?v=1.7.1";
 import { SeededRandom } from "./rng.js";
 import { GAME_CONFIG } from "./constants.js";
@@ -21,7 +21,7 @@ import { saveAuth, loadAuth, clearAuth, isAuthenticated } from "./auth.js";
 import { playAuthIgnition } from "./card-ignition.js?v=1.0.7";
 import { setSoundEnabled } from "./audio.js?v=1.0.0";
 import { TUTORIAL_CARDS, buildTutorialDecks, orderTutorialDeck, TutorialCoach } from "./tutorial.js?v=1.0.0";
-import { initializeController2D } from "./controller-2d.js?v=2.1.0-mesh-model";
+import { initializeController2D } from "./controller-2d.js?v=2.2.0-runtime-polish";
 
 function showFatalGameError(error) {
     const message = error instanceof Error

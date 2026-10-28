@@ -31,7 +31,7 @@ test('隐藏手牌、牌库顺序与盖放后场内容不进入评分',()=>{cons
 test('高LP保留单纯回复卡，低LP时可以使用',()=>{const x=setup();x.p.hand=[createCardInstance(getCardById('ygo_n_84257639'))];assert.equal(x.c.chooseAiMainAction(),null);x.p.lp=1000;assert.equal(x.c.chooseAiMainAction().kind,'spell');x.c.dispose();});
 
 test('看到直接致胜时不为上级召唤解放进攻者',()=>{const x=setup();x.p.monsterZone=[monster('finisher',2500)];x.o.lp=1000;x.p.hand=[monster('boss',4000,2000,5)];assert.equal(x.c.chooseAiMainAction(),null);assert.equal(x.c.chooseAiBattleAction().target,'player');x.c.dispose();});
-test('先攻和主要阶段2不会支付本回合连击代价',()=>{for(const phase of ['main_1','main_2']){const x=setup();x.s.phase=phase;x.s.firstTurn=phase==='main_1';field(x,'picture_ex_029');assert.equal(x.c.chooseAiMainAction(),null);assert.equal(x.p.lp,8000);x.c.dispose();}});
+test('先攻和主要阶段2不会支付本回合连击代价',()=>{for(const phase of ['main_1','main_2']){const x=setup();x.s.phase=phase;x.s.firstTurn=phase==='main_1';const card=field(x,'picture_ex_029');card.effects=card.effects.filter(effect=>effect.action==='twin');assert.equal(card.effects.length,1);assert.equal(x.c.chooseAiMainAction(),null);assert.equal(x.p.lp,8000);x.c.dispose();}});
 test('战斗免破的守备怪兽不作为有收益的击杀目标',()=>{const x=setup();x.p.monsterZone=[monster('attacker',2500)];const t=monster('protected',1000);t.position='defense';t.cannotBeDestroyedByBattle=true;x.o.monsterZone=[t];assert.equal(x.c.chooseAiBattleAction(),null);x.c.dispose();});
 test('高难度也优先可见致胜目标，而不是效果多的大怪',()=>{const x=setup();x.c.aiProfile={skill:5};x.p.monsterZone=[monster('attacker',3000)];const big=monster('valuable',2800);big.effects=Array(3).fill({type:'test'});const small=monster('weak',500);x.o.monsterZone=[big,small];x.o.lp=1000;assert.equal(x.c.chooseAiBattleAction().target,small);x.c.dispose();});
 

@@ -1,0 +1,52 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.sekai.game.mobile"
+4    android:versionCode="8"
+5    android:versionName="2.6.0-offline" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="36" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:4:5-67
+11-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:5:5-79
+12-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:5:22-76
+13
+14    <application
+14-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:6:5-21:19
+15        android:allowBackup="true"
+15-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:7:9-35
+16        android:extractNativeLibs="false"
+17        android:icon="@mipmap/ic_launcher"
+17-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:9:9-43
+18        android:label="次元决斗"
+18-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:8:9-29
+19        android:theme="@style/AppTheme"
+19-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:11:9-40
+20        android:usesCleartextTraffic="true" >
+20-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:10:9-44
+21        <activity
+21-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:12:9-20:20
+22            android:name="com.sekai.game.mobile.MainActivity"
+22-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:13:13-41
+23            android:configChanges="orientation|screenSize|keyboardHidden"
+23-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:14:13-74
+24            android:exported="true" >
+24-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:15:13-36
+25            <intent-filter>
+25-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:16:13-19:29
+26                <action android:name="android.intent.action.MAIN" />
+26-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:17:17-69
+26-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:17:25-66
+27
+28                <category android:name="android.intent.category.LAUNCHER" />
+28-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:18:17-77
+28-->D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\AndroidManifest.xml:18:27-74
+29            </intent-filter>
+30        </activity>
+31    </application>
+32
+33</manifest>

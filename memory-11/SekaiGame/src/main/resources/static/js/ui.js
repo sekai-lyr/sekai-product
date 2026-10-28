@@ -8,7 +8,7 @@ import { ALL_CARDS } from "./catalog.js";
 import { PHASE, GAME_CONFIG, MONSTER_POSITION } from "./constants.js";
 import { addFoilShimmer } from "./effects.js?v=1.10.2-card-atlas-4x4";
 import { cardEffectFieldsHtml, cardRuleStatusHtml, cardVisualEffectHtml, cardVisualImageClass, cardVisualMotionStyle, sekaiCardBackHtml } from "./card-view.js?v=1.2.0-bca";
-import { emitControllerAction } from "./controller-2d.js?v=2.1.0-mesh-model";
+import { emitControllerAction } from "./controller-2d.js?v=2.2.0-runtime-polish";
 
 // 触屏设备没有 Shift 键，提示文案必须跟着输入方式切换，否则玩家会照着按不出来。
 const COARSE_POINTER = typeof window !== "undefined"

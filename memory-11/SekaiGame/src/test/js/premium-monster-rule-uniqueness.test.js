@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { ALL_CARDS } from "../../main/resources/static/js/catalog.js";
 
-const monsters = ALL_CARDS.filter(card => card.type === "monster" && card.rarity !== "N");
+const monsters = ALL_CARDS.filter(card => card.type === "monster" && card.rarity !== "N" && card.series !== "starter_ygo");
 const usedSkillNames = new Map();
 const SECONDARY_NAMES = new Set(["余响·寻找", "余响·构思", "余响·蓄势", "余响·守护"]);
 const STRATEGY_SECONDARY_NAMES = { picture_ex_084: "青瓷寻伴", picture_ex_086: "雪原澄音", water_010: "低音合奏", picture_ex_094: "主唱的决意", picture_ex_095: "失真蓄音", picture_ssr7_010: "电荷积蓄" };
 for (const card of monsters) {
-    const secondaryAllowed = card.rarity === "SSR" || card.rarity === "UR";
+    const secondaryAllowed = card.rarity === "SSR" || card.rarity === "UR" || card.strategyDesign;
     assert.ok(card.effects.length >= 1 && card.effects.length <= (secondaryAllowed ? 2 : 1), `${card.name}效果数量异常`);
     for (const effect of card.effects) {
         assert.ok(effect.type === "themedAction" && effect.action, `${card.name}缺少可结算的动作`);

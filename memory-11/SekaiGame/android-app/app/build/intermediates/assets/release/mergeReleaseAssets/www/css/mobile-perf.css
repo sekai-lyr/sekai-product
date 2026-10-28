@@ -1,0 +1,91 @@
+/* mobile-perf.css — 离线 APK 专用移动端性能覆盖层（桌面/网页版不引用）
+ *
+ * 实测（412x915、4x CPU 节流、软件光栅）：
+ *   大厅   30 fps -> 60 fps
+ *   图鉴    6 fps -> 60 fps（368 张卡每张 3~5 层 blur + mix-blend-mode 持续动画）
+ *   战斗   52 fps -> 60 fps
+ *
+ * 原则：只关闭“装饰性持续动画/毛玻璃”，保留所有一次性演出
+ * （召唤、攻击、规则特效、卡包开包）与玩法状态提示
+ * （可攻击、可选目标、直接攻击靶标）。 */
+
+@media (pointer: coarse), (max-width: 900px) {
+    /* 1. 毛玻璃 backdrop-filter 在 WebView 合成器上极贵：
+          手机一律退回纯色半透明面板（各面板底色本就接近不透明）。 */
+    * {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    /* 2. 卡牌装饰层：每张卡 3~5 个 blur/mix-blend-mode 无限动画。
+          图鉴一屏 300+ 张时直接打满主线程与 GPU，必须停。 */
+    .card-breeze-image {
+        animation: none !important;
+        will-change: auto !important;
+    }
+    .card-breeze-overlay::before {
+        animation: none !important;
+        transform: skewX(-17deg) translateX(18%) !important;
+        opacity: .14 !important;
+    }
+    .card-breeze-overlay::after {
+        animation: none !important;
+        opacity: .1 !important;
+    }
+    .card-live-aura { animation: none !important; }
+    .card-live-motes { animation: none !important; }
+    .card-foil-shimmer,
+    .rarity-UR .card-foil-shimmer,
+    .rarity-SR .card-foil-shimmer,
+    .in-hand:hover .card-foil-shimmer { animation: none !important; }
+
+    /* 3. 大厅：全屏 filter + mix-blend-mode 持续动画与漂浮粒子。 */
+    .lobby-scenery {
+        filter: none !important;
+        animation: screenFade .4s ease both !important;
+    }
+    .lobby-character {
+        animation: none !important;
+        will-change: auto !important;
+    }
+    .lobby-character img { filter: none !important; }
+    .lobby-sheen,
+    .lobby-breeze { display: none !important; }
+    .lobby-particles { display: none !important; }
+    .lobby-battle .live-glow { animation: none !important; }
+    .pack-buy.featured { animation: none !important; }
+
+    /* 4. 决斗场景的持续发光/扫描/漂浮动画。
+          注意：.direct-attack-target、.field-slot.targetable、
+          .field-slot.effect-target、.field-slot.can-attack 的可攻击脉冲
+          属于玩法提示，全部保留。 */
+    .battle-screen.active::before { animation: none !important; }
+    .duel-backdrop::before,
+    .duel-backdrop::after { animation: none !important; }
+    .battlefield::before { animation: none !important; }
+    .battlefield-center-glow,
+    .battlefield-center-glow::before,
+    .battlefield-center-glow::after { animation: none !important; }
+    .duel-particle { animation: none !important; }
+    .field-slot.empty { animation: none !important; }
+    .field-slot.empty::after { animation: none !important; }
+    .field-slot.has-card::after { animation: none !important; }
+    .hp-fill::after { animation: none !important; }
+    .turn-badge::before { animation: none !important; }
+    .duel-title strong { animation: none !important; }
+    .battlefield > .field-half::after { animation: none !important; }
+    .field-slot.face-down .card-back-icon { animation: none !important; }
+    .rarity-SR .card-frame::before,
+    .rarity-UR .card-frame::before,
+    .rarity-SSR .card-frame::before { animation: none !important; }
+    .trap-idle-glow { animation: none !important; }
+    .scene-ocean .duel-particles::before,
+    .scene-ocean .duel-particles::after { animation: none !important; }
+    .scene-ocean .field-zone-slot.has-card,
+    .scene-shallow-tide .field-zone-slot.has-card { animation: none !important; }
+    .sekai-card-back-sheen { animation: none !important; }
+
+    /* 5. 卡包/演出类装饰。 */
+    .pack-orbit { animation: none !important; }
+    .pack-hero-aura { animation: none !important; }
+}

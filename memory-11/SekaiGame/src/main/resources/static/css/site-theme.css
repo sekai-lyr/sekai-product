@@ -1,0 +1,76 @@
+/* Four front-end skins adapted from memory-5. The duel board is intentionally excluded. */
+:root[data-site-theme="a"] {
+    --site-bg:#edf8fb; --site-bg-deep:#d9edf3; --site-panel:rgba(250,254,255,.88); --site-panel-strong:#f7fcfe;
+    --site-line:rgba(33,112,132,.22); --site-line-strong:rgba(18,126,151,.42); --site-text:#15303a; --site-text-2:#466a75; --site-text-3:#6f929d;
+    --site-accent:#087e92; --site-accent-2:#39a9ba; --site-on-accent:#fff; --site-shadow:0 18px 48px rgba(31,96,112,.16);
+    --site-page-bg:radial-gradient(circle at 82% 2%,rgba(79,190,211,.24),transparent 42%),linear-gradient(145deg,#f8fdff,#e4f1f5);
+}
+:root[data-site-theme="b"] {
+    --site-bg:#05070f; --site-bg-deep:#090d1c; --site-panel:rgba(13,17,33,.84); --site-panel-strong:rgba(17,22,42,.95);
+    --site-line:rgba(140,160,220,.22); --site-line-strong:rgba(160,180,255,.42); --site-text:#eef1ff; --site-text-2:#a9b2d6; --site-text-3:#6f7899;
+    --site-accent:#8b6cf0; --site-accent-2:#45d6e8; --site-on-accent:#fff; --site-shadow:0 18px 50px rgba(0,0,0,.55);
+    --site-page-bg:radial-gradient(circle at 78% 0,rgba(38,95,126,.28),transparent 46%),linear-gradient(145deg,#05070f,#0c1728);
+}
+:root[data-site-theme="c"] {
+    --site-bg:#fff9f8; --site-bg-deep:#f9e8ee; --site-panel:rgba(255,250,252,.9); --site-panel-strong:#fffafb;
+    --site-line:rgba(178,53,105,.19); --site-line-strong:rgba(178,53,105,.38); --site-text:#482735; --site-text-2:#82566a; --site-text-3:#aa7c90;
+    --site-accent:#b23569; --site-accent-2:#e487aa; --site-on-accent:#fff; --site-shadow:0 18px 48px rgba(108,44,68,.14);
+    --site-page-bg:radial-gradient(circle at 84% 0,rgba(244,166,196,.31),transparent 45%),linear-gradient(145deg,#fffaf6,#f9e8ef);
+}
+:root[data-site-theme="d"] {
+    --site-bg:#11100e; --site-bg-deep:#211b13; --site-panel:rgba(27,24,19,.9); --site-panel-strong:#242019;
+    --site-line:rgba(226,190,121,.22); --site-line-strong:rgba(226,190,121,.48); --site-text:#f6ecd8; --site-text-2:#cbbd9f; --site-text-3:#91866f;
+    --site-accent:#d9b66f; --site-accent-2:#f0d597; --site-on-accent:#241b0d; --site-shadow:0 18px 52px rgba(0,0,0,.58);
+    --site-page-bg:radial-gradient(circle at 82% 0,rgba(110,82,38,.34),transparent 46%),linear-gradient(145deg,#11100e,#241e16);
+}
+
+html[data-site-theme] body:not(.battle-active) { background:var(--site-page-bg); }
+html[data-site-theme] body .game-shell {
+    --bg-0:var(--site-bg); --bg-1:var(--site-bg-deep); --bg-2:var(--site-panel-strong);
+    --panel:var(--site-panel); --panel-strong:var(--site-panel-strong); --glass:color-mix(in srgb,var(--site-panel) 70%,transparent);
+    --line:var(--site-line); --line-strong:var(--site-line-strong); --text:var(--site-text); --text-2:var(--site-text-2); --text-3:var(--site-text-3);
+    --accent:var(--site-accent); --accent-2:var(--site-accent-2); --shadow:var(--site-shadow);
+    color-scheme:light; background:var(--site-page-bg);
+}
+html[data-site-theme] body#sekai-game .game-shell {
+    --bg-0:var(--site-bg); --bg-1:var(--site-bg-deep); --bg-2:var(--site-panel-strong);
+    --panel:var(--site-panel); --panel-strong:var(--site-panel-strong); --glass:color-mix(in srgb,var(--site-panel) 70%,transparent);
+    --line:var(--site-line); --line-strong:var(--site-line-strong); --text:var(--site-text); --text-2:var(--site-text-2); --text-3:var(--site-text-3);
+    --accent:var(--site-accent); --accent-2:var(--site-accent-2); --shadow:var(--site-shadow);
+    background:var(--site-page-bg);
+}
+html[data-site-theme="b"] body .game-shell,html[data-site-theme="d"] body .game-shell { color-scheme:dark; }
+html[data-site-theme] body .game-shell .topbar { background:linear-gradient(180deg,color-mix(in srgb,var(--site-bg) 94%,transparent),color-mix(in srgb,var(--site-bg) 64%,transparent) 65%,transparent); }
+html[data-site-theme] body .game-shell .sidebar { background:color-mix(in srgb,var(--site-panel-strong) 88%,transparent); border-color:var(--site-line); box-shadow:var(--site-shadow),inset 0 1px 0 rgba(255,255,255,.08); }
+html[data-site-theme] body .game-shell .nav-item.active { color:var(--site-text); background:linear-gradient(180deg,color-mix(in srgb,var(--site-accent) 25%,transparent),color-mix(in srgb,var(--site-accent-2) 11%,transparent)); }
+html[data-site-theme] body .game-shell :is(.primary-action,.auth-submit) { color:var(--site-on-accent); background:linear-gradient(135deg,var(--site-accent),color-mix(in srgb,var(--site-accent) 72%,var(--site-accent-2))); border-color:var(--site-line-strong); box-shadow:0 9px 24px color-mix(in srgb,var(--site-accent) 34%,transparent); }
+html[data-site-theme] body .game-shell :is(.rank-badge,.profile-avatar) { color:var(--site-on-accent); background:linear-gradient(135deg,var(--site-accent),var(--site-accent-2)); }
+html[data-site-theme] body .game-shell :is(.settings-panel,.collection-detail,.collection-browser,.deck-workspace,.deck-source,.rule-panel,.manual-index,.shop-banner,.pack-card) { color:var(--site-text); border-color:var(--site-line); background:var(--site-panel); box-shadow:var(--site-shadow); }
+html[data-site-theme] body[data-visual-route] .game-shell :is(.settings-panel,.collection-detail,.collection-browser,.deck-workspace,.deck-source,.rule-panel,.manual-index) { background:var(--site-panel); border-color:var(--site-line); }
+html[data-site-theme] body#sekai-game .game-shell :is(.settings-panel,.collection-detail,.collection-browser,.deck-workspace,.deck-source,.manual-index,.manual-pages .rule-panel,.featured-pack,.shop-side) {
+    color:var(--site-text); border-color:var(--site-line); background:var(--site-panel); box-shadow:var(--site-shadow);
+}
+html[data-site-theme] body .game-shell[data-page]:not([data-page="home"]) { background:var(--site-page-bg); }
+
+:root[data-site-theme="a"] .lobby-scenery { filter:saturate(.9) brightness(.86) contrast(.96); }
+:root[data-site-theme="b"] .lobby-scenery { filter:saturate(.78) brightness(.66) contrast(1.02); }
+:root[data-site-theme="c"] .lobby-scenery { filter:saturate(.92) brightness(.84) contrast(.96) hue-rotate(-8deg); }
+:root[data-site-theme="d"] .lobby-scenery { filter:saturate(.62) brightness(.58) contrast(1.08) sepia(.18); }
+
+html[data-site-theme] #auth-screen {
+    --text:var(--site-text); --text-2:var(--site-text-2); --text-3:var(--site-text-3); --line:var(--site-line); --accent:var(--site-accent); --accent-2:var(--site-accent-2);
+    color:var(--site-text); color-scheme:light; background:linear-gradient(115deg,color-mix(in srgb,var(--site-bg) 94%,transparent),color-mix(in srgb,var(--site-bg-deep) 78%,transparent)),url('../assets/duel-scenes/sakura-academy.webp') center/cover;
+}
+html[data-site-theme="b"] #auth-screen,html[data-site-theme="d"] #auth-screen { color-scheme:dark; }
+html[data-site-theme] #auth-screen .auth-panel { color:var(--site-text); border-color:var(--site-line); background:color-mix(in srgb,var(--site-panel-strong) 92%,transparent); box-shadow:var(--site-shadow); }
+html[data-site-theme] #auth-screen :is(.auth-brand strong,.auth-panel-title,.auth-field input) { color:var(--site-text); }
+html[data-site-theme] #auth-screen :is(.auth-brand small,.auth-panel-copy,.auth-field span,.auth-panel-footer) { color:var(--site-text-3); }
+html[data-site-theme] #auth-screen .auth-field input { background:var(--site-panel); border-color:var(--site-line); }
+html[data-site-theme] #auth-screen .auth-tab.active { color:var(--site-on-accent); background:var(--site-accent); }
+
+.site-theme-swatches { display:flex; gap:7px; margin-top:8px; }
+.site-theme-swatches i { width:22px; height:7px; border-radius:99px; background:var(--swatch); box-shadow:inset 0 0 0 1px rgba(255,255,255,.18); }
+.site-theme-swatches i:nth-child(2) { opacity:.72; }.site-theme-swatches i:nth-child(3) { opacity:.46; }
+
+/* The theme never alters duel geometry, zones, cards, controller position, or battle effects. */
+html[data-site-theme] body.battle-active .battle-screen { color-scheme:dark; }

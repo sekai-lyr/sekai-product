@@ -392,6 +392,11 @@ const runtime = {
     hidden: false,
     reduced: false,
     paused: false,
+    pointerRaf: 0,
+    pointerX: 0,
+    pointerY: 0,
+    pickerLastFocus: null,
+    motionQuery: null,
 };
 
 function now() {
@@ -920,17 +925,44 @@ export function handleControllerAction(detail) {
     return true;
 }
 
-/* ---- 指针输入：已移除 ----
- *
- * 早期版本在这里做了两件跟着鼠标走的事：
- *   1. 整层视差（--controller-x/y + rotateY）——rotateY 在 perspective 下会把
- *      贴图压成梯形（透视缩短）；
- *   2. 角色视线跟随（伪 3D 转头）——靠横向 scaleX 压扁头部来假装转弯，
- *      turn=0.85 时头宽只剩 0.81，玩家看到的就是"原画被物理压缩"。
- * 两者都会让同一张平涂插画的比例发生非刚性变化，不符合物理直觉，已整体移除。
- * 主控现在只由真实游戏事件驱动；层内的 CSS 关键帧仍在用 var(--controller-x,0)
- * 等变量，缺省值 0 保证这套动作动画完全不受影响。
+/* ---- 指针输入：仅做极轻的整体平移视差 ----
+ * 不做 rotateY、scaleX 或视线伪变形，确保单张原画的比例与五官始终不变。
+ * 每帧最多写一次 CSS 变量，位移上限为 2px / 1.5px。
  */
+
+function resetPointerParallax() {
+    const root = runtime.dom?.root;
+    if (!root) return;
+    root.style.setProperty("--controller-x", "0px");
+    root.style.setProperty("--controller-y", "0px");
+}
+
+function flushPointerParallax() {
+    runtime.pointerRaf = 0;
+    const dom = runtime.dom;
+    if (!dom?.root || !dom.battle?.classList.contains("active") || runtime.reduced || runtime.hidden) {
+        resetPointerParallax();
+        return;
+    }
+    const rect = dom.battle.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return;
+    const x = Math.max(-1, Math.min(1, ((runtime.pointerX - rect.left) / rect.width) * 2 - 1));
+    const y = Math.max(-1, Math.min(1, ((runtime.pointerY - rect.top) / rect.height) * 2 - 1));
+    dom.root.style.setProperty("--controller-x", `${(x * 2).toFixed(2)}px`);
+    dom.root.style.setProperty("--controller-y", `${(y * 1.5).toFixed(2)}px`);
+}
+
+function onBattlePointerMove(event) {
+    runtime.pointerX = event.clientX;
+    runtime.pointerY = event.clientY;
+    if (!runtime.pointerRaf) runtime.pointerRaf = window.requestAnimationFrame(flushPointerParallax);
+}
+
+function onBattlePointerLeave() {
+    if (runtime.pointerRaf) window.cancelAnimationFrame(runtime.pointerRaf);
+    runtime.pointerRaf = 0;
+    resetPointerParallax();
+}
 
 /* ---- 选择界面 ---- */
 
@@ -966,8 +998,10 @@ function openPicker() {
     const dom = runtime.dom;
     if (!dom?.picker) return;
     renderPicker();
+    runtime.pickerLastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     dom.picker.classList.add("active");
     dom.picker.setAttribute("aria-hidden", "false");
+    document.body.classList.add("controller-picker-open");
     dom.pickerGrid?.querySelector(".controller-choice.selected")?.focus();
 }
 
@@ -976,6 +1010,9 @@ function closePicker() {
     if (!dom?.picker) return;
     dom.picker.classList.remove("active");
     dom.picker.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("controller-picker-open");
+    runtime.pickerLastFocus?.focus?.();
+    runtime.pickerLastFocus = null;
 }
 
 /** 切换主控：写 localStorage、应用主题、刷新选择界面，并给一次 LINK SYNC 反馈。 */
@@ -1001,6 +1038,9 @@ function teardownControllerActivity() {
     runtime.timers.clear();
     runtime.holdTimer = null;
     runtime.holdOnTimer = null;
+    if (runtime.pointerRaf) window.cancelAnimationFrame(runtime.pointerRaf);
+    runtime.pointerRaf = 0;
+    resetPointerParallax();
     for (const node of runtime.fxNodes) node.remove();
     runtime.fxNodes.clear();
     clearStateClasses();
@@ -1027,10 +1067,18 @@ export function destroyController2D() {
     meshGeneration++;
     if (!runtime.bound) return;
     runtime.bound = false;
-    runtime.pointerHandler = null;
+    document.querySelector("#btn-controller-select")?.removeEventListener("click", openPicker);
+    document.querySelector("#controller-picker-close")?.removeEventListener("click", closePicker);
+    runtime.dom?.picker?.removeEventListener("pointerdown", onPickerPointerDown);
+    runtime.dom?.battle?.removeEventListener("pointermove", onBattlePointerMove);
+    runtime.dom?.battle?.removeEventListener("pointerleave", onBattlePointerLeave);
+    document.removeEventListener("keydown", onDocumentKeyDown);
     document.removeEventListener("visibilitychange", onVisibilityChange);
     window.removeEventListener(CONTROLLER_ACTION_EVENT, onControllerActionEvent);
     window.removeEventListener("resize", onResize);
+    runtime.motionQuery?.removeEventListener?.("change", onMotionPreferenceChange);
+    runtime.motionQuery = null;
+    closePicker();
     runtime.dom = null;
     runtime.config = null;
     runtime.currentId = null;
@@ -1050,6 +1098,14 @@ function onVisibilityChange() {
     syncMeshRunning();
 }
 
+function onMotionPreferenceChange() {
+    runtime.reduced = prefersReducedMotion();
+    runtime.dom?.root?.classList.toggle("is-reduced-motion", runtime.reduced);
+    runtime.meshModel?.setReducedMotion?.(runtime.reduced);
+    if (runtime.reduced) onBattlePointerLeave();
+    else scheduleIdleHold();
+}
+
 function onResize() {
     // 只清理跨屏特效（抽卡光线按旧坐标计算），避免残留错位。
     for (const node of runtime.fxNodes) {
@@ -1066,17 +1122,45 @@ function onResize() {
 
 /* ---- 初始化 ---- */
 
+function onPickerPointerDown(event) {
+    if (event.target === runtime.dom?.picker) closePicker();
+}
+
+function onDocumentKeyDown(event) {
+    const picker = runtime.dom?.picker;
+    if (!picker?.classList.contains("active")) return;
+    if (event.key === "Escape") {
+        event.preventDefault();
+        closePicker();
+        return;
+    }
+    if (event.key !== "Tab") return;
+    const focusable = [...picker.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])')]
+        .filter(element => !element.disabled && element.getClientRects().length > 0);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+}
+
 function bindEvents(dom) {
     document.querySelector("#btn-controller-select")?.addEventListener("click", openPicker);
     document.querySelector("#controller-picker-close")?.addEventListener("click", closePicker);
-    dom.picker?.addEventListener("pointerdown", event => { if (event.target === dom.picker) closePicker(); });
-    document.addEventListener("keydown", event => {
-        if (event.key === "Escape" && dom.picker?.classList.contains("active")) closePicker();
-    });
-    // 注意：这里不再绑定 pointermove / pointerleave。主控不响应鼠标移动。
+    dom.picker?.addEventListener("pointerdown", onPickerPointerDown);
+    document.addEventListener("keydown", onDocumentKeyDown);
+    dom.battle?.addEventListener("pointermove", onBattlePointerMove, { passive: true });
+    dom.battle?.addEventListener("pointerleave", onBattlePointerLeave, { passive: true });
     window.addEventListener(CONTROLLER_ACTION_EVENT, onControllerActionEvent);
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("resize", onResize, { passive: true });
+    runtime.motionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)") || null;
+    runtime.motionQuery?.addEventListener?.("change", onMotionPreferenceChange);
 }
 
 export function initializeController2D() {

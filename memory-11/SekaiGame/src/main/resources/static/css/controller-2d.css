@@ -119,9 +119,8 @@
 .duel-controller-2d.is-mesh-model .duel-controller-rig {
     /* 停掉 CSS 关键帧：形变由 controller-mesh-model.js 在顶点上完成。
        静态图后端（无 WebGL / 无 rig）仍靠这些关键帧做动作，所以下面
-       各关键帧里的 var(--controller-x/y/ry, ...) 一律保留：
-       主控已不响应鼠标，这些变量不会再被写入，缺省值 0 即为正常状态，
-       变量本身不必删——删了反而要改 20 多条关键帧。 */
+       各关键帧里的 var(--controller-x/y/ry, ...) 一律保留。轻量鼠标视差只写入
+       x/y 两个平移变量，不使用 rotateY 或非等比缩放，不改变原画比例。 */
     animation:none !important;
 }
 .duel-controller-2d.is-mesh-model .duel-controller-rig canvas { will-change:auto; }
@@ -571,6 +570,7 @@
     transition:opacity .2s ease,visibility .2s;
 }
 .controller-picker.active { opacity:1; visibility:visible; }
+body.controller-picker-open { overflow:hidden; }
 .controller-picker-panel {
     width:min(820px,calc(100vw - 32px));
     max-height:min(720px,calc(100vh - 48px));

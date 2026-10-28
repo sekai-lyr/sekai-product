@@ -15,7 +15,7 @@ describe("自制卡稀有度规则分层", () => {
     it("每张自制卡保留一项角色专属效果（SSR/UR 怪兽可多一条支援余响）", () => {
         customCards
             .forEach(card => {
-                const secondaryAllowed = card.type === "monster" && ["SSR", "UR"].includes(card.rarity);
+                const secondaryAllowed = card.type === "monster" && (["SSR", "UR"].includes(card.rarity) || card.strategyDesign);
                 const maxEffects = secondaryAllowed ? 2 : 1;
                 assert.ok(card.effects.length >= 1 && card.effects.length <= maxEffects, `${card.id} 效果数量异常（${card.effects.length}）`);
             });

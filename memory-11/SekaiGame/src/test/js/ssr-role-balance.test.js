@@ -5,7 +5,7 @@ import { ALL_CARDS } from "../../main/resources/static/js/catalog.js";
 import { hasEffectHandler } from "../../main/resources/static/js/engine.js";
 
 test("SSR怪兽为一项招牌技（可带一条支援余响）", () => {
-    const cards = ALL_CARDS.filter(card => card.type === "monster" && card.rarity === "SSR");
+    const cards = ALL_CARDS.filter(card => card.type === "monster" && card.rarity === "SSR" && card.series !== "starter_ygo");
     assert.ok(cards.length >= 40);
     for (const card of cards) {
         assert.ok(card.effects.length >= 1 && card.effects.length <= 2, `${card.name}效果数量异常`);

@@ -1,4 +1,4 @@
-import { ALL_CARDS } from "./catalog.js?v=1.8.6-original";
+import { ALL_CARDS } from "./catalog.js?v=1.9.0-art-ratings";
 
 const RARITY_VALUE = { N: 1, R: 2, SR: 3, SSR: 4, UR: 5 };
 // effects 为旧式效果类型；actions 为主题动作（themedAction.action），两套都参与主题匹配。

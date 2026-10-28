@@ -1,0 +1,58 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.sekai.game.mobile.app-mergeReleaseResources-2:/values/values.xml",
+            "map": [
+                {
+                    "source": "D:\\Sekai_two\\memory-11\\SekaiGame\\android-app\\app\\src\\main\\res\\values\\colors.xml",
+                    "from": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "130",
+                        "endColumns": "58",
+                        "endOffsets": "184"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "58",
+                        "endOffsets": "109"
+                    }
+                },
+                {
+                    "source": "D:\\Sekai_two\\memory-11\\SekaiGame\\android-app\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "-1",
+                        "startColumns": "-1",
+                        "startOffsets": "-1"
+                    },
+                    "to": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "114",
+                        "endLines": "9",
+                        "endColumns": "12",
+                        "endOffsets": "508"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "C:\\Users\\administration\\.gradle\\daemon\\9.1.0\\com.sekai.game.mobile.app-mergeReleaseResources-2:\\values\\values.xml",
+            "map": [
+                {
+                    "source": "D:\\Sekai_two\\memory-11\\SekaiGame\\android-app\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "8",
+                        "endColumns": "12",
+                        "endOffsets": "449"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -9,7 +9,7 @@ import { PHASE, GAME_CONFIG, MONSTER_POSITION } from "./constants.js";
 import { playSound, pitchForRarity } from "./audio.js?v=1.0.0";
 import { createCardInstance } from "./model.js";
 import { getCardById } from "./catalog.js";
-import { emitControllerAction } from "./controller-2d.js?v=2.1.0-mesh-model";
+import { emitControllerAction } from "./controller-2d.js?v=2.2.0-runtime-polish";
 import {
     playSummonEffect, playSpellEffect, playTrapEffect, playRuleDrivenEffect,
     playAttackEffect, playAttackAnimation, showDamageNumber, playDestroyEffect,
@@ -30,6 +30,10 @@ const raf = typeof requestAnimationFrame === "function"
 // 特效锁定时间（毫秒）—— 必须 >= 横幅停留时间
 const EFFECT_LOCK_MS = 2600;
 const ANIMATED_DRAW_EFFECTS = new Set(["drawCards", "gameThroneDraw", "discardAndDraw", "healDrawNoSpecial", "recoverAndDrawV2"]);
+
+export function isSettledControllerAttack(result) {
+    return !!result?.success && !result.replay && !result.redirect && !result.attackCanceled;
+}
 
 export class GameController {
     constructor(gameState, engine, ui) {
@@ -642,6 +646,16 @@ export class GameController {
             && effectType !== "specialSummonFromGraveyard") return;
         const revived = this.engine._lastRevivedCard;
         if (!revived) return;
+        if (ownerIndex === 0) {
+            emitControllerAction("summon", {
+                playerIndex: 0,
+                cardId: revived.id,
+                cardType: "monster",
+                cardName: revived.name || "",
+                specialSummon: true,
+                fromGraveyard: true,
+            });
+        }
         this.checkAndRefresh();
         await new Promise(resolve => this._later(resolve, 80));
         if (this.disposed) return;
@@ -705,6 +719,15 @@ export class GameController {
             result.success ? { card } : null);
         if (result.success) {
             const monsterIndex = this.state.currentPlayer.monsterZone.indexOf(card);
+            if (this.state.currentPlayerIndex === 0) {
+                emitControllerAction("summon", {
+                    playerIndex: 0,
+                    cardId: card.id,
+                    cardType: "monster",
+                    cardName: card.name || "",
+                    flipSummon: true,
+                });
+            }
             this._pvpSend({ type: "flipSummon", monsterIndex });
         }
         this.checkAndRefresh();
@@ -1237,7 +1260,21 @@ export class GameController {
         const materialRects = typeof document === "undefined" ? [] : (pending?.selected || []).map(material =>
             [...document.querySelectorAll('[data-zone="monster"]')].find(slot => slot.dataset.instanceId === material.instanceId)?.getBoundingClientRect()).filter(Boolean);
         const result = this.engine.confirmTribute();
-        if (result.success) playSound(result.card?.faceUp === false ? "set" : "summon", { pitch: pitchForRarity(result.card?.rarity) });
+        if (result.success) {
+            playSound(result.card?.faceUp === false ? "set" : "summon", { pitch: pitchForRarity(result.card?.rarity) });
+            if (this.state.currentPlayerIndex === 0 && card) {
+                emitControllerAction("summon", {
+                    playerIndex: 0,
+                    cardId: card.id,
+                    cardType: "monster",
+                    cardName: card.name || "",
+                    faceDown: result.card?.faceUp === false,
+                    position: result.card?.position || MONSTER_POSITION.ATTACK,
+                    tributeSummon: true,
+                    tributeCount,
+                });
+            }
+        }
         this.ui.addLog(result.message, result.success ? "play" : "damage");
         if (result.success && card) {
             this._pvpSendWithCard("summon", cardIndex, card, {
@@ -1348,7 +1385,7 @@ export class GameController {
         }
         this._playBattleSounds(result, attacker, target === "player" ? null : target);
         if (result.success) this.notifyTutorial("attack", { attacker, target });
-        if (result.success) {
+        if (isSettledControllerAttack(result)) {
             if (attackerOwnerIdx === 0) {
                 // 攻击真正成立（引擎 attack 返回 success 且未被取消/重放）后才通知主控。
                 emitControllerAction("attack", {

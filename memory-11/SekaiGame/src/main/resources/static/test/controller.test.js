@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 import { GameState, Player } from "../js/model.js";
 import { GameEngine } from "../js/engine.js";
-import { GameController } from "../js/controller.js";
+import { GameController, isSettledControllerAttack } from "../js/controller.js";
 import { PHASE } from "../js/constants.js";
 
 function monster(id, level = 3) {
@@ -44,6 +44,14 @@ function createController() {
     const controller = new GameController(state, new GameEngine(state), ui);
     return { state, ui, controller };
 }
+
+test("主控攻击动画只在攻击真正成立后触发", () => {
+    assert.equal(isSettledControllerAttack({ success: true }), true);
+    assert.equal(isSettledControllerAttack({ success: false }), false);
+    assert.equal(isSettledControllerAttack({ success: true, replay: true }), false);
+    assert.equal(isSettledControllerAttack({ success: true, redirect: true }), false);
+    assert.equal(isSettledControllerAttack({ success: true, attackCanceled: true }), false);
+});
 
 test("控制器开局显示5张手牌并进入主要阶段1", () => {
     const { state, ui, controller } = createController();

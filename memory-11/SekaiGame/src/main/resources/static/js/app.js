@@ -17,7 +17,7 @@ import {
     setSelectedArt,
     spendDuelPoints,
 } from "./collection.js?v=1.7.0";
-import { ALL_CARDS, getCardArts, getCardById, hydrateCardArt } from "./catalog.js?v=1.8.6-original";
+import { ALL_CARDS, getCardArts, getCardById, hydrateCardArt } from "./catalog.js?v=1.9.0-art-ratings";
 import { NIGHTCORD_PACK, PACK_RATES, openPack, openTenPacks, applyDuplicateProtection } from "./packs.js?v=1.8.1";
 import { buildSuggestedDeck, getCardCopyLimit, validateDeck } from "./deck.js?v=1.8.0";
 import { saveData } from "./storage.js?v=1.7.4";
@@ -30,6 +30,7 @@ import { playSound, setSoundEnabled } from "./audio.js?v=1.0.0";
 import { analyzeOpening } from "./deck-insight.js";
 import { getCardPerformance } from "./card-performance.js?v=14-trap-atlas-webp";
 import { playCardPerformance } from "./card-performance-fx.js?v=17-card-atlas-4x4";
+import { getSiteTheme, setSiteTheme, siteThemeOptionsHtml } from "./site-theme.js?v=1.0.0-four-styles";
 
 const ROUTES = new Set(["home", "shop", "collection", "decks", "rules", "settings"]);// 注意：不要把这个别名叫做 NIGHTCORD_ONLY —— catalog.js 导出的同名常量只包含 80 张
 // nightcord 卡，同名不同义极易混淆。
@@ -1246,6 +1247,7 @@ export class CardGameApp {
             <section class="screen-heading"><div><span class="eyebrow">SYSTEM</span><h1>设置</h1><p>视觉与操作选项保存在本地浏览器中。</p></div></section>
             <div class="settings-layout"><aside class="settings-portrait"><span>YOUR PLAY, YOUR WAY</span><h2>让每一场决斗<br>更合你的节奏。</h2><p>声音 · 画面 · 操作</p></aside><section class="settings-panel">
                 <label class="setting-row"><div><strong>音效</strong><span>出牌、召唤、战斗与招募时播放音效。</span></div><input type="checkbox" id="setting-sound" ${settings.soundEnabled !== false ? "checked" : ""}></label>
+                <label class="setting-row"><div><strong>网站外观</strong><span>切换大厅与功能页面风格，不改变决斗台布局。</span><span class="site-theme-swatches" aria-hidden="true"><i style="--swatch:var(--site-accent)"></i><i style="--swatch:var(--site-accent-2)"></i><i style="--swatch:var(--site-text-2)"></i></span></div><select id="setting-site-theme" data-site-theme-select>${siteThemeOptionsHtml()}</select></label>
                 <label class="setting-row"><div><strong>减少动态效果</strong><span>降低卡包和战斗中的动画强度。</span></div><input type="checkbox" id="setting-reduce" ${settings.reduceAnimations ? "checked" : ""}></label>
                 <label class="setting-row"><div><strong>动画速度</strong><span>控制决斗演出与AI行动速度，不改变规则结算。</span></div><select id="setting-speed"><option value="0.7">慢速</option><option value="1">正常</option><option value="1.5">快速 1.5×</option><option value="2">极速 2×</option></select></label>
                 <label class="setting-row"><div><strong>演出画质</strong><span>低画质减少装饰粒子和震屏，保留角色招式与目标反馈。</span></div><select id="setting-quality"><option value="auto">自动（手机优先流畅）</option><option value="high">完整演出</option><option value="low">低画质</option></select></label>
@@ -1254,6 +1256,9 @@ export class CardGameApp {
             </section></div>`;
         const speed = this.screenRoot.querySelector("#setting-speed");
         speed.value = String(settings.animationSpeed || 1);
+        const themeSelect = this.screenRoot.querySelector("#setting-site-theme");
+        themeSelect.value = getSiteTheme();
+        themeSelect.addEventListener("change", () => setSiteTheme(themeSelect.value));
         this.screenRoot.querySelector("#setting-quality").value = settings.effectQuality || "auto";
         this.screenRoot.querySelector("#save-settings")?.addEventListener("click", () => {
             settings.soundEnabled = this.screenRoot.querySelector("#setting-sound").checked;

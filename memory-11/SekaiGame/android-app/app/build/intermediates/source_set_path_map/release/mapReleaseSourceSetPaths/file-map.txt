@@ -1,0 +1,8 @@
+com.sekai.game.mobile.app-pngs-0 D:\Sekai_two\memory-11\SekaiGame\android-app\app\build\generated\res\pngs\release
+com.sekai.game.mobile.app-resValues-1 D:\Sekai_two\memory-11\SekaiGame\android-app\app\build\generated\res\resValues\release
+com.sekai.game.mobile.app-updated_navigation_xml-2 D:\Sekai_two\memory-11\SekaiGame\android-app\app\build\generated\updated_navigation_xml\release
+com.sekai.game.mobile.app-packageReleaseResources-3 D:\Sekai_two\memory-11\SekaiGame\android-app\app\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.sekai.game.mobile.app-packageReleaseResources-4 D:\Sekai_two\memory-11\SekaiGame\android-app\app\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.sekai.game.mobile.app-release-5 D:\Sekai_two\memory-11\SekaiGame\android-app\app\build\intermediates\merged_res\release\mergeReleaseResources
+com.sekai.game.mobile.app-main-6 D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\main\res
+com.sekai.game.mobile.app-release-7 D:\Sekai_two\memory-11\SekaiGame\android-app\app\src\release\res

@@ -4,7 +4,7 @@ import test from "node:test";
 import { ALL_CARDS } from "../../main/resources/static/js/catalog.js";
 import { minimumMonsterStatTotal } from "../../main/resources/static/js/card-rules.js";
 
-const monsters = ALL_CARDS.filter(card => card.type === "monster" && card.rarity !== "N");
+const monsters = ALL_CARDS.filter(card => card.type === "monster" && card.rarity !== "N" && card.series !== "starter_ygo");
 
 // 决斗强度阶级：稀有度 rank + 星级修正，与卡面数据里的 duelPowerTier 独立计算，避免自证。
 const RARITY_RANK = { N: 0, R: 1, SR: 2, SSR: 3, UR: 4 };

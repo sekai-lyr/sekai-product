@@ -71,9 +71,9 @@ public class StarterDeckService {
         Deck deck = new Deck();
         deck.setId("starter_" + user.getId());
         deck.setUser(user);
-        deck.setName("游戏王N卡新手卡组");
+        deck.setName("游戏王新手卡组");
         deck.setCoverCardId(starterCards.getFirst().getId());
-        deck.setDescription("系统赠送的40张游戏王N卡新手卡组");
+        deck.setDescription("系统赠送的40张游戏王新手卡组");
         deck.setDifficulty("beginner");
         deck.setStrategy("balanced");
         deck.setIsPreset(true);
