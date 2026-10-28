@@ -1113,9 +1113,18 @@
         grid-template-columns: 1fr;
     }
 
-    /* 手机端导航改由 fragments.html 的折叠菜单 + app.css 手机端适配层接管：
-       这里原先隐藏 nav/user-box 并把侧栏改成 relative（顶栏会随页面滚走、
-       「菜单」按钮展开成空面板），已移除。见本文件末尾的手机端适配层。 */
+    .song-selection-page .sidebar {
+        position: relative;
+        top: auto;
+        height: auto;
+    }
+
+    .song-selection-page .sidebar nav,
+    .song-selection-page .sidebar-bottom,
+    .song-selection-page .user-box {
+        display: none;
+    }
+
     .song-selection-page .sidebar .logo {
         margin: 0;
     }
@@ -2300,277 +2309,45 @@
     text-decoration: none;
 }
 
-/* B 站条目现在也有封面（导入时的 pic 或本机关联的同名封面图），
-   视频标识改为叠在封面左下角的角标，不再占用整块封面区域。 */
-.selection-carousel-page .selection-track-video-art,
-.selection-track-list.circular-selection .selection-track-video-art {
+/* B 站条目没有可依赖的封面图，使用纯 CSS 视频标识，避免出现破图。 */
+.selection-carousel-page .selection-track-video-art {
+    order: 2;
+    display: grid;
+    place-items: center;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    flex: 0 0 auto;
+    align-self: stretch;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 15px;
+    color: rgba(255, 239, 188, 0.92);
+    background:
+        linear-gradient(135deg, rgba(255, 209, 102, 0.2), transparent 42%),
+        linear-gradient(145deg, #25304b, #151624 58%, #2f1b32);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.34);
+}
+
+.selection-carousel-page .selection-track-video-art::before {
+    content: "";
     position: absolute;
-    z-index: 6;
-    top: auto;
-    right: auto;
-    bottom: 30px;
-    left: 30px;
+    inset: 13%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    box-shadow: 0 0 0 18px rgba(255, 255, 255, 0.035), 0 0 0 42px rgba(255, 255, 255, 0.025);
+}
+
+.selection-carousel-page .selection-track-video-art > span {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
-    width: auto;
-    height: auto;
-    aspect-ratio: auto;
-    flex: 0 0 auto;
-    align-self: auto;
-    padding: 5px 10px;
-    overflow: visible;
-    border: 1px solid rgba(255, 255, 255, 0.24);
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 999px;
-    color: rgba(255, 239, 188, 0.95);
-    background: rgba(8, 10, 20, 0.66);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.36);
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 1;
-    white-space: nowrap;
-    pointer-events: none;
-}
-
-.selection-carousel-page .selection-track-video-art::before,
-.selection-track-list.circular-selection .selection-track-video-art::before {
-    content: none;
-}
-
-/* ==========================================================================
-   2026-10-10 手机端适配层（歌曲库 /songs，authoritative mobile layer）
-   --------------------------------------------------------------------------
-   放在文件末尾以确保优先级最高。目标：
-   1) 顶栏 = 折叠导航（导航内容不能再被隐藏）；
-   2) 唱片/卡片舞台高度跟随真实可视高度，翻页控件一定在首屏内；
-   3) 胶片条允许纵向拖动，页面不再「卡住」；
-   4) 触控目标 ≥44px、可读字号 ≥12px。
-   桌面（≥981px）行为不变。
-   ========================================================================== */
-@media (max-width: 980px) {
-    .song-selection-page .song-selection-shell {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    /* 顶栏保持 sticky 且高于舞台/工具条 */
-    .song-selection-page .sidebar {
-        position: sticky;
-        top: 0;
-        z-index: 60;
-        height: auto;
-    }
-
-    .song-selection-content {
-        min-height: 0;
-        padding: 0 0 24px;
-    }
-
-    /* 舞台高度 = 可视高度 - 顶栏，翻页控件随之进入首屏 */
-    .selection-carousel-page .selection-stage,
-    .selection-carousel-page .selection-rail {
-        height: 780px;
-        height: min(calc(100svh - 66px), 780px);
-        min-height: 440px;
-    }
-
-    /* 胶片条与标题都从工具条下方开始，避免顶栏换行后压住「歌曲选择」 */
-    .selection-carousel-page .selection-track-list {
-        inset: 60px 0 0;
-        padding: 26px calc(50% - min(38vw, 165px)) 132px;
-        touch-action: pan-x pan-y;
-        overscroll-behavior: auto;
-    }
-
-    /* 卡片高度跟随视口，短屏不再被 overflow 裁掉 */
-    .selection-carousel-page .selection-track {
-        flex-basis: min(78vw, 330px);
-        width: min(78vw, 330px);
-        min-height: 0;
-    }
-
-    .selection-carousel-page .selection-track-select {
-        min-height: 0;
-    }
-
-    /* 封面保持正方形：用宽度上限（而不是高度上限）来适配短屏，避免被压成长方形 */
-    .selection-carousel-page .selection-track-select img {
-        width: min(100%, 30svh);
-        height: auto;
-        max-height: none;
-        aspect-ratio: 1 / 1;
-        object-fit: cover;
-        margin: 0 auto;
-    }
-
-    /* 翻页控件上移一个安全距离，并抬高触控尺寸 */
-    .selection-carousel-page .selection-carousel-pagination {
-        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-    }
-
-    .selection-carousel-page .selection-rail-head {
-        top: 150px;
-    }
-
-    .selection-carousel-page .selection-feature {
-        display: none;
-    }
-
-    /* 触控目标 */
-    .selection-carousel-page .selection-track-action button,
-    .selection-carousel-page .selection-search button {
-        width: 44px;
-        height: 44px;
-    }
-
-    .selection-carousel-page .selection-toolbar-play {
-        min-height: 44px;
-        padding: 10px 16px;
-    }
-
-    .selection-search input {
-        font-size: 16px;
-        min-height: 44px;
-    }
-
-    /* 可读字号下限 */
-    .selection-carousel-page .selection-kicker,
-    .selection-carousel-page .selection-feature-label,
-    .selection-carousel-page .selection-track-index,
-    .selection-carousel-page .selection-track-copy small,
-    .selection-carousel-page .selection-page-note,
-    .selection-carousel-page .selection-rail-head h2 {
-        font-size: 12px;
-    }
-}
-
-@media (max-width: 620px) {
-    .selection-carousel-page .selection-track-list {
-        inset: 148px 0 0;
-        padding: 22px calc(50% - min(38vw, 165px)) 124px;
-    }
-
-    .selection-carousel-page .selection-track-select img {
-        width: min(100%, 28svh);
-    }
-
-    .selection-carousel-page .selection-rail-head {
-        top: 146px;
-        right: 16px;
-        left: 16px;
-    }
-
-    .selection-carousel-page .selection-carousel-pagination {
-        bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-        max-width: calc(100% - 24px);
-    }
-
-    .selection-carousel-page .selection-pager-numbers a {
-        flex: 0 0 38px;
-        width: 38px;
-        height: 38px;
-        font-size: 13px;
-    }
-
-    .selection-carousel-page .selection-track-action button {
-        width: 44px;
-        height: 44px;
-    }
-
-    /* 「当前选择」反馈：手机上 feature 面板被隐藏，用标题补回可见信息 */
-    .song-selection-page .selection-toolbar h1 {
-        display: block;
-        font-size: 20px;
-    }
-}
-
-/* ==========================================================================
-   2026-10-10 手机端适配层（歌曲库页内播放面板 .selection-player-panel）
-   手机屏幕上舞台变矮，面板内容（封面 + 控件）放不下时改为内部滚动，
-   返回按钮与控件抬到 44px 触控高度。
-   ========================================================================== */
-@media (max-width: 980px) {
-    .song-selection-page .selection-player-panel:not([hidden]) {
-        top: 148px;
-        right: 14px;
-        bottom: calc(84px + env(safe-area-inset-bottom, 0px));
-        left: 14px;
-        width: auto;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .song-selection-page .selection-player-back {
-        min-height: 44px;
-        padding: 10px 14px;
-        font-size: 12px;
-    }
-
-    .song-selection-page .selection-player-art {
-        height: min(30svh, 240px);
-        min-height: 140px;
-        margin-top: 12px;
-    }
-
-    .song-selection-page .selection-player-controls button,
-    .song-selection-page .selection-player-controls a {
-        min-height: 44px;
-        font-size: 12px;
-    }
-
-    .song-selection-page .selection-player-status {
-        font-size: 12px;
-    }
-}
-
-/* ==========================================================================
-   2026-10-10 手机端适配层（歌单详情 /playlists/{id}）
-   目标：移除 / 管理 / 上传 这些破坏性操作在手机上有 44px 命中区，
-   「管理」弹层不再被胶片条的 overflow 裁掉，最小字号 ≥12px。
-   ========================================================================== */
-@media (max-width: 980px) {
-    .playlist-detail-page .playlist-track-actions {
-        flex-wrap: wrap;
-        gap: 8px;
-        padding: 0 10px 0 2px;
-    }
-
-    .playlist-detail-page .playlist-track-actions > form > button {
-        min-width: 60px;
-        min-height: 44px;
-        padding: 0 12px;
-        font-size: 12px;
-    }
-
-    .playlist-detail-page .playlist-track-admin summary {
-        display: inline-flex;
-        align-items: center;
-        min-height: 44px;
-        padding: 0 12px;
-        font-size: 12px;
-    }
-
-    /* 弹层改为在卡片内展开，避免被 overflow-y:hidden 的胶片条裁掉 */
-    .playlist-detail-page .playlist-upload-form {
-        position: static;
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    .playlist-detail-page .playlist-upload-form label,
-    .playlist-detail-page .playlist-upload-form input {
-        font-size: 12px;
-    }
-
-    .playlist-detail-page .playlist-upload-form button {
-        min-height: 44px;
-        font-size: 12px;
-    }
-
-    .playlist-detail-page .selection-add-panel summary,
-    .playlist-detail-page .playlist-library-link {
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        font-size: 12px;
-    }
+    background: rgba(8, 10, 20, 0.38);
+    font-size: 12px;
+    font-weight: 900;
 }

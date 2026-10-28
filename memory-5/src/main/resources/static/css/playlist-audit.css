@@ -1,8 +1,0 @@
-.playlist-audit{margin:10px 0;border:1px solid #d9dce6;border-radius:12px;padding:12px;background:rgba(255,255,255,.55)}
-.playlist-audit summary{cursor:pointer;font-weight:700;line-height:1.6}
-.playlist-audit ul{list-style:none;margin:12px 0 0;padding:0;max-height:420px;overflow:auto}
-.playlist-audit li{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid #ddd;padding:9px 0}
-.playlist-audit li strong{min-width:160px;max-width:300px;overflow-wrap:anywhere}
-.playlist-audit li span{flex:1;min-width:250px;line-height:1.5}
-.playlist-audit li a{white-space:nowrap}
-#sharing-playlist{min-width:220px;padding:8px;border-radius:8px}

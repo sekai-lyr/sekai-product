@@ -22,7 +22,6 @@
     let selectionScrollFrame = 0;
     let isDragging = false;
     let dragStartX = 0;
-    let dragStartY = 0;
     let dragStartScrollLeft = 0;
     let suppressClick = false;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -103,9 +102,6 @@
     }
 
     function centerSelection(button, behavior = "smooth") {
-        if (playlistList?.hasAttribute("data-circular-selection")) {
-            return;
-        }
         const selectedTrack = button?.closest(".playlist-index-track");
         if (selectedTrack) {
             selectedTrack.scrollIntoView({
@@ -169,13 +165,6 @@
         swapBackground(cover);
     }
 
-    playlistList?.addEventListener("circular-selection-change", (event) => {
-        const button = event.detail?.button;
-        if (button) {
-            updateSelection(button, { center: false });
-        }
-    });
-
     if (page && playlistButtons.length) {
         if (background) {
             background.addEventListener("load", deriveCoverPalette);
@@ -192,7 +181,7 @@
             });
         });
 
-        if (playlistList && !playlistList.hasAttribute("data-circular-selection")) {
+        if (playlistList) {
             playlistList.addEventListener("scroll", () => {
                 window.cancelAnimationFrame(selectionScrollFrame);
                 selectionScrollFrame = window.requestAnimationFrame(() => {
@@ -218,7 +207,6 @@
                 isDragging = true;
                 suppressClick = false;
                 dragStartX = event.clientX;
-                dragStartY = event.clientY;
                 dragStartScrollLeft = playlistList.scrollLeft;
                 playlistList.classList.add("is-dragging");
             });
@@ -228,18 +216,12 @@
                     return;
                 }
                 const deltaX = event.clientX - dragStartX;
-                const deltaY = event.clientY - dragStartY;
-                // 同 songs-selection.js：触屏轻点会漂移数像素，只有明确的横向拖动
-                // 才吞掉点击，避免「点封面没反应」。
-                if (Math.abs(deltaX) > 14 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+                if (Math.abs(deltaX) > 6) {
                     if (!suppressClick) {
                         playlistList.setPointerCapture?.(event.pointerId);
                     }
                     suppressClick = true;
                     event.preventDefault();
-                }
-                if (!suppressClick) {
-                    return;
                 }
                 playlistList.scrollLeft = dragStartScrollLeft - deltaX;
             });

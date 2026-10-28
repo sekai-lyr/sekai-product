@@ -1,9 +1,6 @@
 package com.sekai.song.model;
 
 public class NeteaseImportResult {
-    private java.util.List<String> failedInputs = new java.util.ArrayList<>();
-    public java.util.List<String> getFailedInputs() { return failedInputs; }
-    public void setFailedInputs(java.util.List<String> value) { failedInputs = value; }
     private boolean success;
     private String message;
     private Long playlistId;

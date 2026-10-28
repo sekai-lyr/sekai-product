@@ -40,7 +40,6 @@ public class BilibiliStreamControl {
     private static final String PLAY_URL_API = "https://api.bilibili.com/x/player/playurl?";
     private static final Duration PLAY_URL_TTL = Duration.ofMinutes(20);
     private static final int DEFAULT_QUALITY = 80;
-    private static final int MAX_CACHED_PLAY_URLS = 512;
     private static final int STREAM_BUFFER_SIZE = 256 * 1024;
     private static final class HttpClientHolder {
         private static final HttpClient INSTANCE = HttpClient.newBuilder()
@@ -181,7 +180,7 @@ public class BilibiliStreamControl {
             }
             String url = selectFastestUrl(collectPlayUrls(durl), song);
             if (url != null && !url.isBlank()) {
-                cachePlayUrl(cacheKey, url);
+                playUrlCache.put(cacheKey, new CachedPlayUrl(url, Instant.now().plus(PLAY_URL_TTL)));
             }
             return url;
         } catch (IOException | InterruptedException e) {
@@ -190,17 +189,6 @@ public class BilibiliStreamControl {
             }
             return null;
         }
-    }
-
-    private void cachePlayUrl(String cacheKey, String url) {
-        Instant now = Instant.now();
-        if (playUrlCache.size() >= MAX_CACHED_PLAY_URLS) {
-            playUrlCache.entrySet().removeIf(entry -> entry.getValue().expiresAt().isBefore(now));
-            if (playUrlCache.size() >= MAX_CACHED_PLAY_URLS) {
-                playUrlCache.clear();
-            }
-        }
-        playUrlCache.put(cacheKey, new CachedPlayUrl(url, now.plus(PLAY_URL_TTL)));
     }
 
     private List<String> collectPlayUrls(JsonNode durl) {

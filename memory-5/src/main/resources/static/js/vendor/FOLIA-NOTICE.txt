@@ -1,7 +1,0 @@
-Folia Sonnet visualizer by chthollyphile and contributors
-https://github.com/chthollyphile/folia-major
-Source snapshot: package version 0.7.16
-Licensed under AGPL-3.0; see FOLIA-LICENSE.txt.
-The unmodified Sonnet implementation is bundled with a Sekai audio/lyrics adapter.
-Corresponding integration source: /js/vendor/folia-sekai-source.zip
-Dependency license notices: folia-sonnet.js.LEGAL.txt

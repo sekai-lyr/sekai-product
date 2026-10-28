@@ -43,4 +43,4 @@ The main content is capped at 1280px with 20px gutters. The hero, detail rail, f
 
 ## Review status
 
-The page templates, shared CSS, browser scripts, and asset provenance have been checked. Maven packaging passes and all inline and external JavaScript files parse successfully. A live Spring Boot smoke check was attempted, but the local JVM failed to establish its loopback selector before the app could listen on port 8082, so browser screenshots could not be captured in this environment.
+The page templates, shared CSS, browser scripts, and asset provenance have been checked. Maven compilation with the repackage step skipped and all inline and external JavaScript files parse successfully. A live Spring Boot instance was run on port 18082 with an explicit loopback socket directory, and the login showcase was checked at desktop and mobile widths. The existing port 8082 process was left untouched because it held the packaged JAR open.

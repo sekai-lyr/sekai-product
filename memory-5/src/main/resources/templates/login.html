@@ -2,13 +2,10 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai Song - 登录</title>
-    <link rel="stylesheet" th:href="@{/css/auth.css(v=20261010m)}" href="/css/auth.css?v=20261010m">
-    <link rel="stylesheet" th:href="@{/css/showcase-fold.css(v=20261010m)}" href="/css/showcase-fold.css?v=20261010m">
-    <script src="/js/site-theme.js?v=20261028"></script>
-    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
-    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+    <link rel="stylesheet" th:href="@{/css/auth.css(v=20260915g)}" href="/css/auth.css?v=20260915g">
+    <link rel="stylesheet" th:href="@{/css/showcase-fold.css(v=20260915g)}" href="/css/showcase-fold.css?v=20260915g">
 </head>
 <body>
 <main class="auth-page">
@@ -18,8 +15,8 @@
     <section class="form-area">
         <div class="login-card">
             <div class="card-header">
-                <span aria-hidden="true">♫</span>
-                <h1>欢迎回来</h1>
+                <span>?</span>
+                <h2>欢迎回来</h2>
                 <p>登录你的音乐宇宙</p>
             </div>
             <div class="server-message success" th:if="${message}" th:text="${message}"></div>
@@ -44,8 +41,7 @@
         </div>
     </section>
 </main>
-<script th:src="@{/js/showcase-fold.js(v=20261010m)}" src="/js/showcase-fold.js?v=20261010m"></script>
-<script th:src="@{/js/login.js(v=20261010m)}" src="/js/login.js?v=20261010m"></script>
-<footer style="position:relative;z-index:2;text-align:center;padding:16px;font-size:12px;color:#888;"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" style="color:inherit;">浙ICP备2026087772号-1</a></footer>
+<script th:src="@{/js/showcase-fold.js(v=20260915f)}" src="/js/showcase-fold.js?v=20260915f"></script>
+<script th:src="@{/js/login.js(v=20260914c)}" src="/js/login.js?v=20260914c"></script>
 </body>
 </html>

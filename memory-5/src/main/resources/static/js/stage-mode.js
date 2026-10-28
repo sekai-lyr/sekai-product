@@ -9,7 +9,7 @@
     const menu = root.querySelector("[data-stage-view-menu]");
     const label = root.querySelector("[data-stage-view-label]");
     const requestedMode = new URLSearchParams(window.location.search).get("mode");
-    const modes = window.SekaiStages.map(item => item.id);
+    const modes = ["disc", "lyrics", "folia-classic", "folia"];
     const currentMode = modes.includes(requestedMode) ? requestedMode : "disc";
 
     function setOpen(open) {
@@ -22,24 +22,23 @@
     }
 
     if (label) {
-        label.textContent = window.SekaiStages.find(item => item.id === currentMode).name;
+        label.textContent = currentMode === "folia"
+            ? "Folia 最新"
+            : (currentMode === "folia-classic"
+                ? "Folia 经典"
+                : (currentMode === "lyrics" ? "字阵舞台" : "唱片舞台"));
     }
     toggle?.addEventListener("click", (event) => {
         event.stopPropagation();
         setOpen(menu?.hidden !== false);
     });
     root.querySelectorAll("[data-stage-view-option]").forEach((option) => {
-        option.classList.toggle('active', option.dataset.stageViewOption === currentMode);
         option.addEventListener("click", (event) => {
             event.preventDefault();
             const url = new URL(window.location.href);
             const mode = modes.includes(option.dataset.stageViewOption)
                 ? option.dataset.stageViewOption
                 : "disc";
-            if (window.__sekaiBrowserLocal && window.parent.__sekaiLocalPlayer) {
-                window.parent.__sekaiLocalPlayer.changeMode(mode);
-                return;
-            }
             if (mode === "disc") {
                 url.searchParams.delete("mode");
             } else {

@@ -1,1 +1,0 @@
-var i=(t,e,o,n)=>`clamp(${(t*n).toFixed(3)}rem, ${(e*n).toFixed(3)}vw, ${(o*n).toFixed(3)}rem)`,r=(t=1)=>{let e=Number.isFinite(t)&&t>0?t:1;return{translationFontSize:i(1.125,2.6,1.25,e),upcomingFontSize:i(.875,2,1,e)}};export{r as a};

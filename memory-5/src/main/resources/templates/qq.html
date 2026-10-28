@@ -2,23 +2,20 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai Song - QQ 音乐导入</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=20261010m)}" href="/css/app.css?v=20261010m">
-    <script src="/js/site-theme.js?v=20261028"></script>
-    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
-    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20260830b)}" href="/css/app.css?v=20260830b">
 </head>
 <body>
 <div class="app-shell">
     <div th:replace="~{fragments :: sidebar('qq')}"></div>
     <main class="content">
-        <div class="section-title"><h1>QQ 音乐歌曲信息导入</h1><span>粘贴歌单链接，自动分页读取歌曲</span></div>
+        <div class="section-title"><h1>QQ 音乐导入</h1><span>批量 songmid / songid</span></div>
 
         <section class="editor-panel">
             <div class="server-message success" th:if="${message}" th:text="${message}"></div>
             <div class="server-message error" th:if="${error}" th:text="${error}"></div>
-            <form data-import-source="qq" class="grid-form netease-song-import" th:action="@{/qq/import}" method="post">
+            <form class="grid-form netease-song-import" th:action="@{/qq/import}" method="post">
                 <label>
                     目标歌单
                     <select name="playlistId">
@@ -30,20 +27,35 @@
                 </label>
                 <textarea name="songIds"
                           th:text="${songIds}"
-                          placeholder="粘贴 QQ 音乐公开歌单链接或分享短链"></textarea>
-                <button type="submit">读取歌单并导入歌曲</button>
+                          placeholder="每行一个 QQ 音乐 songmid 或 songid；也可以粘贴 y.qq.com/n/ryqq/songDetail/xxx 链接，或网络检查里复制出的 songmid/songid 字段"></textarea>
+                <button type="submit">导入 QQ 歌曲</button>
             </form>
             <div class="import-help">
-                <strong>只导入歌曲信息与歌词，不提供在线音频</strong>
-                <span>直接粘贴公开歌单链接或分享短链即可；网站会自动分页读取歌曲。</span>
+                <strong>按 QQ 单曲导入</strong>
+                <span>支持 songmid、songid、QQ 单曲链接，以及网络检查里复制出来的 songmid / songid 字段。</span>
                 <span>导入后会写入你选择的本地歌单；如果没有选择，会自动放进“QQ 音乐歌曲导入”。</span>
 <span class="compliance-note">使用时请只导入你拥有合法使用权的内容；本系统不提供曲库下载或公开分发服务。</span>
             </div>
         </section>
 
+        <section class="editor-panel">
+            <div class="section-title"><h2>单曲识别</h2><span>可选</span></div>
+            <form class="search-bar" action="/qq" method="get">
+                <input name="link" th:value="${link}" placeholder="粘贴一个 QQ 音乐单曲链接用于识别">
+                <button type="submit">识别</button>
+            </form>
+            <p class="empty" th:if="${qqLink.type == 'unknown' || qqLink.type == 'empty'}"
+               th:text="${qqLink.message}">
+                支持 y.qq.com/n/ryqq/songDetail/xxx 这样的单曲链接。
+            </p>
+            <a class="open-cloud"
+               th:if="${qqLink.song && !#strings.isEmpty(qqLink.id)}"
+               th:href="@{'https://y.qq.com/n/ryqq/songDetail/' + ${qqLink.id}}"
+               target="_blank"
+               rel="noopener">在 QQ 音乐打开</a>
+        </section>
     </main>
 </div>
-<script src="/js/import-tasks.js?v=20261028" defer></script>
 </body>
 </html>
 

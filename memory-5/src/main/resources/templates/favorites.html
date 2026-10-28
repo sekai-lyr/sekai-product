@@ -2,12 +2,9 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai Song - 收藏</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=20261010m)}" href="/css/app.css?v=20261010m">
-    <script src="/js/site-theme.js?v=20261028"></script>
-    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
-    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20260830b)}" href="/css/app.css?v=20260830b">
 </head>
 <body>
 <div class="app-shell">
@@ -17,11 +14,10 @@
         <section class="card-grid">
             <article class="song-card" th:each="song : ${songs}">
                 <a th:href="@{/player/{id}(id=${song.id})}">
-                    <img th:attr="data-song-cover-id=${song.id}" th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
+                    <img th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
                     <strong th:text="${song.title}">Song</strong>
                     <span th:text="${song.artist + ' · ' + song.animeTitle}">Artist</span>
                 </a>
-                <a th:href="@{/songs/{id}/edit(id=${song.id})}">编辑封面</a>
             </article>
         </section>
         <p class="empty" th:if="${#lists.isEmpty(songs)}">还没有收藏歌曲。</p>

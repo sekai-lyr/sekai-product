@@ -2,12 +2,9 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai Song - 主页</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=20261010m)}" href="/css/app.css?v=20261010m">
-    <script src="/js/site-theme.js?v=20261028"></script>
-    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
-    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20260830b)}" href="/css/app.css?v=20260830b">
 </head>
 <body>
 <div class="app-shell">
@@ -16,20 +13,23 @@
         <section class="hero-panel">
             <div>
                 <p class="eyebrow">Tonight Queue</p>
-                <h1>欢迎回来，<span th:text="${loginUser.nickName}">Sekai</span></h1>
+                <h1>晚上好，<span th:text="${loginUser.nickName}">Sekai</span></h1>
                 <p>从收藏歌单里挑一首，给今天配一个动漫片尾曲。</p>
             </div>
-            <a class="hero-action" th:if="${!#lists.isEmpty(recentSongs)}" th:href="@{/player/{id}(id=${recentSongs[0].id},autoplay=1)}">继续听 · <span th:text="${recentSongs[0].title}"></span></a>
-            <a class="hero-action" th:if="${#lists.isEmpty(recentSongs)}" href="/local-player">添加第一首音乐</a>
+            <a class="hero-action" href="/songs">添加歌曲</a>
         </section>
 
-
+        <section class="stats-grid">
+            <article><span th:text="${stats.songCount}">0</span><small>歌曲</small></article>
+            <article><span th:text="${stats.playlistCount}">0</span><small>歌单</small></article>
+            <article><span th:text="${stats.favoriteCount}">0</span><small>收藏</small></article>
+            <article><span th:text="${stats.topAnime}">暂无</span><small>常听作品</small></article>
+        </section>
 
         <section class="home-tools-grid">
             <article class="home-tool-panel">
                 <div class="section-title"><h2>实用工具</h2><span>直接可用</span></div>
                 <div class="home-action-list">
-                    <a href="/library-tools"><strong>智能歌单与整理</strong><span>最近常听、补全歌词、去重和备份</span></a>
                     <a href="/search"><strong>搜索歌库</strong><span>按歌曲、歌手、动漫和歌单快速查找</span></a>
                 </div>
             </article>
@@ -37,14 +37,14 @@
 
         <section class="two-column">
             <div>
-                <div class="section-title"><h2>最近听过</h2><a href="/songs">全部</a></div>
+                <div class="section-title"><h2>最近歌曲</h2><a href="/songs">全部</a></div>
                 <div class="song-list">
                     <a class="song-row" th:each="song : ${recentSongs}" th:href="@{/player/{id}(id=${song.id})}">
                         <img th:src="${#strings.isEmpty(song.coverUrl) ? '/images/login-music-room.png' : song.coverUrl}" alt="">
                         <div><strong th:text="${song.title}">Song</strong><span th:text="${song.artist + ' · ' + song.animeTitle}">Artist</span></div>
                         <em th:text="${song.mood}">治愈</em>
                     </a>
-                    <p class="empty" th:if="${#lists.isEmpty(recentSongs)}">还没有播放记录。去歌曲库挑选第一首喜欢的音乐吧。</p>
+                    <p class="empty" th:if="${#lists.isEmpty(recentSongs)}">还没有歌曲，去歌曲库添加第一首吧。</p>
                 </div>
             </div>
             <div>
@@ -60,14 +60,7 @@
                 </div>
             </div>
         </section>
-        <section class="stats-grid">
-            <article><span th:text="${stats.songCount}">0</span><small>歌曲</small></article>
-            <article><span th:text="${stats.playlistCount}">0</span><small>歌单</small></article>
-            <article><span th:text="${stats.favoriteCount}">0</span><small>收藏</small></article>
-            <article><span th:text="${stats.topAnime}">暂无</span><small>常听作品</small></article>
-        </section>
     </main>
 </div>
-<footer style="position:relative;z-index:2;text-align:center;padding:16px;font-size:12px;color:#888;"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" style="color:inherit;">浙ICP备2026087772号-1</a></footer>
 </body>
 </html>

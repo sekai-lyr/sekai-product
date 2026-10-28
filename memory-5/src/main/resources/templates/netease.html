@@ -2,23 +2,20 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sekai Song - 网易云歌曲导入</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v=20261010m)}" href="/css/app.css?v=20261010m">
-    <script src="/js/site-theme.js?v=20261028"></script>
-    <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
-    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=20260830b)}" href="/css/app.css?v=20260830b">
 </head>
 <body>
 <div class="app-shell">
     <div th:replace="~{fragments :: sidebar('netease')}"></div>
     <main class="content">
-        <div class="section-title"><h1>网易云歌曲信息导入</h1><span>粘贴歌单链接，自动读取歌单歌曲</span></div>
+        <div class="section-title"><h1>网易云歌曲导入</h1><span>批量歌曲 ID</span></div>
 
         <section class="editor-panel">
             <div class="server-message success" th:if="${message}" th:text="${message}"></div>
             <div class="server-message error" th:if="${error}" th:text="${error}"></div>
-            <form data-import-source="netease" class="grid-form netease-song-import" th:action="@{/netease/import}" method="post">
+            <form class="grid-form netease-song-import" th:action="@{/netease/import}" method="post">
                 <label>
                     目标歌单
                     <select name="playlistId">
@@ -30,20 +27,34 @@
                 </label>
                 <textarea name="songIds"
                           th:text="${songIds}"
-                          placeholder="粘贴网易云公开歌单链接，例如 https://music.163.com/playlist?id=..."></textarea>
-                <button type="submit">读取歌单并导入歌曲</button>
+                          placeholder="每行一个网易云歌曲 ID，也可以粘贴 song?id=xxx 链接或网络检查里复制出的 id 字段"></textarea>
+                <button type="submit">导入歌曲</button>
             </form>
             <div class="import-help">
-                <strong>只导入歌曲信息与歌词，不提供在线音频</strong>
-                <span>直接粘贴公开歌单链接即可。即使网页只显示前 10 首，网站也会分批查询其余歌曲资料。</span>
-                <span>如果歌单未公开或平台限制访问，页面会提示读取失败或未读取数量。</span>
+                <strong>现在按歌曲 ID 导入</strong>
+                <span>歌单链接接口经常只能返回前几首，所以这里不再导入网易云歌单链接。</span>
+                <span>从浏览器网络检查里复制歌曲 ID 后直接粘贴进来，系统会去读取单曲资料并加入你选择的歌单。</span>
 <span class="compliance-note">使用时请只导入你拥有合法使用权的内容；本系统不提供曲库下载或公开分发服务。</span>
             </div>
         </section>
 
+        <section class="editor-panel">
+            <div class="section-title"><h2>单曲预览</h2><span>可选</span></div>
+            <form class="search-bar" action="/netease" method="get">
+                <input name="link" th:value="${link}" placeholder="粘贴一个网易云单曲链接用于预览">
+                <button type="submit">预览</button>
+            </form>
+            <p class="empty" th:if="${neteaseLink.type == 'unknown' || neteaseLink.type == 'empty'}">
+                支持 music.163.com/song?id=xxx 这样的单曲链接。
+            </p>
+            <iframe class="netease-player"
+                    th:if="${neteaseLink.song && !#strings.isEmpty(neteaseLink.id)}"
+                    th:src="@{'https://music.163.com/outchain/player?type=2&id=' + ${neteaseLink.id} + '&auto=0&height=66'}"
+                    frameborder="0"
+                    allow="autoplay; encrypted-media"></iframe>
+        </section>
     </main>
 </div>
-<script src="/js/import-tasks.js?v=20261028" defer></script>
 </body>
 </html>
 

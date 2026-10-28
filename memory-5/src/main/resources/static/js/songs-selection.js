@@ -34,7 +34,6 @@
     let selectionScrollFrame = 0;
     let isDragging = false;
     let dragStartX = 0;
-    let dragStartY = 0;
     let dragStartScrollLeft = 0;
     let suppressClick = false;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -116,7 +115,7 @@
     }
 
     function centerSelection(button, behavior = "smooth") {
-        if (!page.classList.contains("selection-carousel-page") || trackList.hasAttribute("data-circular-selection")) {
+        if (!page.classList.contains("selection-carousel-page")) {
             return;
         }
         const track = button.closest(".selection-track");
@@ -149,7 +148,7 @@
     }
 
     function updateAudioSource(button) {
-        if (!audio || page.classList.contains("selection-carousel-page")) {
+        if (!audio) {
             return;
         }
         const source = value(button, "localAudio");
@@ -248,13 +247,6 @@
         });
     }
 
-    trackList.addEventListener("circular-selection-change", (event) => {
-        const button = event.detail?.button;
-        if (button) {
-            updateSelection(button, { center: false });
-        }
-    });
-
     function syncPlayState() {
         const playing = Boolean(audio && !audio.paused && !audio.ended);
         player.classList.toggle("is-playing", playing);
@@ -317,7 +309,7 @@
         });
     });
 
-    if (page.classList.contains("selection-carousel-page") && !trackList.hasAttribute("data-circular-selection")) {
+    if (page.classList.contains("selection-carousel-page")) {
         trackList.addEventListener("wheel", (event) => {
             if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
                 return;
@@ -335,7 +327,6 @@
             isDragging = true;
             suppressClick = false;
             dragStartX = event.clientX;
-            dragStartY = event.clientY;
             dragStartScrollLeft = trackList.scrollLeft;
             trackList.classList.add("is-dragging");
         });
@@ -345,18 +336,12 @@
                 return;
             }
             const deltaX = event.clientX - dragStartX;
-            const deltaY = event.clientY - dragStartY;
-            // 触屏上手指轻点也会漂移几像素：只有明确的横向拖动（>14px 且明显大于纵向）
-            // 才进入拖动、才吞掉点击，否则用户点卡片会「没反应」。
-            if (Math.abs(deltaX) > 14 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+            if (Math.abs(deltaX) > 6) {
                 if (!suppressClick) {
                     trackList.setPointerCapture?.(event.pointerId);
                 }
                 suppressClick = true;
                 event.preventDefault();
-            }
-            if (!suppressClick) {
-                return;
             }
             trackList.scrollLeft = dragStartScrollLeft - deltaX;
         });
