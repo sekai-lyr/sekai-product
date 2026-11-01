@@ -68,19 +68,19 @@
 | Memory | 项目 | 类型 | 亮点技术 |
 |--------|------|------|----------|
 | [memory-1](memory-1/) | Sekai Data Object ✅ | 动漫数据管理 | 作品、角色与台词数据管理，完整分层架构 |
-| [memory-2](memory-2/) | eBusiness 电商练习 ✅ | 电商 Web | Spring Boot + MyBatis 分层架构（[独立仓库](https://github.com/sekai-lyr/memory-2)） |
-| [memory-3](memory-3/) | Sekai Memory Book ✅ | 二次元回忆录 | 番剧/角色/台词记录，带盐哈希密码（[独立仓库](https://github.com/sekai-lyr/memory-3)） |
-| [memory-4](memory-4/) | Sekai Fortune 抽签 ✅ | 运势抽签 MVP | 会员闭环、后台审批、环境变量化配置（[独立仓库](https://github.com/sekai-lyr/memory-4)） |
-| [memory-5](memory-5/) | Sekai Song Player ✅ | 音乐播放器 | LRC 歌词同步、网易云分享链接、授权体系（[独立仓库](https://github.com/sekai-lyr/memory-5)） |
-| [memory-6](memory-6/) | Sekai 2048 ✅ | 休闲游戏 | VIP 订阅、云存档、AI 教练、广告位（[独立仓库](https://github.com/sekai-lyr/memory-6)） |
-| [memory-7](memory-7/) | Sekai Picture Wallpaper ✅ | 壁纸图库 | 上传、筛选、批量操作、运营看板（[独立仓库](https://github.com/sekai-lyr/memory-7)） |
-| [memory-8](memory-8/) | English Word Learning ✅ | 单词学习 | Vue 3 + Spring Data JPA + 错题本（[独立仓库](https://github.com/sekai-lyr/memory-8)） |
-| [memory-9](memory-9/) | SekaiForm AI 对话 ✅ | AI 表单 | 意图识别、工具调用、Live2D 角色（[独立仓库](https://github.com/sekai-lyr/memory-9)） |
-| [memory-10](memory-10/) | SekaiAnimeVideo ✅ | 动漫导航站 | 站点聚合与跳转服务（[独立仓库](https://github.com/sekai-lyr/memory-10)） |
-| [memory-11](memory-11/) | Sekai Duel 夜曲决斗 ✅ | 卡牌游戏 | WebSocket PvP + Godot 4 客户端 + 游戏王规则（[独立仓库](https://github.com/sekai-lyr/memory-11)） |
-| [memory-12](memory-12/) | SekaiLearning ✅ | 学习平台 | 游戏化学习、积分、社群（[独立仓库](https://github.com/sekai-lyr/memory-12)） |
-| [memory-13](memory-13/) | 谎言十年 ✅ | 视觉小说 AVG | Ren'Py 引擎、多语言、APK 发布（[独立仓库](https://github.com/sekai-lyr/memory-13)） |
-| [memory-14](memory-14/) | anime-ai 动漫智能助手 ✅ | AI 应用 | 截图识番 + 角色识别 + Spring AI + RAG + TTS/ASR（[独立仓库](https://github.com/sekai-lyr/memory-14)） |
+| [memory-2](memory-2/) | eBusiness 电商练习 ✅ | 电商 Web | Spring Boot + MyBatis 分层架构 |
+| [memory-3](memory-3/) | Sekai Memory Book ✅ | 二次元回忆录 | 番剧/角色/台词记录，带盐哈希密码 |
+| [memory-4](memory-4/) | Sekai Fortune 抽签 ✅ | 运势抽签 MVP | 会员闭环、后台审批、环境变量化配置 |
+| [memory-5](memory-5/) | Sekai Song Player ✅ | 音乐播放器 | LRC 歌词同步、网易云分享链接、授权体系 |
+| [memory-6](memory-6/) | Sekai 2048 ✅ | 休闲游戏 | VIP 订阅、云存档、AI 教练、广告位 |
+| [memory-7](memory-7/) | Sekai Picture Wallpaper ✅ | 壁纸图库 | 上传、筛选、批量操作、运营看板 |
+| [memory-8](memory-8/) | English Word Learning ✅ | 单词学习 | Vue 3 + Spring Data JPA + 错题本 |
+| [memory-9](memory-9/) | SekaiForm AI 对话 ✅ | AI 表单 | 意图识别、工具调用、Live2D 角色 |
+| [memory-10](memory-10/) | SekaiAnimeVideo ✅ | 动漫导航站 | 站点聚合与跳转服务 |
+| [memory-11](memory-11/) | Sekai Duel 夜曲决斗 ✅ | 卡牌游戏 | WebSocket PvP + Godot 4 客户端 + 游戏王规则 |
+| [memory-12](memory-12/) | SekaiLearning ✅ | 学习平台 | 游戏化学习、积分、社群 |
+| [memory-13](memory-13/) | 谎言十年 ✅ | 视觉小说 AVG | Ren'Py 引擎、多语言、APK 发布 |
+| [memory-14](memory-14/) | anime-ai 动漫智能助手 ✅ | AI 应用 | 截图识番 + 角色识别 + Spring AI + RAG + TTS/ASR |
 | [memory-15](memory-15/) | Sekai World Engine + Nexus ✅ | 世界模拟 & 实验场 | 确定性世界引擎（Spring Boot 4 + Vue 3）、记忆回廊入口、3D 开放世界原型群 |
 
 ---
