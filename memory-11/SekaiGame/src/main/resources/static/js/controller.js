@@ -21,7 +21,7 @@ import {
     playTrapActivationV3, playTrapActivationV5, playCounterTrapV3, playSpellCinematic,
     animateCinematicDestroy, animateCinematicReturnToDeck, animateCinematicReturnToHand,
     animateTrapToGraveyard, playNegatedAttackBarrier, playCoinFlip,
-} from "./effects.js?v=1.10.2-card-atlas-4x4";
+} from "./effects.js?v=1.10.3-independent-atlases";
 
 const raf = typeof requestAnimationFrame === "function"
     ? requestAnimationFrame

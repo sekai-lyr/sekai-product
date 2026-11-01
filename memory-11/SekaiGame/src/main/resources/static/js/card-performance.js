@@ -1,6 +1,6 @@
 import { ALL_CARDS } from "./catalog.js";
 import { getAttackProfile } from "./attack-fx-profiles.js";
-import { AUTHORED_CARD_SCENES, getCardVfxProfile } from "./authored-card-scenes.js?v=25-card-atlas-4x4";
+import { AUTHORED_CARD_SCENES, getCardVfxProfile } from "./authored-card-scenes.js?v=26-independent-atlases";
 
 // 原著身份与本项目美术演绎分开登记，不能把关键词猜测标记为原著考据。
 const CHARACTER_DIRECTIONS = [

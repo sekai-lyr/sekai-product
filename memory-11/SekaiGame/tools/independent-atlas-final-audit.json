@@ -1,0 +1,36 @@
+{
+  "cards": 368,
+  "uniquePixelSheets": 368,
+  "runtimeWebpChecked": 368,
+  "newAtlases": 116,
+  "issues": [],
+  "entryAndModuleChecks": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/login",
+      "status": 200
+    },
+    {
+      "path": "/js/authored-card-scenes.js",
+      "status": 200,
+      "matchesDisk": true
+    },
+    {
+      "path": "/js/card-performance-fx.js",
+      "status": 200,
+      "matchesDisk": true
+    },
+    {
+      "path": "/js/independent-card-atlases.js",
+      "status": 200,
+      "matchesDisk": true
+    },
+    {
+      "path": "/images/vfx/independent-atlas-all.jpg",
+      "status": 200
+    }
+  ]
+}

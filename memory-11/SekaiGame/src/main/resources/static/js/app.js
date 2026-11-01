@@ -28,8 +28,8 @@ import { AI_STAGES, buildStageDeck, isStageUnlocked } from "./stages.js?v=1.8.2"
 import { playDuelLaunch, playDimensionRecruitment } from "./card-ignition.js?v=1.0.7";
 import { playSound, setSoundEnabled } from "./audio.js?v=1.0.0";
 import { analyzeOpening } from "./deck-insight.js";
-import { getCardPerformance } from "./card-performance.js?v=14-trap-atlas-webp";
-import { playCardPerformance } from "./card-performance-fx.js?v=17-card-atlas-4x4";
+import { getCardPerformance } from "./card-performance.js?v=15-independent-atlases";
+import { playCardPerformance } from "./card-performance-fx.js?v=18-independent-atlases";
 import { getSiteTheme, setSiteTheme, siteThemeOptionsHtml } from "./site-theme.js?v=1.0.0-four-styles";
 
 const ROUTES = new Set(["home", "shop", "collection", "decks", "rules", "settings"]);// 注意：不要把这个别名叫做 NIGHTCORD_ONLY —— catalog.js 导出的同名常量只包含 80 张

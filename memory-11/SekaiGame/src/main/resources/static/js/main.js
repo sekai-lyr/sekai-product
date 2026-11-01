@@ -4,9 +4,9 @@ import { configureDuelMotion, cancelDuelMotion } from "./duel-motion.js";
  */
 import { Player, GameState, createCardInstance } from "./model.js";
 import { GameEngine } from "./engine.js?v=1.8.1-strategy";
-import { GameUI } from "./ui.js?v=1.9.2-card-atlas-4x4";
-import { GameController } from "./controller.js?v=1.8.2-card-atlas-4x4";
-import { CardGameApp } from "./app.js?v=3.8.3-art-ratings";
+import { GameUI } from "./ui.js?v=1.9.3-independent-atlases";
+import { GameController } from "./controller.js?v=1.8.3-independent-atlases";
+import { CardGameApp } from "./app.js?v=3.8.4-independent-atlases";
 import { ALL_CARDS, getCardById, hydrateCardArt } from "./catalog.js?v=1.9.0-art-ratings";
 import { getAIDeck, getStarterDeck } from "./decks.js?v=1.7.1";
 import { SeededRandom } from "./rng.js";

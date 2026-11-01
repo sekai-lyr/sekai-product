@@ -1,6 +1,6 @@
 import { getDuelMotion, createMotionScope } from "./duel-motion.js";
-import { getCardPerformance } from "./card-performance.js?v=14-trap-atlas-webp";
-import { getAuthoredScene, drawAuthoredScene } from "./authored-card-scenes.js?v=25-card-atlas-4x4";
+import { getCardPerformance } from "./card-performance.js?v=15-independent-atlases";
+import { getAuthoredScene, drawAuthoredScene, getCardAtlasUrl } from "./authored-card-scenes.js?v=26-independent-atlases";
 
 const NS = "http://www.w3.org/2000/svg";
 const SHAPES = {
@@ -28,15 +28,29 @@ const SHAPES = {
 };
 export const PERFORMANCE_SHAPES = Object.keys(SHAPES);
 const active = new Set();
+const atlasLoads = new Map();
+async function prepareAtlas(cardId) {
+    const url = getCardAtlasUrl(cardId);
+    if (!url || typeof Image === "undefined") return;
+    if (!atlasLoads.has(url)) {
+        const image = new Image();
+        image.src = url;
+        const ready = image.decode().catch(() => { atlasLoads.delete(url); });
+        atlasLoads.set(url, ready);
+        if (atlasLoads.size > 16) atlasLoads.delete(atlasLoads.keys().next().value);
+    }
+    await atlasLoads.get(url);
+}
 const center = node => {
     const r = node?.getBoundingClientRect?.() || node;
     return r && Number.isFinite(r.left) && r.width > 0 && r.height > 0 ? { x:r.left+r.width/2, y:r.top+r.height/2 } : null;
 };
 
 // Viewport coordinates throughout: fixed layer lives under body, never under the scaled arena.
-export function playCardPerformance(card, phase, source, target = source, materials = []) {
+export async function playCardPerformance(card, phase, source, target = source, materials = []) {
     const profile = getCardPerformance(card);
     if (!profile || typeof document === "undefined") return Promise.resolve();
+    await prepareAtlas(profile.id);
     const from = center(source), to = center(target);
     if (!from || !to) return Promise.resolve();
     const motion = getDuelMotion();

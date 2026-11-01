@@ -71,6 +71,5 @@ test("all 105 spells have one dedicated visual implementation", async () => {
         spriteSheets.set(profile.sheet,card.id);
         await access(fileURLToPath(new URL(`../images/vfx/${profile.sheet}`,import.meta.url)));
     }
-    assert.equal(spriteSheets.size,99);
-    assert.equal(Object.keys(DEDICATED_PROCEDURAL_SPELLS).length,6);
+    assert.equal(spriteSheets.size+Object.keys(DEDICATED_PROCEDURAL_SPELLS).length,spells.length);
 });

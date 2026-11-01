@@ -20,6 +20,7 @@ const CHECK = process.argv.includes("--check");
 
 // 可以直接整份拷贝的文件：www 与 static 的差异只来自版本号/本批次改动。
 const VERBATIM = [
+    "js/independent-card-atlases.js",
     "js/trap-atlas-profiles.js",
     "js/card-performance.js",
     "js/card-performance-fx.js",
@@ -35,8 +36,8 @@ const VERBATIM = [
 const PATCHED = ["index.html", "js/main.js"];
 
 const MOBILE_URL = {
-    from: "background:url('/images/vfx/${sheet}?v=trap-independent-1')",
-    to: 'background:url(\'images/vfx-mobile/${sheet.replace(".png",".webp")}?v=trap-quality-3\')',
+    from: 'export const CARD_ATLAS_BASE_URL = "/images/vfx-mobile/";',
+    to: 'export const CARD_ATLAS_BASE_URL = "images/vfx-mobile/";',
 };
 
 const problems = [];

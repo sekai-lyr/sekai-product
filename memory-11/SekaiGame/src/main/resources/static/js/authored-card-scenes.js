@@ -2,6 +2,7 @@
 // Sources establish the card/art identity; these timelines are original game adaptations.
 import { CARD_STORYBOARDS } from "./card-storyboards.js?v=18-trap-atlas";
 import { TRAP_ATLAS_MASK, TRAP_ATLAS_PROFILES, TRAP_WARDS } from "./trap-atlas-profiles.js?v=3";
+import { INDEPENDENT_CARD_ATLASES } from "./independent-card-atlases.js?v=1";
 const official = slug => `https://www.yugioh.com/cards/${slug}`;
 const scene = (title, beats, draw) => ({ title, beats, draw });
 const wing = "M0 0 Q-30-65-125-95 L-88-22 -67-46 -43 0 -24-22Z";
@@ -101,14 +102,14 @@ const VFX_SHEET_DEFAULTS = {
 export const VFX_CARD_PROFILES = {};
 // These six original YGO spells use dedicated procedural renderers instead of sprite textures.
 // Keeping the registration explicit makes full spell coverage auditable without duplicating art.
-export const DEDICATED_PROCEDURAL_SPELLS = Object.freeze({
+export const DEDICATED_PROCEDURAL_SPELLS = Object.freeze(Object.fromEntries(Object.entries({
     ygo_n_53129443:"blackHole",
     ygo_n_83764718:"spellCinematic:rebirth",
     ygo_n_66788016:"spellCinematic:fissure",
     ygo_n_55144522:"spellCinematic:greed",
     ygo_n_72302403:"spellCinematic:swords",
     ygo_n_4031928:"spellCinematic:heart",
-});
+}).filter(([id]) => !INDEPENDENT_CARD_ATLASES[id])));
 const registerVfxCards = (theme, ids) => {
     for (const id of ids) {
         if (VFX_CARD_PROFILES[id]) continue;
@@ -232,6 +233,11 @@ for(const [id,theme,sheet,glow,size] of [
     ["source_spell_022","staffSwordCovenant","staff-sword-covenant-sheet-v1.png","#dce9ff",2.95],
 ]) VFX_CARD_PROFILES[id]={id,theme,sheet,glow,ranges:{summon:[0,3],attack:[0,15],destroy:[12,15]},size:{attack:size,other:size},rotate:"static",mask:"radial-gradient(ellipse 49% 49% at 50% 50%,#000 0 60%,transparent 94%)"};
 export function getCardVfxProfile(cardId){ return VFX_CARD_PROFILES[cardId] || null; }
+export const CARD_ATLAS_BASE_URL = "/images/vfx-mobile/";
+export function getCardAtlasUrl(cardId) {
+    const sheet = VFX_CARD_PROFILES[cardId]?.sheet;
+    return sheet ? `${CARD_ATLAS_BASE_URL}${sheet.replace(".png",".webp")}?v=independent-atlases-1` : null;
+}
 
 // 45 张陷阱卡：每张一套独立的 4×4 图集（16 帧），素材、登记与矢量结界三者一一对应。
 // 图集本身已经把中心（卡面位置）挖成真透明，遮罩只在外缘做羽化，因此结界只环绕卡牌。
@@ -243,6 +249,15 @@ for (const [id, theme, sheet, glow, size] of TRAP_ATLAS_PROFILES) {
         rotate:"static",
         mask:TRAP_ATLAS_MASK,
         ward:TRAP_WARDS[id] || null,
+    };
+}
+
+for (const [id, sheet] of Object.entries(INDEPENDENT_CARD_ATLASES)) {
+    VFX_CARD_PROFILES[id] = {
+        id, theme:id, sheet, glow:"#c5eaff",
+        ranges:{summon:[0,5],attack:[0,15],destroy:[10,15],spell:[0,15],trap:[0,15]},
+        size:{attack:2.8,other:2.8},rotate:"static",
+        mask:TRAP_ATLAS_MASK,
     };
 }
 
@@ -968,8 +983,8 @@ export function drawAuthoredScene(spec, layer, animations, from, to, reduced, op
         // 未登记逐帧素材的卡走通用程序化演出；禁止回退到任何其他角色（尤其炭治郎）的素材。
         if(!vfx)return false;
         spritePlayed=true;
-        const node=document.createElement("div"),attack=mode==="attack",cardWidth=Math.max(72,Math.min(132,Math.hypot(b.x-a.x)*.16)),size=Math.min(cardWidth*(attack?vfx.size.attack:vfx.size.other),innerWidth*.64),angle=attack&&vfx.rotate==="travel"?Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI:0,x=attack?b.x:a.x,y=attack?b.y:a.y,sheet=vfx.sheet,glow=vfx.glow;
-        node.style.cssText=`position:absolute;left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:url('/images/vfx-mobile/${sheet.replace(".png",".webp")}?v=card-atlas-4x4-desktop') 0 0/400% 400% no-repeat;transform:translate(-50%,-50%) rotate(${angle}deg);filter:drop-shadow(0 0 ${options.quality==="low"?3:9}px ${glow});opacity:0;mask-image:${vfx.mask};-webkit-mask-image:${vfx.mask}`;
+        const node=document.createElement("div"),attack=mode==="attack",cardWidth=Math.max(72,Math.min(132,Math.hypot(b.x-a.x)*.16)),size=Math.min(cardWidth*(attack?vfx.size.attack:vfx.size.other),innerWidth*.64),angle=attack&&vfx.rotate==="travel"?Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI:0,x=attack?b.x:a.x,y=attack?b.y:a.y,glow=vfx.glow;
+        node.style.cssText=`position:absolute;left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:url('${getCardAtlasUrl(vfx.id)}') 0 0/400% 400% no-repeat;transform:translate(-50%,-50%) rotate(${angle}deg);filter:drop-shadow(0 0 ${options.quality==="low"?3:9}px ${glow});opacity:0;mask-image:${vfx.mask};-webkit-mask-image:${vfx.mask}`;
         layer.insertBefore(node,svg);spriteNode=node;const [first,last]=vfx.ranges[mode]||vfx.ranges.attack,started=performance.now()+delay;
         const render=now=>{if(!node.isConnected)return;const p=Math.max(0,Math.min(1,(now-started)/duration)),frame=Math.min(last,first+Math.floor(p*(last-first+1))),column=frame%4,row=Math.floor(frame/4);node.style.backgroundPosition=`${column*100/3}% ${row*100/3}%`;if(p<1)requestAnimationFrame(render)};requestAnimationFrame(render);
         animate(node,[{opacity:0,transform:`translate(-50%,-50%) rotate(${angle-12}deg) scale(.68)`},{opacity:.92,transform:`translate(-50%,-50%) rotate(${angle}deg) scale(.94)`,offset:.18},{opacity:.86,transform:`translate(-50%,-50%) rotate(${angle+4}deg) scale(1)`,offset:.78},{opacity:0,transform:`translate(-50%,-50%) rotate(${angle+7}deg) scale(.88)`}],delay,duration);return true;
@@ -993,7 +1008,7 @@ export function drawAuthoredScene(spec, layer, animations, from, to, reduced, op
     // 陷阱卡：图集之外再叠一层与图集同几何的矢量结界，
     // 这样即便素材尚未解码完成，卡牌周围也已经有可读的环带、内印与粒子语言。
     const ward=options.profile?.ward;
-    if(ward && !reduced && options.quality!=="low" && (options.phase==="trap" || options.phase==="spell")){
+    if(ward && !hasPrimarySprite && !reduced && options.quality!=="low" && (options.phase==="trap" || options.phase==="spell")){
         wash(ward.wash,0,1500,.30);
         ring(from,ward.color,ward.r[0],0,900);
         ring(from,ward.accent,ward.r[1],120,820,true);
@@ -1005,7 +1020,7 @@ export function drawAuthoredScene(spec, layer, animations, from, to, reduced, op
         burst(from,ward.accent,ward.parts,ward.r[0]*1.05,560,340);
     }
     if(reduced){const node=element("circle",{cx:to.x,cy:to.y,r:24,"stroke-width":2},"#bfe9f2");animate(node,[{opacity:.6},{opacity:0}],0,180);}
-    else if (!(options.quality==="low" && hasPrimarySprite)) {
+    else if (!hasPrimarySprite) {
         const {profile,phase}=options;
         const melee=phase==="attack" && spec.cues?.some(c=>["fist","claw","fang","sword","axe","spear","saw"].includes(c.symbol)) && !spec.cues.some(c=>c.motion==="beam");
         if(profile?.image && melee){

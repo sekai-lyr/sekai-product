@@ -1,0 +1,28 @@
+{
+  "liveModuleMatchesDisk": true,
+  "total": 368,
+  "byType": {
+    "monster": {
+      "total": 218,
+      "mapped": 218,
+      "exclusive": 218,
+      "missing": 0
+    },
+    "spell": {
+      "total": 105,
+      "mapped": 105,
+      "exclusive": 105,
+      "missing": 0
+    },
+    "trap": {
+      "total": 45,
+      "mapped": 45,
+      "exclusive": 45,
+      "missing": 0
+    }
+  },
+  "uniqueSheets": 368,
+  "missing": [],
+  "shared": [],
+  "badHttp": []
+}

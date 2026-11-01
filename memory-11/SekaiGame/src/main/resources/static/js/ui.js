@@ -6,7 +6,7 @@
 import { ELEMENT_ICONS, ELEMENT_NAMES, RACE_NAMES } from "./cards.js";
 import { ALL_CARDS } from "./catalog.js";
 import { PHASE, GAME_CONFIG, MONSTER_POSITION } from "./constants.js";
-import { addFoilShimmer } from "./effects.js?v=1.10.2-card-atlas-4x4";
+import { addFoilShimmer } from "./effects.js?v=1.10.3-independent-atlases";
 import { cardEffectFieldsHtml, cardRuleStatusHtml, cardVisualEffectHtml, cardVisualImageClass, cardVisualMotionStyle, sekaiCardBackHtml } from "./card-view.js?v=1.2.0-bca";
 import { emitControllerAction } from "./controller-2d.js?v=2.2.0-runtime-polish";
 

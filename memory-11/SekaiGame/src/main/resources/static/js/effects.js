@@ -12,9 +12,9 @@ import { playSound } from "./audio.js?v=1.0.0";
 import { sekaiCardBackHtml } from "./card-view.js?v=1.2.0-bca";
 import { getAttackProfile } from "./attack-fx-profiles.js?v=1.0.0";
 import { playCardAttack } from "./attack-fx.js?v=1.0.0";
-import { playCardPerformance } from "./card-performance-fx.js?v=17-card-atlas-4x4";
-import { getCardPerformance } from "./card-performance.js?v=14-trap-atlas-webp";
-import { getAuthoredScene } from "./authored-card-scenes.js?v=25-card-atlas-4x4";
+import { playCardPerformance } from "./card-performance-fx.js?v=18-independent-atlases";
+import { getCardPerformance } from "./card-performance.js?v=15-independent-atlases";
+import { getAuthoredScene } from "./authored-card-scenes.js?v=26-independent-atlases";
 
 const isBrowser = typeof document !== "undefined";
 let attackVisualBusyUntil = 0;

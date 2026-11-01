@@ -1,0 +1,930 @@
+[
+  {
+    "id": "dark_006",
+    "name": "朝比奈真冬",
+    "type": "monster",
+    "description": "【无声终曲·朝比奈真冬】通常召唤成功时，同名此效果每回合1次：支付700LP；对方一只可取对象表侧怪兽效果无效，直到本回合结束，其攻击力下降400。\n【余响·寻找】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-dark-006-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "picture_ex_031",
+    "name": "不死川实弥·风之呼吸",
+    "type": "monster",
+    "description": "【风之呼吸·尘旋风】主要阶段，同名此效果每回合1次：自身本回合获得贯穿守备的战斗伤害，其攻击力上升500。",
+    "sheet": "independent-picture-ex-031-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_033",
+    "name": "富冈义勇·水柱",
+    "type": "monster",
+    "description": "【水之呼吸·水刃·水柱】通常召唤成功时，同名此效果每回合1次：自己一只表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效，其攻击力上升500。",
+    "sheet": "independent-picture-ex-033-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_034",
+    "name": "伊黑小芭内·蛇柱",
+    "type": "monster",
+    "description": "【蛇之呼吸·蜿蜒蛇行·蛇柱】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置毒印；本回合结束时，其控制者受到850伤害，并移除毒印。",
+    "sheet": "independent-picture-ex-034-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_035",
+    "name": "炼狱杏寿郎·炎柱",
+    "type": "monster",
+    "description": "【炎之呼吸·炼狱·炎柱】通常召唤成功时，同名此效果每回合1次：自己一只表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效，其攻击力上升600。",
+    "sheet": "independent-picture-ex-035-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_036",
+    "name": "时透无一郎·月下霞",
+    "type": "monster",
+    "description": "【霞之呼吸·胧·月下霞】通常召唤成功时，同名此效果每回合1次：支付500LP；将对方一只可取对象表侧怪兽变为里侧守备表示，其守备力下降300。",
+    "sheet": "independent-picture-ex-036-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_037",
+    "name": "蝴蝶忍·紫藤毒",
+    "type": "monster",
+    "description": "【紫藤毒刺】自己的主要阶段，同名此效果每回合1次：支付400LP；给对方一只可取对象表侧怪兽放置1层剧毒（上限3层）；剧毒怪兽的控制者每个结束阶段受到250×层数伤害，且其所有回复减半；剧毒不会自然消失。",
+    "sheet": "independent-picture-ex-037-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_038",
+    "name": "甘露寺蜜璃·恋柱",
+    "type": "monster",
+    "description": "【恋之呼吸·猫足恋风·恋柱】通常召唤成功时，同名此效果每回合1次：将自己墓地最后2只4星以下怪兽加入手牌，然后抽1张卡。",
+    "sheet": "independent-picture-ex-038-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_039",
+    "name": "宇髓天元·谱面完成",
+    "type": "monster",
+    "description": "【音之呼吸·谱面斩·谱面完成】主要阶段，同名此效果每回合1次：随机展示对方1张手牌；若对方手牌不足则全部展示。",
+    "sheet": "independent-picture-ex-039-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_040",
+    "name": "不死川实弥·稀血",
+    "type": "monster",
+    "description": "【风之呼吸·黑风烟岚·稀血】主要阶段，同名此效果每回合1次：将自己墓地最后1张卡除外；恢复1400LP。",
+    "sheet": "independent-picture-ex-040-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_041",
+    "name": "悲鸣屿行冥·南无阿弥陀佛",
+    "type": "monster",
+    "description": "【岩之呼吸·巨岩贯穿·南无阿弥陀佛】通常召唤成功时，同名此效果每回合1次：将对方墓地最后2张卡除外，并清除己方场上怪兽的全部异常状态。",
+    "sheet": "independent-picture-ex-041-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_043",
+    "name": "富冈义勇·水面斩",
+    "type": "monster",
+    "description": "【水之呼吸·水刃·水面斩】主要阶段，同名此效果每回合1次：自身本回合获得贯穿守备的战斗伤害，其攻击力上升600。",
+    "sheet": "independent-picture-ex-043-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_045",
+    "name": "甘露寺蜜璃·猫足恋风",
+    "type": "monster",
+    "description": "【恋之呼吸·猫足恋风】通常召唤成功时，同名此效果每回合1次：展示卡组顶3张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-picture-ex-045-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_046",
+    "name": "蝴蝶忍·蜈蚣之舞",
+    "type": "monster",
+    "description": "【虫之呼吸·毒刃·蜈蚣之舞】通常召唤成功时，同名此效果每回合1次：支付500LP；给对方一只可取对象表侧怪兽放置毒印；本回合结束时，其控制者受到450伤害，并移除毒印。",
+    "sheet": "independent-picture-ex-046-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_047",
+    "name": "宇髓天元·双刀爆裂",
+    "type": "monster",
+    "description": "【音之呼吸·谱面斩·双刀爆裂】主要阶段，同名此效果每回合1次：支付800LP；自身本回合可以攻击2次。",
+    "sheet": "independent-picture-ex-047-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_048",
+    "name": "我妻善逸·火雷神",
+    "type": "monster",
+    "description": "【霹雳一闪·火雷神】主要阶段，同名此效果每回合1次：抛硬币：正面则麻痹对方一只可取对象表侧怪兽（直到下个回合结束不能攻击或改变表示形式）；反面则其攻击力下降600直到回合结束。",
+    "sheet": "independent-picture-ex-048-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_049",
+    "name": "时透无一郎·胧",
+    "type": "monster",
+    "description": "【霞之呼吸·胧】通常召唤成功时，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-picture-ex-049-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_050",
+    "name": "炼狱杏寿郎·奥义玖之型",
+    "type": "monster",
+    "description": "【炎之呼吸·炼狱·奥义玖之型】通常召唤成功时，同名此效果每回合1次：自身本回合获得贯穿守备的战斗伤害，其攻击力上升700。",
+    "sheet": "independent-picture-ex-050-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_051",
+    "name": "嘴平伊之助·空间感知",
+    "type": "monster",
+    "description": "【兽之呼吸·空间感知】通常召唤成功时，同名此效果每回合1次：随机展示对方2张手牌；若对方手牌不足则全部展示。",
+    "sheet": "independent-picture-ex-051-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_052",
+    "name": "悲鸣屿行冥·岩躯",
+    "type": "monster",
+    "description": "【岩之呼吸·巨岩贯穿·岩躯】通常召唤成功时，同名此效果每回合1次：自己一只表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效，其攻击力上升700。",
+    "sheet": "independent-picture-ex-052-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_053",
+    "name": "伊黑小芭内·月夜蛇行",
+    "type": "monster",
+    "description": "【蛇之呼吸·蜿蜒蛇行·月夜蛇行】通常召唤成功时，同名此效果每回合1次：支付500LP；将对方一只可取对象表侧怪兽变为里侧守备表示，其守备力下降400。",
+    "sheet": "independent-picture-ex-053-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_054",
+    "name": "炼狱杏寿郎·炎心",
+    "type": "monster",
+    "description": "【炎之呼吸·炼狱·炎心】通常召唤成功时，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升400；移除指示物时失去对应的提升。",
+    "sheet": "independent-picture-ex-054-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_056",
+    "name": "猗窝座·罗针",
+    "type": "monster",
+    "description": "【破坏杀·罗针】主要阶段，同名此效果每回合1次：支付800LP，展开领域「破坏杀·罗针」：直到对方回合结束，自己受到的战斗伤害减半，另一半反弹给攻击者。",
+    "sheet": "independent-picture-ex-056-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_057",
+    "name": "蝴蝶忍·蝶影毒刃",
+    "type": "monster",
+    "description": "【虫之呼吸·毒刃·蝶影毒刃】通常召唤成功时，同名此效果每回合1次：支付500LP；给对方一只可取对象表侧怪兽放置毒印；本回合结束时，其控制者受到600伤害，并移除毒印。",
+    "sheet": "independent-picture-ex-057-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_058",
+    "name": "不死川实弥·黑风烟岚",
+    "type": "monster",
+    "description": "【风之呼吸·黑风烟岚】通常召唤成功时，同名此效果每回合1次：将卡组顶2张卡送入墓地。",
+    "sheet": "independent-picture-ex-058-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_059",
+    "name": "嘴平伊之助·兽牙乱舞",
+    "type": "monster",
+    "description": "【兽之呼吸·乱裂·兽牙乱舞】主要阶段，同名此效果每回合1次：支付450LP；自身本回合可以攻击2次。",
+    "sheet": "independent-picture-ex-059-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_060",
+    "name": "灶门炭治郎·水火轮转",
+    "type": "monster",
+    "description": "【火之神神乐·水火轮转】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置2层灼烧，然后立即引爆其身上全部灼烧层数：每层使其控制者受到700点伤害；若其带有剧毒，同时引爆剧毒：每层给对方全体表侧怪兽的守备力下降300，守备力变为0的破坏。",
+    "sheet": "independent-picture-ex-060-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_061",
+    "name": "悲鸣屿行冥·石肤",
+    "type": "monster",
+    "description": "【岩之呼吸·巨岩贯穿·石肤】通常召唤成功时，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升400。",
+    "sheet": "independent-picture-ex-061-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_062",
+    "name": "富冈义勇·生生流转",
+    "type": "monster",
+    "description": "【水之呼吸·生生流转】主要阶段，同名此效果每回合1次：将自己墓地最后3张卡按原顺序放回卡组底，抽2张卡。",
+    "sheet": "independent-picture-ex-062-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_063",
+    "name": "炼狱杏寿郎·炼狱",
+    "type": "monster",
+    "description": "【炎之呼吸·炼狱】通常召唤成功时，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升450；移除指示物时失去对应的提升。",
+    "sheet": "independent-picture-ex-063-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_064",
+    "name": "甘露寺蜜璃·摇曳恋情",
+    "type": "monster",
+    "description": "【恋之呼吸·猫足恋风·摇曳恋情】通常召唤成功时，同名此效果每回合1次：将自己墓地最后1只3星以下怪兽加入手牌。",
+    "sheet": "independent-picture-ex-064-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_065",
+    "name": "灶门炭十郎·赤月神乐",
+    "type": "monster",
+    "description": "【赤月神乐】被破坏送入墓地时，同名此效果每回合1次：自己被破坏送入墓地后，将卡组第一只与自身同属性的4星以下怪兽加入手牌。",
+    "sheet": "independent-picture-ex-065-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_066",
+    "name": "时透无一郎·水月霞",
+    "type": "monster",
+    "description": "【霞之呼吸·胧·水月霞】通常召唤成功时，同名此效果每回合1次：支付500LP；将对方一只可取对象表侧怪兽变为里侧守备表示，其守备力下降500。",
+    "sheet": "independent-picture-ex-066-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_067",
+    "name": "宇髓天元·爆音斩",
+    "type": "monster",
+    "description": "【音之呼吸·谱面斩·爆音斩】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置爆破标记；本回合结束时给予其控制者100伤害并破坏该怪兽，提前离场则标记失效。",
+    "sheet": "independent-picture-ex-067-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_069",
+    "name": "伊黑小芭内·蜿蜒蛇行",
+    "type": "monster",
+    "description": "【蛇之呼吸·蜿蜒蛇行】通常召唤成功时，同名此效果每回合1次：支付500LP；对方一只可取对象表侧怪兽效果无效，直到本回合结束，其攻击力下降100。",
+    "sheet": "independent-picture-ex-069-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_070",
+    "name": "我妻善逸·雷霆万钧",
+    "type": "monster",
+    "description": "【霹雳一闪·雷霆万钧】主要阶段，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升500；移除指示物时失去对应的提升。",
+    "sheet": "independent-picture-ex-070-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ex_071",
+    "name": "矿洞小鼠",
+    "type": "monster",
+    "description": "【矿洞小鼠·传承】被破坏送入墓地时，同名此效果每回合1次：自己被破坏送入墓地后，将卡组第一只与自身同属性的3星以下怪兽加入手牌。",
+    "sheet": "independent-picture-ex-071-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_034",
+    "name": "灶门炭治郎·水之呼吸",
+    "type": "monster",
+    "description": "【火之神神乐·水之呼吸】主要阶段，同名此效果每回合1次：自身本回合获得贯穿守备的战斗伤害，其攻击力上升100。\n【余响·守护】主要阶段，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-picture-ssr7-034-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_049",
+    "name": "八幡海铃·暗潮低音",
+    "type": "monster",
+    "description": "【暗潮低音】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置1层出血；出血怪兽每次参与战斗后，其控制者受到650×层数伤害，随后层数-1。\n【余响·守护】主要阶段，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-picture-ssr7-049-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_050",
+    "name": "若叶睦·微笑假面",
+    "type": "monster",
+    "description": "【微笑假面·裂痕】通常召唤成功时，同名此效果每回合1次：抽2张卡；若自己LP不高于3000或墓地有至少7张卡，自身攻击力再永久上升500。\n【余响·构思】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-picture-ssr7-050-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_051",
+    "name": "八幡海铃·疾风鼓点",
+    "type": "monster",
+    "description": "【暗潮低音·疾风鼓点】主要阶段，同名此效果每回合1次：支付500LP；自身本回合可以攻击2次。\n【余响·蓄势】主要阶段，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升150；移除指示物时失去对应的提升。",
+    "sheet": "independent-picture-ssr7-051-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_052",
+    "name": "雪之下雪乃·春雪",
+    "type": "monster",
+    "description": "【日常光影·春雪】通常召唤成功时，同名此效果每回合1次：自己一只表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效，其攻击力上升200。\n【余响·守护】主要阶段，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-picture-ssr7-052-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_053",
+    "name": "阿米娅·红线残响",
+    "type": "monster",
+    "description": "【奇美拉·意志共鸣·红线残响】主要阶段，同名此效果每回合1次：将自己除外区最后1张卡加入手牌。\n【余响·寻找】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-picture-ssr7-053-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_054",
+    "name": "初音未来·水镜",
+    "type": "monster",
+    "description": "【未来音浪·水镜】通常召唤成功时，同名此效果每回合1次：支付600LP；将对方一只可取对象表侧怪兽变为里侧守备表示，其守备力下降100。\n【余响·构思】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-picture-ssr7-054-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_055",
+    "name": "初音未来·花海共鸣",
+    "type": "monster",
+    "description": "【未来音浪·花海共鸣】自己的结束阶段，同名此效果每回合1次：自己场上有至少2种属性的表侧怪兽时，抽2张卡，并恢复650LP。\n【余响·蓄势】主要阶段，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升150；移除指示物时失去对应的提升。",
+    "sheet": "independent-picture-ssr7-055-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_056",
+    "name": "初音未来·南瓜夜曲",
+    "type": "monster",
+    "description": "【未来音浪·南瓜夜曲】通常召唤成功时，同名此效果每回合1次：展示卡组顶4张卡，并按怪兽、魔法、陷阱的顺序重新排列在卡组顶。\n【余响·守护】主要阶段，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-picture-ssr7-056-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_057",
+    "name": "初音未来·春日花冠",
+    "type": "monster",
+    "description": "【未来音浪·春日花冠】通常召唤成功时，同名此效果每回合1次：将自己墓地最后1只4星以下怪兽加入手牌，然后抽1张卡。\n【余响·寻找】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-picture-ssr7-057-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_058",
+    "name": "初音未来·星月花嫁",
+    "type": "monster",
+    "description": "【未来音浪·星月花嫁】通常召唤成功时，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。\n【余响·构思】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-picture-ssr7-058-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "picture_ssr7_059",
+    "name": "阿米娅·苍银天穹",
+    "type": "monster",
+    "description": "【奇美拉·意志共鸣·苍银天穹】通常召唤成功时，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升100。\n【余响·蓄势】主要阶段，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升150；移除指示物时失去对应的提升。",
+    "sheet": "independent-picture-ssr7-059-sheet-v1.png",
+    "reason": "shared"
+  },
+  {
+    "id": "source_monster_001",
+    "name": "真冬",
+    "type": "monster",
+    "description": "【无声终曲·真冬】主要阶段，同名此效果每回合1次：对方一只可取对象表侧怪兽效果无效，直到本回合结束，其攻击力下降500。",
+    "sheet": "independent-source-monster-001-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_002",
+    "name": "白羽静梦",
+    "type": "monster",
+    "description": "【白羽梦境·白羽静梦】主要阶段，同名此效果每回合1次：将对方一只可取对象表侧怪兽变为里侧守备表示，其守备力下降900。",
+    "sheet": "independent-source-monster-002-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_003",
+    "name": "祥子",
+    "type": "monster",
+    "description": "【人偶钢琴·祥子】主要阶段，同名此效果每回合1次：展示卡组顶12张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-003-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_004",
+    "name": "蕾塞·雨夜引魂",
+    "type": "monster",
+    "description": "【引魂夜行·雨夜引魂】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置爆破标记；本回合结束时给予其控制者450伤害并破坏该怪兽，提前离场则标记失效。\n【余响·蓄势】主要阶段，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升150；移除指示物时失去对应的提升。",
+    "sheet": "independent-source-monster-004-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_005",
+    "name": "绯线誓约·青叶",
+    "type": "monster",
+    "description": "【绯线蔷薇·青叶】通常召唤成功时，同名此效果每回合1次：展示卡组顶13张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。\n【余响·守护】主要阶段，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-source-monster-005-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_006",
+    "name": "绯线誓约·棕羽",
+    "type": "monster",
+    "description": "【绯线羽阵·棕羽】通常召唤成功时，同名此效果每回合1次：自己一只表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效，其攻击力上升1300。\n【余响·寻找】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-006-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_007",
+    "name": "绯线誓约·金瞳",
+    "type": "monster",
+    "description": "【绯线魔眼·金瞳】主要阶段，同名此效果每回合1次：对方一只可取对象表侧怪兽效果无效，直到本回合结束，其攻击力下降650。\n【余响·构思】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-007-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_008",
+    "name": "两面宿傩·狱纹",
+    "type": "monster",
+    "description": "【解·空间斩·狱纹】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽施加诅咒：其效果无效、不能作为上级召唤的祭品；被破坏时其控制者受到800×层数伤害。\n【余响·蓄势】主要阶段，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升150；移除指示物时失去对应的提升。",
+    "sheet": "independent-source-monster-008-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_009",
+    "name": "五条悟·苍瞳",
+    "type": "monster",
+    "description": "【六眼·苍瞳观测】通常召唤成功时，同名此效果每回合1次：展示卡组顶9张卡，并按怪兽、魔法、陷阱的顺序重新排列在卡组顶。\n【余响·守护】主要阶段，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-source-monster-009-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_010",
+    "name": "五条悟·无下限",
+    "type": "monster",
+    "description": "【无下限】通常召唤成功时，同名此效果每回合1次：直到下个回合结束，自身不会成为对方效果的对象，且受到的战斗伤害减少1000。\n【余响·构思】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-010-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_011",
+    "name": "五条悟·苍天觉醒",
+    "type": "monster",
+    "description": "【术式反转·赫·苍天觉醒】主要阶段，同名此效果每回合1次：抽2张卡；若自己LP不高于2200或墓地有至少8张卡，自身攻击力再永久上升800。\n【余响·寻找】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-011-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_012",
+    "name": "两面宿傩·伏魔御厨子",
+    "type": "monster",
+    "description": "【伏魔御厨子·解】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置2层出血；出血怪兽每次参与战斗后，其控制者受到600×层数伤害，随后层数-1。\n【余响·守护】主要阶段，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-source-monster-012-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_013",
+    "name": "五条悟·虚式茈",
+    "type": "monster",
+    "description": "【虚式茈】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置3层灼烧，然后立即引爆其身上全部灼烧层数：每层使其控制者受到500点伤害；若其带有剧毒，同时引爆剧毒：每层给对方全体表侧怪兽的守备力下降300，守备力变为0的破坏。\n【余响·蓄势】主要阶段，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升150；移除指示物时失去对应的提升。",
+    "sheet": "independent-source-monster-013-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_014",
+    "name": "宿傩·炎矢",
+    "type": "monster",
+    "description": "【开·炎矢】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置1层灼烧；其控制者每个结束阶段受到800×层数伤害，随后层数-1（上限3层）。\n【余响·构思】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-014-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_015",
+    "name": "五条悟·无量空处",
+    "type": "monster",
+    "description": "【领域展开·无量空处】主要阶段，同名此效果每回合1次：支付1200LP，展开领域「无量空处」：直到对方回合结束，对方怪兽不能发动效果。\n【余响·寻找】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-015-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_016",
+    "name": "五条悟·天上天下",
+    "type": "monster",
+    "description": "【术式反转·赫·天上天下】通常召唤成功时，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升550。\n【余响·守护】主要阶段，同名此效果每回合1次：自身直到下个回合结束不能成为效果对象，其守备力上升300。",
+    "sheet": "independent-source-monster-016-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_017",
+    "name": "咒灵武者·赤影",
+    "type": "monster",
+    "description": "【咒刃赤影】主要阶段，同名此效果每回合1次：将自己墓地最后1只5星以下怪兽特殊召唤为守备表示，其效果直到回合结束无效。\n【余响·蓄势】主要阶段，同名此效果每回合1次：自身获得1个蓄力指示物（最多3个），攻击力上升150；移除指示物时失去对应的提升。",
+    "sheet": "independent-source-monster-017-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_018",
+    "name": "白绫神姬·天仪",
+    "type": "monster",
+    "description": "【神仪白绫·天仪】主要阶段，同名此效果每回合1次：将自己除外区最后3张卡加入手牌，并恢复400LP。\n【余响·构思】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-018-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_019",
+    "name": "黄昏孤影·终焉",
+    "type": "monster",
+    "description": "【暗影终焉】主要阶段，同名此效果每回合1次：给对方一只可取对象表侧怪兽放置2层灼烧，然后立即引爆其身上全部灼烧层数：每层使其控制者受到800点伤害；若其带有剧毒，同时引爆剧毒：每层给对方全体表侧怪兽的守备力下降300，守备力变为0的破坏。\n【余响·寻找】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-019-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "source_monster_020",
+    "name": "虚拟歌姬·初音未来",
+    "type": "monster",
+    "description": "【未来音浪·初音未来】自己的结束阶段，同名此效果每回合1次：自己场上有至少4种属性的表侧怪兽时，抽3张卡，并恢复750LP。\n【余响·寻找】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张怪兽加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-source-monster-020-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "water_007",
+    "name": "蓝絮猫女仆 凯伊",
+    "type": "monster",
+    "description": "【归途迎接】自己的主要阶段，同名此效果每回合1次：自身尚未攻击时，将自身改为守备表示并放弃本回合攻击；将自己墓地最后1只3星以下怪兽加入手牌。",
+    "sheet": "independent-water-007-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "water_008",
+    "name": "里间雨",
+    "type": "monster",
+    "description": "【雨幕庇护】自己的主要阶段，同名此效果每回合1次：自己一只表侧怪兽获得1次破坏替代：将其改为守备表示，直到下个回合结束有效，其攻击力上升200。",
+    "sheet": "independent-water-008-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "water_009",
+    "name": "宫崎奏",
+    "type": "monster",
+    "description": "【序奏检索】自己的主要阶段，同名此效果每回合1次：展示卡组顶3张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-water-009-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "water_010",
+    "name": "山田凉",
+    "type": "monster",
+    "description": "【低音寻谱】通常召唤成功时，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。\n【低音合奏】自己的结束阶段，同名此效果每回合1次：自己场上有至少2种属性的表侧怪兽时，抽1张卡。",
+    "sheet": "independent-water-010-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "water_011",
+    "name": "青蓝妆者",
+    "type": "monster",
+    "description": "【青蓝妆彩·青蓝妆者】主要阶段，同名此效果每回合1次：将自己一只表侧怪兽返回手牌，再将手牌第一只5星以下怪兽特殊召唤为守备表示，然后抽1张卡。\n【余响·构思】主要阶段，同名此效果每回合1次：展示卡组顶2张卡，将其中1张魔法加入手牌，其余按原顺序放回卡组底。",
+    "sheet": "independent-water-011-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_11091375",
+    "name": "蓝宝石龙",
+    "type": "monster",
+    "description": "召唤成功时：将对方攻击力最高的怪兽返回手牌。",
+    "sheet": "independent-ygo-n-11091375-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_13039848",
+    "name": "岩石巨兵",
+    "type": "monster",
+    "description": "召唤成功时：直到下个回合开始，这张卡不会成为对方效果的对象。",
+    "sheet": "independent-ygo-n-13039848-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_14898066",
+    "name": "血腥魔兽人",
+    "type": "monster",
+    "description": "召唤成功时：从对方墓地除外最多2张卡。",
+    "sheet": "independent-ygo-n-14898066-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_15025844",
+    "name": "神圣妖精",
+    "type": "monster",
+    "description": "召唤成功时：回复900LP。",
+    "sheet": "independent-ygo-n-15025844-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_16587243",
+    "name": "新虫",
+    "type": "monster",
+    "description": "召唤成功时：对方攻击力最高的怪兽攻击力下降600。",
+    "sheet": "independent-ygo-n-16587243-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_20277860",
+    "name": "铠武者僵尸",
+    "type": "monster",
+    "description": "被破坏时：回复600LP。",
+    "sheet": "independent-ygo-n-20277860-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_23771716",
+    "name": "七彩鱼",
+    "type": "monster",
+    "description": "召唤成功时：对方攻击力最高的怪兽守备力下降600，守备力变为0则破坏。",
+    "sheet": "independent-ygo-n-23771716-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_28279543",
+    "name": "诅咒之龙",
+    "type": "monster",
+    "description": "被破坏时：给予对方600点伤害。",
+    "sheet": "independent-ygo-n-28279543-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_30113682",
+    "name": "审判者",
+    "type": "monster",
+    "description": "召唤成功时：本回合追加1次通常召唤。",
+    "sheet": "independent-ygo-n-30113682-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_30532390",
+    "name": "天空侦察者",
+    "type": "monster",
+    "description": "召唤成功时：从卡组将1只光属性怪兽加入手牌。",
+    "sheet": "independent-ygo-n-30532390-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_32452818",
+    "name": "海狸战士",
+    "type": "monster",
+    "description": "召唤成功时：这张卡守备力上升700。",
+    "sheet": "independent-ygo-n-32452818-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_37265642",
+    "name": "剑角龙",
+    "type": "monster",
+    "description": "召唤成功时：破坏对方攻击力最低的怪兽。",
+    "sheet": "independent-ygo-n-37265642-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_4031928",
+    "name": "心变",
+    "type": "spell",
+    "description": "对方攻击力最高的怪兽攻击力下降500。",
+    "sheet": "independent-ygo-n-4031928-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_41392891",
+    "name": "小恶魔",
+    "type": "monster",
+    "description": "召唤成功时：己方有盖放的后场时守备力上升400，否则攻击力上升400。",
+    "sheet": "independent-ygo-n-41392891-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_42071342",
+    "name": "暗黑海龙兵",
+    "type": "monster",
+    "description": "召唤成功时：破坏对方1张魔法或陷阱卡。",
+    "sheet": "independent-ygo-n-42071342-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_43096270",
+    "name": "紫翠玉龙",
+    "type": "monster",
+    "description": "召唤成功时：己方场上全部怪兽攻击力上升300。",
+    "sheet": "independent-ygo-n-43096270-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_46986414",
+    "name": "黑魔导",
+    "type": "monster",
+    "description": "召唤成功时：破坏对方场上全部魔法与陷阱卡。",
+    "sheet": "independent-ygo-n-46986414-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_48305365",
+    "name": "斧王",
+    "type": "monster",
+    "description": "召唤成功时：对方攻击力最高的怪兽守备力下降500，自己回复实际减少的数值。",
+    "sheet": "independent-ygo-n-48305365-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_49003308",
+    "name": "加加基哥",
+    "type": "monster",
+    "description": "召唤成功时：对方攻击力最低的怪兽攻击力下降400。",
+    "sheet": "independent-ygo-n-49003308-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_49881766",
+    "name": "恶魔士兵",
+    "type": "monster",
+    "description": "被破坏时：双方各受到400点伤害。",
+    "sheet": "independent-ygo-n-49881766-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_5053103",
+    "name": "牛魔人",
+    "type": "monster",
+    "description": "召唤成功时：这张卡攻击力上升600。",
+    "sheet": "independent-ygo-n-5053103-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_53129443",
+    "name": "黑洞",
+    "type": "spell",
+    "description": "破坏对方场上攻击力最高的1只怪兽。",
+    "sheet": "independent-ygo-n-53129443-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_55144522",
+    "name": "强欲之壶",
+    "type": "spell",
+    "description": "抽2张卡。",
+    "sheet": "independent-ygo-n-55144522-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_58831685",
+    "name": "巨型红海蛇",
+    "type": "monster",
+    "description": "召唤成功时：对方攻击力最高的怪兽本回合不能攻击。",
+    "sheet": "independent-ygo-n-58831685-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_6368038",
+    "name": "暗黑骑士盖亚",
+    "type": "monster",
+    "description": "召唤成功时：破坏对方攻击力最高的怪兽。",
+    "sheet": "independent-ygo-n-6368038-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_66672569",
+    "name": "龙之僵尸",
+    "type": "monster",
+    "description": "被破坏时：己方1只4星以下怪兽攻击力与守备力上升400。",
+    "sheet": "independent-ygo-n-66672569-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_66788016",
+    "name": "地裂",
+    "type": "spell",
+    "description": "破坏对方场上攻击力最低的1只怪兽。",
+    "sheet": "independent-ygo-n-66788016-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_69140098",
+    "name": "双生精灵",
+    "type": "monster",
+    "description": "召唤成功时：从卡组将1只怪兽加入手牌。",
+    "sheet": "independent-ygo-n-69140098-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_69247929",
+    "name": "基因狼人",
+    "type": "monster",
+    "description": "召唤成功时：己方攻击力最高的怪兽攻击力与守备力上升400。",
+    "sheet": "independent-ygo-n-69247929-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_70781052",
+    "name": "恶魔召唤",
+    "type": "monster",
+    "description": "召唤成功时：对方全部怪兽攻击力下降700。",
+    "sheet": "independent-ygo-n-70781052-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_72302403",
+    "name": "光之护封剑",
+    "type": "spell",
+    "description": "对方攻击力最高的怪兽本回合不能攻击。",
+    "sheet": "independent-ygo-n-72302403-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_7359741",
+    "name": "机械猎手",
+    "type": "monster",
+    "description": "召唤成功时：给予对方600点直接伤害。",
+    "sheet": "independent-ygo-n-7359741-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_74677422",
+    "name": "真红眼黑龙",
+    "type": "monster",
+    "description": "召唤成功时：给予对方1200点伤害。",
+    "sheet": "independent-ygo-n-74677422-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_76812113",
+    "name": "鹰身女郎",
+    "type": "monster",
+    "description": "召唤成功时：特殊召唤1只攻击力与守备力均为700的衍生物。",
+    "sheet": "independent-ygo-n-76812113-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_83764718",
+    "name": "死者苏生",
+    "type": "spell",
+    "description": "将自己墓地1只怪兽加入手牌。",
+    "sheet": "independent-ygo-n-83764718-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_85639257",
+    "name": "水魔道士",
+    "type": "monster",
+    "description": "召唤成功时：将对方攻击力最高的怪兽暂时除外，回合结束时返回。",
+    "sheet": "independent-ygo-n-85639257-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_87796900",
+    "name": "要塞守护翼龙",
+    "type": "monster",
+    "description": "召唤成功时：本回合只要己方场上还有其他怪兽，对方就不能攻击这张卡。",
+    "sheet": "independent-ygo-n-87796900-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_89631139",
+    "name": "青眼白龙",
+    "type": "monster",
+    "description": "召唤成功时：破坏对方场上全部怪兽。",
+    "sheet": "independent-ygo-n-89631139-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_90357090",
+    "name": "银牙狼",
+    "type": "monster",
+    "description": "召唤成功时：这张卡攻击力上升400。",
+    "sheet": "independent-ygo-n-90357090-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_91152256",
+    "name": "精灵剑士",
+    "type": "monster",
+    "description": "召唤成功时：己方场上每有1只怪兽，这张卡攻击力上升250。",
+    "sheet": "independent-ygo-n-91152256-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_92667214",
+    "name": "小丑僵尸",
+    "type": "monster",
+    "description": "召唤成功时：对方随机丢弃1张手牌。",
+    "sheet": "independent-ygo-n-92667214-sheet-v1.png",
+    "reason": "missing"
+  },
+  {
+    "id": "ygo_n_97590747",
+    "name": "灯之魔精",
+    "type": "monster",
+    "description": "被破坏时：对方随机丢弃1张手牌。",
+    "sheet": "independent-ygo-n-97590747-sheet-v1.png",
+    "reason": "missing"
+  }
+]
