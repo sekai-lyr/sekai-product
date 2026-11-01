@@ -65,6 +65,14 @@ public class LocalLibraryControl {
                                    @RequestHeader(value="X-Local-Library-CSRF",required=false) String token){
         User user=mutation(session,token);library.bind(id,user.getId(),input);return Map.of("saved",true);
     }
+    /** 关联进度回执：仅记录日志，用于在服务端观测前端逐首关联的节奏（排查批量关联卡顿）。 */
+    @PostMapping("/songs/{id}/link-ack")
+    public Map<String,Boolean> linkAck(@PathVariable Long id,HttpSession session,
+            @RequestHeader(value="X-Local-Library-CSRF",required=false) String token){
+        User user=mutation(session,token);
+        org.slf4j.LoggerFactory.getLogger(LocalLibraryControl.class).info("link-ack user={} song={}",user.getId(),id);
+        return Map.of("ok",true);
+    }
     @PostMapping("/songs/{id}/preferences")
     public Map<String,Boolean> preferences(@PathVariable Long id,@RequestBody @Valid LocalLibraryService.Preferences input,HttpSession session,
                                           @RequestHeader(value="X-Local-Library-CSRF",required=false) String token){

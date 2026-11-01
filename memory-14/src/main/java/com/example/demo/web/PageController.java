@@ -20,7 +20,7 @@ public class PageController {
     @GetMapping("/")
     public String index(HttpSession session) {
         if (session.getAttribute("user") != null) {
-            return "redirect:/chat";
+            return "redirect:/assistants";
         }
         return "forward:/index.html";
     }
@@ -30,7 +30,15 @@ public class PageController {
         if (session.getAttribute("user") == null) {
             return "redirect:/login";
         }
-        return "redirect:/chat";
+        return "redirect:/assistants";
+    }
+
+    @GetMapping("/assistants")
+    public String assistants(HttpSession session) {
+        if (session.getAttribute("user") == null) {
+            return "redirect:/login";
+        }
+        return "forward:/assistants.html";
     }
 
     @GetMapping("/chat")

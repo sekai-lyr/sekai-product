@@ -2809,3 +2809,26 @@ body.render-mode .stage-drawer {
         bottom: calc(48px + env(safe-area-inset-bottom, 0px));
     }
 }
+
+/* ========== 本机演出（local-stage）背景收敛 ==========
+   本机封面的原图往往 1000px 方形，在 16:9/更宽的窗口里 object-fit:cover 会把
+   画面放大裁切，右半屏只剩大片糊掉的头发/衣服色块，看起来像"被大图铺满"。
+   这里把 L1 背景整体压暗，并在右侧加深，让歌词区回到干净的深色演出氛围。 */
+html.sekai-local-stage .stage-bg-img {
+    transform: scale(1.12) translateY(var(--bg-drift, 0px));
+    filter: saturate(0.82) brightness(0.62) blur(1px);
+}
+html.sekai-local-stage .stage-bg-veil {
+    background:
+        linear-gradient(96deg,
+            rgba(6, 11, 22, 0.34) 0%,
+            rgba(6, 11, 22, 0.30) 30%,
+            rgba(6, 11, 22, 0.58) 56%,
+            rgba(6, 11, 22, 0.82) 76%,
+            rgba(6, 11, 22, 0.92) 100%),
+        linear-gradient(180deg,
+            rgba(6, 11, 22, 0.34) 0%,
+            rgba(6, 11, 22, 0.06) 18%,
+            rgba(6, 11, 22, 0.08) 68%,
+            rgba(6, 11, 22, 0.52) 100%);
+}

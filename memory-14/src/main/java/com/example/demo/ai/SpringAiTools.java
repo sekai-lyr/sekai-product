@@ -80,7 +80,7 @@ public class SpringAiTools {
         return weatherService.getWeatherByCity(city);
     }
 
-    @Tool(name = "webSearch", description = "Search the web for real-time info. PRIMARY tool for anime news, releases, announcements.")
+    @Tool(name = "webSearch", description = "Search the web for current information and reliable sources. Use for facts that need verification.")
     public String webSearch(@ToolParam(description = "Search keywords") String query) {
         JSONObject params = new JSONObject();
         params.put("query", query);
@@ -241,6 +241,8 @@ public class SpringAiTools {
             @ToolParam(description = "Date in YYYY-MM-DD") String date,
             @ToolParam(description = "Time in HH:mm") String time) {
         try {
+            String currentConversationId = UserContextHolder.getConversationId();
+            if (currentConversationId != null && !currentConversationId.isBlank()) conversationId = currentConversationId;
             if (conversationId == null || conversationId.isBlank()) return "无法创建提醒：缺少当前会话 ID。";
             LocalDateTime remindTime = LocalDateTime.parse(date + " " + time,
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -250,6 +252,14 @@ public class SpringAiTools {
         } catch (Exception error) {
             return "提醒创建失败：" + error.getMessage();
         }
+    }
+
+    @Tool(name = "createCareReminder", description = "Create a one-time plant or pet care reminder in the current chat. Confirm the task, date and time first. No recurring or offline push reminders.")
+    public String createCareReminder(
+            @ToolParam(description = "Care task to remember") String title,
+            @ToolParam(description = "Date in YYYY-MM-DD") String date,
+            @ToolParam(description = "Time in HH:mm, Asia/Shanghai") String time) {
+        return createAnimeReminder(UserContextHolder.getConversationId(), title, date, time);
     }
 
     @Tool(name = "getDomesticMovieTicketLinks", description = "Get Chinese movie ticket purchase links for a selected movie.")

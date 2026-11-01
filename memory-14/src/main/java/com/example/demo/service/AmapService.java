@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.example.demo.config.AmapConfig;
+import com.example.demo.core.TtlCache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -30,6 +31,9 @@ public class AmapService {
     private final OkHttpClient okHttpClient;
     private final AmapConfig amapConfig;
 
+    /** 地理编码缓存：地址+城市 为键，24 小时过期（地理编码结果基本不变） */
+    private final TtlCache<String, GeocodeResult> geocodeCache = new TtlCache<>(24 * 3600 * 1000L, 512);
+
     public AmapService(OkHttpClient okHttpClient, AmapConfig amapConfig) {
         this.okHttpClient = okHttpClient;
         this.amapConfig = amapConfig;
@@ -40,6 +44,11 @@ public class AmapService {
     }
 
     public GeocodeResult geocode(String address, String city) throws IOException {
+        String cacheKey = (address == null ? "" : address.trim().toLowerCase())
+                + "|" + (city == null ? "" : city.trim().toLowerCase());
+        GeocodeResult cached = geocodeCache.get(cacheKey);
+        if (cached != null) return cached;
+
         StringBuilder url = new StringBuilder(amapConfig.getBaseUrl())
                 .append("/geocode/geo?key=").append(amapConfig.getApiKey())
                 .append("&address=").append(urlEncode(address));
@@ -73,6 +82,7 @@ public class AmapService {
         result.setCity(geo.getString("city"));
         result.setDistrict(geo.getString("district"));
         result.setAdcode(geo.getString("adcode"));
+        geocodeCache.put(cacheKey, result);
         return result;
     }
 

@@ -1,0 +1,11 @@
+# 生产环境配置
+app:
+  name: openclaw
+
+weather:
+  api:
+    timeout: 10
+
+logging:
+  level:
+    com.ykd.claw: WARN

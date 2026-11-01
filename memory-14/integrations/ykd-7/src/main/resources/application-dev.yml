@@ -1,0 +1,17 @@
+# 开发环境配置
+app:
+  name: openclaw-dev
+
+deepseek:
+  api:
+    model: deepseek-chat
+    timeout: 120
+
+weather:
+  api:
+    base-url: https://uapis.cn
+    timeout: 30
+
+logging:
+  level:
+    com.ykd.claw: DEBUG

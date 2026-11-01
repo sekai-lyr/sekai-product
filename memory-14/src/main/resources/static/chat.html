@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AnimeAI · 天空放映室</title>
+<title>SekaiAI · 天空放映室</title>
+<script>document.documentElement.dataset.assistant=new URLSearchParams(location.search).get('assistant')||'';</script>
 <style>
 :root {
   --night-blue: #09182B;
@@ -118,11 +119,17 @@ body{font-family:var(--font-body);color:var(--warm-white);background:var(--night
   .bg-fallback{display:block}
 }
 </style>
+<link rel="stylesheet" href="/css/plant-chat.css">
+<style>
+.assistant-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:0 0 20px}
+.assistant-options a{padding:9px 4px;text-align:center;text-decoration:none;font-size:11px;color:var(--warm-white);opacity:.65;border:1px solid rgba(243,237,227,.13);border-radius:9px;transition:background .2s,opacity .2s}
+.assistant-options a:hover,.assistant-options a:focus-visible,.assistant-options a[aria-current="page"]{opacity:1;background:rgba(243,237,227,.12);border-color:rgba(243,237,227,.35)}
+</style>
 </head>
 <body>
 
-<video class="bg-video" autoplay loop muted playsinline poster="/assets/anime-bg.jpg">
-  <source src="/assets/anime-bg.mp4" type="video/mp4">
+<video class="bg-video" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
+  <source type="video/mp4">
 </video>
 <div class="bg-fallback"></div>
 
@@ -134,8 +141,13 @@ body{font-family:var(--font-body);color:var(--warm-white);background:var(--night
         <text x="11" y="22" font-family="serif" font-size="13" fill="rgba(243,237,227,0.82)" font-weight="600">N</text>
         <path d="M20 7L27 3" stroke="rgba(134,180,210,0.3)" stroke-width="0.7" stroke-linecap="round"/>
       </svg>
-      <span>AnimeAI</span>
+      <span>SekaiAI</span>
     </div>
+    <nav class="assistant-options" aria-label="切换助手">
+      <a href="/chat" data-assistant-option="anime">动漫伙伴</a>
+      <a href="/chat?assistant=plant" data-assistant-option="plant">绿意管家</a>
+      <a href="/chat?assistant=travel" data-assistant-option="travel">远行向导</a>
+    </nav>
     <button class="new-chat" id="newChat">＋ 新的一幕</button>
     <div class="side-label">灵感入口</div>
     <div class="prompt-list">
@@ -186,36 +198,137 @@ body{font-family:var(--font-body);color:var(--warm-white);background:var(--night
         <textarea id="input" rows="1" placeholder="写下你的问题，或上传一张动画截图…"></textarea>
         <button class="send" id="send" title="发送">➤</button>
       </div>
-      <div class="composer-note">AnimeAI 会调用实时工具核验信息，重要档期请以官方公告为准</div>
+      <div class="composer-note">SekaiAI 会调用实时工具核验信息，重要档期请以官方公告为准</div>
     </div>
   </section>
 </main>
 
 <script>
 var v=document.querySelector('.bg-video');
-var p=v.play();
+var plantChat=document.documentElement.dataset.assistant==='plant';
+var reducedMotion=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+v.poster=plantChat?'/assets/plant-bg.jpg':'/assets/anime-bg.jpg';
+v.autoplay=!reducedMotion;
+if(!reducedMotion){v.querySelector('source').src=plantChat?'/assets/plant-bg.mp4':'/assets/anime-bg.mp4';v.load()}
+var p=reducedMotion?undefined:v.play();
 if(p!==undefined){p.then(function(){}).catch(function(){v.classList.add('failed')})}
 v.addEventListener('error',function(){v.classList.add('failed')});
 v.addEventListener('loadeddata',function(){v.style.opacity='1'});
-document.addEventListener('visibilitychange',function(){if(document.hidden)v.pause();else v.play().catch(function(){})});
+document.addEventListener('visibilitychange',function(){if(document.hidden)v.pause();else if(!reducedMotion)v.play().catch(function(){})});
 
 const $=id=>document.getElementById(id);let imageData=null;let busy=false;
-const conversationId=localStorage.getItem('animeConversationId')||(()=>{const id='anime-'+Date.now()+'-'+Math.random().toString(36).slice(2,9);localStorage.setItem('animeConversationId',id);return id})();
+const assistant=document.documentElement.dataset.assistant==='travel'?'travel':(plantChat?'plant':'anime');
+const apiBase=assistant==='travel'?'/api/travel':'/api/ai';
+document.querySelector('[data-assistant-option="'+assistant+'"]').setAttribute('aria-current','page');
+const conversationKey='sekaiConversationId:'+assistant+':v2';
+const conversationId=localStorage.getItem(conversationKey)||(()=>{const id=assistant+'-'+crypto.randomUUID();localStorage.setItem(conversationKey,id);return id})();
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
-function markdown(value){let s=escapeHtml(value);s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/^### (.+)$/gm,'<strong>$1</strong>').replace(/\n/g,'<br>');return s}
+function markdown(value){let s=escapeHtml(value);s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/^#{1,6}\s*(.+)$/gm,'<strong>$1</strong>').replace(/\n/g,'<br>');return s}
 function hideWelcome(){const welcome=$('welcome');if(welcome)welcome.remove()}
 function addMessage(role,content,image){hideWelcome();const row=document.createElement('div');row.className='message '+role;const bubble=document.createElement('div');bubble.className='bubble';if(image){const img=document.createElement('img');img.src=image;img.alt='用户上传的图片';bubble.appendChild(img)}const text=document.createElement('div');text.innerHTML=role==='ai'?markdown(content):escapeHtml(content).replace(/\n/g,'<br>');bubble.appendChild(text);row.appendChild(bubble);$('messages').appendChild(row);$('messages').scrollTop=$('messages').scrollHeight;return row}
 function typing(){hideWelcome();const row=document.createElement('div');row.className='message ai';row.innerHTML='<div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>';$('messages').appendChild(row);$('messages').scrollTop=$('messages').scrollHeight;return row}
-async function send(){const message=$('input').value.trim();if(busy||(!message&&!imageData))return;busy=true;$('send').disabled=true;const pendingImage=imageData;addMessage('user',message||'请识别这张图片',pendingImage);$('input').value='';clearImage();const wait=typing();try{let data;if(pendingImage){const response=await fetch('/api/ai/analyze-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:pendingImage,question:message,conversationId})});data=await response.json()}else{const response=await fetch('/api/ai/chat-with-tools',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,conversationId})});data=await response.json()}wait.remove();if(data.success)addMessage('ai',data.content||'我完成了查询，但暂时没有可展示的内容。');else addMessage('ai','请求失败：'+(data.error||data.message||'未知错误'))}catch(error){wait.remove();addMessage('ai','连接暂时中断，请稍后再试。')}finally{busy=false;$('send').disabled=false;$('input').focus()}}
+async function send(){const message=$('input').value.trim();if(busy||(!message&&!imageData))return;busy=true;$('send').disabled=true;const pendingImage=imageData;addMessage('user',message||'请识别这张图片',pendingImage);$('input').value='';clearImage();const wait=typing();try{
+if(pendingImage){const response=await fetch(apiBase+'/analyze-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({assistant,image:pendingImage,question:message,conversationId})});const data=await response.json();wait.remove();if(data.success)addMessage('ai',data.content||'我完成了查询，但暂时没有可展示的内容。');else addMessage('ai','请求失败：'+(data.error||data.message||'未知错误'))}
+else{await sendStream(message,wait)}
+}catch(error){wait.remove();addMessage('ai','连接暂时中断，请稍后再试。')}finally{busy=false;$('send').disabled=false;$('input').focus()}}
+async function sendStream(message,wait){
+const response=await fetch(apiBase+'/chat/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({assistant,message,conversationId})});
+if(!response.ok||!response.body)throw new Error('stream unavailable');
+wait.remove();
+const row=addMessage('ai','');
+const text=row.querySelector('.bubble div');
+let buf='',acc='',failed=false;
+const reader=response.body.getReader();const decoder=new TextDecoder();
+while(true){const{done,value}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});
+let boundary;while((boundary=/\r?\n\r?\n/.exec(buf))){const raw=buf.slice(0,boundary.index);buf=buf.slice(boundary.index+boundary[0].length);
+let eventName='message';const dataLines=[];
+raw.split(/\r?\n/).forEach(line=>{if(line.startsWith('event:'))eventName=line.slice(6).trim();else if(line.startsWith('data:'))dataLines.push(line.slice(5).replace(/^ /,''))});
+if(!dataLines.length)continue;const payload=dataLines.join('\n');
+if(eventName==='error'){failed=true;acc+=(acc?'\n':'')+'⚠️ '+payload}
+else if(eventName==='done'||payload==='[DONE]'){continue}
+else{acc+=payload}
+text.innerHTML=markdown(acc);$('messages').scrollTop=$('messages').scrollHeight}}
+if(!acc&&!failed)text.innerHTML=markdown('我完成了查询，但暂时没有可展示的内容。');
+}
 function clearImage(){imageData=null;$('imageFile').value='';$('imagePreview').classList.remove('show');$('previewImage').src=''}
 $('attach').onclick=()=>$('imageFile').click();$('removeImage').onclick=clearImage;$('imageFile').onchange=()=>{const file=$('imageFile').files[0];if(!file)return;if(file.size>10*1024*1024){alert('图片请小于 10MB');return clearImage()}const reader=new FileReader();reader.onload=()=>{imageData=reader.result;$('previewImage').src=imageData;$('imagePreview').classList.add('show')};reader.readAsDataURL(file)};
 $('send').onclick=send;$('input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};$('input').oninput=()=>{$('input').style.height='auto';$('input').style.height=Math.min($('input').scrollHeight,150)+'px'};
 document.querySelectorAll('[data-prompt]').forEach(button=>button.onclick=()=>{$('input').value=button.dataset.prompt;$('input').focus();if(innerWidth<851)$('sidebar').classList.remove('open')});
-$('newChat').onclick=()=>{localStorage.removeItem('animeConversationId');location.reload()};$('mobileMenu').onclick=()=>$('sidebar').classList.toggle('open');
+$('newChat').onclick=()=>{if(busy)return;localStorage.removeItem(conversationKey);location.reload()};$('mobileMenu').onclick=()=>$('sidebar').classList.toggle('open');
 $('logout').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.href='/login'};
 fetch('/api/auth/me').then(response=>response.json()).then(data=>{if(data.code!==200||!data.data)return location.href='/login';const name=data.data.userName;$('userName').textContent=name;$('avatar').textContent=name.slice(0,1).toUpperCase()}).catch(()=>{});
-async function pollReminders(){try{const response=await fetch('/api/reminders/pending?conversationId='+encodeURIComponent(conversationId));if(!response.ok)return;const data=await response.json();(data.messages||[]).forEach(message=>{addMessage('ai',message);if(Notification.permission==='granted')new Notification('AnimeAI 提醒',{body:message.replace(/[*#]/g,'')})})}catch{}}
+async function pollReminders(){try{const endpoint=assistant==='travel'?'/api/travel/reminders/pending':'/api/reminders/pending';const response=await fetch(endpoint+'?assistant='+assistant+'&conversationId='+encodeURIComponent(conversationId));if(!response.ok)return;const data=await response.json();(data.messages||[]).forEach(message=>{addMessage('ai',message);if('Notification'in window&&Notification.permission==='granted')new Notification('SekaiAI 提醒',{body:message.replace(/[*#]/g,'')})})}catch{}}
 setInterval(pollReminders,5000);pollReminders();if('Notification'in window&&Notification.permission==='default')setTimeout(()=>Notification.requestPermission(),12000);
+</script>
+<script>
+/* 助手入口档案：页面展示与请求中的助手身份保持一致。 */
+(function(){
+  const PROFILES={
+    recognizer:{name:'角色侦探',sub:'图像识别在线',scene:'Scene 02',h1:'这一次，由我来找TA？',p:'上传任意动画截图，我会指出角色姓名、出处番剧，甚至同款周边的线索。'},
+    radar:{name:'新番雷达',sub:'推荐引擎在线',scene:'Scene 03',h1:'本季雷达扫描完毕',p:'告诉我你喜欢的作品与口味，我来定制这一季的追番清单。'},
+    reminder:{name:'追番管家',sub:'提醒调度在线',scene:'Scene 04',h1:'追番列表，一个都不落下',p:'说出你想追的作品与时间，到点我来提醒你。'},
+    event:{name:'漫展情报局',sub:'全国情报在线',scene:'Scene 05',h1:'情报已汇总',p:'告诉我你的城市与日期，锁定最值得出勤的漫展与联动活动。'},
+    pilgrimage:{name:'圣地巡礼',sub:'天气与地图在线',scene:'Scene 06',h1:'下一站，取景地',p:'报上想巡礼的作品与城市，我来结合天气规划一条可执行的路线。'},
+    plant:{name:'绿意管家',sub:'植物与宠物护理在线',scene:'Scene 07',h1:'今天，你的绿植还好吗？',p:'聊聊养护方案、排查病虫害、设定护理提醒，结合照片与环境信息照顾你的植物和宠物。'},
+    travel:{name:'远行向导',sub:'旅行规划与地图查询',scene:'Scene 08',h1:'下一站，想去哪里？',p:'告诉我目的地、出行日期和天数，一起规划路线、寻找美食，挑选合适的酒店与交通。'}
+  };
+  const key=new URLSearchParams(location.search).get('assistant');
+  const profile=key&&PROFILES[key];
+  if(!profile)return;
+  document.title='SekaiAI · '+profile.name;
+  const topH=document.querySelector('.chat-topbar h2');
+  const topSub=document.querySelector('.chat-topbar .online');
+  const eyebrow=document.querySelector('.chat-topbar .eyebrow');
+  const sideSub=document.querySelector('.user-meta small');
+  if(topH)topH.textContent=profile.name;
+  if(topSub)topSub.textContent=profile.sub;
+  if(eyebrow)eyebrow.textContent=profile.scene;
+  if(sideSub)sideSub.textContent=profile.name+' · 在线';
+  const w1=document.querySelector('#welcome h1');
+  const w2=document.querySelector('#welcome p');
+  if(w1)w1.textContent=profile.h1;
+  if(w2)w2.textContent=profile.p;
+  if(key==='travel'){
+    const prompts=[
+      ['规划一次旅行','帮我规划一次旅行，请先确认目的地、具体日期和游玩天数。'],
+      ['目的地天气','帮我查询出行目的地的天气，请先确认地点和日期。'],
+      ['景点与美食','我想找景点附近的当地美食，请先确认目的地。'],
+      ['酒店交通查询','帮我查询酒店与交通，请先确认城市、出发地和具体日期。'],
+      ['定制每日行程','我想定制一份每日行程，请先确认目的地、日期和天数。'],
+      ['查询交通路线','帮我查询交通路线，请先确认起点和终点。'],
+      ['亲子旅行建议','我想带孩子旅行，请先确认目的地、出行日期和游玩天数。'],
+      ['查看我的行程','列出我之前保存的旅行行程。']
+    ];
+    document.querySelectorAll('[data-prompt]').forEach((button,index)=>{button.textContent=prompts[index][0];button.dataset.prompt=prompts[index][1]});
+    $('input').placeholder='说说你的旅行计划，也可以上传一张照片…';
+    $('imageFile').accept='image/png,image/jpeg,image/webp,image/gif';
+    document.querySelector('#welcome .orb').textContent='行';
+    document.querySelector('.composer-note').textContent='行程与预订信息以查询时结果为准，价格、余票和营业时间请在出发前再次确认';
+  }
+  if(key==='plant'){
+    document.querySelector('.chat-logo svg').innerHTML='<path d="M17 28V17M17 22C8 22 5 16 6 9c8 0 12 4 11 13ZM17 17C17 9 22 5 29 6c0 7-4 12-12 11Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="rgba(162,204,132,.12)"/>';
+    const remap={
+      '最近的动漫电影':['绿植养护问答','介绍一下常见室内绿植的养护要点。'],
+      '附近漫展情报':['病虫害诊断','我的植物叶子发黄有斑点，帮我诊断可能的问题。'],
+      '治愈系作品推荐':['宠物护理建议','给我一些科学的宠物日常护理建议。'],
+      '本季度新番':['护理提醒设置','帮我制定一个浇水施肥的护理提醒计划。'],
+      '识别一张动画截图':['植物养护方案','为我的室内绿植定制一份养护方案。'],
+      '查近期动画电影':['病虫害识别','如何识别和防治常见的植物病虫害？'],
+      '规划漫展行程':['宠物护理入门','新手养宠物需要准备什么？给我一份入门指南。'],
+      '跨作品推荐':['有毒植物排查','哪些常见植物对猫狗有毒？帮我排查一下。']
+    };
+    document.querySelectorAll('[data-prompt]').forEach(b=>{
+      const hit=remap[b.textContent.trim()];
+      if(hit){b.textContent=hit[0];b.dataset.prompt=hit[1];}
+    });
+    const ti=document.getElementById('input');
+    if(ti)ti.placeholder='描述你的植物或宠物问题，也可以上传一张照片…';
+    const orb=document.querySelector('#welcome .orb');
+    if(orb)orb.textContent='绿';
+    const note=document.querySelector('.composer-note');
+    if(note)note.textContent='图片分析仅供初步排查；护理与用药建议需结合实际情况，紧急宠物问题请联系兽医';
+  }
+})();
 </script>
 </body>
 </html>

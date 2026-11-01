@@ -1,4 +1,16 @@
-# Sekai Song Player
+<div align="center">
+
+# 🎵 Sekai Song Player · 歌词同步音乐播放器
+
+> ⭐ Sekai 系列实战项目 05 / 14 · 单项目独立仓库
+
+![Java](https://img.shields.io/badge/Java-red?style=flat-square&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=springboot&logoColor=white) ![MyBatis](https://img.shields.io/badge/MyBatis-blue?style=flat-square) ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-blue?style=flat-square) ![MySQL](https://img.shields.io/badge/MySQL-blue?style=flat-square)
+
+[![Stars](https://img.shields.io/github/stars/sekai-lyr/memory-5?style=flat-square&logo=github)](https://github.com/sekai-lyr/memory-5/stargazers) [![合集](https://img.shields.io/badge/📚_全系列合集-sekai--product-8250DF?style=flat-square)](https://github.com/sekai-lyr/sekai-product)
+
+</div>
+
+---
 
 `memory-5` 是一个 Spring Boot + Thymeleaf + MyBatis 的二次元音乐播放器，专注于个人歌库整理、歌单管理和本地播放。
 
@@ -12,40 +24,6 @@
 - 网易云、QQ 音乐、B 站歌曲/视频链接导入
 
 网易云、QQ 音乐、B 站仅用于粘贴歌曲/歌单链接导入歌曲信息，不内嵌第三方平台页面。
-
-## 手机端适配（2026-10-10）
-
-电脑（≥981px）保持原有左侧栏布局不变；手机和平板（≤980px）走同一套响应式层：
-
-- 侧栏变成 65px 吸顶导航条，导航项收进「菜单」折叠面板（遮罩点击、Esc、选中链接都会关闭）。
-- 歌曲库 / 歌单页的横向胶片条允许纵向拖动，翻页控件固定在首屏内，卡片封面不再是长方形裁切。
-- 播放页三种演出（唱片 / 字阵 / Folia）按真实可视高度布局：封面与圆盘不再左右被裁，
-  进度条命中区 44px（视觉轨道粗细不变），控件条在窄屏吸底，队列抽屉不再把「播放队列」挤成 0 高，
-  字阵 / Folia 舞台在没有歌词时给出提示。
-- 破坏性操作（删除歌单、移除歌曲）在手机上有 44px 命中区并带二次确认。
-
-改动落在 `app.css` / `player-stage.css` / `songs-selection.css` / `playlists-selection.css` 末尾的
-「手机端适配层」小节（用更高特异性 + 靠后的顺序压过文件前面的旧规则），
-以及 `fragments.html`、`app-motion.js`、`songs-selection.js`、`playlists-selection.js`、`lyrics-stage.js`。
-模板里的静态资源版本号已同步更新，回访用户不会拿到旧 CSS/JS。
-
-### 手机端回归验证
-
-```bash
-# 111 项布局/交互断言（导航、胶片条、舞台、抽屉、触控尺寸、长列表可见性）
-# 依赖 tools/browser-qa-runtime 下已安装的 playwright-core，浏览器用本机 Edge
-node tools/browser-qa-runtime/verify-mobile.js --url=http://127.0.0.1:8085
-
-# 全站几何体检（横向溢出 / 越界元素 / 小触控目标 / 小字号）
-node tools/browser-qa-runtime/mobile-audit.js --url=http://127.0.0.1:8085
-
-# 截图（手机 390 / 平板 768 / 桌面 1440）
-node tools/browser-qa-runtime/shot.js --url=http://127.0.0.1:8085 --vps=390,768,1440
-```
-
-验证脚本使用独立测试账号 `qa_mobile_layout`（密码 `123456`）。它由
-`tools/qa-mobile-fixture.sql` 创建：从现有歌库复制少量「有歌词音频 / 无歌词音频 / B 站视频」
-三类歌曲和一张歌单，方便复现三种演出和空歌词提示，不会改动你自己的歌单数据。
 
 ## 外部上传目录
 
@@ -98,3 +76,36 @@ mvn spring-boot:run
 ```
 
 默认端口：`8085`
+
+---
+
+## 🗺️ Sekai 项目全景导航
+
+本项目是 **Sekai 系列作品集** 的一员，全部 14 个实战项目：
+
+| 项目 | 简介 |
+|------|------|
+| [`memory-1`](https://github.com/sekai-lyr/memory-1) | 📊 二次元数据中心 |
+| [`memory-2`](https://github.com/sekai-lyr/memory-2) | 🛒 二次元电商商城 |
+| [`memory-3`](https://github.com/sekai-lyr/memory-3) | 📔 二次元回忆录 |
+| [`memory-4`](https://github.com/sekai-lyr/memory-4) | 🎋 角色抽签与今日运势 |
+| [`memory-5`](https://github.com/sekai-lyr/memory-5) | 🎵 歌词同步音乐播放器 |
+| [`memory-6`](https://github.com/sekai-lyr/memory-6) | 🎮 原创角色合成小游戏 |
+| [`memory-7`](https://github.com/sekai-lyr/memory-7) | 🖼️ 二次元壁纸图库系统 |
+| [`memory-8`](https://github.com/sekai-lyr/memory-8) | 📖 英语单词学习系统 |
+| [`memory-9`](https://github.com/sekai-lyr/memory-9) | 📝 表单收集与 AI 对话系统 |
+| [`memory-10`](https://github.com/sekai-lyr/memory-10) | 📺 动漫视频导航站 |
+| [`memory-11`](https://github.com/sekai-lyr/memory-11) | ⚔️ 游戏王规则卡牌对战 |
+| [`memory-12`](https://github.com/sekai-lyr/memory-12) | 🎓 游戏化学习平台 |
+| [`memory-13`](https://github.com/sekai-lyr/memory-13) | 🎭 Ren'Py 视觉小说 |
+| [`memory-14`](https://github.com/sekai-lyr/memory-14) | 🤖 识番推荐与 RAG 助手平台 |
+
+📦 **一站式浏览全部项目**：[sekai-lyr/sekai-product](https://github.com/sekai-lyr/sekai-product)（monorepo 合集）
+
+<div align="center">
+
+**如果这个项目对你有帮助或启发，欢迎点一个 ⭐ Star 支持一下！**
+
+*Made with ❤️ by [sekai-lyr](https://github.com/sekai-lyr)*
+
+</div>

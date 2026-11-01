@@ -4,13 +4,22 @@ import com.example.demo.anime.AnimeImageRecognitionService;
 import com.example.demo.anime.AnimeService;
 import com.example.demo.chat.ChatMemoryService;
 import com.example.demo.chat.VectorStoreService;
+import com.example.demo.vision.VisionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,19 +39,25 @@ public class AiController {
     private final AnimeEventService animeEventService;
     private final ChatMemoryService chatMemoryService;
     private final VectorStoreService vectorStoreService;
+    private final VisionService visionService;
     private final Map<String, String> conversationCities = new ConcurrentHashMap<>();
+
+    /** SSE 流式对话执行器：虚拟线程，任务结束即释放 */
+    private final ExecutorService streamExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     @PostMapping("/chat")
     public ResponseEntity<Map<String, Object>> chat(@RequestBody Map<String, String> request) {
-        String message = request.get("message");
-        String systemPrompt = request.get("systemPrompt");
-        log.info("AnimeAI chat: {}", message != null && message.length() > 50 ? message.substring(0, 50) + "..." : message);
+        AssistantProfile profile = AssistantProfile.resolve(request.get("assistant"));
+        String conversationId = profile.conversationId(request.get("conversationId"));
+        String message = requireMessage(request.get("message"));
+        String systemPrompt = profile.systemPrompt();
+        log.info("{} chat: {}", profile, message.length() > 50 ? message.substring(0, 50) + "..." : message);
         Map<String, Object> response = new HashMap<>();
         try {
-            if (isRecentAnimeMovieQuestion(message)) {
+            if (profile == AssistantProfile.ANIME && isRecentAnimeMovieQuestion(message)) {
                 String movies = animeService.getRecentAnimeMoviesAniList(15);
                 if (movies != null && !movies.isBlank()) {
-                    saveShortcutResult(request.get("conversationId"), message, movies);
+                    saveShortcutResult(conversationId, message, movies);
                     response.put("success", true);
                     response.put("content", movies);
                     return ResponseEntity.ok(response);
@@ -50,9 +65,9 @@ public class AiController {
             }
             String result = springAiChatService.chatWithTools(
                     message,
-                    systemPrompt == null || systemPrompt.isBlank() ? null : systemPrompt,
-                    null,
-                    request.get("conversationId"));
+                    systemPrompt,
+                    profile.tools(toolCallingService.getRegisteredToolNames()),
+                    conversationId);
             
             result = sanitizeUnannouncedEventAnswer(result, null);
             response.put("success", true);
@@ -63,6 +78,51 @@ public class AiController {
             response.put("error", e.getMessage());
         }
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * SSE 流式对话（独立助手身份 + 工具 + 记忆 + RAG）。POST 返回 text/event-stream，
+     * 事件：增量 data 帧、event:done、event:error。
+     */
+    @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter chatStream(@RequestBody Map<String, String> request) {
+        AssistantProfile profile = AssistantProfile.resolve(request.get("assistant"));
+        String message = requireMessage(request.get("message"));
+        String conversationId = profile.conversationId(request.get("conversationId"));
+        String systemPrompt = profile.systemPrompt();
+        SseEmitter emitter = new SseEmitter(120_000L);
+        AtomicBoolean cancelled = new AtomicBoolean(false);
+        emitter.onTimeout(() -> { cancelled.set(true); emitter.complete(); });
+        emitter.onError(e -> cancelled.set(true));
+
+        streamExecutor.submit(() -> {
+            try {
+                toolCallingService.chatWithToolsStream(systemPrompt, message,
+                        profile.tools(toolCallingService.getRegisteredToolNames()), conversationId, delta -> {
+                    if (cancelled.get()) throw new IllegalStateException("client disconnected");
+                    try {
+                        emitter.send(SseEmitter.event().data(delta));
+                    } catch (IOException io) {
+                        cancelled.set(true);
+                        throw new IllegalStateException("send failed", io);
+                    }
+                });
+                emitter.send(SseEmitter.event().name("done").data("[DONE]"));
+                emitter.complete();
+            } catch (Exception e) {
+                log.error("Stream chat failed: {}", e.getMessage());
+                try {
+                    if (!cancelled.get()) {
+                        emitter.send(SseEmitter.event().name("error")
+                                .data("流式回复中断：" + e.getMessage()));
+                    }
+                    emitter.complete();
+                } catch (Exception sendError) {
+                    emitter.completeWithError(sendError);
+                }
+            }
+        });
+        return emitter;
     }
 
     private boolean isRecentAnimeMovieQuestion(String message) {
@@ -109,15 +169,16 @@ public class AiController {
 
     @PostMapping("/chat-with-tools")
     public ResponseEntity<Map<String, Object>> chatWithTools(@RequestBody Map<String, Object> request) {
-        String message = (String) request.get("message");
-        String systemPrompt = (String) request.get("systemPrompt");
-        String conversationId = (String) request.get("conversationId");
+        AssistantProfile profile = AssistantProfile.resolve((String) request.get("assistant"));
+        String message = requireMessage((String) request.get("message"));
+        String systemPrompt = profile.systemPrompt();
+        String conversationId = profile.conversationId((String) request.get("conversationId"));
         @SuppressWarnings("unchecked")
         List<String> allowedTools = (List<String>) request.get("allowedTools");
         log.info("AnimeAI tool chat: tools={}", allowedTools);
         Map<String, Object> response = new HashMap<>();
         try {
-            if (isRecentAnimeMovieQuestion(message)) {
+            if (profile == AssistantProfile.ANIME && isRecentAnimeMovieQuestion(message)) {
                 String movies = animeService.getRecentAnimeMoviesAniList(15);
                 if (movies != null && !movies.isBlank()) {
                     saveShortcutResult(conversationId, message, movies);
@@ -129,10 +190,11 @@ public class AiController {
                 }
             }
             List<String> validatedTools = toolCallingService.validateToolNames(allowedTools);
-            Set<String> allowedToolSet = isAnimeEventQuestion(message)
-                    ? Set.of("searchAnimeEventsChina")
-                    : (allowedTools == null || allowedTools.isEmpty()
-                    ? null : new HashSet<>(validatedTools));
+            Set<String> allowedToolSet = profile.tools(toolCallingService.getRegisteredToolNames());
+            allowedToolSet.retainAll(validatedTools);
+            if (profile == AssistantProfile.ANIME && isAnimeEventQuestion(message)) {
+                allowedToolSet.retainAll(Set.of("searchAnimeEventsChina"));
+            }
             String result = springAiChatService.chatWithTools(message, systemPrompt, allowedToolSet, conversationId);
             response.put("success", true);
             response.put("content", sanitizeUnannouncedEventAnswer(result, null));
@@ -161,6 +223,8 @@ public class AiController {
 
     @PostMapping("/analyze-image")
     public ResponseEntity<Map<String, Object>> analyzeImage(@RequestBody Map<String, String> request) {
+        AssistantProfile profile = AssistantProfile.resolve(request.get("assistant"));
+        String conversationId = profile.conversationId(request.get("conversationId"));
         Map<String, Object> response = new HashMap<>();
         try {
             String image = request.get("image");
@@ -169,14 +233,18 @@ public class AiController {
             }
             String imageUrl = image.startsWith("data:") ? image : "data:image/jpeg;base64," + image;
             String question = request.get("question");
-            log.info("Anime image recognition: dataLength={}", image.length());
-            String result = animeImageRecognitionService.recognize(imageUrl, question);
+            log.info("{} image analysis: dataLength={}", profile, image.length());
+            String result = profile == AssistantProfile.PLANT
+                    ? visionService.analyzeImageWithCustomPrompt(imageUrl, question == null || question.isBlank()
+                            ? "识别图片中的植物或宠物，描述可见的健康状况，并提供初步护理建议。" : question,
+                            profile.systemPrompt())
+                    : animeImageRecognitionService.recognize(imageUrl, question);
             response.put("success", true);
             response.put("content", result);
-            saveShortcutResult(request.get("conversationId"),
+            saveShortcutResult(conversationId,
                     "用户上传图片并提问：" + (question == null || question.isBlank() ? "请识别这张图片" : question), result);
         } catch (Exception e) {
-            log.error("Anime image analysis failed", e);
+            log.error("{} image analysis failed", profile, e);
             response.put("success", false);
             response.put("error", e.getMessage());
         }
@@ -184,9 +252,9 @@ public class AiController {
     }
 
     @GetMapping("/tools/registered")
-    public ResponseEntity<Map<String, Object>> getRegisteredTools() {
+    public ResponseEntity<Map<String, Object>> getRegisteredTools(@RequestParam(required = false) String assistant) {
         Map<String, Object> response = new HashMap<>();
-        Set<String> tools = toolCallingService.getRegisteredToolNames();
+        Set<String> tools = AssistantProfile.resolve(assistant).tools(toolCallingService.getRegisteredToolNames());
         response.put("success", true);
         response.put("data", tools);
         response.put("total", tools.size());
@@ -194,11 +262,19 @@ public class AiController {
     }
 
     @GetMapping("/tools/schema")
-    public ResponseEntity<Map<String, Object>> getToolsSchema() {
+    public ResponseEntity<Map<String, Object>> getToolsSchema(@RequestParam(required = false) String assistant) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("data", toolCallingService.buildToolsSchema());
+        response.put("data", toolCallingService.buildToolsSchema(
+                AssistantProfile.resolve(assistant).tools(toolCallingService.getRegisteredToolNames())));
         return ResponseEntity.ok(response);
+    }
+
+    private String requireMessage(String message) {
+        if (message == null || message.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "消息不能为空");
+        }
+        return message;
     }
 
     private Map<String, Object> convertToolCallResult(ToolCallResult result) {

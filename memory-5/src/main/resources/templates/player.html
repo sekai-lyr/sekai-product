@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title th:text="${song.title + ' - Sekai Song'}">Player</title>
     <link rel="stylesheet" th:href="@{/css/app.css(v=20261010m)}" href="/css/app.css?v=20261010m">
-    <link rel="stylesheet" th:href="@{/css/player-stage.css(v=20261013-gallery)}" href="/css/player-stage.css?v=20261013-gallery">
-    <link rel="stylesheet" href="/css/performance-controls.css?v=20261013-gallery">
+    <link rel="stylesheet" th:href="@{/css/player-stage.css(v=20261101-localbg)}" href="/css/player-stage.css?v=20261101-localbg">
+    <link rel="stylesheet" href="/css/performance-controls.css?v=20261101-localbg">
     <link rel="stylesheet" href="/css/performance-mobile.css?v=20261024">
     <script src="/js/site-theme.js?v=20261028"></script>
     <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
-    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+    <link rel="stylesheet" href="/css/library-experience.css?v=20261101-stage2">
 </head>
 <body th:classappend="${stageMode == 'folia' ? ' immersive-lyrics-page stage-mode-folia' : (stageMode == 'folia-classic' ? ' immersive-lyrics-page stage-mode-folia stage-mode-folia-classic' : (stageMode == 'lyrics' ? ' immersive-lyrics-page stage-mode-lyrics' : ''))}">
 <div class="app-shell player-bg" th:style="${#strings.isEmpty(song.skinUrl) or not (#strings.startsWith(song.skinUrl,'/') or #strings.startsWith(song.skinUrl,'http')) ? '' : 'background-image: linear-gradient(90deg, rgba(10,15,30,.86), rgba(10,15,30,.62)), url(' + song.skinUrl + ')'}" th:attr="data-local-cover-bg=${song.skinUrl}">
@@ -272,12 +272,6 @@
                     </label>
                     <span data-eq-status>标准</span>
                 </div>
-                <form class="audio-upload" th:action="@{/songs/audio/{id}(id=${song.id})}" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
-                    <label for="audioFile">本地音频</label>
-                    <input id="audioFile" name="audioFile" type="file" accept=".mp3,.flac,.m4a,.wav,.ogg,.aac,audio/*" required>
-                    <button type="submit">上传并播放</button>
-                </form>
                 <form class="audio-upload lyric-fetch"
                       th:action="@{/songs/lyrics/{id}/fetch(id=${song.id})}"
                       method="post">
@@ -285,14 +279,6 @@
                     <input type="hidden" name="force" th:value="${!#strings.isEmpty(song.lyricText)}">
                     <label>云端歌词</label>
                     <button type="submit" th:text="${#strings.isEmpty(song.lyricText) ? '获取同步歌词' : '重新匹配歌词'}">获取同步歌词</button>
-                </form>
-                <form class="audio-upload cover-upload"
-                      th:action="@{/songs/cover/{id}(id=${song.id})}"
-                      method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="returnTo" th:value="${playlistId == null ? '/player/' + song.id : '/player/' + song.id + '?playlistId=' + playlistId}">
-                    <label for="coverFile">上传封面</label>
-                    <input id="coverFile" name="coverFile" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" required>
-                    <button type="submit">更新封面</button>
                 </form>
                 <form class="audio-upload metadata-resync-form"
                       th:if="${playableAudio}"
@@ -397,11 +383,11 @@
     </main>
 </div>
 <script src="/js/stage-catalog.js?v=20261014-derived"></script>
-<script th:if="${browserLocal == true}" src="/js/local-stage.js?v=20261027-lyrics"></script>
+<script th:if="${browserLocal == true}" src="/js/local-stage.js?v=20261101-stage2"></script>
 <script th:src="@{/js/player-stage.js(v=20261010m)}" src="/js/player-stage.js?v=20261010m"></script>
 <script src="/js/lyrics-stage.js?v=20261027-area"></script>
-<script src="/js/stage-mode.js?v=20261027-lyrics"></script>
-<script src="/js/player.js?v=20261013-gallery"></script>
+<script src="/js/stage-mode.js?v=20261101-localbg"></script>
+<script src="/js/player.js?v=20261028-cleanup"></script>
 <script src="/js/performance-controls.js?v=20261024-mobile"></script>
 </body>
 </html>

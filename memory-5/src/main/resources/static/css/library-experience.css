@@ -33,10 +33,57 @@ body :is(button, select, summary, .library-view-switch a, .library-pagination a)
 .playback-file-tools > summary { cursor:pointer; padding:8px 0; font-weight:600; }
 .local-playback-page .local-statistics-notice { font-size:12px; color:var(--muted); }
 .local-playback-page #local-playback-tools:not([hidden]), .local-playback-page .playback-file-tools .local-import-guide { display:block !important; }
-body.local-playback-ready { overflow:auto; }
-.local-playback-ready .sidebar, .local-playback-ready .section-title { display:flex; }
-.local-playback-ready #local-workspace { position:relative; inset:auto; z-index:auto; border-radius:16px; }
-.local-playback-ready #local-stage { height:72svh; }
+/* 演出页沉浸：舞台以外的东西全部让位，舞台铺满整个窗口。
+   以前这里把沉浸态又改回卡片（sidebar display:flex / workspace relative / 72svh），
+   导致播放页始终留着标题、下拉框和右侧留白。
+   2026-11-01：沉浸改为页面级（.stage-immersive），打开 /player/{id} 立刻全屏，
+   不再等本机文件 ready——手机上打不开文件时也不会被控制面板糊满一屏。
+   点「设置」加 .stage-settings-open，全部还原成可操作的配置页。 */
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) { overflow:hidden; background:#05060a; }
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) .app-shell { grid-template-columns:minmax(0,1fr); }
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) .local-player-content > * { display:none !important; }
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) .sidebar,
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) #local-status,
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) #local-playback-tools,
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) .local-toolbar { display:none !important; }
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) .local-player-content > #local-workspace { display:block !important; }
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) #local-workspace { position:fixed; inset:0; z-index:60; border-radius:0; min-height:0; box-shadow:none; background:#05060a; }
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) #local-stage { width:100vw; height:100vh; height:100dvh; min-height:0; }
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) #local-empty:not([hidden]) {
+    display:flex !important; flex-direction:column; align-items:center; justify-content:center;
+    gap:12px; min-height:100dvh; padding:32px 26px calc(32px + env(safe-area-inset-bottom,0px));
+    text-align:center; background:#05060a; max-width:none; width:100%; margin:0;
+}
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) #local-empty h1 { font-size:clamp(24px,6vw,34px); margin:0; }
+body:is(.stage-immersive,.local-playback-ready):not(.stage-settings-open) #local-empty p { max-width:520px; margin:0; color:var(--muted); line-height:1.7; }
+/* 沉浸态浮钮：返回 / 设置（只在播放页渲染） */
+.stage-chrome {
+    display:flex; gap:8px; position:fixed; z-index:80;
+    top:calc(12px + env(safe-area-inset-top,0px)); left:12px;
+    opacity:.82; transition:opacity .35s ease;
+}
+body.chrome-idle:not(.stage-settings-open) .stage-chrome { opacity:0; pointer-events:none; }
+body.stage-settings-open .stage-chrome { opacity:1; }
+/* 设置态：浮钮挪到右下角，只留「返回演出」，不挡顶部导航 */
+body.stage-settings-open .stage-chrome {
+    top:auto; left:auto; right:12px;
+    bottom:calc(16px + env(safe-area-inset-bottom,0px));
+}
+body.stage-settings-open .stage-chrome > a { display:none; }
+.stage-chrome-btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    min-height:40px; padding:0 16px; border-radius:999px; border:1px solid rgba(255,255,255,.22);
+    background:rgba(8,14,24,.55); color:#eaf6ff; font:inherit; font-size:13px; font-weight:700;
+    text-decoration:none; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    cursor:pointer; touch-action:manipulation;
+}
+.stage-chrome-btn:active { background:rgba(120,224,210,.28); }
+.local-empty-actions { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:6px; }
+.local-empty-actions a, .local-empty-actions button {
+    display:inline-flex; align-items:center; min-height:44px; padding:0 20px; border-radius:999px;
+    border:1px solid rgba(126,224,210,.5); background:rgba(126,224,210,.14); color:#eaf6ff;
+    font:inherit; font-size:14px; font-weight:700; text-decoration:none; cursor:pointer;
+}
 .login-card .card-header h1 { font-size:32px; margin:12px 0; }
 .login-card .site-theme-picker { margin-top:24px; }
 @media(max-width:860px) {
@@ -64,3 +111,4 @@ body.local-playback-ready { overflow:auto; }
 
 .library-tools a.primary-btn { display:inline-flex; align-items:center; min-height:44px; padding:12px 16px; border-radius:10px; text-decoration:none; }
 .library-tools section > .library-rows { border:0; padding:0; border-radius:0; background:transparent; }
+.playback-file-tools .local-toolbar { background:var(--panel-strong); color:var(--ink); border-color:var(--line); }

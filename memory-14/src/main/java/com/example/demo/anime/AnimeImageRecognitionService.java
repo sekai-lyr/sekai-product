@@ -3,6 +3,7 @@ package com.example.demo.anime;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.example.demo.utils.SafeHttpClientFactory;
 import com.example.demo.vision.VisionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,15 +33,22 @@ public class AnimeImageRecognitionService {
 
     private final VisionService visionService;
     private final LocalCharacterIndexService localCharacterIndexService;
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(8))
-            .build();
+    private final HttpClient httpClient = SafeHttpClientFactory.create(Duration.ofSeconds(8));
+
+    /** trace.moe 结果缓存：图片 SHA-256 为键，1 小时过期 */
+    private final com.example.demo.core.TtlCache<String, TraceMatch> traceMoeCache =
+            new com.example.demo.core.TtlCache<>(3600 * 1000L, 128);
 
     public String recognize(String imageDataUrl) throws Exception {
         return recognize(imageDataUrl, null);
     }
 
     public String recognize(String imageDataUrl, String userQuestion) throws Exception {
+        if (httpClient == null) {
+            log.warn("HttpClient unavailable, anime image recognition degraded");
+            return "识图服务暂时不可用：本机网络栈初始化失败（回环连接被拦截）。"
+                    + "请检查防火墙/杀毒软件/VPN，或以管理员身份执行 netsh winsock reset 后重启电脑再试。";
+        }
         ImageData image = decodeImage(imageDataUrl);
         TraceMatch match = searchTraceMoe(image);
         if (match == null || match.similarity() < RELIABLE_TRACE_SIMILARITY) {
@@ -249,6 +257,15 @@ public class AnimeImageRecognitionService {
     }
 
     private TraceMatch searchTraceMoe(ImageData image) throws Exception {
+        // 以图搜番结果缓存：按图片内容 SHA-256 为键，1 小时过期，避免同图重复上传
+        String imageHash = java.util.HexFormat.of().formatHex(
+                java.security.MessageDigest.getInstance("SHA-256").digest(image.bytes()));
+        TraceMatch cachedMatch = traceMoeCache.get(imageHash);
+        if (cachedMatch != null) {
+            log.info("trace.moe cache hit: anilistId={}, similarity={}", cachedMatch.anilistId(), cachedMatch.similarity());
+            return cachedMatch;
+        }
+
         String boundary = "----AnimeAI" + UUID.randomUUID();
         byte[] prefix = ("--" + boundary + "\r\n"
                 + "Content-Disposition: form-data; name=\"image\"; filename=\"screenshot\"\r\n"
@@ -280,6 +297,7 @@ public class AnimeImageRecognitionService {
                 top.getDoubleValue("similarity"),
                 top.getString("episode"),
                 top.getDoubleValue("from"));
+        traceMoeCache.put(imageHash, match);
         log.info("trace.moe matched: anilistId={}, similarity={}", match.anilistId(), match.similarity());
         return match;
     }

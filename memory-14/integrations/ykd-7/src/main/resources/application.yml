@@ -1,0 +1,121 @@
+app:
+  name: openclaw
+  version: 1.0.0
+
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: openclaw
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:sqlite}
+  main:
+    banner-mode: off
+  config:
+    import: optional:file:secrets.properties[.properties]
+  ai:
+    deepseek:
+      api-key: ${DEEPSEEK_API_KEY:${deepseek.api.key:}}
+      base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      chat:
+        options:
+          model: ${DEEPSEEK_MODEL:deepseek-v4-flash}
+
+# Alibaba Cloud Model Studio: image, video, vision, ASR and TTS.
+# Flash/Turbo defaults prioritize latency and cost.
+dashscope:
+  api:
+    key: ${DASHSCOPE_API_KEY:}
+  base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/api/v1}
+  compatible-base-url: ${DASHSCOPE_COMPATIBLE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode}
+  vision:
+    model: ${DASHSCOPE_VISION_MODEL:qwen3-vl-flash}
+    timeout: ${DASHSCOPE_VISION_TIMEOUT:90}
+  image:
+    model: ${DASHSCOPE_IMAGE_MODEL:wanx2.1-t2i-turbo}
+    size: ${DASHSCOPE_IMAGE_SIZE:1024*1024}
+    poll-interval: ${DASHSCOPE_IMAGE_POLL_INTERVAL:5}
+    timeout: ${DASHSCOPE_IMAGE_TIMEOUT:300}
+  video:
+    model: ${DASHSCOPE_VIDEO_MODEL:wan2.2-t2v-plus}
+    poll-interval: ${DASHSCOPE_VIDEO_POLL_INTERVAL:5}
+    timeout: ${DASHSCOPE_VIDEO_TIMEOUT:900}
+  asr:
+    model: ${DASHSCOPE_ASR_MODEL:paraformer-v2}
+  tts:
+    model: ${DASHSCOPE_TTS_MODEL:qwen-audio-3.0-tts-flash}
+    voice:
+      female: ${DASHSCOPE_TTS_FEMALE_VOICE:longanhuan_v3.6}
+      male: ${DASHSCOPE_TTS_MALE_VOICE:longjielidou_v3.6}
+    timeout: ${DASHSCOPE_TTS_TIMEOUT:120}
+
+ilink:
+  token: ${ILINK_TOKEN:}
+  max-messages: 200
+  sync-buf-file: ilink_sync_buf.dat
+
+memory:
+  enabled: ${MEMORY_ENABLED:true}
+  history-limit: ${MEMORY_HISTORY_LIMIT:20}
+  relevant-limit: ${MEMORY_RELEVANT_LIMIT:8}
+  minimum-term-matches: ${MEMORY_MINIMUM_TERM_MATCHES:1}
+  extraction-enabled: ${MEMORY_EXTRACTION_ENABLED:${memory.enabled}}
+
+reminder:
+  scan-interval-ms: ${REMINDER_SCAN_INTERVAL_MS:30000}
+  initial-delay-ms: ${REMINDER_INITIAL_DELAY_MS:5000}
+
+skills:
+  directory: ${SKILLS_DIRECTORY:skills}
+  reload-interval-ms: ${SKILLS_RELOAD_INTERVAL_MS:3000}
+
+graph:
+  checkpoint:
+    directory: ${GRAPH_CHECKPOINT_DIRECTORY:data/graph-checkpoints}
+
+knowledge:
+  chunk-size: ${KNOWLEDGE_CHUNK_SIZE:1200}
+  chunk-overlap: ${KNOWLEDGE_CHUNK_OVERLAP:150}
+  search-limit: ${KNOWLEDGE_SEARCH_LIMIT:3}
+  minimum-similarity: ${KNOWLEDGE_MINIMUM_SIMILARITY:0.55}
+  embedding:
+    model: ${DASHSCOPE_EMBEDDING_MODEL:text-embedding-v4}
+    dimensions: ${DASHSCOPE_EMBEDDING_DIMENSIONS:1024}
+
+websearch:
+  base-url: ${WEBSEARCH_BASE_URL:https://www.bing.com/search}
+  max-results: ${WEBSEARCH_MAX_RESULTS:5}
+  timeout: ${WEBSEARCH_TIMEOUT:15}
+
+web:
+  proxy-url: ${WEB_PROXY_URL:}
+
+webpage:
+  max-bytes: ${WEBPAGE_MAX_BYTES:1000000}
+  max-chars: ${WEBPAGE_MAX_CHARS:20000}
+  context-max-chars: ${WEBPAGE_CONTEXT_MAX_CHARS:8000}
+  chunk-chars: ${WEBPAGE_CHUNK_CHARS:1200}
+  max-chunks: ${WEBPAGE_MAX_CHUNKS:6}
+  max-redirects: ${WEBPAGE_MAX_REDIRECTS:5}
+  timeout: ${WEBPAGE_TIMEOUT:20}
+
+amap:
+  api:
+    key: ${AMAP_API_KEY:}
+  base-url: ${AMAP_BASE_URL:https://restapi.amap.com}
+  max-results: ${AMAP_MAX_RESULTS:5}
+  timeout: ${AMAP_TIMEOUT:15}
+
+flyai:
+  executable: ${FLYAI_EXECUTABLE:flyai}
+  api-key: ${FLYAI_API_KEY:${fliggy.api-key:}}
+  timeout: ${FLYAI_TIMEOUT:45s}
+  max-output-chars: ${FLYAI_MAX_OUTPUT_CHARS:200000}
+
+# Web monitoring dashboard
+webui:
+  enabled: ${WEBUI_ENABLED:true}
+
+logging:
+  config: classpath:logback.xml

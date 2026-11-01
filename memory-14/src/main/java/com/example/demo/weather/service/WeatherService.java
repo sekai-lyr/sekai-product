@@ -2,6 +2,7 @@ package com.example.demo.weather.service;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
+import com.example.demo.core.TtlCache;
 import com.example.demo.weather.config.WeatherApiProperties;
 import com.example.demo.weather.dto.WeatherApiResponse;
 import com.example.demo.weather.exception.WeatherApiException;
@@ -31,6 +32,10 @@ public class WeatherService {
     private final OkHttpClient okHttpClient;
     private final WeatherApiProperties weatherApiProperties;
 
+    /** 天气结果缓存：城市+日 为键，30 分钟过期，避免重复调用外部 API */
+    private final TtlCache<String, WeatherResponse> weatherCache =
+            new TtlCache<>(30 * 60 * 1000L, 256);
+
     public WeatherService(OkHttpClient okHttpClient, WeatherApiProperties weatherApiProperties) {
         this.okHttpClient = okHttpClient;
         this.weatherApiProperties = weatherApiProperties;
@@ -38,16 +43,25 @@ public class WeatherService {
 
     public WeatherResponse getWeatherByCity(String city) {
         validateCity(city);
-        
+
+        String cacheKey = city.trim().toLowerCase() + "|" + java.time.LocalDate.now();
+        WeatherResponse cached = weatherCache.get(cacheKey);
+        if (cached != null) {
+            log.debug("命中天气缓存: {}", city);
+            return cached;
+        }
+
         log.info("查询城市天气: {}", city);
-        
+
         String url = buildWeatherUrl(city);
         log.debug("请求 URL: {}", maskApiKey(url));
-        
+
         try {
             String responseBody = executeRequest(url);
             WeatherApiResponse apiResponse = parseResponse(responseBody);
-            return convertToWeatherResponse(apiResponse);
+            WeatherResponse response = convertToWeatherResponse(apiResponse);
+            weatherCache.put(cacheKey, response);
+            return response;
         } catch (IOException e) {
             log.error("获取天气数据失败，城市: {}", city, e);
             throw new WeatherApiException("获取天气数据失败: " + e.getMessage(), e);

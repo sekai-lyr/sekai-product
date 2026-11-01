@@ -61,3 +61,9 @@ memory-11/SekaiGame/android-app/build/
 memory-13/*-dists/
 memory-3/.tools/
 **/*.apk
+
+# local QA & tool artifacts (2026-11-01)
+memory-5/qa-output/
+memory-5/.easyclaw/
+memory-5/.workbuddy/
+memory-5/logs/

@@ -198,19 +198,19 @@
       if (data.code === 200) {
         showMessage(isRegister ? 'Your space is ready. Taking you inside.' : 'Welcome back. Taking you inside.', 'success');
         window.setTimeout(function () {
-          window.location.href = '/chat';
+          window.location.href = '/assistants';
         }, reducedMotion ? 100 : 650);
       } else {
         showMessage(data.message || (isRegister ? 'We could not create your account.' : 'We could not sign you in.'), 'error');
         form.setAttribute('aria-busy', 'false');
         submitButton.disabled = false;
-        submitButton.textContent = isRegister ? 'Create account' : 'Enter FANCE';
+        submitButton.textContent = isRegister ? 'Create account' : 'Enter SekaiAI';
       }
     } catch (error) {
       showMessage('The space is momentarily unavailable. Please try again.', 'error');
       form.setAttribute('aria-busy', 'false');
       submitButton.disabled = false;
-      submitButton.textContent = isRegister ? 'Create account' : 'Enter FANCE';
+      submitButton.textContent = isRegister ? 'Create account' : 'Enter SekaiAI';
     }
   });
 })();

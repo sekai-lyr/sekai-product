@@ -1,5 +1,6 @@
 package com.example.demo.movie;
 
+import com.example.demo.ai.AssistantProfile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,6 +59,7 @@ public class MovieReminderController {
                 || date == null || date.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Missing required fields"));
         }
+        conversationId = AssistantProfile.resolve(request.get("assistant")).conversationId(conversationId);
 
         try {
             LocalDate localDate = LocalDate.parse(date);
@@ -75,11 +77,13 @@ public class MovieReminderController {
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<Map<String, Object>> getPending(@RequestParam String conversationId) {
+    public ResponseEntity<Map<String, Object>> getPending(@RequestParam String conversationId,
+                                                         @RequestParam(required = false) String assistant) {
         if (conversationId == null || conversationId.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Missing conversationId"));
         }
-        List<String> messages = reminderService.getAndMarkPending(conversationId);
+        List<String> messages = reminderService.getAndMarkPending(
+                AssistantProfile.resolve(assistant).conversationId(conversationId));
         return ResponseEntity.ok(Map.of("success", true, "messages", messages));
     }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimeAI · 启程之页</title>
+    <title>SekaiAI · 启程之页</title>
     <link rel="stylesheet" href="/css/cinematic.css?v=20260803-6">
     <style>
         body.cinematic{overflow:auto}
@@ -40,39 +40,39 @@
 <div class="sky-scene"><div class="sun-flare"></div><div class="god-rays"></div><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div><div class="cloud c5"></div><div class="city"></div><div class="rain"></div><div class="sparkles"></div><div class="petals"><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div></div><div class="bokeh"><div class="bokeh-dot"></div><div class="bokeh-dot"></div><div class="bokeh-dot"></div><div class="bokeh-dot"></div><div class="bokeh-dot"></div><div class="bokeh-dot"></div><div class="bokeh-dot"></div><div class="bokeh-dot"></div></div><div class="rainbow"></div><div class="moon"></div><div class="stars-s1"></div><div class="stars-s2"></div><div class="stars-s3"></div><div class="lightning"></div><div class="fog"></div><div class="raindrops"><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div><div class="raindrop"></div></div><div class="cloud-puffs"><div class="cloud-puff"></div><div class="cloud-puff"></div><div class="cloud-puff"></div><div class="cloud-puff"></div><div class="cloud-puff"></div><div class="cloud-puff"></div><div class="cloud-puff"></div><div class="cloud-puff"></div><div class="cloud-puff"></div><div class="cloud-puff"></div></div><div class="snowfall"><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div></div><div class="fireflies"><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div><div class="firefly"></div></div></div>
 <div class="home-shell">
     <div class="navbar">
-        <div class="navbar-brand"><div class="brand-mark" style="width:38px;height:38px;font-size:16px;border-radius:13px">A</div>AnimeAI</div>
+        <div class="navbar-brand"><div class="brand-mark" style="width:38px;height:38px;font-size:16px;border-radius:13px">S</div>SekaiAI</div>
         <div class="navbar-user">
             <span id="greeting"></span>
-            <button class="btn-home" onclick="logout()">退�?/button>
+            <button class="btn-home" onclick="logout()">退�?/button>
         </div>
     </div>
     <main class="home-main">
         <section class="home-hero">
-            <div class="home-orb">�?/div>
-            <h2>你与动画世界的交�?/h2>
-            <p>AI 聊天 · 角色识别 · 电商，每一次相遇都值得被记住�?/p>
+            <div class="home-orb">�?/div>
+            <h2>你与动画世界的交�?/h2>
+            <p>AI 聊天 · 角色识别 · 电商，每一次相遇都值得被记住�?/p>
         </section>
         <div class="home-cards">
             <a href="/chat" class="home-card">
                 <span class="card-icon">☁️</span>
-                <h3>天空放映�?/h3>
-                <p>�?AI 对话，搜索番剧、角色、漫展和电影。上传截图即可识别画面�?/p>
+                <h3>天空放映�?/h3>
+                <p>�?AI 对话，搜索番剧、角色、漫展和电影。上传截图即可识别画面�?/p>
             </a>
             
             <a href="/shop" class="home-card">
                 <span class="card-icon">🎁</span>
-                <h3>精选好�?/h3>
-                <p>宠物与植物周边商品，浏览收藏，发布你的手工与二手好物�?/p>
+                <h3>精选好�?/h3>
+                <p>宠物与植物周边商品，浏览收藏，发布你的手工与二手好物�?/p>
             </a>
             
         </div>
     </main>
-    <footer class="home-foot">AnimeAI · 与每一个温柔的故事相遇</footer>
+    <footer class="home-foot">SekaiAI · 与每一个温柔的故事相遇</footer>
 </div>
 <script>
 fetch('/api/auth/me').then(function(r){return r.json()}).then(function(d){
 if(d.code===200&&d.data){
-document.getElementById('greeting').textContent='你好�?+d.data.userName;
+document.getElementById('greeting').textContent='你好�?+d.data.userName;
 }else{window.location.href='/login';}
 }).catch(function(){window.location.href='/login'});
 async function logout(){

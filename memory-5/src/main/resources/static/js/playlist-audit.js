@@ -24,13 +24,21 @@
             await handle.getFile();return 'ready';
         }catch{return 'missing';}
     }
+    // 并发受限地批量执行，避免千首库全串行把页面拖死。
+    async function pooled(items,limit,worker){
+        let cursor=0;
+        const lanes=Array.from({length:Math.max(1,Math.min(limit,items.length))},async()=>{
+            while(cursor<items.length){const item=items[cursor++];await worker(item);}
+        });
+        await Promise.all(lanes);
+    }
     async function audit(library){
         const songs=new Map(library.songs.map(song=>[song.id,song]));
         const result=[];
         for(const playlist of library.playlists){
             const entries=[];
-            for(const id of playlist.songIds){
-                const song=songs.get(id);if(!song)continue;
+            await pooled(playlist.songIds,24,async id=>{
+                const song=songs.get(id);if(!song)return;
                 const refs=await reference(`user:${library.user.id}:playlist:${playlist.id}:song:${id}`);
                 const global=await reference(`user:${library.user.id}:song:${id}`);
                 const primary=refs?.audio;
@@ -44,7 +52,8 @@
                 entries.push({song,refs,global,audio,movie,localCover,cover:localCover || !!song.coverUrl,lyric,videoOnly,
                     artist:!!song.artist,album:!!song.album,
                     missing:[...(audio==='missing' && !videoOnly?['音频']:[]),...(movie==='missing'?['视频']:[]),...(!localCover && !song.coverUrl?['封面']:[]),...(!lyric && !videoOnly?['LRC']:[])]});
-            }
+            });
+            entries.sort((a,b)=>playlist.songIds.indexOf(a.song.id)-playlist.songIds.indexOf(b.song.id));
             result.push({playlist,entries,counts:{total:entries.length,audio:entries.filter(e=>e.audio==='missing'&&!e.videoOnly).length,
                 video:entries.filter(e=>e.movie==='missing').length,cover:entries.filter(e=>!e.cover).length,
                 lyric:entries.filter(e=>!e.lyric&&!e.videoOnly).length,artist:entries.filter(e=>!e.artist).length,

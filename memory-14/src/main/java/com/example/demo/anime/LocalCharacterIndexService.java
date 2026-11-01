@@ -3,6 +3,7 @@ package com.example.demo.anime;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.example.demo.utils.SafeHttpClientFactory;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class LocalCharacterIndexService {
 
     private static final URI SEARCH_URI = URI.create("http://127.0.0.1:8095/search");
-    private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
+    private final HttpClient httpClient = SafeHttpClientFactory.create(Duration.ofSeconds(2));
     private Process process;
 
     @PostConstruct

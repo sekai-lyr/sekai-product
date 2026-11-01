@@ -1,0 +1,248 @@
+/* ============================================================
+   SekaiAI · Assistant Hub (登录后助手选择页)
+   设计语言与 fance-auth.css 保持一致
+   ============================================================ */
+
+.hub-main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 96px 6vw 56px;
+}
+
+.hub-hero {
+  max-width: 1100px;
+  margin-bottom: 48px;
+}
+
+.hub-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.hub-kicker::before {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: var(--violet);
+}
+
+.hub-hero h1 {
+  margin: 18px 0 14px;
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(42px, 4.6vw, 76px);
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+}
+
+.hub-hero h1 span {
+  display: block;
+}
+
+.hub-hero h1 .accent {
+  font-family: var(--font-script);
+  font-size: 0.52em;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.hub-hero p {
+  margin: 0;
+  max-width: 560px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* ---------- 卡片网格 ---------- */
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 1100px;
+}
+
+@media (max-width: 1024px) {
+  .hub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .hub-grid { grid-template-columns: 1fr; }
+  .hub-main { padding-top: 84px; }
+}
+
+/* 单助手阶段：卡片保持舒适宽度，后续新增卡片自动回流为多列网格 */
+.hub-grid-single {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 380px));
+}
+
+.assistant-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 24px 22px;
+  border: 1px solid rgba(245, 242, 234, 0.14);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(245, 242, 234, 0.07), rgba(245, 242, 234, 0.02));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+              border-color 0.45s ease,
+              background 0.45s ease,
+              box-shadow 0.45s ease;
+}
+
+.assistant-card::after {
+  content: "";
+  position: absolute;
+  inset: -40% -40% auto auto;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(109, 62, 232, 0.28), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.assistant-card:hover,
+.assistant-card:focus-visible {
+  transform: translateY(-6px);
+  border-color: rgba(109, 62, 232, 0.55);
+  background: linear-gradient(160deg, rgba(245, 242, 234, 0.1), rgba(109, 62, 232, 0.06));
+  box-shadow: 0 24px 48px -24px rgba(6, 19, 33, 0.9);
+  outline: none;
+}
+
+.assistant-card:hover::after { opacity: 1; }
+
+.card-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(245, 242, 234, 0.22);
+  border-radius: 50%;
+  color: var(--white);
+  transition: border-color 0.4s ease, color 0.4s ease, background 0.4s ease;
+}
+
+.assistant-card:hover .card-icon {
+  border-color: rgba(109, 62, 232, 0.7);
+  background: rgba(109, 62, 232, 0.16);
+  color: #d9ccff;
+}
+
+.card-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.card-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.card-name h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 19px;
+  letter-spacing: 0.04em;
+}
+
+.card-name small {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.card-desc {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--muted);
+  flex: 1;
+}
+
+.card-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--faint);
+  transition: color 0.4s ease, gap 0.4s ease;
+}
+
+.card-enter::after {
+  content: "→";
+  font-size: 14px;
+  transition: transform 0.4s ease;
+}
+
+.assistant-card:hover .card-enter {
+  color: var(--white);
+  gap: 12px;
+}
+
+/* 即将上线的卡片 */
+.assistant-card.soon {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.assistant-card.soon .card-enter::before {
+  content: "即将上线";
+  letter-spacing: 0.28em;
+  color: var(--faint);
+}
+
+/* ---------- 页脚 ---------- */
+
+.hub-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  max-width: 1100px;
+  margin-top: 44px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--faint);
+}
+
+.hub-foot a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(245, 242, 234, 0.25);
+  padding-bottom: 2px;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.hub-foot a:hover {
+  color: var(--white);
+  border-color: var(--violet);
+}

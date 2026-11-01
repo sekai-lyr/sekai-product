@@ -1,0 +1,41 @@
+ndow.__buildRoot=buildRoot;
+      Object.defineProperty(window,'showDirectoryPicker',{configurable:true,
+        value:async()=>window.__root});
+    });
+    const page=await context.newPage();
+    const errors=[];page.on('pageerror',e=>{errors.push(e.message);log('PAGEERROR',e.message);});
+    let posts=0;page.on('request',r=>{if(r.method()==='POST'){posts++;if(posts<=3||posts%20===0)log('POST#'+posts,r.url().replace(base,''));}});
+    await page.goto(base+'/local-player',{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>document.querySelector('#local-link-existing'),null,{timeout:30000});
+    await page.evaluate(recs=>{window.__root=window.__buildRoot(recs);},records);
+    await page.selectOption('#local-link-playlist',String(PLAYLIST_ID));
+    const tClick=Date.now();
+    await page.click('#local-link-existing');
+    log('clicked 关联已有歌曲, waiting preview…');
+    let ok=false;
+    for(let i=0;i<120;i++){
+      await page.waitForTimeout(500);
+      const st=await page.evaluate(()=>({rows:document.querySelectorAll('#local-link-preview-rows tr').length,
+        hidden:document.querySelector('#local-link-preview')?.hidden,
+        status:document.querySelector('#local-status')?.textContent}));
+      if(st.rows>0&&!st.hidden){log(`preview rows=${st.rows} in ${((Date.now()-tClick)/1000).toFixed(1)}s | ${st.status}`);ok=true;break;}
+      if(i%10===9)log(`preview… rows=${st.rows} | ${st.status}`);
+    }
+    if(!ok)throw new Error('preview never rendered');
+    const filled=await page.evaluate(()=>[...document.querySelectorAll('#local-link-preview-rows select')].filter(s=>s.value).length);
+    log(`filled selects: ${filled}`);
+    await page.click('#local-link-confirm');
+    log('clicked 确认关联所选歌曲');
+    const tConfirm=Date.now();let last='';
+    for(let i=0;i<800;i++){
+      await page.waitForTimeout(300);
+      const st=await page.evaluate(()=>({btn:document.querySelector('#local-link-confirm')?.textContent,
+        dis:document.querySelector('#local-link-confirm')?.disabled,
+        status:document.querySelector('#local-status')?.textContent}));
+      const sig=`${st.btn}|${st.status}`;
+      if(sig!==last){last=sig;log(`+${((Date.now()-tConfirm)/1000).toFixed(1)}s btn="${st.btn}"`);}
+      if(!st.dis&&i>2){log(`DONE in ${((Date.now()-tConfirm)/1000).toFixed(1)}s | ${st.status}`);break;}
+    }
+    log('errors:',JSON.stringify(errors),'posts:',posts);
+  }finally{await browser.close();}
+})().catch(e=>{console.error('FATAL',e);process.exit(1);});

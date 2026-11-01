@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${playbackPage == true ? 'Sekai Song · 歌曲演出' : 'Sekai Song · 导入本地音乐'}">Sekai Song · 本地音乐演出</title>
     <link rel="stylesheet" href="/css/app.css?v=20261010m">
-    <link rel="stylesheet" href="/css/local-player.css?v=20261016-import-refresh">
+    <link rel="stylesheet" href="/css/local-player.css?v=20261101-stage2">
     <link rel="stylesheet" href="/css/playlist-audit.css?v=20261026">
     <script src="/js/site-theme.js?v=20261028"></script>
     <link rel="stylesheet" href="/css/site-theme.css?v=20261025">
-    <link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+    <link rel="stylesheet" href="/css/library-experience.css?v=20261101-stage2">
 </head>
 <body class="local-player-page" th:classappend="${playbackPage == true ? ' local-playback-page' : ''}"
       th:attr="data-song-id=${requestedSongId},data-playlist-id=${requestedPlaylistId},data-stage-mode=${stageMode},data-autoplay=${startAutoplay}">
@@ -113,15 +113,24 @@
 </section>
 <p class="local-statistics-notice">登录播放时，会向网站上报歌曲编号、演出类型和实际播放时长，用于站长改进产品；不上传音乐、封面或本地路径。</p>
 <section id="local-workspace">
-    <div id="local-empty"><h1>音乐准备好，舞台就准备好。</h1><p>从上方选择文件开始。已有歌曲请用“关联已有歌曲／视频”，不用重复导入。</p><p>完成后，回到歌曲库或歌单，打开歌曲即可选择演出。</p></div>
+    <div id="local-empty"><h1>音乐准备好，舞台就准备好。</h1><p>从上方选择文件开始。已有歌曲请用“关联已有歌曲／视频”，不用重复导入。</p><p>完成后，回到歌曲库或歌单，打开歌曲即可选择演出。</p>
+        <div class="local-empty-actions" th:if="${playbackPage == true}">
+            <button type="button" data-stage-settings>关联本机文件</button>
+            <a th:href="${requestedPlaylistId != null ? '/playlists/' + requestedPlaylistId : '/songs'}">返回歌单</a>
+        </div>
+    </div>
     <iframe id="local-stage" title="本地音乐演出舞台" allow="autoplay" hidden></iframe>
 </section>
 </main>
 </div>
+<div class="stage-chrome" th:if="${playbackPage == true}">
+    <a class="stage-chrome-btn" th:href="${requestedPlaylistId != null ? '/playlists/' + requestedPlaylistId : '/songs'}">‹ 返回</a>
+    <button class="stage-chrome-btn" type="button" id="stage-settings-toggle">设置</button>
+</div>
 <script src="/js/listening-stats.js?v=20261012"></script>
 <script src="/js/stage-catalog.js?v=20261014-derived"></script>
 <script src="/js/device-sharing-player.js?v=20261026-playlist"></script>
-<script src="/js/playlist-audit.js?v=20261027-cover"></script>
-<script src="/js/local-player.js?v=20261027-login-restore-2"></script>
+<script src="/js/playlist-audit.js?v=20261031-link-speed6"></script>
+<script src="/js/local-player.js?v=20261101-stage2"></script>
 </body>
 </html>

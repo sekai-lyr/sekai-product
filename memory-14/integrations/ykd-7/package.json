@@ -1,0 +1,7 @@
+{
+  "name": "sekai-travel-runtime",
+  "private": true,
+  "dependencies": {
+    "@fly-ai/flyai-cli": "1.0.16"
+  }
+}

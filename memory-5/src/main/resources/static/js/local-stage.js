@@ -3,8 +3,19 @@
     const player=window.parent !== window ? window.parent.__sekaiLocalPlayer : null;
     const track=player?.track;
     window.__sekaiBrowserLocal=true;
+    // 本机演出专属样式钩子：宽屏下 L1 封面背景会被放大裁切、糊满右半屏，需要针对性压暗。
+    document.documentElement.classList.add('sekai-local-stage');
     if (!track) {
-        document.querySelector('main').replaceChildren(Object.assign(document.createElement('p'),{textContent:'请从“打开本地音乐”页面选择文件。'}));
+        const box=document.createElement('div');
+        box.setAttribute('style','min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:32px');
+        const heading=document.createElement('p');
+        heading.setAttribute('style','margin:0;font-size:clamp(20px,4vw,28px);font-weight:800;color:#eef8ff');
+        heading.textContent='舞台还没接上音源';
+        const note=document.createElement('p');
+        note.setAttribute('style','margin:0;max-width:520px;color:#8fa7b8;line-height:1.7;font-size:14px');
+        note.textContent='这首歌还没有关联本机音频。在电脑上打开同一首歌，点左上角「设置」→「关联本机文件」，授权后这里就会开始演出。';
+        box.append(heading,note);
+        document.querySelector('main').replaceChildren(box);
         return;
     }
     const finder=document.querySelector('[data-asset-finder]');

@@ -38,18 +38,24 @@
         : `user:${account?.id || 'guest'}:song:${track.id || track.key}`;
     async function loadBindings(){
         const playlistId=bindingPlaylistId();
-        for(const track of tracks){
-            const refs=await remembered(referenceKey(track));
-            const global=await remembered(referenceKey(track,null));
-            Object.assign(track,{handle:refs?.audio,videoHandle:refs?.video,lyricHandle:refs?.lyric,
-                coverHandle:refs?.cover || global?.cover,coverBlob:refs?.coverBlob || global?.coverBlob,
-                playlistId,deviceFileName:refs?.fileName,deviceFileSize:refs?.fileSize,file:null,videoFile:null,ready:false,
-                availability:track.serverAudioUrl || track.serverVideoUrl?'linked':'unlinked'});
-            if(!refs?.audio)continue;
-            try{track.availability=await refs.audio.queryPermission({mode:'read'})==='granted'?'linked':'permission';
-                if(track.availability==='linked')await refs.audio.getFile();}
-            catch{track.availability='missing';}
-        }
+        // 歌曲库大时逐首串行会让页面像卡死：这里并发受限地批量恢复关联。
+        let cursor=0;
+        const workers=Array.from({length:Math.min(24,tracks.length)},async()=>{
+            while(cursor<tracks.length){
+                const track=tracks[cursor++];
+                const refs=await remembered(referenceKey(track));
+                const global=await remembered(referenceKey(track,null));
+                Object.assign(track,{handle:refs?.audio,videoHandle:refs?.video,lyricHandle:refs?.lyric,
+                    coverHandle:refs?.cover || global?.cover,coverBlob:refs?.coverBlob || global?.coverBlob,
+                    playlistId,deviceFileName:refs?.fileName,deviceFileSize:refs?.fileSize,file:null,videoFile:null,ready:false,
+                    availability:track.serverAudioUrl || track.serverVideoUrl?'linked':'unlinked'});
+                if(!refs?.audio)continue;
+                try{track.availability=await refs.audio.queryPermission({mode:'read'})==='granted'?'linked':'permission';
+                    if(track.availability==='linked')await refs.audio.getFile();}
+                catch{track.availability='missing';}
+            }
+        });
+        await Promise.all(workers);
         const remoteSources=await window.SekaiDeviceSources?.sources() || [];
         for(const track of tracks)if(track.availability==='unlinked' && remoteSources.some(source=>
             String(source.songId)===String(track.id) && (playlistId
@@ -59,7 +65,10 @@
     }
     async function api(path,body,method='POST'){
         const response=await fetch(`/local-player/library${path}`,{method,headers:{'Content-Type':'application/json','X-Local-Library-CSRF':csrf},body:body===undefined?undefined:JSON.stringify(body)});
-        if(!response.ok)throw new Error(response.status===401?'登录已过期，请重新登录。':'账户字段保存失败，请重试。');
+        if(!response.ok){
+            const error=new Error(response.status===401?'登录已过期，请重新登录后再试。':`账户字段保存失败（HTTP ${response.status}），请重试。`);
+            error.status=response.status;throw error;
+        }
         return response.json();
     }
     async function refreshPlaylistAudit(){
@@ -82,6 +91,29 @@
     const importConfirm=document.querySelector('#local-import-confirm');
     const requestedSongId=document.body.dataset.songId || new URLSearchParams(location.search).get('songId');
     const playbackPage=document.body.classList.contains('local-playback-page');
+    // 演出页直接进沉浸：不等本机文件 ready，手机上打开同一条链接也不会被控制面板盖住。
+    if(playbackPage)document.body.classList.add('stage-immersive');
+    const settingsToggle=document.querySelector('#stage-settings-toggle');
+    const setSettingsOpen=open=>{
+        document.body.classList.toggle('stage-settings-open',open);
+        if(settingsToggle)settingsToggle.textContent=open?'返回演出':'设置';
+        if(!open)window.scrollTo({top:0,behavior:'auto'});
+    };
+    settingsToggle?.addEventListener('click',()=>setSettingsOpen(!document.body.classList.contains('stage-settings-open')));
+    // 演出时浮钮 3 秒后自动淡出，碰一下屏幕再出现，不挡画面也不是死路。
+    if(playbackPage){
+        let chromeIdle;
+        const wakeChrome=()=>{
+            document.body.classList.remove('chrome-idle');
+            clearTimeout(chromeIdle);
+            chromeIdle=setTimeout(()=>document.body.classList.add('chrome-idle'),3000);
+        };
+        ['pointerdown','pointermove','keydown','touchstart'].forEach(type=>document.addEventListener(type,wakeChrome,{passive:true}));
+        wakeChrome();
+    }
+    document.querySelectorAll('[data-stage-settings]').forEach(node=>node.addEventListener('click',()=>setSettingsOpen(true)));
+    // 手机浏览器没有文件系统访问权限，按钮点了也白点，直接收起来。
+    if(!('showDirectoryPicker' in window))document.querySelectorAll('[data-stage-settings]').forEach(node=>{node.hidden=true;node.style.display='none';});
     const requestedSong=!!requestedSongId;
     if(requestedSong){
         document.querySelector('#local-files-label').textContent=new URLSearchParams(location.search).get('media')==='video'?'关联本首视频':'关联本首音频或视频';
@@ -170,6 +202,18 @@
         if(coverFile){if(track.cover?.startsWith('blob:'))URL.revokeObjectURL(track.cover);track.cover=URL.createObjectURL(coverFile);track.coverHandle=handles.get(coverFile);}
         if(track.coverBlob instanceof Blob){if(track.cover?.startsWith('blob:'))URL.revokeObjectURL(track.cover);track.cover=URL.createObjectURL(track.coverBlob);}
         if (lrc) {track.rows=parseLyrics(await readLocalLyric(lrc));track.sidecar=lrc;}
+        track.ready=true;
+    }
+    // 确认关联已有歌曲时的轻量装配：站内歌曲的标题/歌词/封面服务端已有，
+    // 只需接上同名 LRC 与封面文件，跳过整段音频标签解析（大文件时动辄数分钟）。
+    async function prepareLinked(track) {
+        track.cover=/^(?:https?:)?\/\//i.test(track.coverUrl || '') || /^\/(?!\/)/.test(track.coverUrl || '') ? track.coverUrl : null;
+        if(track.coverBlob instanceof Blob){if(track.cover?.startsWith('blob:'))URL.revokeObjectURL(track.cover);track.cover=URL.createObjectURL(track.coverBlob);}
+        track.rows=parseLyrics(track.lyrics || '');
+        if(track.coverHandle){try{const picture=await track.coverHandle.getFile();if(track.cover)URL.revokeObjectURL(track.cover);track.cover=URL.createObjectURL(picture);}catch{}}
+        let lrc=sidecars.get(stem(track.file));
+        if(track.lyricHandle){try{lrc=await track.lyricHandle.getFile();track.lyricUnavailable=false;}catch(error){track.lyricUnavailable=true;lrc=null;}}
+        if(lrc){track.rows=parseLyrics(await readLocalLyric(lrc));track.sidecar=lrc;}
         track.ready=true;
     }
     function prepareServer(track) {
@@ -292,7 +336,10 @@
         if(track.url){URL.revokeObjectURL(track.url);track.url=null;}
         frame.contentDocument?.querySelector('audio')?.pause();frame.hidden=true;document.querySelector('#local-empty').hidden=false;
         document.body.classList.remove('local-playback-ready');
-        if(playbackPage){document.querySelector('#local-empty h1').textContent=track.title;document.querySelector('#local-empty p').textContent='歌曲已在歌单中。本机文件未关联或授权已失效，请在上方重新关联或授权，不需要重新导入歌单。';}
+        if(playbackPage){document.querySelector('#local-empty h1').textContent=track.title;
+            const ps=document.querySelectorAll('#local-empty p');
+            if(ps[0])ps[0].textContent='这首歌已经在歌单里，但还没有接上本机音频文件。';
+            if(ps[1])ps[1].textContent='在电脑上打开同一首歌，点左上角「设置」→「关联本机文件」授权后，舞台就会亮起来。手机浏览器读不到电脑里的文件。';}
         status.textContent=`${track.title}：${track.availability==='permission'?'需要恢复本机授权':'本地文件不可用，请重新关联'}。账户歌曲记录仍保留。`;refreshOptions();
         document.querySelector('#local-restore').hidden=track.availability!=='permission';
     }
@@ -451,13 +498,46 @@
             if(progressButton){progressButton.disabled=false;progressButton.textContent=completed?`已关联 ${new Set(imported).size} 首 · 重新选择`:'关联已有歌曲／视频';}
         }
     }
-    async function walk(root,prefix,files){for await(const [name,entry] of root.entries()){
-        if(entry.kind==='directory')await walk(entry,`${prefix}${name}/`,files);
-        else if(/\.(mp3|flac|m4a|wav|ogg|aac|opus|mp4|webm|mov|lrc|png|jpe?g|webp)$/i.test(name)){const file=await entry.getFile();handles.set(file,entry);filePaths.set(file,prefix+name);files.push(file);}
+    async function walk(root,prefix,files,onProgress){let seen=0;for await(const [name,entry] of root.entries()){
+        if(entry.kind==='directory')await walk(entry,`${prefix}${name}/`,files,onProgress);
+        else if(/\.(mp3|flac|m4a|wav|ogg|aac|opus|mp4|webm|mov|lrc|png|jpe?g|webp)$/i.test(name)){const file=await entry.getFile();handles.set(file,entry);filePaths.set(file,prefix+name);files.push(file);if(++seen%25===0){status.textContent=`正在扫描所选文件夹…已发现 ${files.length} 个音视频/歌词/封面文件`;onProgress?.(files.length);}}
     }}
     const linkPlaylist=document.querySelector('#local-link-playlist');
     const linkPreview=document.querySelector('#local-link-preview');
     const linkRows=document.querySelector('#local-link-preview-rows');
+    // 面板内进度条：文件多时顶部状态栏常被滚出视野，这里保证用户始终看得到进度。
+    const linkProgress=()=>{
+        let line=document.querySelector('#local-link-progress');
+        if(!line){line=document.createElement('p');line.id='local-link-progress';line.className='local-hint';
+            line.setAttribute('role','status');line.setAttribute('aria-live','polite');
+            document.querySelector('#local-link-preview')?.before(line);}
+        return line;
+    };
+    const reportProgress=text=>{linkProgress().textContent=text;};
+    // speed5：常驻浮层——面板内进度行会被上百行表格挤出视野，浮层固定在右下角，滚到哪都看得见。
+    const linkToast=()=>{
+        let box=document.querySelector('#local-link-toast');
+        if(!box){
+            box=document.createElement('div');box.id='local-link-toast';box.className='local-link-toast';
+            box.setAttribute('role','status');box.setAttribute('aria-live','polite');
+            box.innerHTML='<div class="local-link-toast-head"><strong>确认关联</strong><button type="button" class="local-link-toast-close" aria-label="关闭">×</button></div><p class="local-link-toast-text"></p><div class="local-link-toast-bar" hidden><i></i></div>';
+            box.querySelector('.local-link-toast-close').addEventListener('click',()=>box.remove());
+            document.body.append(box);
+        }
+        return box;
+    };
+    const toast=(text,{done=0,total=0,label='确认关联'}={})=>{
+        const box=linkToast(),bar=box.querySelector('.local-link-toast-bar');
+        box.querySelector('strong').textContent=label;
+        box.querySelector('.local-link-toast-text').textContent=text;
+        bar.hidden=!total;
+        if(total)bar.firstElementChild.style.width=`${Math.min(100,Math.round(done/total*100))}%`;
+        return box;
+    };
+    const withParseTimeout=(promise,ms)=>new Promise((resolve,reject)=>{
+        const timer=setTimeout(()=>reject(new Error('解析超时')),ms);
+        promise.then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});
+    });
     let linkGroups=[],linkPreviewPlaylist=null;
     async function previewExistingFiles(files){
         await libraryReady;
@@ -465,20 +545,32 @@
         if(!playlist)throw new Error('请先选择要关联的网站歌单。');
         linkPreviewPlaylist=playlist.id;linkGroups=[];linkRows.replaceChildren();
         const candidates=tracks.filter(track=>playlist.songIds.includes(track.id));
-        const prior=[];
-        for(const other of playlists){
-            if(other.id===playlist.id)continue;
-            for(const id of other.songIds){
+        // 跨歌单重复检测：并行读取其余歌单的已存关联，避免千首库串行卡住预览。
+        const prior=(await Promise.all(playlists.flatMap(other=>{
+            if(other.id===playlist.id)return [];
+            return other.songIds.map(async id=>{
                 const refs=await remembered(`user:${account.id}:playlist:${other.id}:song:${id}`);
-                if(refs?.audio)prior.push({playlist:other.name,refs});
-            }
-        }
-        for(const group of mediaGroups(files)){
-            const file=group.file;
+                return refs?.audio?{playlist:other.name,refs}:null;
+            });
+        }))).filter(Boolean);
+        const groups=mediaGroups(files),total=groups.length;
+        let index=0,parseUsed=0;const parseBudget=260;
+        for(const group of groups){
+            const file=group.file;index++;
+            const progress=`正在检查 ${index}/${total}：${filePaths.get(file) || file.name}`;
+            status.textContent=`${progress}…`;
+            reportProgress(`${progress}（视频只按文件名匹配，不读标签）…`);
+            // 文件名与站内歌曲唯一对应时直接命中，跳过整段音频标签解析（大文件夹动辄数分钟）。
             let title=file.name.replace(/\.[^.]+$/,''),artist='';
-            try{const tags=(await (await parser())(file,{skipCovers:true})).common;title=tags.title || title;artist=tags.artist || '';}catch{}
-            const byName=candidates.filter(track=>normalized(track.title)===normalized(title) && (!artist || normalized(track.artist)===normalized(artist)));
             const byFile=candidates.filter(track=>track.fileName===file.name && (!track.fileSize || track.fileSize===file.size));
+            let byName=[];
+            // 视频解析标签要读整段文件（几百个 MP4 会卡死数十分钟），一律跳过；音频按预算+单文件超时。
+            if(byFile.length!==1 && !isVideo(file) && parseUsed<parseBudget){
+                try{parseUsed++;
+                    const tags=(await withParseTimeout((await parser())(file,{skipCovers:true}),4000)).common;
+                    title=tags.title || title;artist=tags.artist || '';}catch{}
+                byName=candidates.filter(track=>normalized(track.title)===normalized(title) && (!artist || normalized(track.artist)===normalized(artist)));
+            }
             const matches=byName.length===1?byName:byFile.length===1?byFile:[];
             const duplicate=[];
             for(const {playlist:source,refs} of prior){
@@ -496,8 +588,8 @@
             choice.append(select);
             const warning=document.createElement('td');
             if(duplicate.length){
-                const label=document.createElement('label'),allow=document.createElement('input');allow.type='checkbox';
-                label.append(allow,document.createTextNode(` 疑似已用于 ${[...new Set(duplicate)].join('、')}；勾选后复用`));warning.append(label);
+                const label=document.createElement('label'),allow=document.createElement('input');allow.type='checkbox';allow.checked=true;
+                label.append(allow,document.createTextNode(` 同名同大小文件已用于 ${[...new Set(duplicate)].join('、')}，已自动勾选复用；取消勾选则跳过该文件`));warning.append(label);
             }else warning.textContent='未发现跨歌单重复';
             row.append(name,choice,warning);linkRows.append(row);linkGroups.push({group,row,select,duplicate,matchKey:`${normalized(title)}:${normalized(artist)}`});
         }
@@ -507,42 +599,106 @@
             item.row.lastElementChild.append(document.createElement('br'),document.createTextNode(`本次文件夹有 ${candidateCounts.get(item.matchKey)} 份同名候选，请检查是否重复下载`));
         }
         linkPreview.hidden=!linkGroups.length;
-        status.textContent=`已检查 ${linkGroups.length} 组音视频；请逐项核对“网站歌曲”和重复提示，再确认关联。此时尚未保存。`;
+        const matched=linkGroups.filter(item=>item.select.value).length;
+        status.textContent=`已检查 ${linkGroups.length} 组音视频，${matched} 组已自动匹配；请逐项核对“网站歌曲”和重复提示，再确认关联。此时尚未保存。`;
+        reportProgress(`已检查 ${linkGroups.length} 组：${matched} 组自动匹配${matched<linkGroups.length?`，${linkGroups.length-matched} 组需手动选择下拉框`:''}。核对后点下方“确认关联所选歌曲”。`);
     }
     document.querySelector('#local-link-confirm').addEventListener('click',async()=>{
-        if(String(linkPreviewPlaylist)!==linkPlaylist.value){status.textContent='目标歌单已改变，请重新选择本机文件夹。';return;}
+        const button=document.querySelector('#local-link-confirm');
+        if(button.disabled)return;
+        // speed5：点击瞬间先给可见反馈 + 服务器心跳；此后无论卡在哪一步都有据可查，不再点完毫无反应。
+        toast('已收到点击，正在准备关联…');
+        try{fetch('/local-player/library/songs/0/link-ack',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','X-Local-Library-CSRF':csrf}}).catch(()=>{});}catch{}
+        const fail=message=>{status.textContent=message;toast(message,{label:'无法开始关联'});};
+        if(String(linkPreviewPlaylist)!==linkPlaylist.value)return fail('目标歌单已改变，请重新选择本机文件夹。');
         const chosen=linkGroups.filter(item=>item.select.value);
-        if(!chosen.length){status.textContent='请先在预览中选择至少一首网站歌曲。';return;}
-        if(chosen.some(item=>item.duplicate.length && !item.row.querySelector('input[type=checkbox]').checked)){
-            status.textContent='有文件疑似已用于其他歌单。请取消该行关联，或勾选明确复用。';return;
-        }
-        const used=new Set();
-        if(chosen.some(item=>{if(used.has(item.select.value))return true;used.add(item.select.value);return false;})){
-            status.textContent='同一首网站歌曲本次只能关联一个文件，请调整预览选择。';return;
-        }
-        const button=document.querySelector('#local-link-confirm');button.disabled=true;
+        if(!chosen.length)return fail('请先在预览中选择至少一首网站歌曲。');
+        const blocked=chosen.filter(item=>item.duplicate.length && !item.row.querySelector('input[type=checkbox]')?.checked);
+        // 同一首网站歌曲被多行选中时不再整批拦截：保留第一行，其余跳过并在结果里说明。
+        const seenSong=new Set();const dupSong=[];
+        const usable=chosen.filter(item=>blocked.indexOf(item)<0).filter(item=>{
+            if(seenSong.has(item.select.value)){dupSong.push(item);return false;}
+            seenSong.add(item.select.value);return true;});
+        if(!usable.length)return fail(`所选 ${chosen.length} 首都标为“疑似已用于其他歌单”。请勾选允许复用，或取消该行关联。`);
+        const playlistName=playlists.find(p=>String(p.id)===linkPreviewPlaylist)?.name || '所选歌单';
+        button.disabled=true;
         try{
-            playlistSelect.value=String(linkPreviewPlaylist);await loadBindings();
-            for(const item of chosen){
+            playlistSelect.value=String(linkPreviewPlaylist);
+            const withTimeout=(promise,ms,label)=>new Promise((resolve,reject)=>{
+                const timer=setTimeout(()=>reject(new Error(`${label}超过 ${Math.round(ms/1000)} 秒未响应`)),ms);
+                promise.then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});
+            });
+            let done=0,ok=0;const failed=[];let authExpired=false,lyricFailed=0;
+            // 服务重启/网络抖动会返回 5xx 或直接断连：这类错误重试，不该把整批歌曲判死。
+            const transient=error=>!error.status || error.status>=500;
+            const retry=async(run,attempts=3)=>{let last;
+                for(let i=0;i<attempts;i++){
+                    try{return await run();}catch(error){last=error;
+                        if(!transient(error)||i===attempts-1)throw error;
+                        toast(`服务器暂时不可用（${error.message}），正在重试第 ${i+1} 次…`,{done:done-1,total:usable.length});
+                        await new Promise(resolve=>setTimeout(resolve,600*(i+1)));}
+                }
+                throw last;
+            };
+            for(const item of usable){
+                done++;
                 const track=tracks.find(t=>String(t.id)===item.select.value),{file,videoFile}=item.group;
-                Object.assign(track,{file,handle:handles.get(file),videoFile,videoHandle:videoFile?handles.get(videoFile):null,
-                    deviceFileName:file.name,deviceFileSize:file.size,coverHandle:handles.get(coverFiles.get(stem(file))) || track.coverHandle,
-                    lyricHandle:lyricHandles.get(stem(file)),availability:'linked',ready:false});
-                track.sidecar=sidecars.get(stem(file));
-                await prepare(track);await persistBinding(track);await persistLyrics(track);
+                const songT0=Date.now();
+                const say=step=>{const s=((Date.now()-songT0)/1000).toFixed(1);
+                    toast(`正在关联 ${done}/${usable.length}：${track.title} · ${step}${s>0.4?`（本首已用 ${s} 秒）`:''}`,{done:done-1,total:usable.length});};
+                const report=step=>{say(step);
+                    reportProgress(`正在关联 ${done}/${usable.length}：${track.title} · ${step}`);
+                    button.textContent=`正在关联 ${done}/${usable.length}`;};
+                try{
+                    report('开始');
+                    const ticker=setInterval(()=>say('处理中'),1000);
+                    try{
+                        Object.assign(track,{file,handle:handles.get(file),videoFile,videoHandle:videoFile?handles.get(videoFile):null,
+                            deviceFileName:file.name,deviceFileSize:file.size,coverHandle:handles.get(coverFiles.get(stem(file))) || track.coverHandle,
+                            lyricHandle:lyricHandles.get(stem(file)),availability:'linked',ready:false});
+                        track.sidecar=sidecars.get(stem(file));
+                        report('通知服务器');
+                        // 遥测回执只是排查用，失败不影响关联本身。
+                        try{await withTimeout(retry(()=>api(`/songs/${track.id}/link-ack`),2),15000,'服务器通知');}catch(error){if(error.status===401)throw error;}
+                        report('读取封面歌词');
+                        await withTimeout(prepareLinked(track),15000,'本机文件读取');
+                        report('保存授权记录');
+                        await withTimeout(retry(()=>persistBinding(track)),15000,'授权保存');
+                        report('同步歌词');
+                        // 歌词同步失败不推翻已保存的关联，只有登录失效才中止整批。
+                        try{await withTimeout(retry(()=>persistLyrics(track)),15000,'歌词同步');}catch(error){if(error.status===401)throw error;lyricFailed++;}
+                        ok++;
+                    }finally{clearInterval(ticker);}
+                }catch(error){failed.push(`${track.title}：${error.message}`);
+                    if(error.status===401)authExpired=true;
+                    toast(`第 ${done}/${usable.length} 首失败（${error.message}）${authExpired?'，登录已过期，已停止':''}`,{done,total:usable.length});}
+                if(authExpired)break;
+                // 每 4 首让出主线程一次，保证浮层与滚动条始终响应，不会“假死”。
+                if(done%4===0)await new Promise(resolve=>setTimeout(resolve,0));
             }
             localStorage.setItem(`sekai.local.playlist.${account.id}`,playlistSelect.value);
             refreshOptions();linkPreview.hidden=true;
-            status.textContent=`已为“${playlists.find(p=>String(p.id)===linkPlaylist.value).name}”关联 ${chosen.length} 首。其他歌单的本机文件关联未改变。`;
+            const skippedParts=[];
+            if(blocked.length)skippedParts.push(`${blocked.length} 首因取消勾选复用被跳过`);
+            if(dupSong.length)skippedParts.push(`${dupSong.length} 行因重复指向同一首网站歌曲被跳过`);
+            const skipped=skippedParts.length?`（另有 ${skippedParts.join('、')}）`:'';
+            let summary=failed.length || authExpired
+                ?`已为“${playlistName}”关联 ${ok}/${usable.length} 首，${failed.length} 首失败：${failed.slice(0,3).join('；')}${failed.length>3?'…':''}${authExpired?'。登录已过期，请重新登录后重新关联补齐剩余歌曲':''}${skipped}。`
+                :`已为“${playlistName}”关联 ${ok} 首${skipped}。其他歌单的本机文件关联未改变。`;
+            if(lyricFailed)summary+=`（另有 ${lyricFailed} 首歌词未同步，可再次关联补齐）`;
+            status.textContent=summary;
+            toast(summary,{done:usable.length,total:usable.length,label:failed.length?'关联部分完成':'关联完成'});
+            status.scrollIntoView({block:'center'});
             void refreshPlaylistAudit();
-        }catch(error){status.textContent=`关联未全部完成：${error.message}`;}
-        finally{button.disabled=false;}
+        }catch(error){status.textContent=`关联未全部完成：${error.message}`;toast(`关联未全部完成：${error.message}`,{label:'关联出错'});}
+        finally{button.disabled=false;button.textContent='确认关联所选歌曲';}
     });
     async function linkDirectory(root){
         await libraryReady;
         const files=[];sidecars.clear();coverFiles.clear();lyricHandles.clear();
         status.textContent='正在扫描所选文件夹及子文件夹，文件较多时请稍候…';
-        await walk(root,`${root.name}/`,files);
+        reportProgress('正在扫描文件夹…');
+        await walk(root,`${root.name}/`,files,count=>reportProgress(`正在扫描文件夹…已发现 ${count} 个音视频/歌词/封面文件`));
         for(const file of files){if(/\.lrc$/i.test(file.name)){sidecars.set(stem(file),file);lyricHandles.set(stem(file),handles.get(file));}
             if(/\.(png|jpe?g|webp)$/i.test(file.name))coverFiles.set(stem(file),file);}
         await previewExistingFiles(files);

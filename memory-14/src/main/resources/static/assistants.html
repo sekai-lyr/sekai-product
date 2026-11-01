@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#061321">
+  <title>SekaiAI · 选择你的助手</title>
+  <link rel="stylesheet" href="/css/fance-auth.css">
+  <link rel="stylesheet" href="/css/assistants.css">
+</head>
+<body>
+  <div class="auth-page" data-page="assistants">
+    <div class="scene" aria-hidden="true">
+      <img class="scene-backdrop" src="/assets/fance-retreat-video.jpg" alt="" fetchpriority="high">
+      <div class="scene-water-glow"></div>
+      <div class="scene-overlay"></div>
+      <div class="scene-shimmer"></div>
+      <div class="scene-stars"></div>
+      <span class="shooting-star star-one"></span>
+      <span class="shooting-star star-two"></span>
+      <span class="shooting-star star-three"></span>
+      <span class="shooting-star star-four"></span>
+      <span class="shooting-star star-five"></span>
+      <span class="shooting-star star-six"></span>
+      <div class="grain"></div>
+    </div>
+
+    <header class="auth-header">
+      <a class="wordmark" href="/assistants" aria-label="SekaiAI home">
+        <span class="wordmark-mark" aria-hidden="true"></span>
+        <span class="wordmark-name">SekaiAI</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="/assistants" aria-current="page">Assistants</a>
+        <a href="/logout">Sign out</a>
+      </nav>
+    </header>
+
+    <main class="hub-main">
+      <section class="hub-hero">
+        <span class="hub-kicker">Welcome back</span>
+        <h1>
+          <span>Choose a Companion</span>
+          <span class="accent">for tonight's journey</span>
+        </h1>
+        <p>选择天空放映室、绿意管家或远行向导——聊动漫、照顾植物宠物，或规划下一次旅行。</p>
+      </section>
+
+      <nav class="hub-grid" aria-label="AI assistants">
+
+        <a class="assistant-card" href="/chat">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.3 8.7 8.7 0 0 1-3.8-.85L3 20l1.05-4.2A8.1 8.1 0 0 1 3.5 11.5a8.38 8.38 0 0 1 8.5-8.3 8.38 8.38 0 0 1 9 8.3z"/></svg>
+          </span>
+          <div class="card-name">
+            <h3>综合伙伴</h3>
+            <small>Sky Theater</small>
+          </div>
+          <p class="card-desc">天空放映室的常驻主持人。识别角色、追踪新番、闲聊剧情，什么都能聊的那一位。</p>
+          <span class="card-enter">Enter</span>
+        </a>
+
+        <a class="assistant-card" href="/chat?assistant=plant">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 21c-5 0-8-3.5-8-8 0-6 5-9.5 12-10 .5 7-3 12-8 12"/><path d="M12 21c0-6 2.5-9 6.5-11.5"/></svg>
+          </span>
+          <div class="card-name">
+            <h3>绿意管家</h3>
+            <small>Plant &amp; Pet</small>
+          </div>
+          <p class="card-desc">植物与宠物护理助手。养护方案、病虫害初步排查与护理提醒。</p>
+          <span class="card-enter">Enter</span>
+        </a>
+
+        <a class="assistant-card" href="/chat?assistant=travel">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m16 8-2.5 5.5L8 16l2.5-5.5L16 8Z"/></svg>
+          </span>
+          <div class="card-name">
+            <h3>远行向导</h3>
+            <small>Travel Guide</small>
+          </div>
+          <p class="card-desc">旅行规划与地图导航助手。查询天气、寻找景点美食，比较酒店交通，安排每日行程。</p>
+          <span class="card-enter">Enter</span>
+        </a>
+
+      </nav>
+
+      <footer class="hub-foot">
+        <span>Scene 01 · Assistant Selection</span>
+        <span>新伙伴持续进驻中</span>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // 未登录直接带回登录页
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(d => { if (d.code !== 200) window.location.href = '/login'; })
+      .catch(() => { window.location.href = '/login'; });
+  </script>
+</body>
+</html>

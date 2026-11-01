@@ -7,7 +7,9 @@ import com.example.demo.chat.ChatMemoryService;
 import com.example.demo.chat.ChatMessage;
 import com.example.demo.chat.LlmService;
 import com.example.demo.chat.VectorStoreService;
+import com.example.demo.chat.event.VectorSaveEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -29,16 +32,19 @@ public class ToolCallingService {
     private final LlmService llmService;
     private final ChatMemoryService chatMemoryService;
     private final VectorStoreService vectorStoreService;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
     private final Map<String, ToolInfo> toolRegistry = new LinkedHashMap<>();
     private final ExecutorService toolExecutor;
 
     @Autowired
     public ToolCallingService(LlmService llmService, SpringAiTools springAiTools,
                               ChatMemoryService chatMemoryService,
-                              VectorStoreService vectorStoreService) {
+                              VectorStoreService vectorStoreService,
+                              org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.llmService = llmService;
         this.chatMemoryService = chatMemoryService;
         this.vectorStoreService = vectorStoreService;
+        this.eventPublisher = eventPublisher;
         this.toolExecutor = Executors.newFixedThreadPool(
                 Math.min(Runtime.getRuntime().availableProcessors(), 4),
                 r -> { Thread t = new Thread(r, "tool-executor"); t.setDaemon(true); return t; });
@@ -60,7 +66,20 @@ public class ToolCallingService {
     /** Full-featured: with conversation memory + RAG context */
     public ToolCallResponse chatWithTools(String systemPrompt, String userMessage,
                                            Set<String> allowedToolNames, String conversationId) {
+        return doChatWithTools(systemPrompt, userMessage, allowedToolNames, conversationId, null);
+    }
+
+    public ToolCallResponse chatWithToolsStream(String systemPrompt, String userMessage,
+                                                Set<String> allowedToolNames, String conversationId,
+                                                Consumer<String> onDelta) {
+        return doChatWithTools(systemPrompt, userMessage, allowedToolNames, conversationId, onDelta);
+    }
+
+    private ToolCallResponse doChatWithTools(String systemPrompt, String userMessage,
+                                             Set<String> allowedToolNames, String conversationId,
+                                             Consumer<String> onDelta) {
         String traceId = UUID.randomUUID().toString().substring(0, 8);
+        MDC.put("traceId", traceId);
         log.info("[Trace:{}] Tool chat started, convId={}, msgLen={}",
                 traceId, conversationId, userMessage.length());
 
@@ -75,7 +94,7 @@ public class ToolCallingService {
         String effectivePrompt = systemPrompt;
         if (conversationId != null && !conversationId.isBlank()) {
             effectivePrompt += "\n\n# Runtime Context\nCurrent conversationId: " + conversationId
-                    + "\nWhen calling createAnimeReminder, pass this exact conversationId.";
+                    + "\nUse this exact conversationId when calling reminder tools.";
         }
         if (conversationId != null && !conversationId.isBlank() && vectorStoreService != null) {
             try {
@@ -128,21 +147,22 @@ public class ToolCallingService {
 
         // 3. Execute tool loop
         try {
-            ToolCallResponse response = executeToolLoop(messages, allowedToolNames, traceId);
+            ToolCallResponse response = executeToolLoop(messages, allowedToolNames, traceId, conversationId, onDelta);
 
-            // 4. Save to memory (async)
+            // 4. Save to memory
             if (conversationId != null && !conversationId.isBlank() && chatMemoryService != null && response.getText() != null) {
                 try {
+                    // MySQL 历史同步保存（保证下一轮可读到）
                     chatMemoryService.saveMessagePair(conversationId, userMessage, response.getText());
-                    // Also save to vector store for RAG
-                    if (vectorStoreService != null) {
-                        vectorStoreService.saveMessage(conversationId, userMessage, response.getText());
-                    }
+                    // 向量保存（embedding+SQLite 写）走异步事件，移出请求路径
+                    eventPublisher.publishEvent(
+                            new VectorSaveEvent(conversationId, userMessage, response.getText()));
                 } catch (Exception e) { log.warn("Failed to save memory: {}", e.getMessage()); }
             }
             return response;
         } finally {
             UserContextHolder.clear();
+            MDC.remove("traceId");
         }
     }
 
@@ -210,7 +230,8 @@ public class ToolCallingService {
         return "object";
     }
 
-    private ToolCallResponse executeToolLoop(JSONArray messages, Set<String> allowedToolNames, String traceId) {
+    private ToolCallResponse executeToolLoop(JSONArray messages, Set<String> allowedToolNames, String traceId,
+                                              String conversationId, Consumer<String> onDelta) {
         JSONArray tools = buildToolsSchema(allowedToolNames);
         List<ToolCallResult> history = new ArrayList<>();
         List<Path> files = new ArrayList<>();
@@ -220,7 +241,8 @@ public class ToolCallingService {
         for (int i = 0; i < MAX_ITERATIONS; i++) {
             log.info("[Trace:{}] Iteration {}/{}", traceId, i + 1, MAX_ITERATIONS);
             try {
-                JSONObject resp = llmService.chatWithTools(messages, tools);
+                JSONObject resp = onDelta == null ? llmService.chatWithTools(messages, tools)
+                        : llmService.streamChatWithTools(messages, tools, onDelta);
                 tokens += extractTokens(resp);
                 if (hasToolCalls(resp)) {
                     JSONObject am = getAssistantMessage(resp);
@@ -230,15 +252,29 @@ public class ToolCallingService {
                         Future<ToolCallResult> future = toolExecutor.submit(() -> {
                             long start = System.currentTimeMillis();
                             try {
+                                if (allowedToolNames != null && !allowedToolNames.contains(tc.toolName)) {
+                                    throw new IllegalArgumentException("Tool is not available for this assistant: " + tc.toolName);
+                                }
+                                UserContextHolder.setConversationId(conversationId);
                                 String r = executeTool(tc.toolName, tc.arguments);
                                 long dur = System.currentTimeMillis() - start;
                                 return ToolCallResult.success(traceId, tc.toolName, tc.arguments, r, dur);
                             } catch (Exception e) {
                                 return ToolCallResult.error(traceId, tc.toolName, tc.arguments, e.getMessage(),
                                         System.currentTimeMillis() - start);
+                            } finally {
+                                UserContextHolder.clear();
                             }
                         });
-                        ToolCallResult cr = future.get(10, TimeUnit.SECONDS);
+                        ToolCallResult cr;
+                        try {
+                            cr = future.get(10, TimeUnit.SECONDS);
+                        } catch (TimeoutException te) {
+                            future.cancel(true);
+                            log.warn("[Trace:{}] Tool {} timed out after 10s, cancelled", traceId, tc.toolName);
+                            cr = ToolCallResult.error(traceId, tc.toolName, tc.arguments,
+                                    "Tool execution timed out (10s)", 10_000L);
+                        }
                         history.add(cr);
                         files.addAll(extractGeneratedFiles(cr.getResult()));
                         JSONObject tm = new JSONObject();
@@ -255,7 +291,7 @@ public class ToolCallingService {
                 }
             } catch (Exception e) {
                 log.error("[Trace:{}] Iteration {} failed: {}", traceId, i, e.getMessage());
-                break;
+                throw new IllegalStateException("AI 服务调用失败", e);
             }
         }
         if (text.isEmpty()) {
@@ -263,10 +299,12 @@ public class ToolCallingService {
                 ToolCallResult result = history.get(index);
                 if (result.isSuccess() && result.getResult() != null && !result.getResult().isBlank()) {
                     text.append(result.getResult());
+                    if (onDelta != null) onDelta.accept(result.getResult());
                     break;
                 }
             }
         }
+        if (text.isEmpty()) throw new IllegalStateException("AI 未返回回复内容，请稍后重试");
         return ToolCallResponse.builder().text(text.toString()).toolCallHistory(history)
                 .generatedFiles(files).totalIterations(history.size()).totalTokens(tokens).traceId(traceId).build();
     }

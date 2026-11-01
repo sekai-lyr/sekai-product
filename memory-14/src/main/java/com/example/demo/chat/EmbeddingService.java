@@ -1,121 +1,109 @@
 package com.example.demo.chat;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.example.demo.config.DashScopeConfig;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.io.entity.StringEntity;
+import ai.onnxruntime.OnnxTensor;
+import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-@Service
 /**
-文本向量化服务。
- * 调用嵌入模型将文本转为向量，为RAG知识库提供向量化能力。
+ * 文本向量化服务（本地推理版）。
+ * 使用 bge-small-zh-v1.5 ONNX 模型在本机 CPU 上生成 512 维句向量（CLS 池化 + L2 归一化），
+ * 不再依赖任何远端 embedding API。
  */
+@Service
 public class EmbeddingService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmbeddingService.class);
-    
-    private static final String MODEL_NAME = "text-embedding-v2";
-    
-    private final DashScopeConfig config;
-    
-    public EmbeddingService(DashScopeConfig config) {
-        this.config = config;
+
+    private final BertTokenizer tokenizer;
+    private final String modelDir;
+
+    private volatile OrtSession session;
+    private volatile boolean failed = false;
+
+    public EmbeddingService(BertTokenizer tokenizer,
+                            @Value("${embedding.local.model-dir:D:/Sekai_Object/models/bge-small-zh-v1.5}") String modelDir) {
+        this.tokenizer = tokenizer;
+        this.modelDir = modelDir;
     }
-    
-    public float[] embed(String text) throws IOException {
-        if (text == null || text.isEmpty()) {
+
+    private synchronized OrtSession session() throws IOException {
+        if (session != null) return session;
+        if (failed) throw new IOException("Local embedding model failed to load earlier");
+        try {
+            OrtEnvironment env = OrtEnvironment.getEnvironment();
+            OrtSession.SessionOptions so = new OrtSession.SessionOptions();
+            so.setCPUArenaAllocator(true);
+            so.setIntraOpNumThreads(2);
+            session = env.createSession(modelDir + "/model.onnx", so);
+            logger.info("Local embedding model loaded from {} (inputs: {})", modelDir, session.getInputNames());
+            return session;
+        } catch (Exception e) {
+            failed = true;
+            throw new IOException("Failed to load local embedding model: " + e.getMessage(), e);
+        }
+    }
+
+    /** 生成句向量；失败返回空数组（调用方跳过），不影响主流程 */
+    public float[] embed(String text) {
+        if (text == null || text.isEmpty()) return new float[0];
+        try {
+            OrtSession sess = session();
+            int[] ids = tokenizer.encode(text);
+            int len = ids.length;
+            long[] inputIds = new long[len];
+            long[] attention = new long[len];
+            long[] tokenTypes = new long[len];
+            for (int i = 0; i < len; i++) { inputIds[i] = ids[i]; attention[i] = 1; }
+
+            OrtEnvironment env = OrtEnvironment.getEnvironment();
+            Map<String, OnnxTensor> inputs = new LinkedHashMap<>();
+            inputs.put("input_ids", OnnxTensor.createTensor(env, LongBuffer.wrap(inputIds), new long[]{1, len}));
+            inputs.put("attention_mask", OnnxTensor.createTensor(env, LongBuffer.wrap(attention), new long[]{1, len}));
+            if (sess.getInputNames().contains("token_type_ids")) {
+                inputs.put("token_type_ids", OnnxTensor.createTensor(env, LongBuffer.wrap(tokenTypes), new long[]{1, len}));
+            }
+
+            try (OrtSession.Result result = sess.run(inputs)) {
+                float[] vector;
+                var sentenceEmb = result.get("sentence_embedding");
+                if (sentenceEmb.isPresent()) {
+                    float[][][] se = (float[][][]) sentenceEmb.get().getValue();
+                    vector = se[0][0].clone();
+                } else {
+                    float[][][] hidden = (float[][][]) result.get(0).getValue();
+                    vector = hidden[0][0].clone(); // CLS token
+                }
+                l2Normalize(vector);
+                return vector;
+            }
+        } catch (Exception e) {
+            logger.warn("Local embedding failed, returning empty vector: {}", e.getMessage());
             return new float[0];
         }
-        
-        JSONObject requestBody = new JSONObject();
-        requestBody.put("model", MODEL_NAME);
-        
-        JSONArray input = new JSONArray();
-        input.add(text);
-        requestBody.put("input", input);
-        
-        String jsonRequest = JSON.toJSONString(requestBody);
-        
-        HttpPost httpPost = new HttpPost(config.getBaseUrl() + "/embeddings");
-        httpPost.setHeader("Content-Type", "application/json");
-        httpPost.setHeader("Authorization", "Bearer " + config.getApiKey());
-        httpPost.setEntity(new StringEntity(jsonRequest, ContentType.APPLICATION_JSON));
-        
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             org.apache.hc.client5.http.impl.classic.CloseableHttpResponse response = httpClient.execute(httpPost)) {
-            
-            HttpEntity entity = response.getEntity();
-            String responseBody = "";
-            if (entity != null) {
-                responseBody = EntityUtils.toString(entity, "UTF-8");
-            }
-            
-            logger.debug("Embedding API response: {}", responseBody);
-            
-            if (response.getCode() != 200) {
-                throw new IOException("Embedding API request failed with status: " + response.getCode());
-            }
-            
-            return parseEmbeddingResponse(responseBody);
-        } catch (org.apache.hc.core5.http.ParseException e) {
-            throw new IOException("Failed to parse embedding response", e);
-        }
     }
-    
+
     public List<float[]> embedBatch(List<String> texts) throws IOException {
-        List<float[]> embeddings = new ArrayList<>();
-        for (String text : texts) {
-            embeddings.add(embed(text));
-        }
-        return embeddings;
+        List<float[]> out = new ArrayList<>();
+        if (texts == null) return out;
+        for (String t : texts) out.add(embed(t));
+        return out;
     }
-    
-    private float[] parseEmbeddingResponse(String responseBody) {
-        JSONObject responseJson = JSON.parseObject(responseBody);
-        
-        if (responseJson == null || !responseJson.containsKey("data")) {
-            logger.warn("Embedding response does not contain data");
-            return new float[0];
-        }
-        
-        Object dataObj = responseJson.get("data");
-        if (!(dataObj instanceof JSONArray)) {
-            logger.warn("Embedding data is not an array");
-            return new float[0];
-        }
-        
-        JSONArray dataArray = (JSONArray) dataObj;
-        if (dataArray.isEmpty()) {
-            logger.warn("Embedding data array is empty");
-            return new float[0];
-        }
-        
-        Object embeddingObj = dataArray.getJSONObject(0).get("embedding");
-        if (!(embeddingObj instanceof JSONArray)) {
-            logger.warn("Embedding is not an array");
-            return new float[0];
-        }
-        
-        JSONArray embeddingArray = (JSONArray) embeddingObj;
-        float[] embedding = new float[embeddingArray.size()];
-        for (int i = 0; i < embeddingArray.size(); i++) {
-            embedding[i] = embeddingArray.getFloatValue(i);
-        }
-        
-        return embedding;
+
+    private void l2Normalize(float[] v) {
+        double norm = 0;
+        for (float x : v) norm += x * x;
+        norm = Math.sqrt(norm);
+        if (norm > 0) for (int i = 0; i < v.length; i++) v[i] /= norm;
     }
 }

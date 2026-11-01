@@ -119,6 +119,10 @@ public class VisionService {
     }
 
     public String analyzeImageWithCustomPrompt(String imageUrl, String prompt) throws IOException {
+        return analyzeImageWithCustomPrompt(imageUrl, prompt, MULTIMODAL_SYSTEM_PROMPT);
+    }
+
+    public String analyzeImageWithCustomPrompt(String imageUrl, String prompt, String systemPrompt) throws IOException {
         JSONObject requestBody = new JSONObject();
         requestBody.put("model", config.getVision().getModel());
         
@@ -126,7 +130,7 @@ public class VisionService {
         
         JSONObject systemMessage = new JSONObject();
         systemMessage.put("role", "system");
-        systemMessage.put("content", MULTIMODAL_SYSTEM_PROMPT);
+        systemMessage.put("content", systemPrompt);
         messages.add(systemMessage);
         
         JSONObject userMessage = new JSONObject();

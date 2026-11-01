@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import com.example.demo.movie.MovieTicketService;
+import com.example.demo.utils.SafeHttpClientFactory;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -23,7 +24,7 @@ public class AnimeService {
 
     public AnimeService(MovieTicketService movieTicketService) {
         this.movieTicketService = movieTicketService;
-        this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
+        this.httpClient = SafeHttpClientFactory.create(Duration.ofSeconds(3));
     }
 
     // ============ searchAnime ============

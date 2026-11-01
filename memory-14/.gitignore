@@ -36,3 +36,6 @@ build/
 .venv-clip/
 data/clip-model/
 data/anime-index/
+
+### Local secrets (never commit) ###
+local-secret.properties

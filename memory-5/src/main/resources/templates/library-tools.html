@@ -3,7 +3,7 @@
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
     <title>歌库整理 · Sekai Song</title>
     <link rel="stylesheet" href="/css/app.css?v=20261010m"><script src="/js/site-theme.js?v=20261028"></script>
-    <link rel="stylesheet" href="/css/site-theme.css?v=20261025"><link rel="stylesheet" href="/css/library-experience.css?v=20261028">
+    <link rel="stylesheet" href="/css/site-theme.css?v=20261025"><link rel="stylesheet" href="/css/library-experience.css?v=20261101-stage2">
 </head>
 <body th:attr="data-library-csrf=${libraryCsrf}"><div class="app-shell">
     <div th:replace="~{fragments :: sidebar('library-tools')}"></div>
@@ -23,7 +23,7 @@
             <p id="merge-status" role="status"></p>
         </section>
         <section aria-labelledby="backup-heading"><h2 id="backup-heading">备份与恢复</h2>
-            <p>包含歌曲资料、歌词、收藏、歌单和播放偏好。音视频、本机封面及文件授权留在设备上，恢复后请重新关联。</p>
+            <p>包含歌曲资料、歌词、收藏、歌单和播放偏好。音视频、本机封面及文件授权留在设备上，恢复后请重新关联。单份备份最多 5000 首歌曲、500 张歌单和 8 MB。</p>
             <a class="primary-btn" href="/api/library-tools/backup">下载资料备份</a>
             <p><label>选择 JSON 备份 <input id="backup-file" type="file" accept=".json,application/json"></label></p>
             <div id="restore-preview" hidden><p id="restore-description"></p><ul id="restore-conflicts"></ul>

@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: ${SQLITE_URL:jdbc:sqlite:openclaw.db}
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+

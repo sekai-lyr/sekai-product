@@ -3,6 +3,7 @@ package com.example.demo.chat;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.example.demo.chat.event.VectorSaveEvent;
 import com.example.demo.config.DashScopeConfig;
 import com.example.demo.utils.JsonUtils;
 import com.example.demo.weather.tool.WeatherTool;
@@ -18,7 +19,6 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -37,18 +37,19 @@ public class LlmService {
     private final DashScopeConfig config;
     private final ChatMemoryService chatMemoryService;
     private final CloseableHttpClient httpClient;
-    
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     @Autowired
-    @Lazy
     private VectorStoreService vectorStoreService;
 
     @Autowired
-    @Lazy
     private WeatherTool weatherTool;
 
-    public LlmService(DashScopeConfig config, ChatMemoryService chatMemoryService) {
+    public LlmService(DashScopeConfig config, ChatMemoryService chatMemoryService,
+                      org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.config = config;
         this.chatMemoryService = chatMemoryService;
+        this.eventPublisher = eventPublisher;
         this.httpClient = HttpClients.createDefault();
     }
 
@@ -227,6 +228,151 @@ public class LlmService {
         } catch (Exception e) {
             logger.error("Failed to async save vector", e);
         }
+    }
+
+    // ============ SSE 流式对话（纯文本：记忆 + RAG，无工具） ============
+
+    /**
+     * 带记忆与 RAG 的流式对话。每个增量文本片段通过 onDelta 回调返回；
+     * 结束后同步保存对话历史（MySQL），并发布 VectorSaveEvent 异步写向量库。
+     *
+     * @param onDelta 增量内容回调；抛出异常可中断读取（用于客户端断连）
+     */
+    public void chatWithMemoryStream(String conversationId, String userMessage, String systemPrompt,
+                                     java.util.function.Consumer<String> onDelta) throws IOException {
+        logger.info("Stream chat with memory, conversationId: {}, userMessage: {}", conversationId, userMessage);
+
+        List<ChatMessage> promptMessages = chatMemoryService.buildPromptMessages(conversationId, systemPrompt, userMessage);
+
+        String ragContext = retrieveRagContext(userMessage, conversationId);
+        if (ragContext != null && !ragContext.isEmpty()) {
+            String ragSystemMessage = "参考以下历史对话信息，帮助回答用户当前问题：\n\n" + ragContext;
+            if (systemPrompt == null) {
+                systemPrompt = ragSystemMessage;
+            } else {
+                systemPrompt = systemPrompt + "\n\n" + ragSystemMessage;
+            }
+        }
+
+        if (systemPrompt != null && !systemPrompt.isEmpty()) {
+            ChatMessage systemMsg = new ChatMessage("system", systemPrompt);
+            if (promptMessages.isEmpty() || !"system".equals(promptMessages.get(0).getRole())) {
+                promptMessages.add(0, systemMsg);
+            } else {
+                promptMessages.set(0, systemMsg);
+            }
+        }
+
+        JSONArray messages = new JSONArray();
+        for (ChatMessage msg : promptMessages) {
+            JSONObject messageObj = new JSONObject();
+            messageObj.put("role", msg.getRole());
+            messageObj.put("content", msg.getContent());
+            messages.add(messageObj);
+        }
+
+        StringBuilder full = new StringBuilder();
+        streamChat(messages, delta -> {
+            full.append(delta);
+            onDelta.accept(delta);
+        });
+
+        String reply = full.toString();
+        if (!reply.isBlank() && conversationId != null && !conversationId.isBlank()) {
+            try {
+                chatMemoryService.saveMessagePair(conversationId, userMessage, reply);
+                eventPublisher.publishEvent(new VectorSaveEvent(conversationId, userMessage, reply));
+            } catch (Exception e) {
+                logger.warn("Failed to save stream memory: {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * 调用 LLM stream=true 接口，逐行解析 SSE data chunk，
+     * 把每个 content 增量交给 onDelta。收到 [DONE] 或流结束返回。
+     */
+    public void streamChat(JSONArray messages, java.util.function.Consumer<String> onDelta) throws IOException {
+        streamChatWithTools(messages, null, onDelta);
+    }
+
+    /** 合并 OpenAI 流式工具参数片段，文本增量直接返回页面。 */
+    public JSONObject streamChatWithTools(JSONArray messages, JSONArray tools,
+                                          java.util.function.Consumer<String> onDelta) throws IOException {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("model", config.getModel());
+        requestBody.put("messages", messages);
+        requestBody.put("stream", true);
+        if (tools != null && !tools.isEmpty()) {
+            requestBody.put("tools", tools);
+            requestBody.put("tool_choice", "auto");
+        }
+
+        StringBuilder content = new StringBuilder();
+        java.util.Map<Integer, JSONObject> toolCalls = new java.util.TreeMap<>();
+        JSONObject usage = null;
+
+        HttpPost httpPost = new HttpPost(config.getBaseUrl() + "/chat/completions");
+        httpPost.setHeader("Content-Type", "application/json");
+        httpPost.setHeader("Authorization", "Bearer " + config.getApiKey());
+        httpPost.setEntity(new StringEntity(JSON.toJSONString(requestBody), ContentType.APPLICATION_JSON));
+
+        try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+            if (response.getCode() != 200) {
+                throw new IOException("LLM stream request failed with status: " + response.getCode());
+            }
+            HttpEntity entity = response.getEntity();
+            if (entity == null) {
+                throw new IOException("LLM stream response has no body");
+            }
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(entity.getContent(), java.nio.charset.StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.startsWith("data:")) continue;
+                    String data = line.substring(5).trim();
+                    if (data.isEmpty()) continue;
+                    if ("[DONE]".equals(data)) break;
+                    JSONObject chunk;
+                    try {
+                        chunk = JSON.parseObject(data);
+                    } catch (com.alibaba.fastjson2.JSONException e) {
+                        throw new IOException("Invalid LLM stream response", e);
+                    }
+                    if (chunk == null) continue;
+                    if (chunk.containsKey("error")) throw new IOException("LLM stream returned an error");
+                    if (chunk.getJSONObject("usage") != null) usage = chunk.getJSONObject("usage");
+                    JSONArray choices = chunk.getJSONArray("choices");
+                    if (choices == null || choices.isEmpty()) continue;
+                    JSONObject delta = choices.getJSONObject(0).getJSONObject("delta");
+                    if (delta == null) continue;
+                    String text = delta.getString("content");
+                    if (text != null && !text.isEmpty()) {
+                        content.append(text);
+                        onDelta.accept(text);
+                    }
+                    JSONArray calls = delta.getJSONArray("tool_calls");
+                    if (calls == null) continue;
+                    for (int i = 0; i < calls.size(); i++) {
+                        JSONObject part = calls.getJSONObject(i);
+                        JSONObject call = toolCalls.computeIfAbsent(part.getIntValue("index"), key ->
+                                JSONObject.of("type", "function", "function", JSONObject.of("name", "", "arguments", "")));
+                        if (part.getString("id") != null) call.put("id", part.getString("id"));
+                        JSONObject function = part.getJSONObject("function");
+                        if (function == null) continue;
+                        JSONObject merged = call.getJSONObject("function");
+                        for (String field : List.of("name", "arguments")) {
+                            if (function.getString(field) != null) {
+                                merged.put(field, merged.getString(field) + function.getString(field));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        JSONObject message = JSONObject.of("role", "assistant", "content", content.toString());
+        if (!toolCalls.isEmpty()) message.put("tool_calls", new JSONArray(toolCalls.values()));
+        return JSONObject.of("choices", JSONArray.of(JSONObject.of("message", message)), "usage", usage);
     }
 
     private String parseResponse(String responseBody) {
