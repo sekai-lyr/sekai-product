@@ -9,9 +9,9 @@
 [![Forks](https://img.shields.io/github/forks/sekai-lyr/sekai-product?style=for-the-badge&logo=github)](https://github.com/sekai-lyr/sekai-product/network/members)
 [![Releases](https://img.shields.io/badge/项目数-15-2ea44f?style=for-the-badge)](#-项目一览)
 
-<img src="memory-15/sekai-nexus/preview-final.png" width="720" alt="Sekai 记忆回廊 · 15 个项目的入口大厅" />
+<img src="memory-15/sekai-nexus/preview-final.png" width="720" alt="Sekai Nexus · 星岛奇境" />
 
-<sub>▲ Sekai Nexus 记忆回廊 —— 15 个世界的入口大厅</sub>
+<sub>▲ Sekai Nexus · 星岛奇境 —— 可以真正开始探索的 3D 小世界（记忆回廊）</sub>
 
 </div>
 
